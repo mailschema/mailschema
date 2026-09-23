@@ -28,7 +28,7 @@ function usage() {
   return `Verify a published MailSchema package against the canonical schema.
 
 Usage:
-  node scripts/promote-package.mjs --registry <npm|PyPI|crates.io> --version <x.y.z>
+  node scripts/promote-package.mjs --registry <npm|PyPI|crates.io|Go> --version <x.y.z>
   node scripts/promote-package.mjs --registry <registry> --version <x.y.z> --promote
 
 Without --promote, the command performs public registry readback without changing files.
@@ -123,6 +123,23 @@ async function registryArtifact(registry, version) {
     };
   }
 
+  if (registry === 'Go') {
+    const module = 'github.com/mailschema/go';
+    const moduleVersion = `v${version}`;
+    const metadata = await getJson(`https://proxy.golang.org/${module}/@v/${moduleVersion}.info`);
+    if (metadata.Version !== moduleVersion)
+      throw new Error('The Go module proxy returned unexpected package metadata.');
+    return {
+      name: `${moduleVersion}.zip`,
+      downloadUrl: `https://proxy.golang.org/${module}/@v/${moduleVersion}.zip`,
+      publicUrl: `https://pkg.go.dev/${module}@${moduleVersion}`,
+      metadataSha256: null,
+      integrity: null,
+      schemaSuffix: '/schemas/contribution.schema.json',
+      archive: 'zip',
+    };
+  }
+
   throw new Error(`Unsupported registry: ${registry}`);
 }
 
@@ -160,7 +177,7 @@ async function verify(registry, version) {
     channels: [
       {
         registry,
-        name: registry === 'Go' ? 'mailschema.org/go' : packageName,
+        name: registry === 'Go' ? 'github.com/mailschema/go' : packageName,
         version,
         url: artifact.publicUrl,
         artifacts: [
@@ -217,8 +234,8 @@ if (args.help) {
 }
 if (!args.registry || !args.version)
   throw new Error(`${usage()}\n\nRegistry and version are required.`);
-if (!Object.hasOwn(slugs, args.registry) || args.registry === 'Go')
-  throw new Error('Registry must be npm, PyPI or crates.io.');
+if (!Object.hasOwn(slugs, args.registry))
+  throw new Error('Registry must be npm, PyPI, crates.io or Go.');
 if (!/^\d+\.\d+\.\d+$/.test(args.version)) throw new Error('Version must use x.y.z format.');
 
 const evidence = await verify(args.registry, args.version);

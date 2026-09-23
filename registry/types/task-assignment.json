@@ -11,14 +11,17 @@
   "target": "A task identifier, its assignment and the applicable update version.",
   "operations": [
     {
+      "id": "respond",
       "name": "Accept or decline",
       "description": "Respond to the assignment."
     },
     {
+      "id": "report-progress",
       "name": "Report progress",
       "description": "Update the task’s recorded state."
     },
     {
+      "id": "report-completion",
       "name": "Report completion",
       "description": "Provide a completion report. The service may still need to verify the work."
     }

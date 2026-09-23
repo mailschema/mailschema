@@ -3,15 +3,19 @@ import { open } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import {
   assertContribution,
+  assertContentReviewRequest,
+  assertMapDocument,
   assertTypeRecord,
+  getContentReviewSchema,
   getContributionSchema,
+  getMapSchema,
   getRecordSchema,
-} from './dist/index.js';
+} from '../dist/index.js';
 
 const help = `MailSchema contribution tools
 
-  mailschema check <file.json> [--record]
-  mailschema schema [--record]
+  mailschema check <file.json> [--record | --map | --content-review]
+  mailschema schema [--record | --map | --content-review]
 
 Checks JSON structure and required fields locally. Registry references and
 editorial acceptance are separate checks. No files are uploaded or changed.`;
@@ -19,13 +23,37 @@ editorial acceptance are separate checks. No files are uploaded or changed.`;
 try {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
-    options: { record: { type: 'boolean' }, help: { type: 'boolean', short: 'h' } },
+    options: {
+      record: { type: 'boolean' },
+      map: { type: 'boolean' },
+      'content-review': { type: 'boolean' },
+      help: { type: 'boolean', short: 'h' },
+    },
   });
   const [command, path, ...extra] = positionals;
+  const formats = [values.record, values.map, values['content-review']].filter(Boolean);
+  if (formats.length > 1) throw new Error('Choose only one document format.');
+  const selected = values['content-review']
+    ? 'Content Review request'
+    : values.map
+      ? 'MAP document'
+      : values.record
+        ? 'type record'
+        : 'contribution';
   if (values.help || !command) console.log(help);
   else if (command === 'schema' && !path && !extra.length)
     console.log(
-      JSON.stringify(values.record ? getRecordSchema() : getContributionSchema(), null, 2),
+      JSON.stringify(
+        values['content-review']
+          ? getContentReviewSchema()
+          : values.map
+            ? getMapSchema()
+            : values.record
+              ? getRecordSchema()
+              : getContributionSchema(),
+        null,
+        2,
+      ),
     );
   else if (command === 'check' && path && !extra.length) {
     const file = await open(path, 'r');
@@ -41,11 +69,11 @@ try {
     } finally {
       await file.close();
     }
-    if (values.record) assertTypeRecord(value);
+    if (values['content-review']) assertContentReviewRequest(value);
+    else if (values.map) assertMapDocument(value);
+    else if (values.record) assertTypeRecord(value);
     else assertContribution(value);
-    console.log(
-      'Valid MailSchema ' + (values.record ? 'type record' : 'contribution') + ' structure.',
-    );
+    console.log(`Valid MailSchema ${selected}.`);
   } else throw new Error(help);
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

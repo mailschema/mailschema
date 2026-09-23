@@ -2,7 +2,7 @@
 
 Initial availability check: 23 September 2026 (Australia/Sydney). The observations below predate publication. The user subsequently authorized publishing with existing credentials; release evidence is maintained in `docs/releases/` and package instructions in `packages/README.md`.
 
-`mailschema` version `0.1.0` is now published and independently verified on npm, PyPI and crates.io. The bare package names are held by those releases. JSR, RubyGems and NuGet remain pending account setup; no npm organization scope was created.
+`mailschema` version `0.1.1` is published on npm, PyPI and crates.io. `github.com/mailschema/go` version `v0.1.0` is published through the Go module proxy. Public artifacts are promoted to the website only after byte-for-byte schema readback. JSR, RubyGems and NuGet remain pending account setup; no empty packages are published merely to reserve names.
 
 ## Observed names
 
@@ -20,14 +20,11 @@ Public API absence is a candidate-availability signal, not proof that registrati
 | Packagist        | `mailschema/*` | [Vendor package list](https://packagist.org/packages/list.json?vendor=mailschema) returned an empty list. No conclusion about vendor ownership.                            |
 | GitHub           | `mailschema`   | [Identity endpoint](https://api.github.com/users/mailschema) returned 404. Registration eligibility remains unconfirmed.                                                   |
 
-## Recommended order
+## Expansion rule
 
-1. Establish the official npm organization and GitHub organization for active project use, subject to registration checks.
-2. Publish a useful `mailschema` npm package containing the existing contribution schema, TypeScript definitions and validation API. A small contribution-check command is a natural companion. Extract and test this as a separate distributable; the private Astro website is not the release package.
-3. Establish the JSR scope for the same project. A compatible `@mailschema/registry` distribution can expose the same schema and validator without duplicating their implementation.
-4. Add Python support when a useful Python consumer or validator is ready. Rust, Ruby and .NET can follow actual implementation demand.
+Add another ecosystem when it serves a real implementation or contribution workflow. A new package must expose useful schema or validation behavior, preserve the canonical bytes and join the same public readback gate. JSR, RubyGems, NuGet and Packagist remain candidates, not launch requirements.
 
-The initial package concerns Registry contributions. It must not imply that the MAP wire format, runtime authorization or conformance certification is already implemented. A package release number is also separate from a specification version.
+The packages cover MAP 0.1 and Registry contributions. They do not imply runtime authorization, product conformance or IETF adoption. A package release number is separate from a specification version.
 
 Owning the npm organization does not claim the bare `mailschema` package. It controls the `@mailschema/*` family. Avoid creating numerous empty packages merely to hold names.
 
@@ -38,4 +35,4 @@ Owning the npm organization does not claim the bare `mailschema` package. It con
 - [JSR scopes](https://jsr.io/docs/scopes) can be created independently of publishing a version. All JSR packages are scoped.
 - [PyPI name retention](https://docs.pypi.org/project-management/name-retention/) treats empty or nonfunctional name-squatting projects as invalid.
 
-The initial default `npm whoami` check returned HTTP 401. The existing `NPM_TOKEN` subsequently authenticated successfully as `auscaster` when explicitly selected, so a new login was unnecessary. Existing PyPI and Cargo publishing credentials were also located. The user confirmed that JSR, RubyGems and NuGet credentials are not set up yet. No credentials were printed or added to package artifacts.
+Publishing credentials remain in existing local or hosted credential stores. No credentials are printed, committed or added to package artifacts. JSR, RubyGems and NuGet credentials are not configured yet.

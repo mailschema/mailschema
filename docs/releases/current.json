@@ -1,9 +1,26 @@
 {
   "schema": "mailschema-package-set/1",
-  "schemaSha256": "2ea9f3db23f7695c7b4e28b4f962cf5942d194ddc2a532bc0d09ccc9674194b6",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
   "channels": [
-    { "registry": "npm", "evidence": "0.1.0", "version": "0.1.0" },
-    { "registry": "PyPI", "evidence": "0.1.0", "version": "0.1.0" },
-    { "registry": "crates.io", "evidence": "0.1.0", "version": "0.1.0" }
+    {
+      "registry": "npm",
+      "evidence": "npm-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "registry": "PyPI",
+      "evidence": "pypi-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "registry": "crates.io",
+      "evidence": "crates-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "registry": "Go",
+      "evidence": "go-0.1.0",
+      "version": "0.1.0"
+    }
   ]
 }

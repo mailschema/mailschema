@@ -11,14 +11,17 @@
   "target": "The event identifier, occurrence where applicable, and invitation update sequence.",
   "operations": [
     {
+      "id": "accept",
       "name": "Accept",
       "description": "Indicate that the invitee expects to attend."
     },
     {
+      "id": "decline",
       "name": "Decline",
       "description": "Indicate that the invitee does not expect to attend."
     },
     {
+      "id": "respond-tentatively",
       "name": "Respond tentatively",
       "description": "Record a tentative attendance response."
     }

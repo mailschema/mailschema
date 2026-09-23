@@ -17,6 +17,12 @@ export const specNavigation = [
       'How an email describes an action, a client requests it and a service returns the result.',
   },
   {
+    slug: 'profile',
+    label: 'MAP 0.1 profile',
+    section: 'The protocol',
+    description: 'The JSON-LD, MIME and authenticated HTTPS wire contract.',
+  },
+  {
     slug: 'content-review',
     label: contentReview.name,
     section: 'The protocol',

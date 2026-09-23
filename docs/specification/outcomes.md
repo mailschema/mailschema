@@ -8,7 +8,7 @@ A result tells the client what happened to the requested operation. Successful d
 
 ## Operation states
 
-The draft requires the following distinctions where they apply. The type defines which states its operations use. Wire values and HTTP status mappings remain to be specified.
+The draft requires the following distinctions where they apply. The type defines which states its operations use. MAP 0.1 assigns the service result values and HTTP status mappings in the [execution profile](/specification/profile/).
 
 | State             | Meaning                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------- |
@@ -32,10 +32,10 @@ For Content Review, an approval result without an identifiable content revision 
 
 A client may lose the response after the service has performed an operation. Retrying that request must not apply the same effect a second time.
 
-The execution profile must define how a service recognises a retry and how a client retrieves the original result. It must also distinguish a retry from a request with changed inputs or a different target revision.
+The execution profile binds one complete request value to a client-generated request ID. An exact retry returns the recorded response. A changed value, including a changed target revision, produces an idempotency conflict and no effect.
 
 ## Interrupted exchanges
 
 After a timeout, the client cannot assume that the request failed. It should recover the authoritative result before retrying in a way that could duplicate the operation.
 
-Request identifiers, retention periods, recovery routes and status mappings remain open requirements for the wire profile.
+The description advertises a result URL template and retention period. Every response identifies that result resource. An authenticated client retrieves it after an interrupted exchange before deciding whether another request is safe.

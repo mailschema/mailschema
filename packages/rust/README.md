@@ -1,22 +1,22 @@
 # MailSchema
 
-Embedded JSON Schemas for MailSchema Registry contributions and records. No runtime dependencies, filesystem access or network calls.
+Embedded JSON Schemas for Mail Action Protocol 0.1 and the MailSchema Registry. No runtime dependencies, filesystem access or network calls.
 
 ```toml
 [dependencies]
-mailschema = "0.1"
+mailschema = "0.2"
 ```
 
 ```rust
-use mailschema::{Schema, CONTRIBUTION_SCHEMA};
+use mailschema::{Schema, MAP_0_1_SCHEMA};
 
-assert_eq!(Schema::Contribution.as_str(), CONTRIBUTION_SCHEMA);
-let record_schema = Schema::Record.as_str();
-assert!(record_schema.contains("$defs"));
+assert_eq!(Schema::Map01.as_str(), MAP_0_1_SCHEMA);
+let content_review = Schema::ContentReview01.as_str();
+assert!(content_review.contains("Content Review"));
 ```
 
-Parse either string with your JSON library and pass it to a JSON Schema Draft 2020-12 validator with format checking enabled. `CONTRIBUTION_SCHEMA` covers new types, amendments and implementation declarations. `RECORD_SCHEMA` covers expanded records with contributor and maintenance history.
+Parse the strings with your JSON library and pass them to a JSON Schema Draft 2020-12 validator with format checking enabled. `MAP_0_1_SCHEMA` and `CONTENT_REVIEW_0_1_SCHEMA` cover the protocol documents. `CONTRIBUTION_SCHEMA` and `RECORD_SCHEMA` cover Registry data.
 
-The crate supplies schemas, not a validation engine. Schema validation does not check Registry references, establish contributor identity or certify product compatibility. These are contribution formats, not the draft Mail Action Protocol wire format. Package and specification versions are independent.
+The crate supplies schemas, not a validation engine. Validation does not establish endpoint trust, grant service authorization, check Registry references or certify product compatibility. Package and specification versions are independent.
 
 MIT licensed.

@@ -19,6 +19,7 @@
     "target": "The delivered document and its revision.",
     "operations": [
       {
+        "id": "acknowledge-receipt",
         "name": "Acknowledge receipt",
         "description": "Record receipt of the identified document."
       }

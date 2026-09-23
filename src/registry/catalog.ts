@@ -52,8 +52,11 @@ function uniqueParties(parties: Party[]) {
 }
 function checkType(type: TypeRecord) {
   assertTypeRecord(type);
-  const operations = type.operations.map((operation) => operation.name.toLocaleLowerCase());
-  if (new Set(operations).size !== operations.length)
+  const operationIds = type.operations.map((operation) => operation.id);
+  if (new Set(operationIds).size !== operationIds.length)
+    throw new Error(`${type.slug}: duplicate operation identifiers`);
+  const operationNames = type.operations.map((operation) => operation.name.toLocaleLowerCase());
+  if (new Set(operationNames).size !== operationNames.length)
     throw new Error(`${type.slug}: duplicate operation names`);
 }
 

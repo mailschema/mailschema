@@ -12,9 +12,9 @@ The service remains responsible for the operation and its permissions. People ca
 
 ## Document status
 
-MAP 0.1 is a working draft. It describes the interaction model and the first type, Content Review. The wire representation, request and result fields, media types and conformance tests remain under development. This document is not an IETF specification.
+MAP 0.1 is a working draft. It defines the interaction model, a JSON-LD description carried by Structured Email, an authenticated HTTPS execution profile and the first type, Content Review. The published schemas and fixtures are implementable, but the draft may still change. This document is not an IETF specification.
 
-The initial execution profile delivers action descriptions by email and submits requests over authenticated HTTPS. A profile defines the representation and execution rules implementations follow.
+The initial execution profile delivers action descriptions by email and submits requests over authenticated HTTPS. [MAP 0.1 profile](/specification/profile/) defines its fields, status behavior, trust checks and recovery rules.
 
 ## Participants
 

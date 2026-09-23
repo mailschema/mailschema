@@ -24,7 +24,7 @@ const registryRequirements: Record<string, { host: string; name: string }> = {
   npm: { host: 'www.npmjs.com', name: 'mailschema' },
   PyPI: { host: 'pypi.org', name: 'mailschema' },
   'crates.io': { host: 'crates.io', name: 'mailschema' },
-  Go: { host: 'pkg.go.dev', name: 'mailschema.org/go' },
+  Go: { host: 'pkg.go.dev', name: 'github.com/mailschema/go' },
 };
 
 function schemaDigest(schema: string): string {

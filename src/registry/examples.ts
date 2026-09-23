@@ -35,7 +35,7 @@ export function contributionExamples(registry: Registry) {
       typeDigest: recordDigest(record),
       profile: record.profile,
       product: { name: 'Example Reviewer', url: 'https://example.com/reviewer' },
-      operations: record.operations.map((operation) => operation.name),
+      operations: record.operations.map((operation) => operation.id),
       evidence: { kind: 'declaration' },
     },
   };

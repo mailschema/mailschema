@@ -1,0 +1,56 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "map": "https://mailschema.org/ns/map#",
+    "schema": "https://schema.org/",
+    "profile": {
+      "@id": "map:profile",
+      "@type": "@id"
+    },
+    "type": "map:interactionType",
+    "id": "@id",
+    "version": "schema:version",
+    "recordDigest": "map:recordDigest",
+    "describedAt": {
+      "@id": "schema:dateCreated",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "expiresAt": {
+      "@id": "schema:expires",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "service": "schema:provider",
+    "name": "schema:name",
+    "execution": "map:execution",
+    "url": {
+      "@id": "schema:url",
+      "@type": "@id"
+    },
+    "method": "map:httpMethod",
+    "requestMediaType": "map:requestMediaType",
+    "resultMediaType": "map:resultMediaType",
+    "resultUrlTemplate": "map:resultUrlTemplate",
+    "resultRetentionSeconds": "map:resultRetentionSeconds",
+    "humanUrl": {
+      "@id": "map:humanUrl",
+      "@type": "@id"
+    },
+    "authorization": "map:authorization",
+    "kind": "map:kind",
+    "schemes": "map:authorizationScheme",
+    "audience": "map:audience",
+    "target": "schema:object",
+    "revision": "schema:version",
+    "title": "schema:name",
+    "digest": "map:digest",
+    "operations": {
+      "@id": "schema:potentialAction",
+      "@container": "@set"
+    },
+    "description": "schema:description",
+    "inputSchema": {
+      "@id": "map:inputSchema",
+      "@type": "@id"
+    }
+  }
+}

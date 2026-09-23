@@ -10,6 +10,10 @@ import {
   assertContribution,
   assertTypeRecord,
   referenceErrors,
+  getMapSchema,
+  getContentReviewSchema,
+  assertMapDocument,
+  assertContentReviewRequest,
 } from '../.release/packages/npm/dist/index.js';
 
 const fixture = JSON.parse(
@@ -52,6 +56,32 @@ test('published schema bytes agree across all three distributions', () => {
   assert.notEqual(getContributionSchema().title, 'mutated');
 });
 
+test('all distributions include the MAP and Content Review schemas', () => {
+  for (const [name, canonical] of [
+    ['map-0.1.schema.json', 'public/schemas/map-0.1.schema.json'],
+    ['content-review-0.1.schema.json', 'public/schemas/content-review-0.1.schema.json'],
+  ]) {
+    const expected = readFileSync(canonical, 'utf8');
+    for (const path of [
+      `npm/dist/${name}`,
+      `python/src/mailschema/${name}`,
+      `rust/schemas/${name}`,
+    ])
+      assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), expected);
+  }
+  assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.1.schema.json');
+  assert.equal(
+    getContentReviewSchema().$id,
+    'https://mailschema.org/schemas/content-review-0.1.schema.json',
+  );
+  const description = JSON.parse(
+    readFileSync('public/fixtures/map-0.1/content-review-description.json'),
+  );
+  const request = JSON.parse(readFileSync('public/fixtures/map-0.1/approve.json'));
+  assertMapDocument(description);
+  assertContentReviewRequest(request);
+});
+
 test('compiled API validates contributions and records and rejects unsupported claims', () => {
   assertContribution(fixture);
   assertTypeRecord(record);
@@ -78,7 +108,7 @@ test('compiled reference validator rejects stale amendments and unrelated operat
     typeDigest: digest,
     profile: record.profile,
     product: { name: 'Example Reviewer', url: 'https://example.com' },
-    operations: [record.operations[0].name],
+    operations: [record.operations[0].id],
     evidence: { kind: 'declaration' },
   };
   assertContribution(implementation);
@@ -90,7 +120,7 @@ test('compiled reference validator rejects stale amendments and unrelated operat
 });
 
 test('packaged CLI validates files, emits standalone schema and fails invalid input', () => {
-  const cli = resolve('.release/packages/npm/cli.mjs');
+  const cli = resolve('.release/packages/npm/bin/mailschema.js');
   const check = execFileSync(process.execPath, [cli, 'check', 'registry/examples/new-type.json'], {
     encoding: 'utf8',
   });
@@ -99,6 +129,18 @@ test('packaged CLI validates files, emits standalone schema and fails invalid in
     execFileSync(process.execPath, [cli, 'schema', '--record'], { encoding: 'utf8' }),
   );
   assert.equal(schema.$ref, '#/$defs/record');
+  const mapCheck = execFileSync(
+    process.execPath,
+    [cli, 'check', 'public/fixtures/map-0.1/content-review-description.json', '--map'],
+    { encoding: 'utf8' },
+  );
+  assert.match(mapCheck, /Valid MailSchema MAP document/);
+  const contentCheck = execFileSync(
+    process.execPath,
+    [cli, 'check', 'public/fixtures/map-0.1/approve.json', '--content-review'],
+    { encoding: 'utf8' },
+  );
+  assert.match(contentCheck, /Valid MailSchema Content Review request/);
   const bad = spawnSync(process.execPath, [cli, 'check', 'package.json'], { encoding: 'utf8' });
   assert.equal(bad.status, 1);
   const missing = spawnSync(process.execPath, [cli, 'check', '/nonexistent-metadata-file.json'], {

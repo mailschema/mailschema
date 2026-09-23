@@ -24,12 +24,12 @@ npm run verify
 ## Site structure
 
 - `/`: identity, protocol explanation and local review demonstration.
-- `/specification/`: MAP 0.1 draft reader, six Markdown chapters.
+- `/specification/`: MAP 0.1 draft reader, including the exact MIME and authenticated HTTPS profile.
 - `/types/`: the complete interaction collection, with operations, examples, maturity labels and guidance on using or proposing a type.
 - `/registry/`: five type records, searchable by name and description and filterable by category and status.
 - `/registry/<type>/`: definition brief, operations, example, existing standards, open questions and implementation evidence.
 - `/examples/`: interactive local Content Review simulation.
-- `/tools/`: released JavaScript, Python and Rust packages, installation, runnable examples and API reference.
+- `/tools/`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
 - `/about/`, `/contribute/`, `/search/`: project, contribution checker and guide, and local search.
 - `/registry/catalog.json`, `/registry/records/<type>.json`, `/registry/snapshots/<digest>.json`: generated Registry data and exact record snapshots.
 - `/registry/records/<type>.record.json`: a raw record accepted directly by the package validators; used by each type page's download link.
@@ -38,13 +38,13 @@ Specification content and Sourcey configuration live in `docs/specification/`. S
 
 ## Content and implementation boundaries
 
-MAP 0.1 currently documents the proposed semantic contract. It does not freeze a wire representation or imply IETF adoption, product integration or conformance. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
+MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. It does not imply IETF adoption, deployed product support or independent conformance. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
 
 The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review/` address redirects to its Registry record.
 
 The example runs in the browser and never sends email. It illustrates revision binding, feedback acceptance, a predetermined edit, separate approval, permission refusal and stale requests. Sourcey renders the documentation; it is not presented as a MAP implementation.
 
-The contribution page validates and previews new types, amendments and implementation declarations locally in the browser. The CLI imports the same JSON format into reviewable repository changes. A public repository URL, contribution terms and a hosted submission endpoint remain publication work; the site currently receives no submissions. See [Contributions](docs/CONTRIBUTIONS.md) for the channel decision, format and operating process.
+The contribution page validates and previews new types, amendments and implementation declarations locally in the browser. The CLI imports the same JSON format into reviewable repository changes. Contributors submit those files through pull requests to the public repository; a hosted one-click submission endpoint remains future work. See [Contributions](docs/CONTRIBUTIONS.md) for the format and operating process.
 
 ## Keeping content in sync
 
@@ -85,15 +85,15 @@ The local Sourcey build is pinned by a content-addressed package artifact while 
 
 ## Published packages
 
-MailSchema `0.1.0` is available on [npm](https://www.npmjs.com/package/mailschema/v/0.1.0), [PyPI](https://pypi.org/project/mailschema/0.1.0/) and [crates.io](https://crates.io/crates/mailschema/0.1.0). JavaScript and Python provide contribution validation; Rust embeds the same schemas for existing validators. These package releases do not imply a stable MAP wire format or implemented email authorization.
+MailSchema `0.1.1` is published on [npm](https://www.npmjs.com/package/mailschema/v/0.1.1), [PyPI](https://pypi.org/project/mailschema/0.1.1/) and [crates.io](https://crates.io/crates/mailschema/0.1.1). The typed [Go module](https://pkg.go.dev/github.com/mailschema/go@v0.1.0) is published as `v0.1.0`. The packages expose the exact MAP, Content Review and Registry contracts; they do not establish endpoint trust or grant authorization.
 
-`npm run packages:prepare` builds distribution sources from the site's canonical schema and JavaScript validation code. `npm run packages:test` checks the compiled JavaScript package and matching schema bytes. See [package instructions](packages/README.md) for all language checks and [release evidence](docs/releases/0.1.0.json) for registry readback and artifact hashes. Packages are versioned snapshots; a schema change requires preparing, testing and publishing a new package version.
+`npm run packages:prepare` builds distribution sources from the canonical schemas and JavaScript validation code. `npm run packages:test` checks the compiled JavaScript package and matching schema bytes. See [package instructions](packages/README.md) for all language checks and `docs/releases/` for registry readback and artifact hashes. Packages are versioned snapshots; a schema change requires preparing, testing and publishing a new package version.
 
 The Tools page reads each advertised channel from `docs/releases/current.json`. That package-set manifest points to independently verified release evidence and may select different versions for different ecosystems. The site build refuses an unverified selection, a missing version, incorrect registry identity or any package built from different canonical schema bytes.
 
 Publishing to a registry does not change the website. After an artifact is published, independent readback records its evidence under `docs/releases/`; promotion updates `current.json`; the normal verified site deployment then publishes the new installation command. This two-phase release prevents a partial or compromised registry publication from silently becoming the recommended version. Package versions may move independently, while the shared schema digest identifies the contribution format they implement. Package versions and MAP specification versions are also independent.
 
-Run `npm run packages:promote -- --registry npm --version 0.1.1` to verify a public artifact without changing the repository. Add `--promote` to write its immutable evidence and update the selected package set. npm, PyPI and crates.io are supported. The reusable `Verify and promote a package` workflow can be dispatched manually or called by a future publishing workflow. It performs public readback, runs the package and site verification suites and opens a pull request. Merging the promotion runs verification on `main` and deploys the exact verified build to Cloudflare. The site never reads a registry's mutable `latest` value at build time.
+Run `npm run packages:promote -- --registry npm --version 0.1.1` to verify a public artifact without changing the repository. Add `--promote` to write its immutable evidence and update the selected package set. npm, PyPI, crates.io and Go are supported. The reusable `Verify and promote a package` workflow can be dispatched manually or called by a future publishing workflow. It performs public readback, runs the package and site verification suites and opens a pull request. Merging the promotion runs verification on `main` and deploys the exact verified build to Cloudflare. The site never reads a registry's mutable latest value at build time.
 
 The master social cards are generated by `npm run social:generate` from the approved identity and stored under `public/og/`. Astro pages use the MailSchema card; Sourcey specification pages use the MAP card. Versioned filenames allow share-preview caches to be replaced deliberately when the artwork changes.
 

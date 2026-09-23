@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-23T12:29:32.369Z",
+  "version": "0.1.1",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "verification": "Public registry metadata and an independent artifact download matched the canonical MailSchema schema bytes.",
+  "channels": [
+    {
+      "registry": "crates.io",
+      "name": "mailschema",
+      "version": "0.1.1",
+      "url": "https://crates.io/crates/mailschema/0.1.1",
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.1.crate",
+          "sha256": "713cc93f6d83809054f84da41ae51879ab2f08d9eecdfcaa33c05b9845080d10"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

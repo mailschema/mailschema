@@ -7,29 +7,29 @@ import '../styles/tools.css';
 ---
 
 <Base
-  title="Registry tools"
+  title="MailSchema tools"
   theme="light"
-  description="Install MailSchema for JavaScript, Python or Rust. Validate contributions, inspect Registry records and use the shared JSON Schemas in your application."
+  description="Install MailSchema for JavaScript, Python, Rust or Go. Validate MAP documents, bundle the exact schemas and prepare Registry contributions."
 >
   <main id="main" class="container tools-page">
     <header class="page-hero tools-hero">
       <div>
         <span class="eyebrow eyebrow-line">Tools</span>
-        <h1>Tools for the Registry.</h1>
+        <h1>Build against the same contract.</h1>
         <p class="lead">
-          Validate a contribution locally, use the schema in your application, or add checks to your
-          build.
+          Validate MAP documents, bundle the exact schemas and prepare Registry contributions with
+          one versioned source.
         </p>
       </div>
       <div class="tools-hero-aside">
         <span class="pill soft">{packageSetLabel}</span>
         <p>
-          The same contribution format,
+          The same schema bytes,
           <br />
-          in your own workflow.
+          verified in four ecosystems.
         </p>
-        <a href="/contribute/#check-a-contribution" class="text-link">
-          Use the browser checker <Icon size={16} />
+        <a href="/specification/profile/" class="text-link">
+          Read the MAP 0.1 profile <Icon size={16} />
         </a>
       </div>
     </header>
@@ -129,7 +129,7 @@ import '../styles/tools.css';
         <CodeBlock label="JavaScript" code={recordCheckCommands.javascript} />
         <CodeBlock label="Python · after installation" code={recordCheckCommands.python} />
         <p>
-          In Rust, pass <code>RECORD_SCHEMA</code> to your validator. For amendments and
+          In Rust or Go, load the bundled Registry schema into your validator. For amendments and
           implementation declarations, the <a href="/registry/catalog.json">Registry catalogue</a>{' '}
           also provides exact record digests.
         </p>
@@ -148,8 +148,8 @@ import '../styles/tools.css';
           <div>
             <h3>Structure</h3>
             <p>
-              Required fields, allowed values and URI formats. The JavaScript and Python validators
-              check these locally against the shared schema.
+              Required fields, exact identifiers, allowed values and URI formats. The JavaScript and
+              Python validators check these locally against the shared schemas.
             </p>
           </div>
         </li>
@@ -189,9 +189,10 @@ import '../styles/tools.css';
       </a>
     </aside>
     <p class="tools-scope">
-      These packages work with Registry contributions. MAP is documented in the{' '}
-      <a href="/specification/">Mail Action Protocol specification</a>; its wire representation
-      remains a draft. Package and specification versions are independent.
+      These packages implement the published MAP 0.1 and Registry schemas. They validate documents;
+      they do not establish endpoint trust, grant authorization or send email. Read the{' '}
+      <a href="/specification/profile/">MAP 0.1 execution profile</a> before acting on a message.
+      Package and specification versions are independent.
     </p>
   </main>
 </Base>

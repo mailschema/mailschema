@@ -1,6 +1,6 @@
 # Vendor contributions and ingestion
 
-23 September 2026. Implemented locally; public intake is not open.
+23 September 2026. Public source and pull-request intake are open at [mailschema/mailschema](https://github.com/mailschema/mailschema). The browser prepares and checks a contribution locally; hosted one-click submission remains future work.
 
 ## Channel decision
 
@@ -12,7 +12,7 @@ Use a website and Git workflow over the same contribution format. The website pr
 | Website with its own queue      | Convenient entry point                                               | A second system for identity, moderation, revisions and history    |
 | Website backed by pull requests | Accessible preparation and one review history                        | A small authenticated submission endpoint when public intake opens |
 
-The first implementation provides the website checker and Git-ready importer. The future website Submit action should open a pull request containing the same file through a narrowly scoped server-side GitHub App. It should not write directly to the published collection or maintain a separate database of accepted types. Repository identity, contribution terms and the hosted submission connection still need to be configured. No public repository or endpoint is invented here.
+The first implementation provides the website checker and Git-ready importer. The future website Submit action should open a pull request containing the same file through a narrowly scoped server-side GitHub App. It should not write directly to the published collection or maintain a separate database of accepted types. Repository identity and contribution terms are configured; the hosted submission connection is not.
 
 ## What a vendor contributes
 
@@ -32,7 +32,7 @@ Contributor names and website links are supplied attribution. They do not establ
 - `src/registry/`: shared schema/reference validation, deterministic projection, digests and generated examples.
 - `src/data/types.ts`: the single consumer-facing projection used by page templates and search.
 
-The submission format is repository metadata. It does not define MAP's still-undecided message or wire representation. Record digests identify the sorted-key JSON representation used by this repository; clients can read the published digest rather than implementing a new signing or identity protocol.
+The submission format is Registry metadata. MAP's message and execution representation are defined separately by the MAP 0.1 profile. Record digests identify the sorted-key JSON representation used by this repository; clients can read the published digest rather than implementing a new signing or identity protocol.
 
 Validation is shared between the website and CLI. Full repository validation additionally resolves amendment dependencies and checks conflicts across submissions. Checks cover required content, known statuses, identifiers, duplicate types and operations, HTTPS references, supported operations, matching profiles and exact version/digest bindings. JSON files are bounded to 256 KiB. Submitted text is rendered as text, and no submitted scripts or reproduction commands are executed.
 
@@ -40,7 +40,7 @@ Validation is shared between the website and CLI. Full repository validation add
 
 Use `/contribute/` to load a file or start from an example. The checker validates its format and references against `/registry/catalog.json`, previews attribution and returns a checked JSON download. Editing the file invalidates the previous result. An unavailable Registry cannot produce a successful reference check. The browser does not send the file to a server.
 
-The `/tools/` page documents the published JavaScript, Python and Rust packages, with pinned installation commands and executable examples. JavaScript and Python check file structure locally; the JavaScript API can also check references against a supplied catalogue. Rust provides schemas for an existing validator. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the validators' `--record` option.
+The `/tools/` page documents the published JavaScript, Python, Rust and Go packages with pinned installation commands and executable examples. JavaScript and Python validate MAP and Registry documents locally; the JavaScript API can also check references against a supplied catalogue. Rust provides canonical schemas for an existing validator. Go provides typed MAP documents, strict decoding and core validation. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the CLI validators' `--record` option.
 
 In a checkout:
 
@@ -57,7 +57,7 @@ Generated examples use illustrative vendor names. They are preparation and test 
 
 ## Review and publication
 
-A contribution file should be proposed in a pull request. The prepared GitHub workflow runs `npm run verify` and saves the built static site as a review artifact. It uses a read-only repository token and does not deploy. Required review and branch protection must be configured when the repository opens; local files cannot enforce those hosted settings.
+A contribution file is proposed in a pull request. The GitHub workflow runs `npm run verify` and saves the built static site as a review artifact. It uses a read-only repository token and does not deploy. Protected `main` requires the verification check before merge.
 
 Review checks the interaction's scope, existing standards, contributor and maintainer attribution, requested maturity, exact changes and evidence claims. Schema validation is not editorial acceptance. A requested Draft status requires a version and maintained specification link; the cross-page tests check that the linked definition exists and agrees with the record's shared metadata and operation headings.
 
