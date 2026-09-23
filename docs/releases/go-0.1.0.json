@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-23T12:06:53.857Z",
+  "version": "0.1.0",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "verification": "Public registry metadata and an independent artifact download matched the canonical MailSchema schema bytes.",
+  "channels": [
+    {
+      "registry": "Go",
+      "name": "github.com/mailschema/go",
+      "version": "0.1.0",
+      "url": "https://pkg.go.dev/github.com/mailschema/go@v0.1.0",
+      "artifacts": [
+        {
+          "name": "v0.1.0.zip",
+          "sha256": "95cbfce1f9d3b67eae3fffe892c5438946e64be8e134325ed9b80173fa334dc3"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

@@ -18,7 +18,7 @@ export interface TypeDefinition {
   profile: string;
   overview: string;
   target: string;
-  operations: { name: string; description: string }[];
+  operations: { id: string; name: string; description: string }[];
   inputs: string;
   results: string;
   permissions: string;

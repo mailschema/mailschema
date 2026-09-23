@@ -69,6 +69,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                "maxLength": 100
+              },
               "name": {
                 "type": "string",
                 "minLength": 1,
@@ -82,7 +87,7 @@
                 "pattern": "\\S"
               }
             },
-            "required": ["name", "description"]
+            "required": ["id", "name", "description"]
           },
           "minItems": 1,
           "maxItems": 100
@@ -188,6 +193,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                "maxLength": 100
+              },
               "name": {
                 "type": "string",
                 "minLength": 1,
@@ -332,6 +342,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                "maxLength": 100
+              },
               "name": {
                 "type": "string",
                 "minLength": 1,
@@ -345,7 +360,7 @@
                 "pattern": "\\S"
               }
             },
-            "required": ["name", "description"]
+            "required": ["id", "name", "description"]
           },
           "minItems": 1,
           "maxItems": 100
@@ -790,9 +805,8 @@
           "type": "array",
           "items": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 240,
-            "pattern": "\\S"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "maxLength": 100
           },
           "minItems": 1,
           "maxItems": 100

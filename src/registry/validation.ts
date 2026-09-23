@@ -52,7 +52,7 @@ export function referenceErrors(input: Contribution, catalog: CatalogView): stri
       ];
     if (target.profile !== input.profile)
       errors.push('Execution profile does not match the targeted record.');
-    const operations = new Set(target.operations.map((operation) => operation.name));
+    const operations = new Set(target.operations.map((operation) => operation.id));
     if (
       new Set(input.operations).size !== input.operations.length ||
       input.operations.some((operation) => !operations.has(operation))
@@ -74,10 +74,13 @@ export function referenceErrors(input: Contribution, catalog: CatalogView): stri
       )
     )
       errors.push('Another type already uses this name.');
-    const operations = input.record.operations.map((operation) =>
+    const operationIds = input.record.operations.map((operation) => operation.id);
+    const operationNames = input.record.operations.map((operation) =>
       operation.name.toLocaleLowerCase(),
     );
-    if (new Set(operations).size !== operations.length)
+    if (new Set(operationIds).size !== operationIds.length)
+      errors.push('Operation identifiers must be unique within a type.');
+    if (new Set(operationNames).size !== operationNames.length)
       errors.push('Operation names must be unique within a type.');
   }
   return errors;

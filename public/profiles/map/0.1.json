@@ -1,0 +1,12 @@
+{
+  "id": "https://mailschema.org/profiles/map/0.1",
+  "name": "Mail Action Protocol 0.1",
+  "status": "working-draft",
+  "description": "A JSON-LD description in Structured Email with requests and results exchanged over authenticated HTTPS.",
+  "context": "https://mailschema.org/contexts/map-0.1.jsonld",
+  "schema": "https://mailschema.org/schemas/map-0.1.schema.json",
+  "specification": "https://mailschema.org/specification/profile/",
+  "requestMediaType": "application/json",
+  "resultMediaType": "application/json",
+  "problemMediaType": "application/problem+json"
+}

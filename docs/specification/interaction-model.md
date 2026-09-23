@@ -20,7 +20,7 @@ The service includes enough information for a client to identify the interaction
 | Execution route        | The service endpoint that accepts requests.                                          |
 | Human route            | A normal service interface through which a person can complete the interaction.      |
 
-These are concepts in the draft model. Their field names and encoding have not been selected.
+The [MAP 0.1 profile](/specification/profile/) assigns these concepts exact JSON fields and binds descriptions to a versioned profile, type record and target revision.
 
 ## Request
 
@@ -28,7 +28,7 @@ The client selects an offered operation and supplies its required inputs. It ide
 
 Before performing the operation, the service checks the caller's permission, the requested action and the target. It also checks any applicable expiry, revocation or additional approval. A Content Review request includes the exact revision being reviewed.
 
-The request must be identifiable so that a retry can be distinguished from a new request. The wire profile will specify how clients identify requests and recover results.
+The request carries a client-generated UUID URN. The service records the first request value for that identifier, returns the recorded response for an exact retry and rejects reuse with changed values.
 
 ## Result
 
@@ -36,7 +36,7 @@ The service reports the state of the requested operation. It identifies the requ
 
 The result distinguishes work that has been accepted from work that has completed. It also reports refusal, stale content, pending work or a required approval when those conditions apply.
 
-[Results and retries](/specification/outcomes/) defines the distinctions clients need to preserve. Field names and HTTP mappings remain open.
+[Results and retries](/specification/outcomes/) explains the distinctions clients preserve. The [profile](/specification/profile/) defines their wire values and HTTP mappings.
 
 ## Human participation
 

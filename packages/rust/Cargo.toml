@@ -1,9 +1,12 @@
 [package]
 name = "mailschema"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.70"
-description = "Embedded JSON Schemas for MailSchema Registry contributions and records"
+description = "Embedded JSON Schemas for Mail Action Protocol and the MailSchema Registry"
+homepage = "https://mailschema.org/tools/"
+repository = "https://github.com/mailschema/mailschema"
+documentation = "https://docs.rs/mailschema"
 license = "MIT"
 readme = "README.md"
 keywords = ["email", "schema", "json-schema", "agents"]

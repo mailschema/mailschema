@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude"
+     category="info"
+     docName="draft-mailschema-mail-action-protocol-00"
+     ipr="trust200902"
+     submissionType="IETF"
+     version="3">
+  <front>
+    <title abbrev="Mail Action Protocol">Mail Action Protocol</title>
+    <seriesInfo name="Internet-Draft" value="draft-mailschema-mail-action-protocol-00"/>
+    <author fullname="MailSchema Editors">
+      <organization>MailSchema</organization>
+      <address>
+        <uri>https://mailschema.org/</uri>
+      </address>
+    </author>
+    <date year="2026" month="September" day="23"/>
+    <area>Applications and Real-Time</area>
+    <workgroup>Individual Submission</workgroup>
+    <keyword>email</keyword>
+    <keyword>agents</keyword>
+    <keyword>structured email</keyword>
+    <abstract>
+      <t>The Mail Action Protocol (MAP) defines how a service describes an
+      action in email, how an authorized client requests that action over
+      HTTPS, and how the service reports and retains the result. MAP reuses the
+      JSON-LD representation and MIME structure defined by the Structured
+      Email work. It adds exact interaction-type, target, operation,
+      authorization, idempotency, and recovery semantics. It does not replace
+      email transport, grant service authority, or define a new agent identity
+      system.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="introduction" numbered="true">
+      <name>Introduction</name>
+      <t>Email routinely asks a recipient to act in another service: review a
+      revision, supply information, respond to an event, or change a
+      preference. A person can interpret the message and follow a link. An
+      automated client needs a stable description of the operation, the exact
+      object on which it acts, the service endpoint, and the possible
+      outcomes.</t>
+      <t>MAP defines that interaction without moving business authority into
+      email. The service remains authoritative for identity, permission,
+      target state, additional approvals, and the operation's effect. The
+      readable email and normal service interface remain available to a
+      person.</t>
+      <t>The key words <bcp14>MUST</bcp14>, <bcp14>MUST NOT</bcp14>,
+      <bcp14>SHOULD</bcp14>, and <bcp14>MAY</bcp14> in this document are to be
+      interpreted as described in BCP 14 <xref target="RFC2119"/> <xref
+      target="RFC8174"/> when, and only when, they appear in all capitals.</t>
+    </section>
+
+    <section anchor="scope" numbered="true">
+      <name>Scope and Relationship to Existing Work</name>
+      <t>MAP descriptions are JSON-LD documents carried in the
+      <tt>application/ld+json</tt> alternative defined by Structured Email
+      <xref target="I-D.ietf-sml-structured-email"/>. SMTP, Internet Message
+      Format, MIME, mailbox access, and provider APIs continue to perform their
+      existing roles <xref target="RFC5322"/> <xref target="RFC2046"/>.</t>
+      <t>MAP 0.1 uses existing HTTPS and service authentication. It defines no
+      custom DNS discovery, new media type, global identity provider,
+      mandatory online registry lookup, or general permission-policy
+      language. A later specification can define a different execution profile
+      without changing email transport.</t>
+    </section>
+
+    <section anchor="terms" numbered="true">
+      <name>Terminology</name>
+      <dl>
+        <dt>Service</dt>
+        <dd>The authority that owns an operation, checks permission, performs
+        the effect, and records its result.</dd>
+        <dt>Client</dt>
+        <dd>An agent, inbox, or application that reads a description and may
+        submit an authorized request.</dd>
+        <dt>Interaction Type</dt>
+        <dd>A versioned definition of the target, operations, inputs, results,
+        and permission boundaries for a class of interaction.</dd>
+        <dt>Profile</dt>
+        <dd>The representation and execution rules used by one MAP exchange.</dd>
+        <dt>Human Route</dt>
+        <dd>A service interface through which a person can inspect and complete
+        the interaction.</dd>
+      </dl>
+    </section>
+
+    <section anchor="model" numbered="true">
+      <name>Interaction Model</name>
+      <t>An interaction has three documents:</t>
+      <ol>
+        <li>A description identifies the profile, interaction type, service,
+        exact target revision, offered operations, execution endpoint, result
+        route, expiry, and human route.</li>
+        <li>A request repeats the exact interaction, type, operation, and target
+        references and supplies type-specific input.</li>
+        <li>A result reports the authoritative state. A Problem Details
+        document reports a request that was not applied.</li>
+      </ol>
+      <t>The service <bcp14>MUST</bcp14> recheck authentication, authorization,
+      target state, expiry, revocation, and any additional approval at execution
+      time. Receiving or forwarding an email does not transfer permission.</t>
+    </section>
+
+    <section anchor="description" numbered="true">
+      <name>Description</name>
+      <t>The MAP 0.1 profile URI is
+      <tt>https://mailschema.org/profiles/map/0.1</tt>. A client
+      <bcp14>MUST</bcp14> match this value exactly.</t>
+      <t>The complete field contract is the JSON Schema at
+      <tt>https://mailschema.org/schemas/map-0.1.schema.json</tt>. Its principal
+      members use the JSON data model <xref target="RFC8259"/>:</t>
+      <dl>
+        <dt>@id</dt><dd>A UUID URN identifying the interaction.</dd>
+        <dt>type</dt><dd>The interaction type URI, version, and exact record
+        digest.</dd>
+        <dt>service</dt><dd>The service identity, HTTPS execution and result
+        routes, human route, retention interval, and informational
+        authentication metadata.</dd>
+        <dt>target</dt><dd>The service object, revision, and SHA-256 digest to
+        which the operations apply.</dd>
+        <dt>operations</dt><dd>Stable operation identifiers, readable labels,
+        and type-specific input-schema references.</dd>
+      </dl>
+      <t>The description <bcp14>MUST NOT</bcp14> contain an access token,
+      session credential, or new authorization grant. Its authentication
+      metadata only names schemes that a configured client may already use.</t>
+    </section>
+
+    <section anchor="trust" numbered="true">
+      <name>Endpoint Trust</name>
+      <t>A description and every value derived from it are untrusted input.
+      Before credential use, a client <bcp14>MUST</bcp14> match the service
+      identity and exact HTTPS execution origin against configuration obtained
+      independently of the email. Message authentication alone is
+      insufficient.</t>
+      <t>A client <bcp14>MUST NOT</bcp14> follow an execution redirect to a
+      different origin without applying the same trust check. A client
+      <bcp14>MUST NOT</bcp14> automatically fetch or interpret an unknown
+      schema, URL, or instruction named by the message. These rules align with
+      the Structured Email trust model <xref target="I-D.ietf-sml-trust"/>.</t>
+    </section>
+
+    <section anchor="execution" numbered="true">
+      <name>HTTPS Execution Profile</name>
+      <t>The client sends an authenticated <tt>POST</tt> using HTTP semantics
+      <xref target="RFC9110"/> with
+      <tt>Content-Type: application/json</tt> to the execution URL. The JSON
+      body conforms to the request definition in the MAP schema. Service
+      authentication and OAuth security follow the service's established
+      configuration and applicable guidance such as <xref target="RFC9700"/>.</t>
+      <t>A successful response uses <tt>application/json</tt>. The service
+      returns status 200 for <tt>accepted</tt> or <tt>completed</tt>, and status
+      202 for <tt>pending</tt> or <tt>approval-required</tt>. Every response
+      carries a <tt>Location</tt> header for the request's result resource.</t>
+      <t>Errors use <tt>application/problem+json</tt> <xref target="RFC9457"/>.
+      MAP 0.1 defines <tt>invalid-request</tt>, <tt>refused</tt>,
+      <tt>stale-target</tt>, <tt>expired-interaction</tt>,
+      <tt>unsupported-profile</tt>, <tt>unsupported-type</tt>,
+      <tt>unsupported-operation</tt>, <tt>idempotency-conflict</tt>, and
+      <tt>request-in-progress</tt>. A service <bcp14>MUST NOT</bcp14> apply the
+      requested effect when returning one of these problems.</t>
+    </section>
+
+    <section anchor="idempotency" numbered="true">
+      <name>Idempotency and Recovery</name>
+      <t>A client generates a UUID URN as <tt>requestId</tt>. Within one
+      service, the first use binds that identifier to the complete JSON request
+      value. Repeating the identifier with the same JSON values is an exact
+      retry. The service <bcp14>MUST</bcp14> return the recorded response without
+      applying the effect again. Object member order is insignificant; array
+      order and member values are significant.</t>
+      <t>Reuse with a changed value produces an
+      <tt>idempotency-conflict</tt>. The changed request <bcp14>MUST NOT</bcp14>
+      be applied.</t>
+      <t>An authenticated <tt>GET</tt> to the result resource returns the
+      recorded result or problem. After a timeout, a client
+      <bcp14>SHOULD</bcp14> retrieve that resource before issuing a request that
+      might repeat the effect. An uncertain outcome is local client state; it
+      is not a MAP result value.</t>
+    </section>
+
+    <section anchor="types" numbered="true">
+      <name>Interaction Types</name>
+      <t>MAP separates the execution profile from interaction semantics. A type
+      record defines the target, stable operations, required inputs, results,
+      permissions, human route, examples, and related standards. A description
+      binds the type URI, version, and record digest so implementations do not
+      guess compatibility.</t>
+      <t>The initial Content Review 0.1 type offers
+      <tt>request-changes</tt> and <tt>approve</tt> for an exact content
+      revision. Approval records a review decision; it does not send or publish
+      the content.</t>
+    </section>
+
+    <section anchor="security" numbered="true">
+      <name>Security Considerations</name>
+      <t>Implementations must treat structured content as attacker-controlled.
+      The endpoint trust checks in <xref target="trust"/> prevent an email from
+      redirecting a service credential. Schema validation does not establish
+      trust or permission.</t>
+      <t>Services must protect result resources with authorization equivalent
+      to the underlying operation. Error detail should disclose no token,
+      private target content, or permission information beyond what the caller
+      is allowed to know.</t>
+      <t>A target revision and digest prevent an approval from silently moving
+      to changed content. Services must compare the request with current target
+      state before applying an effect.</t>
+      <t>Clients should present the operation, target, scope, and consequence
+      before obtaining human approval. A changed target or materially changed
+      action requires a new decision according to service policy.</t>
+    </section>
+
+    <section anchor="privacy" numbered="true">
+      <name>Privacy Considerations</name>
+      <t>Descriptions are carried through email systems and may be retained or
+      forwarded. They should contain the minimum target metadata needed to
+      understand the action. Sensitive source material should remain behind an
+      authorized service route rather than being copied into the description.</t>
+      <t>Result retention is advertised in seconds. A service must retain the
+      result for at least that interval and should not retain it longer than its
+      stated service purpose requires.</t>
+    </section>
+
+    <section anchor="iana" numbered="true">
+      <name>IANA Considerations</name>
+      <t>This document requests no IANA action. MAP 0.1 uses existing media
+      types and HTTPS. A future version that introduces a new media type or
+      well-known URI will define the required registration.</t>
+    </section>
+
+    <section anchor="implementations" numbered="true">
+      <name>Implementation Status</name>
+      <t>This section follows <xref target="RFC7942"/> and may be removed before
+      publication as an RFC.</t>
+      <t>The MailSchema repository contains JSON Schemas, valid and invalid
+      fixtures, a complete MIME message, a deterministic client/service
+      harness, and conformance cases for completion, refusal, stale targets,
+      approval, exact retry, conflict, recovery, expiry, unsupported contracts,
+      and untrusted endpoints. JavaScript, Python, Rust, and Go packages expose
+      the schemas. The materials are available at
+      <eref target="https://github.com/mailschema/mailschema"/>.</t>
+      <t>A Nitrosend implementation that validates MAP descriptions and emits
+      the JSON-LD MIME alternative is under review at
+      <eref target="https://github.com/nitrosend/api/pull/522"/>. It is not
+      claimed as deployed or independently operated. MailSchema, Nitrosend, and
+      the initial Sourcey demonstration share ownership.</t>
+    </section>
+  </middle>
+
+  <back>
+    <references>
+      <name>Normative References</name>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5322.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9110.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9700.xml"/>
+      <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/">
+        <front><title>Structured Email</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
+        <seriesInfo name="Internet-Draft" value="draft-ietf-sml-structured-email-06"/>
+      </reference>
+      <reference anchor="I-D.ietf-sml-trust" target="https://datatracker.ietf.org/doc/draft-ietf-sml-trust/">
+        <front><title>Structured Email: Trust and Security Considerations</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
+        <seriesInfo name="Internet-Draft" value="draft-ietf-sml-trust-01"/>
+      </reference>
+    </references>
+    <references>
+      <name>Informative References</name>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
+    </references>
+  </back>
+</rfc>

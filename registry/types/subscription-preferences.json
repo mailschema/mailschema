@@ -11,6 +11,7 @@
   "target": "The recipient’s subscription with the specified service or list.",
   "operations": [
     {
+      "id": "update-preferences",
       "name": "Update preferences",
       "description": "Set the offered topic and frequency options."
     }

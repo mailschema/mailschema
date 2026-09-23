@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-09-23T12:32:06.116Z",
+  "version": "0.1.1",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "verification": "Public registry metadata and an independent artifact download matched the canonical MailSchema schema bytes.",
+  "channels": [
+    {
+      "registry": "npm",
+      "name": "mailschema",
+      "version": "0.1.1",
+      "url": "https://www.npmjs.com/package/mailschema/v/0.1.1",
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.1.tgz",
+          "sha256": "a5c40740e72004d4929f62534bf6d4cc266fdfb3e9399bdb44859c1e48d6cb9b",
+          "integrity": "sha512-5o8+qvcOG/fTEBlChIyc6ACM97IhyUiqXO3vWa9XLW6bc2lx/ZSy3/5cfXFEgzyKBGegXFMYp0+ATDdokzRInQ=="
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "format": "mailschema-conformance/1",
+  "profile": "https://mailschema.org/profiles/map/0.1",
+  "type": {
+    "id": "https://mailschema.org/types/content-review",
+    "version": "0.1",
+    "recordDigest": "sha-256:0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c"
+  },
+  "artifacts": [
+    {
+      "path": "public/schemas/map-0.1.schema.json",
+      "sha256": "56a1d70e1f6eb6b525d0c2d692b98b3aaf666cb684c875fadb35f15a750c69b9"
+    },
+    {
+      "path": "public/schemas/content-review-0.1.schema.json",
+      "sha256": "feaa03c3fac72d8a7a0cd10dd3f562cc936061a60e31c187620184155caa35ed"
+    },
+    {
+      "path": "registry/types/content-review.json",
+      "sha256": "5c0c9af570c7869a52a74919ef2386c79ffd8d556eb230d89df07b394921e27c"
+    },
+    {
+      "path": "public/fixtures/map-0.1/content-review-description.json",
+      "sha256": "03c08f59bc548a989b9147a28f40824e2ebd49f9388e62e697555ef01352ecab"
+    },
+    {
+      "path": "public/fixtures/map-0.1/content-review.eml",
+      "sha256": "b4298a4ef0b718c82df1cb497e2e48a5447978083a90f39b31abc27141c0ef3c"
+    },
+    {
+      "path": "public/fixtures/map-0.1/request-changes.json",
+      "sha256": "bf47b2ea89effc4bac46aeb4a7d2318046e0630602c1e458c6df08fcd1affe58"
+    },
+    {
+      "path": "public/fixtures/map-0.1/approve.json",
+      "sha256": "4992345aa71023ea68c06e96af64da27995989bf91d5d9331cc61db1f3909a0b"
+    },
+    {
+      "path": "public/fixtures/map-0.1/result-completed.json",
+      "sha256": "37b9046c4ed112939fa377d1c7ad6efb8d309db1bf7b2a3926823b1a78011d41"
+    },
+    {
+      "path": "public/fixtures/map-0.1/result-approval-required.json",
+      "sha256": "cc5404fbb5ffb126d89ad6f826f9bac1ebb41a530d52acc7259a477b71ee7bb6"
+    },
+    {
+      "path": "public/fixtures/map-0.1/problem-stale-target.json",
+      "sha256": "253cbe3853b21f0dfd1231f951feb8e41a428ed93aa4272d23b041d3cf4e0be3"
+    },
+    {
+      "path": "public/fixtures/map-0.1/invalid/inline-credential.json",
+      "sha256": "e85d73beca20f4755847bec643bdcdd08fad0d299d876febedd74397cf3386e4"
+    },
+    {
+      "path": "public/fixtures/map-0.1/invalid/unknown-operation.json",
+      "sha256": "659785e65387db18d58a17a62f6df2533d0c8635333de6968be2065978908cee"
+    }
+  ],
+  "cases": [
+    { "id": "approve-completed", "expected": "200 completed" },
+    { "id": "feedback-accepted", "expected": "200 accepted" },
+    { "id": "exact-retry", "expected": "original response, no repeated effect" },
+    { "id": "lost-response-recovery", "expected": "recorded response from result URL" },
+    { "id": "changed-request", "expected": "409 idempotency-conflict" },
+    { "id": "permission-refusal", "expected": "403 refused" },
+    { "id": "stale-revision", "expected": "409 stale-target" },
+    { "id": "expired-interaction", "expected": "410 expired-interaction" },
+    { "id": "unsupported-type", "expected": "422 unsupported-type" },
+    { "id": "approval-gate", "expected": "202 approval-required" },
+    { "id": "pending-work", "expected": "202 pending" },
+    { "id": "untrusted-endpoint", "expected": "client refusal before credential use" }
+  ],
+  "referenceImplementation": "src/map/reference.ts",
+  "reproduce": ["npm run profile:validate", "npm run map:test", "npm run conformance:check"]
+}

@@ -16,8 +16,10 @@ async function put(path, value) {
 
 const schemaBytes = await read('public/schemas/contribution.schema.json');
 const schema = JSON.parse(schemaBytes);
+const mapSchemaBytes = await read('public/schemas/map-0.1.schema.json');
+const contentReviewSchemaBytes = await read('public/schemas/content-review-0.1.schema.json');
 const versions = JSON.parse(await read('packages/versions.json'));
-for (const registry of ['npm', 'PyPI', 'crates.io'])
+for (const registry of ['npm', 'PyPI', 'crates.io', 'Go'])
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
     throw new Error(`Invalid ${registry} package version.`);
 const recordSchema = json({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/record' });
@@ -32,19 +34,24 @@ await put(
     name: 'mailschema',
     version: versions.npm,
     description:
-      'JSON Schemas, TypeScript definitions and validation tools for MailSchema Registry contributions',
+      'Schemas and validation tools for Mail Action Protocol and the MailSchema Registry',
     type: 'module',
     license: 'MIT',
     author: 'MailSchema contributors',
+    homepage: 'https://mailschema.org/tools/',
+    repository: { type: 'git', url: 'git+https://github.com/mailschema/mailschema.git' },
+    bugs: { url: 'https://github.com/mailschema/mailschema/issues' },
     engines: { node: '>=22' },
     exports: {
       '.': { types: './dist/index.d.ts', import: './dist/index.js' },
       './contribution.schema.json': './dist/contribution.schema.json',
+      './map-0.1.schema.json': './dist/map-0.1.schema.json',
+      './content-review-0.1.schema.json': './dist/content-review-0.1.schema.json',
       './package.json': './package.json',
     },
     types: './dist/index.d.ts',
-    bin: { mailschema: './cli.mjs' },
-    files: ['dist', 'cli.mjs', 'README.md', 'LICENSE'],
+    bin: { mailschema: './bin/mailschema.js' },
+    files: ['dist', 'bin', 'README.md', 'LICENSE'],
     dependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
     keywords: ['email', 'schema', 'json-schema', 'agents', 'registry'],
     publishConfig: { access: 'public', registry: 'https://registry.npmjs.org/' },
@@ -53,8 +60,11 @@ await put(
 await put('npm/src/model.ts', await read('src/registry/model.ts'));
 await put('npm/src/validation.ts', validation);
 await put('npm/src/index.ts', await read('packages/javascript/index.ts'));
+await put('npm/src/map.ts', await read('packages/javascript/map.ts'));
 await put('npm/src/contribution.schema.json', schemaBytes);
-await put('npm/cli.mjs', await read('packages/javascript/cli.mjs'));
+await put('npm/src/map-0.1.schema.json', mapSchemaBytes);
+await put('npm/src/content-review-0.1.schema.json', contentReviewSchemaBytes);
+await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
 await put('npm/LICENSE', license);
 await put(
@@ -80,9 +90,11 @@ execFileSync(
   [resolve(root, 'node_modules/typescript/bin/tsc'), '-p', resolve(output, 'npm/tsconfig.json')],
   { cwd: root, stdio: 'inherit' },
 );
-await chmod(resolve(output, 'npm/cli.mjs'), 0o755);
+await chmod(resolve(output, 'npm/bin/mailschema.js'), 0o755);
 // Preserve the canonical schema bytes, rather than the compiler's JSON formatting.
 await put('npm/dist/contribution.schema.json', schemaBytes);
+await put('npm/dist/map-0.1.schema.json', mapSchemaBytes);
+await put('npm/dist/content-review-0.1.schema.json', contentReviewSchemaBytes);
 
 for (const language of ['python', 'rust']) {
   await mkdir(resolve(output, language), { recursive: true });
@@ -93,10 +105,19 @@ for (const language of ['python', 'rust']) {
   await put(`${language}/LICENSE`, license);
 }
 await put('python/src/mailschema/contribution.schema.json', schemaBytes);
+await put('python/src/mailschema/map-0.1.schema.json', mapSchemaBytes);
+await put('python/src/mailschema/content-review-0.1.schema.json', contentReviewSchemaBytes);
 await put('python/tests/new-type.json', await read('registry/examples/new-type.json'));
 await put('python/tests/content-review.json', await read('registry/types/content-review.json'));
+await put(
+  'python/tests/map-description.json',
+  await read('public/fixtures/map-0.1/content-review-description.json'),
+);
+await put('python/tests/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
 await put('rust/schemas/contribution.schema.json', schemaBytes);
 await put('rust/schemas/record.schema.json', recordSchema);
+await put('rust/schemas/map-0.1.schema.json', mapSchemaBytes);
+await put('rust/schemas/content-review-0.1.schema.json', contentReviewSchemaBytes);
 
 // Check each source distribution against its own declared release version.
 const python = await read('packages/python/pyproject.toml');
@@ -118,11 +139,12 @@ await put(
       { registry: 'npm', version: versions.npm },
       { registry: 'PyPI', version: versions.PyPI },
       { registry: 'crates.io', version: versions['crates.io'] },
+      { registry: 'Go', version: versions.Go },
     ],
     source: 'public/schemas/contribution.schema.json',
     status: 'prepared',
   }),
 );
 console.log(
-  `Prepared MailSchema packages from one canonical schema: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}.`,
+  `Prepared MailSchema packages from one canonical schema: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}, Go ${versions.Go}.`,
 );

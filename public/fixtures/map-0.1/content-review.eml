@@ -1,0 +1,48 @@
+From: Example Review Service <reviews@reviews.example>
+To: Reviewer <reviewer@example.net>
+Date: Wed, 23 Sep 2026 01:00:00 +0000
+Message-ID: <map-018f47a2-5d7c-7b11-9a3d-4d2160b85b10@reviews.example>
+Subject: Review requested: September product update
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="map-example-boundary"
+
+--map-example-boundary
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Please review revision 4 of “September product update”.
+
+Open the review: https://reviews.example/reviews/campaign-42/revision/4
+
+--map-example-boundary
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+<!doctype html><html><body><h1>Review requested</h1><p>Please review revision 4 of <strong>September product update</strong>.</p><p><a href="https://reviews.example/reviews/campaign-42/revision/4">Open the review</a></p></body></html>
+
+--map-example-boundary
+Content-Type: application/ld+json; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+{
+  "@context": "https://mailschema.org/contexts/map-0.1.jsonld",
+  "@type": "MailAction",
+  "@id": "urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b85b10",
+  "profile": "https://mailschema.org/profiles/map/0.1",
+  "type": {"id":"https://mailschema.org/types/content-review","version":"0.1","recordDigest":"sha-256:0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c"},
+  "describedAt": "2026-09-23T01:00:00Z",
+  "expiresAt": "2026-09-30T01:00:00Z",
+  "service": {
+    "id": "https://reviews.example/service",
+    "name": "Example Review Service",
+    "execution": {"url":"https://reviews.example/map/actions","method":"POST","requestMediaType":"application/json","resultMediaType":"application/json","resultUrlTemplate":"https://reviews.example/map/results/{requestId}","resultRetentionSeconds":604800},
+    "humanUrl": "https://reviews.example/reviews/campaign-42/revision/4",
+    "authorization": {"kind":"service-configured","schemes":["oauth2"],"audience":"https://reviews.example/"}
+  },
+  "target": {"id":"https://reviews.example/content/campaign-42","revision":"4","title":"September product update","digest":"sha-256:9096ce5e9226696d3bdc80f7d62a8e1ca4995c4fd8c4b9f0155287529aefe8fd"},
+  "operations": [
+    {"id":"request-changes","name":"Request changes","description":"Record feedback on revision 4.","inputSchema":"https://mailschema.org/schemas/content-review-0.1.schema.json"},
+    {"id":"approve","name":"Approve","description":"Record approval of revision 4.","inputSchema":"https://mailschema.org/schemas/content-review-0.1.schema.json"}
+  ]
+}
+--map-example-boundary--

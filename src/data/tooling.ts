@@ -26,6 +26,7 @@ const channel = (name: string) => {
 const npmRelease = channel('npm');
 const pythonRelease = channel('PyPI');
 const rustRelease = channel('crates.io');
+const goRelease = channel('Go');
 const versions = new Set(selectedChannels.values().map((entry) => entry.version));
 const sharedVersion = [...versions][0];
 export const packageSetLabel =
@@ -38,39 +39,48 @@ export const tooling = [
     registry: 'npm',
     release: npmRelease,
     runtime: 'Node.js 22+',
-    title: 'Check a contribution.',
+    title: 'Validate MAP at the boundary.',
     description:
-      'Validate JSON, use typed definitions and check references against a supplied Registry catalogue.',
+      'Check MAP descriptions, requests, results and problems before your application trusts their fields.',
     install: `npm install mailschema@${npmRelease.version}`,
-    command: `npx mailschema@${npmRelease.version} check contribution.json`,
+    command: `npx mailschema@${npmRelease.version} check description.json --map`,
     installLanguage: 'bash' as const,
     language: 'javascript' as const,
-    filename: 'check-contribution.mjs',
-    example: `import { readFile } from 'node:fs/promises';\nimport { assertContribution } from 'mailschema';\n\nconst contribution = JSON.parse(\n  await readFile('contribution.json', 'utf8'),\n);\n\nassertContribution(contribution);`,
+    filename: 'check-description.mjs',
+    example: `import { readFile } from 'node:fs/promises';
+import { assertMapDocument } from 'mailschema';
+
+const description = JSON.parse(
+  await readFile('description.json', 'utf8'),
+);
+
+assertMapDocument(description);`,
     exampleNote:
-      'Returns normally for valid input. Throws an error with field details if the contribution needs changes.',
+      'Returns normally for a valid MAP 0.1 document. Throws with field details when the contract does not match.',
     api: [
       {
-        name: 'assertContribution(value)',
-        description: 'Check contribution structure; throw if invalid.',
+        name: 'assertMapDocument(value) / mapErrors(value)',
+        description: 'Validate a MAP 0.1 description, request, result or problem.',
       },
-      { name: 'contributionErrors(value)', description: 'Return field errors, or an empty array.' },
       {
-        name: 'assertTypeRecord(value)',
-        description: 'Check an expanded record, including attribution and history.',
+        name: 'assertContentReviewRequest(value)',
+        description: 'Apply the Content Review 0.1 request binding.',
+      },
+      {
+        name: 'getMapSchema() / getContentReviewSchema()',
+        description: 'Return independent copies of the protocol schemas.',
+      },
+      {
+        name: 'assertContribution(value) / assertTypeRecord(value)',
+        description: 'Validate Registry contributions and expanded type records.',
       },
       {
         name: 'referenceErrors(contribution, catalog)',
-        description:
-          'Check amendment bases, type names, versions, profiles and supported operations against supplied Registry data.',
-      },
-      {
-        name: 'getContributionSchema() / getRecordSchema()',
-        description: 'Return an independent copy of either JSON Schema.',
+        description: 'Check exact Registry versions, profiles, digests and operations.',
       },
     ],
     exports:
-      'TypeScript: Contribution, TypeDefinition, TypeRecord, Implementation, Party and CatalogView.',
+      'Runtime validation, Registry reference checks and TypeScript definitions for Registry records.',
   },
   {
     id: 'python',
@@ -78,34 +88,44 @@ export const tooling = [
     registry: 'PyPI',
     release: pythonRelease,
     runtime: 'Python 3.10+',
-    title: 'Validate in Python.',
+    title: 'Use the same contract in Python.',
     description:
-      'Check contribution fields and Registry record structure with the established jsonschema library.',
+      'Validate MAP 0.1 and Content Review documents locally with Draft 2020-12 format checking.',
     install: `python -m pip install mailschema==${pythonRelease.version}`,
-    command: 'python -m mailschema check contribution.json',
+    command: 'python -m mailschema check description.json --map',
     installLanguage: 'bash' as const,
     language: 'python' as const,
-    filename: 'check_contribution.py',
-    example: `import json\nfrom pathlib import Path\nfrom mailschema import validate_contribution\n\ncontribution = json.loads(\n    Path("contribution.json").read_text()\n)\n\nvalidate_contribution(contribution)`,
+    filename: 'check_description.py',
+    example: `import json
+from pathlib import Path
+from mailschema import validate_map_document
+
+description = json.loads(
+    Path("description.json").read_text()
+)
+
+validate_map_document(description)`,
     exampleNote:
-      'Returns None for valid input. Raises ValueError with field details if the contribution needs changes.',
+      'Returns None for a valid MAP 0.1 document. Raises ValueError with field details when validation fails.',
     api: [
       {
-        name: 'validate_contribution(value)',
-        description: 'Check contribution structure; raise ValueError if invalid.',
-      },
-      { name: 'contribution_errors(value)', description: 'Return field errors, or an empty list.' },
-      {
-        name: 'validate_record(value) / record_errors(value)',
-        description: 'Validate an expanded Registry record or inspect its errors.',
+        name: 'validate_map_document(value) / map_errors(value)',
+        description: 'Validate a MAP 0.1 description, request, result or problem.',
       },
       {
-        name: 'get_contribution_schema() / get_record_schema()',
-        description: 'Return a fresh copy of either JSON Schema.',
+        name: 'validate_content_review_request(value)',
+        description: 'Apply the Content Review 0.1 request binding.',
+      },
+      {
+        name: 'get_map_schema() / get_content_review_schema()',
+        description: 'Return fresh copies of the protocol schemas.',
+      },
+      {
+        name: 'validate_contribution(value) / validate_record(value)',
+        description: 'Validate Registry contributions and expanded type records.',
       },
     ],
-    exports:
-      'Structure and format checks. Registry reference checks run separately in the browser or JavaScript API.',
+    exports: 'Local structure and format validation through the established jsonschema library.',
   },
   {
     id: 'rust',
@@ -113,39 +133,96 @@ export const tooling = [
     registry: 'crates.io',
     release: rustRelease,
     runtime: 'Rust 1.70+',
-    title: 'Bring the schema with you.',
+    title: 'Bundle exact schema bytes.',
     description:
-      'Embed the contribution and record schemas in your application. Use them with your chosen JSON Schema validator.',
+      'Embed the MAP, Content Review and Registry schemas without a runtime dependency or network lookup.',
     install: `[dependencies]\nmailschema = "=${rustRelease.version}"`,
     command: null,
     installLanguage: 'toml' as const,
     language: 'rust' as const,
     filename: 'src/main.rs',
-    example: `use mailschema::{CONTRIBUTION_SCHEMA, RECORD_SCHEMA};\n\nfn main() -> std::io::Result<()> {\n    std::fs::write(\n        "contribution.schema.json", CONTRIBUTION_SCHEMA\n    )?;\n    std::fs::write("record.schema.json", RECORD_SCHEMA)?;\n    Ok(())\n}`,
-    exampleNote:
-      'Writes both bundled schemas to local files. No runtime dependencies or network calls.',
+    example: `use mailschema::{MAP_0_1_SCHEMA, CONTENT_REVIEW_0_1_SCHEMA};
+
+fn main() -> std::io::Result<()> {
+    std::fs::write("map-0.1.schema.json", MAP_0_1_SCHEMA)?;
+    std::fs::write(
+        "content-review-0.1.schema.json",
+        CONTENT_REVIEW_0_1_SCHEMA,
+    )?;
+    Ok(())
+}`,
+    exampleNote: 'Writes the canonical schemas to local files for use with your chosen validator.',
     api: [
       {
-        name: 'CONTRIBUTION_SCHEMA',
-        description: 'The contribution JSON Schema as a static string.',
+        name: 'MAP_0_1_SCHEMA / CONTENT_REVIEW_0_1_SCHEMA',
+        description: 'The protocol schemas as static strings.',
       },
       {
-        name: 'RECORD_SCHEMA',
-        description: 'The standalone record JSON Schema as a static string.',
+        name: 'CONTRIBUTION_SCHEMA / RECORD_SCHEMA',
+        description: 'The Registry schemas as static strings.',
       },
       {
-        name: 'Schema::Contribution.as_str() / Schema::Record.as_str()',
-        description: 'Select a bundled schema through the typed enum.',
+        name: 'Schema::Map01.as_str() / Schema::ContentReview01.as_str()',
+        description: 'Select a bundled protocol schema through the typed enum.',
       },
     ],
     exports:
-      'Schemas only. Validation requires a JSON Schema Draft 2020-12 engine with format checking enabled.',
+      'Canonical schemas. Validation uses a Draft 2020-12 engine with format checking enabled.',
+  },
+  {
+    id: 'go',
+    name: 'Go',
+    registry: 'Go',
+    release: goRelease,
+    runtime: 'Go 1.22+',
+    title: 'Decode into protocol types.',
+    description:
+      'Use typed MAP documents, strict JSON decoding and core reference checks in a Go service or agent.',
+    install: `go get github.com/mailschema/go@v${goRelease.version}`,
+    command: null,
+    installLanguage: 'bash' as const,
+    language: 'go' as const,
+    filename: 'main.go',
+    example: `package main
+
+import (
+    "os"
+    mailschema "github.com/mailschema/go"
+)
+
+func main() {
+    request, err := mailschema.Decode[mailschema.Request](os.Stdin)
+    if err != nil {
+        panic(err)
+    }
+    if err := mailschema.ValidateRequest(request); err != nil {
+        panic(err)
+    }
+}`,
+    exampleNote:
+      'Strict decoding rejects unknown fields. Core validation checks the fixed MAP identifiers and references.',
+    api: [
+      {
+        name: 'Decode[T](reader)',
+        description: 'Strictly decode a MAP document into its typed representation.',
+      },
+      {
+        name: 'ValidateDescription / ValidateRequest',
+        description: 'Check core MAP identifiers and references.',
+      },
+      {
+        name: 'Schema(MAP01Schema)',
+        description: 'Return an independent copy of a bundled schema.',
+      },
+    ],
+    exports:
+      'Typed descriptions, requests, results and problems, plus the MAP, Content Review and Registry schemas.',
   },
 ];
 
 export const localCheckCommands = {
-  javascript: tooling[0].command!,
-  python: tooling[1].command!,
+  javascript: `npx mailschema@${npmRelease.version} check contribution.json`,
+  python: 'python -m mailschema check contribution.json',
 };
 export const recordCheckCommands = {
   javascript: `npx mailschema@${npmRelease.version} check content-review.json --record`,

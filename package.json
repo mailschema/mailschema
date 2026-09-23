@@ -8,10 +8,10 @@
   },
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
-    "check": "npm run registry:validate && astro check",
+    "check": "npm run registry:validate && npm run profile:validate && npm run conformance:check && astro check",
     "registry:validate": "node scripts/registry.ts validate",
     "registry:ingest": "node scripts/registry.ts ingest",
-    "verify": "npm run check && npm run build && npm test",
+    "verify": "npm run check && npm run build && npm run map:test && npm test",
     "build": "astro build",
     "deploy": "npm run verify && wrangler deploy",
     "deploy:dry-run": "npm run build && wrangler deploy --dry-run",
@@ -21,7 +21,10 @@
     "test:visual": "node scripts/compare-reader.mjs",
     "packages:prepare": "node scripts/prepare-packages.mjs",
     "packages:promote": "node scripts/promote-package.mjs",
-    "packages:test": "node --test tests/packages-check.mjs"
+    "packages:test": "node --test tests/packages-check.mjs",
+    "profile:validate": "node scripts/map-profile.ts",
+    "map:test": "node --test tests/map-profile.test.mjs",
+    "conformance:check": "node scripts/conformance.ts"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "5.3.0",

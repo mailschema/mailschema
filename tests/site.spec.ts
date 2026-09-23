@@ -5,6 +5,7 @@ import { searchEntries } from '../src/data/site';
 const routes = [
   '/',
   '/specification/',
+  '/specification/profile/',
   '/specification/interaction-model/',
   '/specification/content-review/',
   '/specification/authorization/',

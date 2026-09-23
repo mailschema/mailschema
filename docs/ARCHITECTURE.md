@@ -71,7 +71,7 @@ The new identity brief lives in [brand/MAILSCHEMA-MAP-IDENTITY.md](../brand/IDEN
 3. The implementation and demo brief records the product workflow and known gaps.
 4. Older naming and strategy documents remain dated research. Their provisional names do not override this decision.
 
-Publication of the project site and Registry tooling does not claim IETF adoption, MAP product conformance or independent implementation of the specification.
+Publication of the project site, exact profile and Registry tooling does not claim IETF adoption, deployed MAP product conformance or independent implementation of the specification.
 
 ## Specification renderer
 
@@ -99,7 +99,7 @@ Local ingestion and previews are implemented. Public repository setup, contribut
 
 ## Package documentation
 
-The approved integration places package installation, examples and API reference at `/tools/` within the existing MailSchema site. Tools is linked from the main navigation, search, contribution guide, type record downloads and the specification reader's resource links. These packages support Registry contributions and records; they do not implement MAP email actions or authorization. Normative MAP requirements remain in the specification.
+The approved integration places package installation, examples and API reference at `/tools/` within the MailSchema site. Tools is linked from the main navigation, search, contribution guide, type record downloads and the specification reader's resource links. The packages validate or expose MAP 0.1, Content Review 0.1 and Registry contracts. They do not send email, establish endpoint trust or grant authorization. Normative MAP requirements remain in the specification.
 
 The repository owns both the site and packages. Published package versions are independent of specification versions and may differ between language ecosystems. `packages/versions.json` declares the version prepared for each registry without requiring synchronized releases. `docs/releases/current.json` is the explicit package set promoted to the website. Each channel points to immutable release evidence; `src/data/tooling.ts` supplies the selected versions, registry links and commands. A build guard checks every selected registry identity, version and verification result against the canonical schema digest. A schema change requires matching verified package releases before the site can advertise them.
 
@@ -107,7 +107,7 @@ Registry publication and website promotion are separate phases. Publishing an ar
 
 The reusable promotion workflow is deliberately pull-request based. It can be started manually or called by a package-publishing workflow. Given one registry and exact version, it downloads the public artifact, compares the registry checksum where available, extracts the packaged contribution schema and compares its exact bytes with the canonical schema. It then writes immutable evidence, changes only that registry's selected version, runs the complete verification suite and opens a promotion pull request. Other language packages keep their existing versions. After merge, the `main` workflow verifies the repository again and deploys that exact build to Cloudflare.
 
-Type pages offer raw record downloads that work directly with package validators. Existing digest-envelope exports remain available for consumers. The contribution flow distinguishes structural validation, checks against Registry references and review. The Rust package embeds schemas; JavaScript and Python provide validation. All three language examples have been executed against the published packages.
+Type pages offer raw record downloads that work directly with package validators. Existing digest-envelope exports remain available for consumers. The contribution flow distinguishes structural validation, checks against Registry references and review. The Rust package embeds schemas; JavaScript and Python provide validation; Go provides typed documents, strict decoding and core reference checks. Public artifact readback binds every promoted package to the exact contribution schema bytes.
 
 The main navigation is shared between Astro and MailSchema's Sourcey configuration. The reader's additional resource link is project configuration; the Sourcey package and generic reader theme are unchanged.
 

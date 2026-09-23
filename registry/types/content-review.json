@@ -6,15 +6,17 @@
   "status": "Draft",
   "version": "0.1",
   "origin": "MailSchema draft",
-  "profile": "Email + authenticated HTTPS (draft)",
+  "profile": "https://mailschema.org/profiles/map/0.1",
   "overview": "A service sends content for review. The recipient can submit feedback or record approval of the revision they received. Editing the draft and sending or publishing it remain separate service operations.",
   "target": "Service-owned content identified by its exact revision.",
   "operations": [
     {
+      "id": "request-changes",
       "name": "Request changes",
       "description": "Record feedback on the identified revision."
     },
     {
+      "id": "approve",
       "name": "Approve",
       "description": "Record approval of that revision."
     }
@@ -46,13 +48,13 @@
     }
   ],
   "openQuestions": [
-    "Wire representation and operation identifiers.",
-    "Revision references and retry behaviour."
+    "Which independent services and clients can reproduce the 0.1 conformance cases?",
+    "Which content digest representations need bindings beyond SHA-256?"
   ],
   "history": [
     {
       "label": "0.1 · Working draft",
-      "description": "The MAP draft describes review feedback and revision approval. The browser example illustrates the exchange."
+      "description": "The MAP 0.1 profile defines review feedback, revision approval, exact target binding, retries and recovery."
     }
   ],
   "definition": {

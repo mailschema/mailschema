@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import release from '../docs/releases/0.1.0.json' with { type: 'json' };
+import npmRelease from '../docs/releases/npm-0.1.1.json' with { type: 'json' };
+import pythonRelease from '../docs/releases/pypi-0.1.1.json' with { type: 'json' };
+import rustRelease from '../docs/releases/crates-0.1.1.json' with { type: 'json' };
+import goRelease from '../docs/releases/go-0.1.0.json' with { type: 'json' };
 import current from '../docs/releases/current.json' with { type: 'json' };
 import {
   assertPackageRelease,
@@ -8,39 +11,38 @@ import {
   type PackageRelease,
   type PackageSetSelection,
 } from '../src/lib/package-release';
-import { tooling, recordCheckCommands } from '../src/data/tooling';
+import { tooling, localCheckCommands, recordCheckCommands } from '../src/data/tooling';
 import { typeRecords } from '../src/data/types';
 import { assertTypeRecord } from '../src/registry/validation';
 
 test('advertised tooling refuses schema drift and unverified or mixed releases', () => {
   const schema = readFileSync('public/schemas/contribution.schema.json', 'utf8');
-  expect(() => assertPackageRelease(release, schema)).not.toThrow();
-  expect(
-    assertPackageSet(
-      current as PackageSetSelection,
-      new Map([['0.1.0', release as PackageRelease]]),
-      schema,
-    ).size,
-  ).toBe(3);
-  expect(() => assertPackageRelease(release, schema + '\n')).toThrow(/differs from the advertised/);
+  const releases = new Map<string, PackageRelease>([
+    ['npm-0.1.1', npmRelease as PackageRelease],
+    ['pypi-0.1.1', pythonRelease as PackageRelease],
+    ['crates-0.1.1', rustRelease as PackageRelease],
+    ['go-0.1.0', goRelease as PackageRelease],
+  ]);
+  for (const release of releases.values())
+    expect(() => assertPackageRelease(release, schema)).not.toThrow();
+  expect(assertPackageSet(current as PackageSetSelection, releases, schema).size).toBe(4);
+  expect(() => assertPackageRelease(npmRelease, schema + '\n')).toThrow(
+    /differs from the advertised/,
+  );
   for (const alteration of [
     { status: 'submitted' },
     { version: '9.9.9' },
     { url: 'https://example.com/package' },
   ]) {
-    const changed = structuredClone(release);
+    const changed = structuredClone(npmRelease);
     Object.assign(changed.channels[0], alteration);
     expect(() => assertPackageRelease(changed, schema)).toThrow();
   }
   const wrongSelection = structuredClone(current);
   wrongSelection.channels[0].version = '9.9.9';
-  expect(() =>
-    assertPackageSet(
-      wrongSelection as PackageSetSelection,
-      new Map([['0.1.0', release as PackageRelease]]),
-      schema,
-    ),
-  ).toThrow(/not verified/);
+  expect(() => assertPackageSet(wrongSelection as PackageSetSelection, releases, schema)).toThrow(
+    /not verified/,
+  );
 });
 
 test('language tabs restore deep links and support keyboard navigation and exact copying', async ({
@@ -68,16 +70,16 @@ test('language tabs restore deep links and support keyboard navigation and exact
   await expect(page.locator('#javascript')).toBeVisible();
   await expect(page).toHaveURL(/#javascript$/);
   const panel = page.locator('#javascript');
-  await expect(panel.getByRole('link', { name: `npm · ${release.version}` })).toHaveAttribute(
+  await expect(panel.getByRole('link', { name: `npm · ${npmRelease.version}` })).toHaveAttribute(
     'href',
-    release.channels[0].url,
+    npmRelease.channels[0].url,
   );
   await panel.getByRole('button', { name: 'Copy Install', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).copiedCode)).toBe(tooling[0].install);
   await expect(panel.getByRole('button', { name: 'Copy Install', exact: true })).toContainText(
     'Copied',
   );
-  await panel.getByRole('button', { name: 'Copy check-contribution.mjs', exact: true }).click();
+  await panel.getByRole('button', { name: 'Copy check-description.mjs', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).copiedCode)).toBe(tooling[0].example);
   await page.reload();
   await expect(page.locator('#javascript')).toBeVisible();
@@ -142,7 +144,7 @@ test('tooling remains readable without JavaScript and is linked from the contrib
   await page.goto('/contribute/');
   await page.getByRole('link', { name: 'Prefer to validate locally?' }).click();
   await expect(page).toHaveURL(/#local-validation$/);
-  await expect(page.locator('#local-validation')).toContainText(tooling[0].command!);
+  await expect(page.locator('#local-validation')).toContainText(localCheckCommands.javascript);
   await page.getByRole('link', { name: 'Installation and API reference' }).click();
   await expect(page).toHaveURL(/\/tools\/$/);
   await page.goto('/search/?q=Python');
