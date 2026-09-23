@@ -45,6 +45,7 @@ test('distribution metadata and READMEs point to maintained language repositorie
   const npmPackage = JSON.parse(readFileSync('.release/packages/npm/package.json'));
   assert.equal(npmPackage.repository.url, 'git+https://github.com/mailschema/javascript.git');
   assert.equal(npmPackage.bugs.url, 'https://github.com/mailschema/javascript/issues');
+  assert.equal(npmPackage.scripts.build, 'node build.mjs');
   assert.equal(npmPackage.scripts.test, 'npm run build && node --test test/*.test.mjs');
 
   const pythonProject = readFileSync('.release/packages/python/pyproject.toml', 'utf8');

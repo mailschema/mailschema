@@ -1,5 +1,8 @@
 # MailSchema for JavaScript
 
+[![npm](https://img.shields.io/npm/v/mailschema)](https://www.npmjs.com/package/mailschema)
+[![CI](https://github.com/mailschema/javascript/actions/workflows/test.yml/badge.svg)](https://github.com/mailschema/javascript/actions/workflows/test.yml)
+
 Validate Mail Action Protocol documents and MailSchema Registry contributions without making a network request.
 
 [Specification](https://mailschema.org/specification/) · [Registry](https://mailschema.org/registry/) · [Tools](https://mailschema.org/tools/) · [Source](https://github.com/mailschema/javascript)

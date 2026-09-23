@@ -58,7 +58,7 @@ await put(
     bin: { mailschema: './bin/mailschema.js' },
     files: ['dist', 'bin', 'README.md', 'LICENSE'],
     scripts: {
-      build: 'tsc -p tsconfig.json',
+      build: 'node build.mjs',
       test: 'npm run build && node --test test/*.test.mjs',
     },
     dependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
@@ -75,6 +75,7 @@ await put('npm/src/contribution.schema.json', schemaBytes);
 await put('npm/src/map-0.1.schema.json', mapSchemaBytes);
 await put('npm/src/content-review-0.1.schema.json', contentReviewSchemaBytes);
 await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
+await put('npm/build.mjs', await read('packages/javascript/build.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
 await put('npm/LICENSE', license);
 await put('npm/test/package.test.mjs', await read('packages/javascript/package.test.mjs'));
