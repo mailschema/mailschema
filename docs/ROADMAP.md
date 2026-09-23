@@ -29,8 +29,8 @@ Make MAP a useful open standard for service actions carried through email, with 
 | JavaScript, Python and Rust | `0.1.1` published | Public artifacts contain the canonical MAP, Content Review and Registry schemas |
 | Go | `v0.1.0` published and CI green | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy |
 | Package promotion | Verified | npm, PyPI, crates.io and Go artifacts were independently downloaded and matched to the canonical schema bytes |
-| Nitrosend API | In review | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522) adds typed MAP descriptions and `application/ld+json` email delivery |
-| Nitrosend Node SDK | In review | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11), dependent on API #522 |
+| Nitrosend API | Merged; production verification pending | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522) adds typed MAP descriptions and `application/ld+json` email delivery |
+| Nitrosend Node SDK | Merged | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract |
 | Sourcey | Renderer in production; action service pending | Sourcey already serves the specification. Content Review execution remains dogfood work. |
 | Internet-Draft | Source builds cleanly | Submission waits for public product evidence and an implementation-status update |
 
@@ -146,7 +146,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 1. Run package-native checks, the MAP conformance suite, the site build and browser tests from a clean release tree.
 2. Open and merge the MailSchema release pull request after its required check passes; verify the new public schemas, profile page, Tools page and social metadata from `mailschema.org`.
-3. Resolve review and CI on Nitrosend API #522. Land the API before the generated Node SDK change.
+3. Complete Nitrosend `main` CI and production readback for the merged API contract.
 4. Implement Sourcey's Content Review service boundary and test it with the same fixtures.
 5. Run and publish the common-ownership dogfood evidence, then add exact implementation declarations to the Registry.
 6. Refresh the Internet-Draft implementation status and begin IETF community review.

@@ -242,10 +242,10 @@
       the schemas. The materials are available at
       <eref target="https://github.com/mailschema/mailschema"/>.</t>
       <t>A Nitrosend implementation that validates MAP descriptions and emits
-      the JSON-LD MIME alternative is under review at
-      <eref target="https://github.com/nitrosend/api/pull/522"/>. It is not
-      claimed as deployed or independently operated. MailSchema, Nitrosend, and
-      the initial Sourcey demonstration share ownership.</t>
+      the JSON-LD MIME alternative was merged through
+      <eref target="https://github.com/nitrosend/api/pull/522"/>. It is not yet
+      claimed as deployed or independently operated. MailSchema, Nitrosend,
+      and the initial Sourcey demonstration share ownership.</t>
     </section>
   </middle>
 

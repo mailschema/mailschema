@@ -31,15 +31,15 @@
 
 ## Product integration
 
-- Nitrosend API pull request [#522](https://github.com/nitrosend/api/pull/522) passed RSpec, RuboCop, Brakeman and dependency-audit checks. It has not been merged or deployed.
-- Nitrosend Node SDK pull request [#11](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract and remains dependent on API #522.
+- Nitrosend API pull request [#522](https://github.com/nitrosend/api/pull/522) passed RSpec, RuboCop, Brakeman and dependency-audit checks and was merged. Production deployment and readback remain pending.
+- Nitrosend Node SDK pull request [#11](https://github.com/nitrosend/node-sdk/pull/11) was merged after the API contract.
 - Sourcey continues to render the specification. A Sourcey Content Review execution service and recorded end-to-end dogfood run remain later milestones; no implementation declaration is published before that evidence exists.
 
 ## Internet-Draft
 
 - `xml2rfc` 3.34.1 generated text and HTML from `ietf/draft-mailschema-mail-action-protocol-00.xml` without warnings.
 - The draft requests no new media type, DNS record, well-known URI or other IANA registration.
-- The implementation section identifies the reference suite and the Nitrosend work in review without claiming IETF submission, deployed product support or independent adoption.
+- The implementation section identifies the reference suite and merged Nitrosend source without claiming IETF submission, deployed product support or independent adoption.
 
 ## Release boundary
 
