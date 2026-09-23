@@ -7,7 +7,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 def _bundled(name: str) -> dict[str, Any]:

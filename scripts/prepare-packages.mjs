@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir, cp, chmod } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, cp, chmod, rm } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -28,6 +28,11 @@ const validation = (await read('src/registry/validation.ts'))
   .replace('../../public/schemas/contribution.schema.json', './contribution.schema.json')
   .replace("'./model.ts'", "'./model.js'");
 
+// A package build must contain only files produced for this release. This also
+// prevents an older wheel, crate or compiled file from entering a later upload.
+await rm(output, { recursive: true, force: true });
+await mkdir(output, { recursive: true });
+
 await put(
   'npm/package.json',
   json({
@@ -39,8 +44,8 @@ await put(
     license: 'MIT',
     author: 'MailSchema contributors',
     homepage: 'https://mailschema.org/tools/',
-    repository: { type: 'git', url: 'git+https://github.com/mailschema/mailschema.git' },
-    bugs: { url: 'https://github.com/mailschema/mailschema/issues' },
+    repository: { type: 'git', url: 'git+https://github.com/mailschema/javascript.git' },
+    bugs: { url: 'https://github.com/mailschema/javascript/issues' },
     engines: { node: '>=22' },
     exports: {
       '.': { types: './dist/index.d.ts', import: './dist/index.js' },
@@ -52,7 +57,12 @@ await put(
     types: './dist/index.d.ts',
     bin: { mailschema: './bin/mailschema.js' },
     files: ['dist', 'bin', 'README.md', 'LICENSE'],
+    scripts: {
+      build: 'tsc -p tsconfig.json',
+      test: 'npm run build && node --test test/*.test.mjs',
+    },
     dependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
+    devDependencies: { typescript: '5.9.3' },
     keywords: ['email', 'schema', 'json-schema', 'agents', 'registry'],
     publishConfig: { access: 'public', registry: 'https://registry.npmjs.org/' },
   }),
@@ -67,6 +77,12 @@ await put('npm/src/content-review-0.1.schema.json', contentReviewSchemaBytes);
 await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
 await put('npm/LICENSE', license);
+await put('npm/test/package.test.mjs', await read('packages/javascript/package.test.mjs'));
+await put(
+  'npm/test/map-description.json',
+  await read('public/fixtures/map-0.1/content-review-description.json'),
+);
+await put('npm/test/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
 await put(
   'npm/tsconfig.json',
   json({
