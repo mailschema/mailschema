@@ -22,22 +22,24 @@ Make MAP a useful open standard for service actions carried through email, with 
 | Surface | State | Evidence or next gate |
 | --- | --- | --- |
 | Project source and site | Live | [`mailschema/mailschema`](https://github.com/mailschema/mailschema) and [`mailschema.org`](https://mailschema.org) |
-| MAP 0.1 profile | Implemented on the release branch | JSON-LD context, profile record, exact schemas, complete email fixture and specification reader |
-| Content Review 0.1 | Implemented on the release branch | Stable `request-changes` and `approve` operations with revision and digest binding |
+| GitHub organization | Live | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path |
+| MAP 0.1 profile | Published | JSON-LD context, profile record, exact schemas, complete email fixture and specification reader |
+| Content Review 0.1 | Published | Stable `request-changes` and `approve` operations with revision and digest binding |
 | Reference implementation | Passing | Deterministic description, request, result, retry, refusal, expiry, stale-target and approval tests |
 | Conformance artifacts | Passing | Digest-bound manifest covering 12 artifacts and 12 core cases |
 | JavaScript, Python and Rust | `0.1.1` published | Public artifacts contain the canonical MAP, Content Review and Registry schemas |
 | Go | `v0.1.0` published and CI green | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy |
 | Package promotion | Verified | npm, PyPI, crates.io and Go artifacts were independently downloaded and matched to the canonical schema bytes |
-| Nitrosend API | Merged; production verification pending | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522) adds typed MAP descriptions and `application/ld+json` email delivery |
+| Nitrosend API | Deployed; public contract verified | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522), successful [`main` CI](https://github.com/nitrosend/api/actions/runs/35862102718), successful [production deployment](https://github.com/nitrosend/api/actions/runs/35863539893) and the live OpenAPI contract |
 | Nitrosend Node SDK | Merged | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract |
-| Sourcey | Renderer in production; action service pending | Sourcey already serves the specification. Content Review execution remains dogfood work. |
+| Sourcey | `3.6.6` published and in production; action service pending | The exact public npm release serves the specification. Content Review execution remains dogfood work. |
 | Internet-Draft | Source builds cleanly | Submission waits for public product evidence and an implementation-status update |
 
 ## Repository map
 
 - [`mailschema/mailschema`](https://github.com/mailschema/mailschema): specification, site, Registry, schemas, fixtures, conformance suite, package sources and Internet-Draft.
 - [`mailschema/go`](https://github.com/mailschema/go): typed Go implementation and embedded canonical schemas.
+- [`mailschema/.github`](https://github.com/mailschema/.github): public organization profile and current project status.
 - Nitrosend and Sourcey remain in their product repositories. MailSchema records their exact supported versions and evidence rather than copying their application code into the standards repository.
 
 Create another MailSchema repository only when a maintained implementation has its own release lifecycle. Empty language or ecosystem repositories are not part of the naming strategy.
@@ -57,7 +59,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 2. MAP 0.1 and Content Review 0.1
 
-**Status:** complete on the release branch
+**Status:** complete and published
 
 - Carry the structured description as JSON-LD in an `application/ld+json` Structured Email body part.
 - Define exact description, request, result and Problem Details schemas.
@@ -70,7 +72,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 3. Reference implementation and conformance
 
-**Status:** complete on the release branch
+**Status:** complete and published
 
 - Run deterministic client and service behavior around Content Review.
 - Cover completion, refusal, stale revisions, approval requirements, duplicate requests, changed-payload conflicts, lost-response recovery, expiry and unsupported contracts.
@@ -81,7 +83,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 4. Developer distributions
 
-**Status:** complete on the release branch
+**Status:** complete and published
 
 - Publish MAP and Registry validators for JavaScript and Python.
 - Publish canonical embedded schemas for Rust.
@@ -95,9 +97,9 @@ Create another MailSchema repository only when a maintained implementation has i
 
 **Status:** in progress
 
-- Merge Nitrosend API support for an optional typed MAP description in transactional sends.
-- Preserve the readable text and HTML parts and add the structured `application/ld+json` alternative only on providers that support exact MIME construction.
-- Include the MAP description in idempotency and reject unsupported delivery paths before calling a provider.
+- Nitrosend API support for an optional typed MAP description in transactional sends is merged and deployed.
+- Nitrosend preserves the readable text and HTML parts and adds the structured `application/ld+json` alternative only on providers that support exact MIME construction.
+- Nitrosend includes the MAP description in idempotency and rejects unsupported delivery paths before calling a provider.
 - Release matching SDK types after the API contract lands.
 - Add Sourcey Content Review operations against an exact content revision using Sourcey's existing authentication and authorization.
 - Keep Sourcey theming and rendering generic; MAP behavior belongs in an implementation boundary, not fixed reader-theme content.
@@ -144,13 +146,10 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ## Immediate dependency sequence
 
-1. Run package-native checks, the MAP conformance suite, the site build and browser tests from a clean release tree.
-2. Open and merge the MailSchema release pull request after its required check passes; verify the new public schemas, profile page, Tools page and social metadata from `mailschema.org`.
-3. Complete Nitrosend `main` CI and production readback for the merged API contract.
-4. Implement Sourcey's Content Review service boundary and test it with the same fixtures.
-5. Run and publish the common-ownership dogfood evidence, then add exact implementation declarations to the Registry.
-6. Refresh the Internet-Draft implementation status and begin IETF community review.
-7. Use the conformance kit and Registry contribution path to recruit an external implementation.
+1. Implement the first Content Review service boundary on an exact product revision and test it with the same fixtures.
+2. Run and publish the common-ownership dogfood evidence, then add exact implementation declarations to the Registry.
+3. Refresh the Internet-Draft implementation status and begin IETF community review.
+4. Use the conformance kit and Registry contribution path to recruit an external implementation.
 
 ## Release and consistency gates
 

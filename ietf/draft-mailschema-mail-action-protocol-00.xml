@@ -243,9 +243,12 @@
       <eref target="https://github.com/mailschema/mailschema"/>.</t>
       <t>A Nitrosend implementation that validates MAP descriptions and emits
       the JSON-LD MIME alternative was merged through
-      <eref target="https://github.com/nitrosend/api/pull/522"/>. It is not yet
-      claimed as deployed or independently operated. MailSchema, Nitrosend,
-      and the initial Sourcey demonstration share ownership.</t>
+      <eref target="https://github.com/nitrosend/api/pull/522"/> and deployed
+      from that commit after its production checks passed. The live OpenAPI
+      contract exposes the MAP description field. No authenticated end-to-end
+      message receipt has yet been published, and the implementation is not
+      independently operated. MailSchema, Nitrosend, and Sourcey share
+      ownership.</t>
     </section>
   </middle>
 

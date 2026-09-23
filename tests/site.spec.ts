@@ -312,10 +312,13 @@ test('Sourcey owns the reader and publishes its specification indexes', async ({
     'https://mailschema.org/specification/_og/static.png',
   );
   expect((await request.get('/specification/_og/static.png')).status()).toBe(200);
-  await expect(page.getByRole('link', { name: 'Built with Sourcey' })).toHaveAttribute(
+  const attribution = page.locator('.sourcey-attribution');
+  await expect(attribution).toHaveText('Docs by Sourcey');
+  await expect(attribution.getByRole('link', { name: 'Sourcey' })).toHaveAttribute(
     'href',
     'https://sourcey.com',
   );
+  await expect(attribution.getByRole('link', { name: 'Sourcey' }).locator('svg')).toHaveCount(1);
   const index = await (await request.get('/specification/search-index.json')).json();
   const pages = [...new Set(index.map((entry: { url: string }) => entry.url.split('#')[0]))];
   expect(pages.sort()).toEqual(

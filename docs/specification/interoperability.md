@@ -10,22 +10,27 @@ Interoperability depends on agreement about both meaning and representation. Sha
 
 ## Existing specifications
 
-The representation profile should reuse existing standards where they meet its requirements.
+MAP 0.1 selects a narrow profile over existing formats and protocols.
 
-| Work                                                                                                                             | Relevance                                                                  |
-| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [Structured Email, draft-ietf-sml-structured-email-06](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06) | A proposed way to carry a machine-readable version of email content.       |
-| [Schema.org Actions](https://schema.org/docs/actions.html)                                                                       | Vocabulary for actions, inputs, results and execution entry points.        |
-| [OAuth 2.0](https://www.rfc-editor.org/rfc/rfc6749)                                                                              | Delegated authorization where supported by the service.                    |
-| [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)                                                          | Authentication and identity information where needed by an implementation. |
+| Work                                                                                                                             | Use in MAP                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| [Structured Email, draft-ietf-sml-structured-email-06](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06) | Supplies the model for carrying a machine-readable alternative beside readable email content.                              |
+| [MIME, RFC 2046](https://www.rfc-editor.org/rfc/rfc2046) and [Internet Message Format, RFC 5322](https://www.rfc-editor.org/rfc/rfc5322) | Carry the readable and `application/ld+json` body parts without changing email transport.                                  |
+| [JSON-LD 1.1](https://www.w3.org/TR/json-ld11/)                                                                                  | Gives descriptions explicit vocabulary identity while retaining ordinary JSON processing.                                 |
+| [HTTP Semantics, RFC 9110](https://www.rfc-editor.org/rfc/rfc9110)                                                               | Carries authenticated operation requests, result retrieval and status semantics.                                           |
+| [Problem Details, RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)                                                              | Encodes machine-readable execution failures.                                                                               |
+| [OAuth 2.0](https://www.rfc-editor.org/rfc/rfc6749)                                                                              | Can authorize execution where a service already supports it; MAP does not define or grant credentials.                     |
+| [Schema.org Actions](https://schema.org/docs/actions.html)                                                                       | Provides vocabulary that type authors should reuse or map where its semantics match.                                        |
 
-These references identify work to evaluate. The current MAP draft does not yet select a representation or declare a complete binding to these specifications. The Structured Email reference is an Internet-Draft and may change.
+The Structured Email reference remains an Internet-Draft and may change. MAP therefore identifies its exact profile version and media-type treatment. A future Structured Email revision can be assessed without changing the meaning of registered types.
 
 For proposed types, the Registry record should identify existing definitions and explain any additional behaviour MAP requires. Vocabulary similarity does not establish equivalent semantics. In particular, an opinion described by [Schema.org ReviewAction](https://schema.org/ReviewAction) is different from the revision approval defined by Content Review.
 
 ## Cross-service testing
 
-The first compatibility test will apply Content Review to two independently configured services using the same client review logic. The test should exercise feedback, editing through the service's own workflow, approval, stale revisions, permission failures and recovery after a lost response.
+The public conformance kit fixes the description, request, result, retry and refusal behaviour independently of a product account. It covers completion, feedback acceptance, exact retry, lost-response recovery, changed-payload conflict, refusal, stale targets, expiry, unsupported types, approval requirements, pending work and endpoint trust.
+
+The first product compatibility test will apply Content Review to two independently configured services using the same client review logic. It will exercise feedback, editing through the service's own workflow, approval, stale revisions, permission failures and recovery after a lost response. Nitrosend now exposes the deployed sending-side contract. The Sourcey execution boundary and the recorded email-to-action run remain outstanding.
 
 Two implementations under common ownership can provide useful compatibility evidence. They do not establish independent adoption.
 
@@ -37,15 +42,8 @@ Implementation evidence is attached to the relevant type version and execution p
 
 Registry inclusion does not grant execution permission. Clients need not consult the Registry during an interaction.
 
-## Remaining profile work
+## Current interoperability status
 
-Before implementations can claim conformance to a stable MAP release, the profile needs:
+MAP 0.1 defines the message representation, request and result encodings, authentication boundary, correlation, duplicate handling, recovery, version handling and conformance cases needed for implementation. Content Review 0.1 fixes the first type-specific operations and revision-binding rules.
 
-- A selected message representation and media type treatment.
-- Request and result encodings.
-- Authentication bindings.
-- Request correlation, duplicate handling and recovery rules.
-- Type and profile version handling, including unsupported versions.
-- Conformance tests for the profile and each type.
-
-The semantic draft and local browser example provide material for this work. They do not establish wire compatibility.
+The remaining work is implementation evidence: reproduce the profile through deployed sending and execution services, publish the exact run record, and obtain an implementation outside the initial common-ownership group. Until then, the project claims a testable draft and deployed product contract, not independent interoperability.

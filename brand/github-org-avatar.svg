@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">MailSchema</title>
+  <rect width="512" height="512" fill="oklch(18% 0.012 275)"/>
+  <g transform="translate(128 115) scale(6.4)">
+    <path d="M2 10 12 16v21L2 31Z" fill="oklch(94% 0.176 120)"/>
+    <path d="M15 2 25 8v34l-10-6Z" fill="oklch(96% 0.005 275)"/>
+    <path d="m28 10 10 6v21l-10-6Z" fill="oklch(59% 0.238 286)"/>
+  </g>
+</svg>

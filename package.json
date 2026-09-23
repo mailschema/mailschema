@@ -31,7 +31,7 @@
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "astro": "7.3.3",
-    "sourcey": "file:vendor/sourcey-sha256-28216a8095bae26029691de84c767dabc1ee72e0d47fcae01eae40141f9215e5.tgz"
+    "sourcey": "3.6.6"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",
