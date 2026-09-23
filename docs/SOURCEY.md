@@ -8,15 +8,15 @@ The specification is rendered by Sourcey's built-in `reader` theme. The Astro ho
 - MailSchema: six authored chapters, navigation order, brand assets, document metadata, sidebar links and notes, right-aside links, pagination edges and footer content in `docs/specification/`.
 - Astro/Cloudflare: host routing and static-asset delivery. The Sourcey integration consumes Astro's client output directory and base prefix.
 
-The reusable theme contains no MailSchema or MAP names. Optional project-content areas are host-authored arrays and disappear when they are not configured. Sourcey's own “Built with Sourcey” attribution remains part of the renderer. The host's `brand.css` contains brand tokens only. Fonts are self-hosted through the same public asset as the rest of the site.
+The reusable theme contains no MailSchema or MAP names. Optional project-content areas are host-authored arrays and disappear when they are not configured. Sourcey's own “Docs by Sourcey” attribution remains part of the renderer. The host's `brand.css` contains brand tokens only. Fonts are self-hosted through the same public asset as the rest of the site.
 
 The MailSchema Registry contains type definitions. Sourcey's earlier candidate product entry has been removed. Sourcey is credited as the specification renderer, with no claim of MAP implementation. Registry and contribution links in the reader sidebar are MailSchema-authored configuration, not Sourcey defaults.
 
 ## Package handoff
 
-`docs/sourcey-package.json` records the content-addressed local Sourcey artifact pinned in `package.json` and `package-lock.json`. `npm ci` works without the author's Sourcey checkout. This artifact is the unreleased Sourcey 3.6.6 build; it is not a published release.
+`package.json` and `package-lock.json` pin the exact public `sourcey@3.6.6` release. The npm tarball has SHA-256 `f451ebecf67120d003049706731d15fa7b10f9af163df268bd1b4a5289fe0f47` and npm shasum `89b7d9e5a2a3ac669ebf08469f7841ca41b2e2b7`; both match the verified release artifact. A clean consumer install imported Sourcey and contained the packaged reader theme before MailSchema adopted it.
 
-The implementation owner is `/Users/kam/dev/sourcey/sourcey/oss`. To refresh the local artifact after an intentional change, run its build, lint and tests; use `npm pack --ignore-scripts`; name the resulting archive by its SHA-256; install that archive in MailSchema; update the generated package record; and rerun build, browser and visual checks. A future public release can replace the local artifact after that release is explicitly authorized.
+Sourcey is maintained in [`sourcey/sourcey`](https://github.com/sourcey/sourcey). Updating MailSchema requires an intentional exact-version change, public registry readback, a clean install and the complete build, browser and visual checks. MailSchema does not track a mutable npm tag or a local Sourcey checkout.
 
 ## Verification
 

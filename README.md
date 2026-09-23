@@ -38,7 +38,7 @@ Specification content and Sourcey configuration live in `docs/specification/`. S
 
 ## Content and implementation boundaries
 
-MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. It does not imply IETF adoption, deployed product support or independent conformance. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
+MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. Nitrosend exposes the first deployed sending-side contract; the project does not yet claim a reproduced end-to-end product run, independent conformance or IETF adoption. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
 
 The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review/` address redirects to its Registry record.
 
@@ -64,7 +64,7 @@ Contribute data files rather than editing application TypeScript. `npm run regis
 
 `tests/catalog.spec.ts` compares the rendered collection, status/version labels, operations and examples across pages. It also checks linked specification titles, summaries and operation headings against the record. `npm run verify` must pass after a content change. A change to the meaning of an operation still requires reviewing its Markdown definition, record and demonstration together; matching metadata cannot prove semantic agreement.
 
-`tests/registry.spec.ts` exercises schema validation, references, amendments, CLI imports, browser previews and an isolated production build with illustrative vendor contributions. Example files are generated with current record digests and are not included in the public collection. The GitHub workflow is prepared to run verification and save a build artifact on pull requests; it has not run on a remote repository.
+`tests/registry.spec.ts` exercises schema validation, references, amendments, CLI imports, browser previews and an isolated production build with illustrative vendor contributions. Example files are generated with current record digests and are not included in the public collection. GitHub Actions runs verification and saves the build artifact on pull requests before protected `main` deploys it to Cloudflare.
 
 ## Design and provenance
 
@@ -81,7 +81,7 @@ The strategy history is maintained separately from this standalone project. No p
 
 `npm run test:visual` compares all six Sourcey chapters against the saved current-content reader baseline at desktop and mobile sizes. It targets the production preview at `http://127.0.0.1:49328`; override `READER_BASE_URL` to use another origin. Results and diff images are written to ignored `test-results/reader-comparison/`. Earlier language-pass and pre-Tools references are retained separately; see `tests/visual-reference/README.md` for provenance.
 
-The local Sourcey build is pinned by a content-addressed package artifact while its public release is pending. See `docs/SOURCEY.md` for ownership, update steps and validation details.
+The specification reader uses the exact public `sourcey@3.6.6` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
 
 ## Published packages
 
