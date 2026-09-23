@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import {
@@ -39,6 +39,41 @@ test('each distribution uses its independently declared package version', () => 
     readFileSync('.release/packages/rust/Cargo.toml', 'utf8'),
     new RegExp(`^version = "${versions['crates.io'].replaceAll('.', '\\.')}"$`, 'm'),
   );
+});
+
+test('distribution metadata and READMEs point to maintained language repositories', () => {
+  const npmPackage = JSON.parse(readFileSync('.release/packages/npm/package.json'));
+  assert.equal(npmPackage.repository.url, 'git+https://github.com/mailschema/javascript.git');
+  assert.equal(npmPackage.bugs.url, 'https://github.com/mailschema/javascript/issues');
+  assert.equal(npmPackage.scripts.build, 'node build.mjs');
+  assert.equal(npmPackage.scripts.test, 'npm run build && node --test test/*.test.mjs');
+
+  const pythonProject = readFileSync('.release/packages/python/pyproject.toml', 'utf8');
+  assert.match(pythonProject, /Repository = "https:\/\/github\.com\/mailschema\/python"/);
+  assert.match(pythonProject, /Issues = "https:\/\/github\.com\/mailschema\/python\/issues"/);
+
+  const rustProject = readFileSync('.release/packages/rust/Cargo.toml', 'utf8');
+  assert.match(rustProject, /repository = "https:\/\/github\.com\/mailschema\/rust"/);
+
+  for (const [language, repository] of [
+    ['npm', 'javascript'],
+    ['python', 'python'],
+    ['rust', 'rust'],
+  ]) {
+    const readme = readFileSync(`.release/packages/${language}/README.md`, 'utf8');
+    assert.match(readme, /Mail Action Protocol/);
+    assert.match(readme, new RegExp(`https://github\\.com/mailschema/${repository}`));
+    assert.doesNotMatch(readme, /(?:version|mailschema\s*=\s*)[ `"]*0\.2(?:\.0)?\b/i);
+  }
+});
+
+test('package preparation removes artifacts from earlier builds', () => {
+  for (const path of [
+    '.release/packages/python/dist',
+    '.release/packages/python/tests/__pycache__',
+    '.release/packages/rust/target',
+  ])
+    assert.equal(existsSync(path), false, `${path} must not survive package preparation`);
 });
 
 test('published schema bytes agree across all three distributions', () => {

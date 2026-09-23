@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mailschema"
-version = "0.1.1"
+version = "0.1.2"
 description = "Schemas and validation tools for Mail Action Protocol and the MailSchema Registry"
 readme = "README.md"
 license = "MIT"
@@ -20,8 +20,8 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://mailschema.org/tools/"
-Repository = "https://github.com/mailschema/mailschema"
-Issues = "https://github.com/mailschema/mailschema/issues"
+Repository = "https://github.com/mailschema/python"
+Issues = "https://github.com/mailschema/python/issues"
 
 [project.scripts]
 mailschema = "mailschema.__main__:main"

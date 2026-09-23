@@ -1,6 +1,6 @@
 # MailSchema execution plan
 
-Status date: 23 September 2026. This is the canonical dependency-ordered plan for publishing, proving and advancing MailSchema and Mail Action Protocol (MAP).
+Status date: 24 September 2026. This is the canonical dependency-ordered plan for publishing, proving and advancing MailSchema and Mail Action Protocol (MAP).
 
 ## Objective
 
@@ -19,30 +19,33 @@ Make MAP a useful open standard for service actions carried through email, with 
 
 ## Current execution state
 
-| Surface | State | Evidence or next gate |
-| --- | --- | --- |
-| Project source and site | Live | [`mailschema/mailschema`](https://github.com/mailschema/mailschema) and [`mailschema.org`](https://mailschema.org) |
-| GitHub organization | Live | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path |
-| MAP 0.1 profile | Published | JSON-LD context, profile record, exact schemas, complete email fixture and specification reader |
-| Content Review 0.1 | Published | Stable `request-changes` and `approve` operations with revision and digest binding |
-| Reference implementation | Passing | Deterministic description, request, result, retry, refusal, expiry, stale-target and approval tests |
-| Conformance artifacts | Passing | Digest-bound manifest covering 12 artifacts and 12 core cases |
-| JavaScript, Python and Rust | `0.1.1` published | Public artifacts contain the canonical MAP, Content Review and Registry schemas |
-| Go | `v0.1.0` published and CI green | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy |
-| Package promotion | Verified | npm, PyPI, crates.io and Go artifacts were independently downloaded and matched to the canonical schema bytes |
-| Nitrosend API | Deployed; public contract verified | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522), successful [`main` CI](https://github.com/nitrosend/api/actions/runs/35862102718), successful [production deployment](https://github.com/nitrosend/api/actions/runs/35863539893) and the live OpenAPI contract |
-| Nitrosend Node SDK | Merged | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract |
-| Sourcey | `3.6.6` published and in production; action service pending | The exact public npm release serves the specification. Content Review execution remains dogfood work. |
-| Internet-Draft | Source builds cleanly | Submission waits for public product evidence and an implementation-status update |
+| Surface                     | State                                                       | Evidence or next gate                                                                                                                                                                                                                                                            |
+| --------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project source and site     | Live                                                        | [`mailschema/mailschema`](https://github.com/mailschema/mailschema) and [`mailschema.org`](https://mailschema.org)                                                                                                                                                               |
+| GitHub organization         | Live                                                        | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path                                                                                                     |
+| MAP 0.1 profile             | Published                                                   | JSON-LD context, profile record, exact schemas, complete email fixture and specification reader                                                                                                                                                                                  |
+| Content Review 0.1          | Published                                                   | Stable `request-changes` and `approve` operations with revision and digest binding                                                                                                                                                                                               |
+| Reference implementation    | Passing                                                     | Deterministic description, request, result, retry, refusal, expiry, stale-target and approval tests                                                                                                                                                                              |
+| Conformance artifacts       | Passing                                                     | Digest-bound manifest covering 12 artifacts and 12 core cases                                                                                                                                                                                                                    |
+| JavaScript, Python and Rust | JavaScript `0.1.3`; Python and Rust `0.1.2`                 | Maintained repositories, green CI, tagged releases and verified public artifacts containing the canonical schemas                                                                                                                                                                |
+| Go                          | `v0.1.0` published and CI green                             | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy                                                                                                                                                                                                      |
+| Package promotion           | Verified                                                    | npm, PyPI, crates.io and Go artifacts were independently downloaded and matched to the canonical schema bytes                                                                                                                                                                    |
+| Nitrosend API               | Deployed; public contract verified                          | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522), successful [`main` CI](https://github.com/nitrosend/api/actions/runs/35862102718), successful [production deployment](https://github.com/nitrosend/api/actions/runs/35863539893) and the live OpenAPI contract |
+| Nitrosend Node SDK          | Merged                                                      | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract                                                                                                                                                                    |
+| Sourcey                     | `3.6.6` published and in production; action service pending | The exact public npm release serves the specification. Content Review execution remains dogfood work.                                                                                                                                                                            |
+| Internet-Draft              | Source builds cleanly                                       | Submission waits for public product evidence and an implementation-status update                                                                                                                                                                                                 |
 
 ## Repository map
 
 - [`mailschema/mailschema`](https://github.com/mailschema/mailschema): specification, site, Registry, schemas, fixtures, conformance suite, package sources and Internet-Draft.
+- [`mailschema/javascript`](https://github.com/mailschema/javascript): JavaScript and TypeScript validation library, CLI and npm release history.
+- [`mailschema/python`](https://github.com/mailschema/python): Python validation library, CLI and PyPI release history.
+- [`mailschema/rust`](https://github.com/mailschema/rust): embedded canonical schemas and crates.io release history.
 - [`mailschema/go`](https://github.com/mailschema/go): typed Go implementation and embedded canonical schemas.
 - [`mailschema/.github`](https://github.com/mailschema/.github): public organization profile and current project status.
 - Nitrosend and Sourcey remain in their product repositories. MailSchema records their exact supported versions and evidence rather than copying their application code into the standards repository.
 
-Create another MailSchema repository only when a maintained implementation has its own release lifecycle. Empty language or ecosystem repositories are not part of the naming strategy.
+Create another MailSchema repository only when a maintained implementation has its own release lifecycle and consumer value. Empty language or ecosystem repositories are not part of the naming strategy.
 
 ## Milestones
 
@@ -156,6 +159,7 @@ Create another MailSchema repository only when a maintained implementation has i
 - Canonical schemas live under `public/schemas/`; packages and product integrations pin exact copies or digests.
 - `conformance/map-0.1/manifest.json` binds normative artifacts and expected cases.
 - `docs/releases/current.json` selects only independently downloaded package artifacts whose embedded contribution schema matches the current canonical bytes.
+- Language repositories own package CI, tags and registry publication; this repository owns canonical schemas, coordinated source preparation and public artifact promotion.
 - A schema change requires new affected package releases and promotion evidence before the site can build.
 - The Nitrosend SDK follows the merged API schema; it is not published ahead of that API contract.
 - Registry implementation claims require deployed behavior and reproducible evidence, not an open pull request.
@@ -163,15 +167,15 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ## Material risks and controls
 
-| Risk | Control |
-| --- | --- |
-| Email content tricks a client into sending credentials to an attacker | Endpoint trust is configured independently of the email; descriptions carry no credentials or grants |
-| A retry applies an action twice | Stable request IDs, value equality, recorded results and explicit idempotency conflict behavior |
-| Approval targets the wrong revision | Every request repeats the exact target revision and digest; stale targets fail without an effect |
-| Registry branding becomes a de facto central runtime | Clients may bundle definitions; MAP 0.1 requires no online Registry lookup |
-| MailSchema overclaims adoption | Implementation state is recorded per exact type, profile, operations and digest; common ownership is disclosed |
-| Package versions drift silently | Every advertised channel is selected explicitly from immutable public readback evidence |
-| The IETF draft duplicates existing work | MAP reuses Structured Email, MIME, HTTP, Problem Details and service authentication and keeps its new surface narrow |
+| Risk                                                                  | Control                                                                                                              |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Email content tricks a client into sending credentials to an attacker | Endpoint trust is configured independently of the email; descriptions carry no credentials or grants                 |
+| A retry applies an action twice                                       | Stable request IDs, value equality, recorded results and explicit idempotency conflict behavior                      |
+| Approval targets the wrong revision                                   | Every request repeats the exact target revision and digest; stale targets fail without an effect                     |
+| Registry branding becomes a de facto central runtime                  | Clients may bundle definitions; MAP 0.1 requires no online Registry lookup                                           |
+| MailSchema overclaims adoption                                        | Implementation state is recorded per exact type, profile, operations and digest; common ownership is disclosed       |
+| Package versions drift silently                                       | Every advertised channel is selected explicitly from immutable public readback evidence                              |
+| The IETF draft duplicates existing work                               | MAP reuses Structured Email, MIME, HTTP, Problem Details and service authentication and keeps its new surface narrow |
 
 ## Deliberately deferred
 

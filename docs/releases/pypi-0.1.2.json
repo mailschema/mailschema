@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-23T14:39:14.887Z",
+  "version": "0.1.2",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "verification": "Public registry metadata and an independent artifact download matched the canonical MailSchema schema bytes.",
+  "channels": [
+    {
+      "registry": "PyPI",
+      "name": "mailschema",
+      "version": "0.1.2",
+      "url": "https://pypi.org/project/mailschema/0.1.2/",
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.2-py3-none-any.whl",
+          "sha256": "e834adf9b0635222f5cd1acaaa3b0f7991a47099f052db8280269e1eb49f3cef"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

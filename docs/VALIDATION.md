@@ -1,6 +1,6 @@
 # Release validation
 
-23 September 2026. This record covers the live MAP 0.1 profile, Content Review 0.1, conformance kit, developer packages, public website and the first deployed product contract.
+24 September 2026. This record covers the live MAP 0.1 profile, Content Review 0.1, conformance kit, developer packages, public website and the first deployed product contract.
 
 ## Protocol and Registry
 
@@ -12,13 +12,14 @@
 
 ## Packages
 
-- JavaScript, Python and Rust `0.1.1` and Go `v0.1.0` were independently downloaded from their public registries. Every artifact contained the current canonical contribution schema bytes.
-- Six distribution checks passed across declared versions, canonical schema copies, MAP and Content Review schemas, compiled validation, Registry reference checks and CLI behavior.
+- JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `v0.1.0` were independently downloaded from their public registries. Every selected artifact contained the current canonical contribution schema bytes.
+- Eight distribution checks passed across declared versions, canonical schema copies, clean build output, maintained repository metadata, MAP and Content Review schemas, compiled validation, Registry reference checks and CLI behavior.
 - A clean public npm invocation accepted the MAP description with `--map`.
-- A fresh Python virtual environment installed `mailschema==0.1.1`, reported `0.1.1` and validated the MAP description.
+- A fresh Python virtual environment installed `mailschema==0.1.2`, reported `0.1.2` and validated the MAP description.
 - The Rust crate passed its unit test and publication dry run before release; crates.io public readback then verified the released archive.
 - The Go module passed `go test ./...` in GitHub Actions and public Go proxy readback.
-- `docs/releases/current.json` selects npm, PyPI and crates.io `0.1.1` plus Go `v0.1.0`. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched schema digest.
+- npm `0.1.2` was not promoted because its CI build reformatted the embedded JSON and failed the byte-digest gate. JavaScript `0.1.3` preserves the canonical bytes during its build and passed public readback.
+- `docs/releases/current.json` selects npm `0.1.3`, PyPI and crates.io `0.1.2`, and Go `v0.1.0`. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched schema digest.
 
 ## Site
 
