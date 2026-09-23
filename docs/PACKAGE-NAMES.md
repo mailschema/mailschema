@@ -2,7 +2,7 @@
 
 Initial availability check: 23 September 2026 (Australia/Sydney). The observations below predate publication. The user subsequently authorized publishing with existing credentials; release evidence is maintained in `docs/releases/` and package instructions in `packages/README.md`.
 
-`mailschema` version `0.1.1` is published on npm, PyPI and crates.io. `github.com/mailschema/go` version `v0.1.0` is published through the Go module proxy. Public artifacts are promoted to the website only after byte-for-byte schema readback. JSR, RubyGems and NuGet remain pending account setup; no empty packages are published merely to reserve names.
+`mailschema` version `0.1.3` is published on npm; version `0.1.2` is published on PyPI and crates.io. `github.com/mailschema/go` version `v0.1.0` is published through the Go module proxy. Public artifacts are promoted to the website only after byte-for-byte schema readback. JSR, RubyGems and NuGet remain pending account setup; no empty packages are published merely to reserve names.
 
 ## Observed names
 

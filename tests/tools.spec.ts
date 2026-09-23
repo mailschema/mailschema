@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import npmRelease from '../docs/releases/npm-0.1.1.json' with { type: 'json' };
-import pythonRelease from '../docs/releases/pypi-0.1.1.json' with { type: 'json' };
-import rustRelease from '../docs/releases/crates-0.1.1.json' with { type: 'json' };
+import npmRelease from '../docs/releases/npm-0.1.3.json' with { type: 'json' };
+import pythonRelease from '../docs/releases/pypi-0.1.2.json' with { type: 'json' };
+import rustRelease from '../docs/releases/crates-0.1.2.json' with { type: 'json' };
 import goRelease from '../docs/releases/go-0.1.0.json' with { type: 'json' };
 import current from '../docs/releases/current.json' with { type: 'json' };
 import {
@@ -18,9 +18,9 @@ import { assertTypeRecord } from '../src/registry/validation';
 test('advertised tooling refuses schema drift and unverified or mixed releases', () => {
   const schema = readFileSync('public/schemas/contribution.schema.json', 'utf8');
   const releases = new Map<string, PackageRelease>([
-    ['npm-0.1.1', npmRelease as PackageRelease],
-    ['pypi-0.1.1', pythonRelease as PackageRelease],
-    ['crates-0.1.1', rustRelease as PackageRelease],
+    ['npm-0.1.3', npmRelease as PackageRelease],
+    ['pypi-0.1.2', pythonRelease as PackageRelease],
+    ['crates-0.1.2', rustRelease as PackageRelease],
     ['go-0.1.0', goRelease as PackageRelease],
   ]);
   for (const release of releases.values())

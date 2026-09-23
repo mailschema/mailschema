@@ -1,5 +1,8 @@
 # MailSchema for Rust
 
+[![crates.io](https://img.shields.io/crates/v/mailschema)](https://crates.io/crates/mailschema)
+[![CI](https://github.com/mailschema/rust/actions/workflows/test.yml/badge.svg)](https://github.com/mailschema/rust/actions/workflows/test.yml)
+
 Embed the canonical Mail Action Protocol and MailSchema Registry schemas in a Rust application without runtime dependencies, filesystem access or network calls.
 
 [Specification](https://mailschema.org/specification/) · [Registry](https://mailschema.org/registry/) · [Tools](https://mailschema.org/tools/) · [Source](https://github.com/mailschema/rust)

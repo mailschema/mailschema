@@ -4,18 +4,18 @@
   "channels": [
     {
       "registry": "npm",
-      "evidence": "npm-0.1.1",
-      "version": "0.1.1"
+      "evidence": "npm-0.1.3",
+      "version": "0.1.3"
     },
     {
       "registry": "PyPI",
-      "evidence": "pypi-0.1.1",
-      "version": "0.1.1"
+      "evidence": "pypi-0.1.2",
+      "version": "0.1.2"
     },
     {
       "registry": "crates.io",
-      "evidence": "crates-0.1.1",
-      "version": "0.1.1"
+      "evidence": "crates-0.1.2",
+      "version": "0.1.2"
     },
     {
       "registry": "Go",
