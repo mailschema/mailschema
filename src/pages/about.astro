@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+import { typeGroups, typeHref } from '../data/types';
+import '../styles/catalog.css';
+import '../styles/prose.css';
+---
+
+<Base title="About MailSchema" theme="light">
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">The project</span>
+      <h1>About MailSchema</h1>
+      <p class="lead">
+        MailSchema is building an open standard for agents to work with services through email.
+      </p>
+    </header>
+    <div class="longform">
+      <aside class="longform-aside">
+        <span class="eyebrow">MailSchema</span>
+        <p>
+          Mail Action Protocol
+          <br />
+          Interaction types
+          <br />
+          Type registry
+        </p>
+      </aside>
+      <article class="prose">
+        <h2>Why email</h2>
+        <p>
+          Reviews, requests and decisions already arrive in the inbox. A message often contains the
+          context an agent needs, but each service describes the next step in its own way.
+        </p>
+        <p>
+          MailSchema provides a place to define those interactions together. The aim is for a
+          service to describe an action in a form that different agents and inboxes can understand.
+        </p>
+        <h2>The project</h2>
+        <p>
+          <a href="/specification/">Mail Action Protocol</a> defines the common exchange between
+          service and client. <a href="/types/">Interaction types</a> describe particular kinds of
+          work. The <a href="/registry/">Registry</a> collects submitted definitions and their
+          history.
+        </p>
+        <p>
+          Services retain their own permissions and business operations. People can continue to read
+          the email and use the service directly.
+        </p>
+        <h2>Current work</h2>
+        <p>
+          MAP 0.1 is a working draft. Content Review is the first type under development, with a
+          browser example showing feedback, revisions and approval. The request format and
+          compatibility tests are still being specified.
+        </p>
+        <p>The type collection currently includes:</p>
+        <ul>
+          {typeGroups.map((group) => (
+            <li>
+              <strong>{group.status}:</strong>{' '}
+              {group.records.map((type, index) => (
+                <Fragment>
+                  {index > 0 && ', '}
+                  <a href={typeHref(type.slug)}>{type.name}</a>
+                </Fragment>
+              ))}
+            </li>
+          ))}
+        </ul>
+        <h2>Existing standards</h2>
+        <p>
+          MailSchema should adopt existing formats and protocols where they fit. Each type proposal
+          identifies related work and explains what it adds. The
+          <a href="/specification/interoperability/">interoperability chapter</a> records the
+          specifications under consideration.
+        </p>
+        <p>
+          <a href="/contribute/">Contribute a proposal →</a>
+        </p>
+      </article>
+    </div>
+  </main>
+</Base>

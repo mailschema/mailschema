@@ -1,0 +1,84 @@
+name: Verify and promote a package
+
+on:
+  workflow_call:
+    inputs:
+      registry:
+        description: Published package registry
+        required: true
+        type: string
+      version:
+        description: Exact published version, such as 0.1.1
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: Published package registry
+        required: true
+        type: choice
+        options:
+          - npm
+          - PyPI
+          - crates.io
+      version:
+        description: Exact published version, such as 0.1.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: promote-${{ inputs.registry }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Verify public artifact and prepare promotion
+        run: npm run packages:promote -- --registry "$REGISTRY" --version "$VERSION" --promote
+        env:
+          REGISTRY: ${{ inputs.registry }}
+          VERSION: ${{ inputs.version }}
+      - run: npm run packages:prepare && npm run packages:test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify
+      - name: Open promotion pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY: ${{ inputs.registry }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          slug=$(printf '%s' "$REGISTRY" | tr '[:upper:].' '[:lower:]-')
+          branch="package-promotions/${slug}-${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add docs/releases
+          if git diff --cached --quiet; then
+            echo "The selected package version is already promoted."
+            exit 0
+          fi
+          git commit -m "Promote ${REGISTRY} ${VERSION}"
+          git push --force-with-lease origin "HEAD:refs/heads/${branch}"
+          existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh pr create \
+              --base "${GITHUB_REF_NAME}" \
+              --head "$branch" \
+              --title "Promote ${REGISTRY} ${VERSION}" \
+              --body "Public registry metadata and the published artifact were independently read back. The packaged schema matches the canonical MailSchema schema bytes, and the complete site verification passed. Merging this pull request promotes the exact version on the Tools page."
+          fi

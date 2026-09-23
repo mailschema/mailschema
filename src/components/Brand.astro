@@ -1,0 +1,12 @@
+---
+const { wordmark = true, class: className = '' } = Astro.props;
+---
+
+<span class:list={['brand', className]}>
+  <svg class="brand-mark" width="30" height="34" viewBox="0 0 40 44" fill="none" aria-hidden="true">
+    <path d="M2 10 12 16v21L2 31Z" fill="var(--lime)" />
+    <path d="M15 2 25 8v34l-10-6Z" fill="currentColor" />
+    <path d="m28 10 10 6v21l-10-6Z" fill="var(--blue)" />
+  </svg>
+  {wordmark && <span>MailSchema</span>}
+</span>

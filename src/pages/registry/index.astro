@@ -1,0 +1,194 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { typeRecords, typeHref, typeGroups, typeCollectionSummary } from '../../data/types';
+import '../../styles/catalog.css';
+import '../../styles/registry.css';
+const categories = [...new Set(typeRecords.map((type) => type.category))].sort();
+const statuses = typeGroups.map((group) => group.status);
+---
+
+<Base
+  title="Type registry"
+  theme="light"
+  description="Interaction type definitions, examples and proposals, with versions and review status."
+>
+  <main id="main" class="container">
+    <header class="page-hero catalog-hero">
+      <div>
+        <span class="eyebrow eyebrow-line">MailSchema Registry</span>
+        <h1>Type registry</h1>
+        <p class="lead">
+          Browse interaction definitions, examples and proposals. Each record identifies its
+          version, maintainers and review status, with implementation details where available.
+        </p>
+      </div>
+      <div class="catalog-art registry-art" aria-hidden="true">
+        <Icon name="grid" size={130} />
+      </div>
+    </header>
+    <section class="catalog-rule" aria-label="Interaction type collection">
+      <form
+        class="registry-filters"
+        id="registry-filters"
+        role="search"
+        aria-label="Find an interaction type"
+        hidden
+      >
+        <div class="registry-field registry-query">
+          <label for="registry-query">Find a type</label>
+          <input
+            id="registry-query"
+            type="search"
+            name="q"
+            placeholder="Search names and descriptions"
+            autocomplete="off"
+          />
+        </div>
+        <div class="registry-field">
+          <label for="registry-category">Category</label>
+          <select id="registry-category" name="category">
+            <option value="">All categories</option>
+            {categories.map((category) => (
+              <option>{category}</option>
+            ))}
+          </select>
+        </div>
+        <div class="registry-field">
+          <label for="registry-status">Status</label>
+          <select id="registry-status" name="status">
+            <option value="">All statuses</option>
+            {statuses.map((status) => (
+              <option>{status}</option>
+            ))}
+          </select>
+        </div>
+        <button type="reset" class="registry-clear">
+          Clear filters
+        </button>
+      </form>
+      <div class="registry-summary">
+        <p>
+          The collection contains {typeCollectionSummary}. Each record describes its scope and open
+          questions.
+        </p>
+        <span data-registry-count role="status" aria-live="polite">
+          {typeRecords.length} types
+        </span>
+      </div>
+      <div class="registry-columns" aria-hidden="true">
+        <span>Type</span>
+        <span>Category</span>
+        <span>Version</span>
+        <span>Status</span>
+        <span></span>
+      </div>
+      <ul class="registry-list">
+        {typeRecords.map((type) => (
+          <li
+            data-type-record
+            data-category={type.category}
+            data-status={type.status}
+            data-search={`${type.name} ${type.summary}`.toLocaleLowerCase()}
+          >
+            <a href={typeHref(type.slug)} class="registry-record">
+              <div class="registry-record-copy">
+                <h2>{type.name}</h2>
+                <p data-type-description>{type.summary}</p>
+              </div>
+              <span class="registry-category">
+                <span class="registry-cell-label">Category</span>
+                {type.category}
+              </span>
+              <span class="registry-version">
+                <span class="registry-cell-label">Version</span>
+                {type.version || 'Not assigned'}
+              </span>
+              <span class="registry-status">
+                <span class="registry-cell-label">Status</span>
+                <span class="pill soft">{type.status}</span>
+              </span>
+              <Icon name="northeast" size={18} />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="registry-empty" hidden>
+        <h2>No types match these filters.</h2>
+        <p>Try another name or clear the filters to see the whole collection.</p>
+      </div>
+      <noscript>
+        <p class="registry-noscript">
+          All types are listed above. Enable JavaScript to search and filter the collection.
+        </p>
+      </noscript>
+    </section>
+    <section class="catalog-note">
+      <h2>Contribute a type</h2>
+      <div>
+        <p>
+          Describe an interaction that other services could use. Include its operations, inputs,
+          results and a complete example. Check the existing definitions before proposing another.
+        </p>
+        <a class="text-link" href="/contribute/">
+          Prepare a type proposal <Icon size={16} />
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
+<script>
+  const form = document.querySelector<HTMLFormElement>('#registry-filters')!;
+  const query = form.elements.namedItem('q') as HTMLInputElement;
+  const category = form.elements.namedItem('category') as HTMLSelectElement;
+  const status = form.elements.namedItem('status') as HTMLSelectElement;
+  const records = [...document.querySelectorAll<HTMLElement>('[data-type-record]')];
+  function filter(updateUrl = true) {
+    const terms = query.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
+    let count = 0;
+    for (const record of records) {
+      record.hidden = !(
+        terms.every((term) => record.dataset.search!.includes(term)) &&
+        (!category.value || record.dataset.category === category.value) &&
+        (!status.value || record.dataset.status === status.value)
+      );
+      if (!record.hidden) count++;
+    }
+    document.querySelector('[data-registry-count]')!.textContent =
+      `${count} ${count === 1 ? 'type' : 'types'}`;
+    document.querySelector<HTMLElement>('.registry-empty')!.hidden = count !== 0;
+    document.querySelector<HTMLElement>('.registry-columns')!.hidden = count === 0;
+    if (updateUrl) {
+      const url = new URL(location.href);
+      for (const input of [query, category, status]) {
+        const value = input.value.trim();
+        if (value) url.searchParams.set(input.name, value);
+        else url.searchParams.delete(input.name);
+      }
+      history.replaceState(null, '', url);
+    }
+  }
+  function restore() {
+    const params = new URLSearchParams(location.search);
+    query.value = params.get('q') || '';
+    for (const select of [category, status]) {
+      const value = params.get(select.name) || '';
+      select.value = [...select.options].some((option) => option.value === value) ? value : '';
+    }
+    filter(false);
+  }
+  form.hidden = false;
+  restore();
+  form.addEventListener('input', () => filter());
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    filter();
+  });
+  form.addEventListener('reset', (event) => {
+    event.preventDefault();
+    query.value = category.value = status.value = '';
+    filter();
+    query.focus();
+  });
+  window.addEventListener('popstate', restore);
+</script>

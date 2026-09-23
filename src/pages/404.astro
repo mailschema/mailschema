@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/catalog.css';
+---
+
+<Base title="Page not found">
+  <main id="main" class="container error-page">
+    <span class="eyebrow eyebrow-line">This route has no result</span>
+    <div class="error-number">404</div>
+    <h1>A small detour.</h1>
+    <p>That page isn’t here. The specification is a good place to pick up the thread.</p>
+    <a href="/specification/" class="button primary">
+      Read Mail Action Protocol <Icon size={17} />
+    </a>
+  </main>
+</Base>

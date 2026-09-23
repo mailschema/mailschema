@@ -1,0 +1,14 @@
+---
+import type { Party } from '../registry/model';
+interface Props {
+  parties: Party[];
+}
+const { parties } = Astro.props;
+---
+
+{parties.map((party, index) => (
+  <Fragment>
+    {index > 0 && ', '}
+    {party.url ? <a href={party.url}>{party.name}</a> : party.name}
+  </Fragment>
+))}

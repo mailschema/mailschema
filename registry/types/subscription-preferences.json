@@ -1,0 +1,59 @@
+{
+  "slug": "subscription-preferences",
+  "name": "Subscription Preferences",
+  "summary": "Choose which emails a service sends and how often.",
+  "category": "Email",
+  "status": "Proposal",
+  "version": null,
+  "origin": "MailSchema editorial proposal",
+  "profile": "Preference interaction under consideration",
+  "overview": "A recipient changes the email topics or delivery frequency offered by a service. This proposal concerns email preferences; it does not describe paid subscription management.",
+  "target": "The recipient’s subscription with the specified service or list.",
+  "operations": [
+    {
+      "name": "Update preferences",
+      "description": "Set the offered topic and frequency options."
+    }
+  ],
+  "inputs": "The subscription reference and selected values from the settings the service offers.",
+  "results": "The recorded settings and when they take effect, or an explanation of why the requested change was not applied.",
+  "permissions": "The preference interaction needs permission to update that recipient’s settings. An existing one-click unsubscribe route keeps its own requirements.",
+  "humanRoute": "The service’s email preference page, with its unsubscribe option available.",
+  "example": {
+    "title": "Switch to a weekly digest",
+    "steps": [
+      "A service offers immediate product announcements or a weekly digest.",
+      "The recipient selects the weekly digest.",
+      "The service records that preference and reports when it applies."
+    ],
+    "exception": "If the selected frequency is no longer offered, the service reports the problem without silently selecting another option."
+  },
+  "references": [
+    {
+      "title": "One-click unsubscribe · RFC 8058",
+      "href": "https://www.rfc-editor.org/rfc/rfc8058",
+      "description": "Preserve the existing unsubscribe mechanism. Its POST excludes cookies and HTTP authorization and requires recipient consent."
+    }
+  ],
+  "openQuestions": [
+    "Available settings, partial updates and when changes take effect.",
+    "Identity binding for preference changes.",
+    "How clients expose the existing unsubscribe route without adding MAP credential requirements."
+  ],
+  "history": [
+    {
+      "label": "Initial proposal",
+      "description": "The preference interaction is being scoped around existing email unsubscribe behaviour. No version has been assigned."
+    }
+  ],
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ContributionChecker from '../components/ContributionChecker.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import { tooling, localCheckCommands } from '../data/tooling';
+import '../styles/catalog.css';
+import '../styles/prose.css';
+---
+
+<Base
+  title="Contribute to MailSchema"
+  theme="light"
+  description="Prepare and validate a type proposal, amendment or implementation declaration for the MailSchema Registry."
+>
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Contribute</span>
+      <h1>Contribute to MailSchema</h1>
+      <p class="lead">
+        Propose an interaction, improve a definition or show how your service implements one.
+        Contributions stay with the type, along with their authors, examples and review history.
+      </p>
+    </header>
+    <ContributionChecker />
+    <section
+      id="local-validation"
+      class="contribution-local"
+      aria-labelledby="local-validation-title"
+    >
+      <div>
+        <span class="eyebrow eyebrow-line">In your toolchain</span>
+        <h2 id="local-validation-title">Check a file locally.</h2>
+        <p>
+          Use the MailSchema packages to validate contribution structure before review. The browser
+          checker also checks references against the current Registry.
+        </p>
+        <a href="/tools/" class="text-link">
+          Installation and API reference <Icon size={16} />
+        </a>
+      </div>
+      <div class="contribution-local-commands">
+        <CodeBlock label="JavaScript · Node.js 22+" code={localCheckCommands.javascript} />
+        <CodeBlock
+          label="Python · Python 3.10+"
+          code={`${tooling[1].install}\n${localCheckCommands.python}`}
+        />
+      </div>
+    </section>
+    <div class="longform">
+      <aside class="longform-aside">
+        <span class="eyebrow">Writing guide</span>
+        <a href="/proposal-template.md" download class="text-link">
+          Download the template <Icon name="file" size={16} />
+        </a>
+      </aside>
+      <article class="prose">
+        <h2>How your contribution appears</h2>
+        <ul>
+          <li>
+            <strong>New type:</strong> a Registry record with your attribution, its maintainers,
+            definition, examples and maturity label. It also appears in Types and search.
+          </li>
+          <li>
+            <strong>Amendment:</strong> an update to an existing record, with the contributor,
+            change summary and original submission retained in its history.
+          </li>
+          <li>
+            <strong>Implementation:</strong> a support declaration or submitted test report under
+            the type it implements, tied to the exact version, execution profile and record.
+          </li>
+        </ul>
+        <h2>Before proposing a type</h2>
+        <p>
+          Check the <a href="/registry/">Registry</a> and related standards. If an existing
+          definition covers the interaction, propose an example, implementation or amendment to that
+          definition.
+        </p>
+        <h2 id="propose-a-type">Write the proposal</h2>
+        <p>
+          Include the target, available actions, required inputs, permissions and results. Show one
+          complete exchange and the failure cases that explain its boundaries. Identify the existing
+          formats or protocols it uses.
+        </p>
+        <h2 id="review-the-draft">Review</h2>
+        <p>
+          Contributions are prepared as repository changes. The checks validate their structure and
+          references, reject conflicting updates and build the site preview. Review considers
+          whether the interaction is useful across services, its operations are clear and it reuses
+          existing work. Passing validation does not establish acceptance or compatibility.
+        </p>
+        <p>
+          For MAP itself, useful feedback identifies an ambiguous result, a missing permission check
+          or an assumption that breaks when the service changes. Include a reproducible example.
+        </p>
+        <h2 id="implementation-evidence">Implementation evidence</h2>
+        <span id="register-an-implementation"></span>
+        <p>
+          Identify the product, type version, execution profile and operations supported. A test
+          report also needs an evidence link, reproduction instructions and results. The Registry
+          distinguishes support declarations from submitted test reports; neither is a certification
+          badge.
+        </p>
+        <h2 id="ingestion">Validate and import</h2>
+        <p>
+          In a checkout of the site, validate your JSON file before creating the repository change:
+        </p>
+        <pre><code>npm run registry:ingest -- contribution.json</code></pre>
+        <p>To import the validated contribution and build its preview:</p>
+        <pre><code>{`npm run registry:ingest -- contribution.json --write\nnpm run verify\nnpm run dev -- --port 4325`}</code></pre>
+        <p>
+          Open the type’s Registry page to inspect the result. Submit the contribution file in a
+          pull request for review. Amendments must name the digest of the record they change, so an
+          old submission cannot silently replace a newer definition.
+        </p>
+        <p>
+          The <a href="/schemas/contribution.schema.json">contribution schema</a> uses{' '}
+          <a href="https://json-schema.org/draft/2020-12">JSON Schema 2020-12</a>. The{' '}
+          <a href="/registry/catalog.json">Registry data</a> includes the record identifiers and
+          digests needed for amendments and implementation declarations. These describe Registry
+          submissions, not MAP wire messages.
+        </p>
+        <h2 id="contribution-status">Public submissions</h2>
+        <p>
+          The local checker, importer and preview are available. The public repository and
+          contribution terms have not yet been opened, so this site does not receive submissions.
+          The example files use an illustrative vendor and are not Registry entries.
+        </p>
+        <p>
+          <a href="/proposal-template.md" download>
+            Download the type proposal template →
+          </a>
+        </p>
+      </article>
+    </div>
+  </main>
+</Base>

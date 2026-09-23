@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-09-22T15:34:39.730139+00:00",
+  "version": "0.1.0",
+  "schemaSha256": "2ea9f3db23f7695c7b4e28b4f962cf5942d194ddc2a532bc0d09ccc9674194b6",
+  "verification": "Public registry metadata and independent artifact downloads matched local prepared archives.",
+  "channels": [
+    {
+      "registry": "npm",
+      "name": "mailschema",
+      "version": "0.1.0",
+      "url": "https://www.npmjs.com/package/mailschema/v/0.1.0",
+      "maintainers": ["auscaster"],
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.0.tgz",
+          "sha256": "832781e70cc7633b56723c03d781f0dcc2a4b982a3351e61cc33c2b21bd94528",
+          "integrity": "sha512-MXQVOyuwbZ+v4AQx1BUqJq8aj7fSoIkKAQ9cDcx+KQMiu0JXy07EDCqdaiwpyNsTG38MnGi0UBdNFTY2uFPAuw=="
+        }
+      ],
+      "status": "verified"
+    },
+    {
+      "registry": "PyPI",
+      "name": "mailschema",
+      "version": "0.1.0",
+      "url": "https://pypi.org/project/mailschema/0.1.0/",
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.0-py3-none-any.whl",
+          "sha256": "c5d1507f3819cc44cc1b5339bf5e025a4b4a02ec09ebb49a78a637b6f6555e71"
+        },
+        {
+          "name": "mailschema-0.1.0.tar.gz",
+          "sha256": "05a641e30bf8b1611c68f8c06f1bc78bea89333e24206d8bec0baa27c399c4d5"
+        }
+      ],
+      "status": "verified"
+    },
+    {
+      "registry": "crates.io",
+      "name": "mailschema",
+      "version": "0.1.0",
+      "url": "https://crates.io/crates/mailschema/0.1.0",
+      "owners": ["auscaster"],
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.0.crate",
+          "sha256": "711218c07e37fc07c5297166131f019c60dc6f6ed31c45701400a218526e90f2"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

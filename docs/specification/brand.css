@@ -1,0 +1,7 @@
+/* Brand tokens only. The reader layout and behaviour belong to Sourcey. */
+:root {
+  --font: 'Plus Jakarta Sans Variable', sans-serif;
+  --blue: oklch(59% 0.238 286);
+  --blue-ink: oklch(47% 0.21 285);
+  --lime: oklch(94% 0.176 120);
+}

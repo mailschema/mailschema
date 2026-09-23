@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "status": "founder_selected",
+  "date": "2026-09-22",
+  "timezone": "Australia/Sydney",
+  "project": {
+    "name": "MailSchema",
+    "purpose": "Open standards for agent interactions through email.",
+    "intended_site": "mailschema.org"
+  },
+  "specification": {
+    "name": "Mail Action Protocol",
+    "acronym": "MAP",
+    "initial_title": "Mail Action Protocol (MAP) 0.1 \u2014 Draft",
+    "status": "draft",
+    "summary": "An open specification for agents to discover and complete service actions offered through email."
+  },
+  "family": {
+    "types": "MailSchema Types",
+    "registry": "MailSchema Registry",
+    "first_type": "Content Review",
+    "core": "Common requirements remain inside the first MAP specification."
+  },
+  "implementation": {
+    "proof": "Content Review across independently configured services",
+    "requires_vendor_account_for_compatibility": false
+  },
+  "founder_correction": ["mail action protocol", "you sasid it was better"],
+  "superseded_names": [
+    "Mail Agent Protocol",
+    "Model Email Protocol",
+    "A-Mail",
+    "MailSchema Interactions"
+  ],
+  "constraints": [
+    "Agents explicit in opening summaries",
+    "Readable human path and existing service authority preserved",
+    "Reuse existing standards including competitor work where suitable",
+    "First proof remains revision-bound Content Review",
+    "No mandatory central registry, new identity, universal transport or policy runtime",
+    "New imagegen identity concepts from fresh prompts and no old references"
+  ],
+  "visual_identity": {
+    "status": "founder_selected",
+    "names_locked": true,
+    "selected_direction": "03",
+    "generation": "built-in imagegen",
+    "fresh_prompts": true,
+    "selection_note": "Second board displayed, labelled Direction 03: charcoal, yellow-lime and blue-violet.",
+    "asset": "brand/direction-03-selected.png"
+  },
+  "canonical_document": "docs/ARCHITECTURE.md",
+  "scope_document": "Project charter",
+  "implementation_claim": "No completed wire specification or product conformance implied by the naming decision.",
+  "website": {
+    "framework": "Astro",
+    "workspace": "/Users/kam/dev/mailschema",
+    "status": "production",
+    "production_deployed": true,
+    "url": "https://mailschema.org"
+  },
+  "web_project": {
+    "specification_renderer": "Sourcey reader theme via sourcey/astro"
+  }
+}

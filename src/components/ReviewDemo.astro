@@ -1,0 +1,197 @@
+---
+import Icon from './Icon.astro';
+import { reviewCopy } from '../data/review';
+import '../styles/demo.css';
+---
+
+<div class="review-demo" data-review-demo>
+  <div class="demo-toolbar">
+    <div class="demo-tabs" role="tablist" aria-label="Review presentation">
+      <button
+        id="email-tab"
+        role="tab"
+        aria-selected="true"
+        aria-controls="email-panel"
+        data-tab="email"
+        disabled
+      >
+        <Icon name="mail" size={15} /> The email
+      </button>
+      <button
+        id="interaction-tab"
+        role="tab"
+        aria-selected="false"
+        aria-controls="interaction-panel"
+        tabindex="-1"
+        data-tab="interaction"
+        disabled
+      >
+        <Icon name="code" size={16} /> The interaction
+      </button>
+    </div>
+    <span class="demo-local">
+      <span class="small-dot"></span> Interactive example
+    </span>
+  </div>
+  <div class="demo-body">
+    <div class="demo-message">
+      <section id="email-panel" role="tabpanel" aria-labelledby="email-tab" data-panel="email">
+        <div class="message-sender">
+          <span class="sender-avatar">
+            m<span>↗</span>
+          </span>
+          <div>
+            <strong>Example campaign service</strong>
+            <span>
+              Content review <span aria-hidden="true">·</span> Example email
+            </span>
+          </div>
+          <span class="message-time">Just now</span>
+        </div>
+        <h3>{reviewCopy.subject}</h3>
+        <p class="message-intro">
+          Please review the opening for the September update. You can request changes or approve
+          this revision.
+        </p>
+        <div class="review-content">
+          <div class="review-content-label">
+            <span>
+              <Icon name="file" size={14} /> September product update
+            </span>
+            <span class="revision-label">
+              Revision <b data-revision>3</b>
+            </span>
+          </div>
+          <p class="review-quote" data-quote>
+            “{reviewCopy.original}”
+          </p>
+        </div>
+      </section>
+      <section
+        id="interaction-panel"
+        role="tabpanel"
+        aria-labelledby="interaction-tab"
+        data-panel="interaction"
+        hidden
+      >
+        <div class="interaction-title">
+          <span class="eyebrow">The same message, understood by a client</span>
+          <h3>Content Review</h3>
+          <span class="pill soft">Proposed type · 0.1</span>
+        </div>
+        <dl class="interaction-fields">
+          <div>
+            <dt>Originating service</dt>
+            <dd>Example campaign service</dd>
+          </div>
+          <div>
+            <dt>Target</dt>
+            <dd>September product update</dd>
+          </div>
+          <div>
+            <dt>Revision</dt>
+            <dd data-revision>3</dd>
+          </div>
+          <div>
+            <dt>Available actions</dt>
+            <dd>Request changes · Approve</dd>
+          </div>
+          <div>
+            <dt>Execution</dt>
+            <dd>Authenticated HTTPS</dd>
+          </div>
+        </dl>
+        <p class="semantic-note">
+          A semantic view of the proposed interaction, not a finalized wire format.
+        </p>
+      </section>
+      <div class="demo-action-area">
+        <form data-feedback-form hidden>
+          <label for="review-feedback">What needs to change?</label>
+          <textarea
+            id="review-feedback"
+            name="feedback"
+            rows="2"
+            required
+            maxlength="500"
+          >{reviewCopy.feedback}</textarea>
+          <div>
+            <button class="button dark-button compact" type="submit">
+              Submit feedback <Icon size={15} />
+            </button>
+            <button class="demo-cancel" type="button" data-cancel>
+              Cancel
+            </button>
+          </div>
+        </form>
+        <div class="demo-main-actions" data-main-actions>
+          <button class="button outline compact" data-request disabled>
+            Request changes
+          </button>
+          <button class="button primary compact" data-approve disabled>
+            Approve revision <span data-revision>3</span>
+            <Icon name="check" size={15} />
+          </button>
+        </div>
+        <button class="button dark-button compact" data-revise hidden>
+          Create revision <span data-next-revision>4</span> <Icon size={16} />
+        </button>
+        <p class="action-footnote" data-action-footnote>
+          Approval applies to this revision. Sending is a separate action.
+        </p>
+      </div>
+      <p class="demo-noscript" data-demo-fallback>
+        Enable JavaScript to try the local example. The email offers two actions: request changes or
+        approve this exact revision.
+      </p>
+    </div>
+    <aside class="demo-inspector" aria-label="Interaction result">
+      <div class="inspector-heading">
+        <span class="eyebrow">What the client knows</span>
+        <span class="pill">MAP 0.1</span>
+      </div>
+      <div class="inspector-state">
+        <span class="state-symbol" data-state-symbol>
+          ↗
+        </span>
+        <span class="eyebrow" data-state-label>
+          Awaiting a decision
+        </span>
+        <h4 data-state-title>Revision 3 is ready for review.</h4>
+        <p data-state-description>
+          You can request changes or approve this revision. The service checks your permission when
+          you submit the request.
+        </p>
+      </div>
+      <div class="demo-result" role="status" aria-live="polite" aria-atomic="true">
+        <span class="eyebrow">Latest result</span>
+        <p data-result>No request made yet.</p>
+      </div>
+      <div class="demo-scenarios">
+        <label for="demo-role">Act as</label>
+        <select id="demo-role" data-role disabled>
+          <option value="reviewer">Reviewer</option>
+          <option value="editor">Editor</option>
+          <option value="reader">Read-only viewer</option>
+        </select>
+        <div class="demo-utilities">
+          <button data-stale disabled>
+            Try a stale approval <Icon name="northeast" size={12} />
+          </button>
+          <button data-reset aria-label="Reset example" disabled>
+            <Icon name="reset" size={14} />
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <div class="demo-caption">
+    <span>
+      <span class="small-dot"></span> Interactive example. Runs in your browser; no email is sent.
+    </span>
+    <a href="/specification/content-review/">
+      Read the interaction contract <Icon size={13} />
+    </a>
+  </div>
+</div>
+<script src="../scripts/review-demo.ts"></script>

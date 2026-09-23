@@ -1,0 +1,9 @@
+{
+  "schema": "mailschema-package-set/1",
+  "schemaSha256": "2ea9f3db23f7695c7b4e28b4f962cf5942d194ddc2a532bc0d09ccc9674194b6",
+  "channels": [
+    { "registry": "npm", "evidence": "0.1.0", "version": "0.1.0" },
+    { "registry": "PyPI", "evidence": "0.1.0", "version": "0.1.0" },
+    { "registry": "crates.io", "evidence": "0.1.0", "version": "0.1.0" }
+  ]
+}

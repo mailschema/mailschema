@@ -1,0 +1,9 @@
+{
+  "artifact": "vendor/sourcey-sha256-28216a8095bae26029691de84c767dabc1ee72e0d47fcae01eae40141f9215e5.tgz",
+  "sha256": "28216a8095bae26029691de84c767dabc1ee72e0d47fcae01eae40141f9215e5",
+  "bytes": 331182,
+  "package_version": "3.6.6",
+  "source_repository": "/Users/kam/dev/sourcey/sourcey/oss",
+  "source_base_commit": "6a8e38da92a64759851937a055acec4e7c3db413",
+  "status": "unreleased local build"
+}

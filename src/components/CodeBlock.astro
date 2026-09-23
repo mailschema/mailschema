@@ -1,0 +1,106 @@
+---
+import { Code } from 'astro:components';
+import Icon from './Icon.astro';
+interface Props {
+  code: string;
+  label: string;
+  lang?: 'bash' | 'javascript' | 'python' | 'rust' | 'toml';
+}
+const { code, label, lang = 'bash' } = Astro.props;
+---
+
+<div class="tool-code" data-code-block>
+  <div class="tool-code-heading">
+    <span>{label}</span>
+    <button type="button" data-copy-code aria-label={`Copy ${label}`} hidden>
+      <Icon name="copy" size={14} />
+      <span data-copy-label>Copy</span>
+    </button>
+    <span class="code-copy-status" role="status" aria-live="polite"></span>
+  </div>
+  <Code
+    code={code}
+    lang={lang}
+    theme="github-dark"
+    wrap={lang === 'bash' || lang === 'toml'}
+    tabindex="0"
+    aria-label={label}
+  />
+</div>
+<script>
+  import '../scripts/code-copy';
+</script>
+<style is:global>
+  .tool-code {
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 5px;
+    background: var(--ink);
+    color: var(--text-light);
+  }
+  .tool-code-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 48px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--line-dark);
+    font-size: 11px;
+    position: relative;
+  }
+  .tool-code-heading > span:first-child {
+    color: var(--muted-dark);
+  }
+  .tool-code button {
+    margin-left: auto;
+    background: transparent;
+    border: 0;
+    color: var(--text-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: end;
+    gap: 8px;
+    padding: 0;
+    min-height: 44px;
+    min-width: 65px;
+    font-size: 11px;
+  }
+  .tool-code button:hover {
+    color: var(--lime);
+  }
+  .tool-code :focus-visible {
+    outline-color: var(--lime);
+    outline-offset: -3px;
+  }
+  .tool-code pre.astro-code {
+    margin: 0;
+    padding: 22px 20px;
+    background: transparent !important;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.9;
+    tab-size: 2;
+    border-radius: 0;
+  }
+  .tool-code pre code {
+    font: inherit;
+    padding: 0;
+    background: transparent;
+  }
+  .code-copy-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .tool-code-heading {
+      padding-inline: 16px;
+    }
+    .tool-code pre.astro-code {
+      padding: 18px 16px;
+    }
+  }
+</style>

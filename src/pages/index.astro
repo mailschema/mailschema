@@ -1,0 +1,207 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Structure from '../components/Structure.astro';
+import ReviewDemo from '../components/ReviewDemo.astro';
+import '../styles/home.css';
+---
+
+<Base title="Email agents can act on">
+  <main id="main">
+    <section class="hero container">
+      <div class="hero-copy">
+        <h1>
+          Email agents
+          <br />
+          can <span>act on.</span>
+        </h1>
+        <p class="hero-description">
+          MailSchema is building an open standard for agents to work with services through email.
+          Messages describe the available actions, so compatible agents and inboxes can take the
+          next step.
+        </p>
+        <div class="hero-buttons">
+          <a class="button primary" href="/specification/">
+            Read the specification <Icon size={17} />
+          </a>
+          <a class="hero-secondary" href="/examples/">
+            Try a review <span>↗</span>
+          </a>
+        </div>
+        <a href="/specification/" class="protocol-kicker">
+          <span class="small-dot"></span>
+          <span>Mail Action Protocol · Working Draft 0.1</span>
+          <Icon size={13} />
+        </a>
+      </div>
+      <Structure />
+    </section>
+    <section class="protocol-section container">
+      <div class="section-intro">
+        <div>
+          <span class="eyebrow eyebrow-line">From message to action</span>
+          <h2 class="section-title">
+            There’s work
+            <br />
+            in your inbox.
+          </h2>
+        </div>
+        <p>
+          A draft needs feedback. A service needs an answer before it can proceed. MAP gives those
+          requests a structure that agents can recognise, alongside the email people already read.
+        </p>
+      </div>
+      <div class="protocol-flow">
+        <div>
+          <span class="flow-number">
+            01 <Icon size={18} />
+          </span>
+          <h3>A request arrives</h3>
+          <p>
+            The message identifies the work and the actions available. For a draft, that might mean
+            requesting changes or approving a particular revision.
+          </p>
+          <span class="flow-example">Content Review · Revision 3</span>
+        </div>
+        <div>
+          <span class="flow-number">
+            02 <Icon size={18} />
+          </span>
+          <h3>Your agent responds</h3>
+          <p>
+            A compatible agent submits the request to the service, using the permissions you have
+            given it. You can also follow the link and handle the review yourself.
+          </p>
+          <span class="flow-example">Request changes on revision 3</span>
+        </div>
+        <div>
+          <span class="flow-number">
+            03 <Icon name="check" size={18} />
+          </span>
+          <h3>The service confirms</h3>
+          <p>
+            The result tells the agent what happened. Feedback might have been recorded, approval
+            might still be needed, or the draft might have changed since the email arrived.
+          </p>
+          <span class="flow-example">Feedback recorded for revision 3</span>
+        </div>
+      </div>
+    </section>
+    <section class="map-feature container" aria-labelledby="map-title">
+      <div class="map-feature-mark">
+        <span class="eyebrow">The specification</span>
+        <div class="big-map">
+          MAP<span>↗</span>
+        </div>
+        <div class="map-feature-meta">
+          <span>MAIL ACTION PROTOCOL</span>
+          <span class="pill">0.1 · Draft</span>
+        </div>
+      </div>
+      <div class="map-feature-copy">
+        <span class="eyebrow">Mail Action Protocol</span>
+        <h2 id="map-title">Describe it once.</h2>
+        <p>
+          With a shared type, a review request has the same meaning across services. Agent and inbox
+          developers can build support for that interaction while each service handles its own
+          permissions and underlying work.
+        </p>
+        <p>
+          MAP defines how the message describes the action, how a client requests it and what the
+          result means.
+        </p>
+        <a href="/specification/" class="button dark-button">
+          Read MAP 0.1 <Icon size={17} />
+        </a>
+      </div>
+    </section>
+    <section class="demo-section container" aria-labelledby="demo-heading">
+      <div class="section-intro">
+        <div>
+          <span class="eyebrow eyebrow-line">Content Review</span>
+          <h2 class="section-title" id="demo-heading">
+            Take a draft
+            <br />
+            through review.
+          </h2>
+        </div>
+        <div>
+          <p>
+            A campaign test email arrives for review. Request a change, create the next revision and
+            approve it. Try the exchange below to see what the person reads and what the agent
+            receives.
+          </p>
+          <a class="text-link" href="/registry/content-review/">
+            Read the type definition <Icon size={16} />
+          </a>
+        </div>
+      </div>
+      <ReviewDemo />
+    </section>
+    <section class="ecosystem container" aria-labelledby="ecosystem-heading">
+      <div class="ecosystem-heading">
+        <span class="eyebrow eyebrow-line">MailSchema Types</span>
+        <h2 class="section-title" id="ecosystem-heading">
+          A type gives the request its meaning.
+        </h2>
+        <p class="ecosystem-description">
+          Content Review tells a client how to handle feedback and approval. Other types can
+          describe other kinds of work. Each definition sets out the actions, the information they
+          need and the results a client can expect.
+        </p>
+      </div>
+      <div class="ecosystem-links">
+        <a class="ecosystem-types" href="/types/">
+          <div class="ecosystem-link-top">
+            <Icon name="layers" size={33} />
+            <Icon name="northeast" size={24} />
+          </div>
+          <span class="eyebrow">Understand types</span>
+          <h3>Types</h3>
+          <p>
+            Learn how a type describes an interaction, how it relates to MAP and when an existing
+            definition fits your workflow.
+          </p>
+          <span class="text-link">
+            About interaction types <Icon size={17} />
+          </span>
+        </a>
+        <a class="ecosystem-registry" href="/registry/">
+          <div class="ecosystem-link-top">
+            <Icon name="grid" size={33} />
+            <Icon name="northeast" size={24} />
+          </div>
+          <span class="eyebrow">Browse the Registry</span>
+          <h3>Registry</h3>
+          <p>
+            Read type definitions and examples, follow their revisions and see the proposals under
+            discussion. Implementation details belong with the type they support.
+          </p>
+          <span class="text-link">
+            Browse type definitions <Icon size={17} />
+          </span>
+        </a>
+      </div>
+    </section>
+    <section class="open-section container">
+      <div>
+        <span class="eyebrow eyebrow-line">Contribute</span>
+        <h2>
+          Propose a type
+          <br />
+          <span>for your workflow.</span>
+        </h2>
+      </div>
+      <div>
+        <p>
+          If your service asks people to do something by email, describe the exchange. A useful
+          proposal shows what a client needs to know and how the same interaction could work in
+          another service.
+        </p>
+        <a href="/contribute/" class="button outline">
+          Prepare a type proposal <Icon size={17} />
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>

@@ -1,0 +1,22 @@
+# Local agent and workflow state
+.scafld/
+.claude/
+.mcp.json
+AGENTS.md
+CLAUDE.md
+node_modules/
+dist/
+.astro/
+playwright-report/
+test-results/
+.env
+.DS_Store
+
+.sourcey/
+.wrangler/
+
+.runx/
+
+# Built distribution artifacts and isolated release tools
+.release/
+__pycache__/

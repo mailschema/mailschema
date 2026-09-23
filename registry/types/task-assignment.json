@@ -1,0 +1,71 @@
+{
+  "slug": "task-assignment",
+  "name": "Task Assignment",
+  "summary": "Accept assigned work and report its progress or completion.",
+  "category": "Tasks",
+  "status": "Reuse assessment",
+  "version": null,
+  "origin": "MailSchema binding proposal",
+  "profile": "Existing task standards under review",
+  "overview": "A service assigns work to a person or agent. The recipient can respond to the assignment and report its state. The proposal examines which existing task semantics can be reused.",
+  "target": "A task identifier, its assignment and the applicable update version.",
+  "operations": [
+    {
+      "name": "Accept or decline",
+      "description": "Respond to the assignment."
+    },
+    {
+      "name": "Report progress",
+      "description": "Update the task’s recorded state."
+    },
+    {
+      "name": "Report completion",
+      "description": "Provide a completion report. The service may still need to verify the work."
+    }
+  ],
+  "inputs": "The assignment reference, response or progress information, and any completion evidence required by the service.",
+  "results": "A recorded assignment response or task update. Acceptance of an assignment and verification of its completion are separate states.",
+  "permissions": "Accepting a task does not grant access to the resources needed to carry it out. The service and client retain their existing permissions.",
+  "humanRoute": "The service’s task interface.",
+  "example": {
+    "title": "Check links in a documentation release",
+    "steps": [
+      "A service assigns an agent to check links in a specified documentation release.",
+      "The agent accepts the assignment and performs the permitted checks.",
+      "It submits a report and the service records the update."
+    ],
+    "exception": "A cancelled or changed assignment needs to be reconciled before a completion report is accepted. Acceptance does not permit editing or publishing the release."
+  },
+  "references": [
+    {
+      "title": "iCalendar · RFC 5545",
+      "href": "https://www.rfc-editor.org/rfc/rfc5545",
+      "description": "Defines task data through VTODO."
+    },
+    {
+      "title": "iTIP · RFC 5546, section 3.4",
+      "href": "https://www.rfc-editor.org/rfc/rfc5546#section-3.4",
+      "description": "Defines task responses and completion updates. A proposed MAP binding must identify any remaining gap."
+    }
+  ],
+  "openQuestions": [
+    "The mapping to existing task semantics and whether a MAP binding is needed.",
+    "Completion evidence, cancellation and changes to an accepted assignment."
+  ],
+  "history": [
+    {
+      "label": "Reuse assessment",
+      "description": "The existing task protocols are being evaluated. No MAP binding or compatibility claim is established."
+    }
+  ],
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

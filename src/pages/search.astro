@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { searchEntries as entries } from '../data/site';
+import '../styles/catalog.css';
+---
+
+<Base title="Search" theme="light">
+  <main id="main" class="container search-page">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Specifications, types and tools</span>
+      <h1>Search MailSchema</h1>
+    </header>
+    <form class="search-form" action="/search/" method="get" role="search">
+      <Icon name="search" />
+      <input
+        type="search"
+        name="q"
+        id="search-query"
+        aria-label="Search documentation"
+        placeholder="Try “approval” or “revision”"
+        autocomplete="off"
+      />
+      <button class="button dark-button" type="submit">
+        Search
+      </button>
+    </form>
+    <p class="search-count" role="status" aria-live="polite">
+      <span data-count>{entries.length}</span> results
+    </p>
+    <div data-results>
+      {entries.map((entry) => (
+        <a
+          class="search-result"
+          href={entry.href}
+          data-search={`${entry.title} ${entry.description} ${entry.group}`.toLowerCase()}
+        >
+          <span class="eyebrow">{entry.group}</span>
+          <h2>
+            {entry.title}
+            <Icon name="northeast" size={18} />
+          </h2>
+          <p>{entry.description}</p>
+        </a>
+      ))}
+    </div>
+    <div class="search-empty" hidden>
+      <h2>No matching pages.</h2>
+      <p>Try a broader term such as “review”, “service” or “permission”.</p>
+      <button data-clear>Clear search</button>
+    </div>
+    <noscript>
+      <p>
+        JavaScript enables filtering. All documentation links are available below the search field.
+      </p>
+    </noscript>
+  </main>
+</Base>
+<script>
+  const input = document.querySelector<HTMLInputElement>('#search-query')!;
+  const form = document.querySelector<HTMLFormElement>('.search-form')!;
+  const entries = [...document.querySelectorAll<HTMLElement>('[data-search]')];
+  function search() {
+    const terms = input.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
+    let count = 0;
+    entries.forEach((entry) => {
+      entry.hidden = !terms.every((term) => entry.dataset.search!.includes(term));
+      if (!entry.hidden) count++;
+    });
+    document.querySelector('[data-count]')!.textContent = String(count);
+    document.querySelector<HTMLElement>('.search-empty')!.hidden = count !== 0;
+  }
+  input.value = new URLSearchParams(window.location.search).get('q') || '';
+  search();
+  input.addEventListener('input', search);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const url = new URL(window.location.href);
+    if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+    else url.searchParams.delete('q');
+    history.replaceState(null, '', url);
+    search();
+  });
+  document.querySelector('[data-clear]')?.addEventListener('click', () => {
+    input.value = '';
+    form.requestSubmit();
+    input.focus();
+  });
+</script>

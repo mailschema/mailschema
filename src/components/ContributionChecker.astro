@@ -1,0 +1,77 @@
+---
+import Icon from './Icon.astro';
+import '../styles/contribution.css';
+---
+
+<section class="contribution-checker" aria-labelledby="check-a-contribution">
+  <div class="contribution-intro">
+    <div>
+      <span class="eyebrow eyebrow-line">Prepare a contribution</span>
+      <h2 id="check-a-contribution">Check the file. See the record.</h2>
+    </div>
+    <p>
+      Start from an example or load your JSON file. Check its fields and references, then preview
+      how the contribution will appear. Everything runs in your browser; nothing is submitted.
+      <a href="#local-validation" class="contribution-local-link">
+        Prefer to validate locally? <Icon size={14} />
+      </a>
+    </p>
+  </div>
+  <div class="contribution-examples">
+    <span>Example files</span>
+    <a href="/contribution-examples/new-type.json" data-example="new-type">
+      New type <Icon size={13} />
+    </a>
+    <a href="/contribution-examples/amendment.json" data-example="amendment">
+      Amendment <Icon size={13} />
+    </a>
+    <a href="/contribution-examples/implementation.json" data-example="implementation">
+      Implementation <Icon size={13} />
+    </a>
+  </div>
+  <form id="contribution-form" hidden>
+    <div class="contribution-editor-heading">
+      <label for="contribution-json">Contribution JSON</label>
+      <label class="contribution-file">
+        Load a file <input id="contribution-file" type="file" accept=".json,application/json" />
+      </label>
+    </div>
+    <textarea
+      id="contribution-json"
+      rows="12"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="Paste a contribution file, or choose an example above."
+      required
+    ></textarea>
+    <div class="contribution-actions">
+      <button class="button dark-button" type="submit">
+        Check and preview <Icon size={16} />
+      </button>
+      <button class="text-link" type="button" data-download disabled>
+        Download checked JSON <Icon size={14} />
+      </button>
+      <span role="status" data-check-status></span>
+    </div>
+    <div class="contribution-errors" role="alert" hidden>
+      <h3>Check these fields</h3>
+      <ul></ul>
+    </div>
+  </form>
+  <noscript>
+    <p>Download an example and run the command below to validate it locally.</p>
+  </noscript>
+  <div class="contribution-preview" data-preview hidden>
+    <span class="eyebrow">Contribution preview</span>
+    <h3 data-preview-title></h3>
+    <p data-preview-summary></p>
+    <dl data-preview-facts></dl>
+    <p class="contribution-preview-note">
+      The file checks passed. Inclusion, scope and contributor details still need review. This
+      preview is not a published Registry record.
+    </p>
+  </div>
+</section>
+<script>
+  import '../scripts/contribution-checker';
+</script>

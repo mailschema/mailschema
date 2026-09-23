@@ -1,0 +1,7 @@
+.scafld/
+node_modules/
+dist/
+.astro/
+brand/
+package-lock.json
+docs/screenshots/

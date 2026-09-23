@@ -1,0 +1,262 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import PartyList from '../../components/PartyList.astro';
+import { registry, typeRecords, typeStatusLabel, type TypeRecord } from '../../data/types';
+import { recordDigest } from '../../registry/catalog';
+import '../../styles/catalog.css';
+import '../../styles/prose.css';
+import '../../styles/registry.css';
+export function getStaticPaths() {
+  return typeRecords.map((record) => ({ params: { type: record.slug }, props: { record } }));
+}
+interface Props {
+  record: TypeRecord;
+}
+const { record } = Astro.props;
+const proposed = record.status !== 'Draft';
+const implementations = registry.implementations.filter((item) => item.type === record.slug);
+const digest = recordDigest(record);
+---
+
+<Base title={`${record.name} · Registry`} description={record.summary} theme="light">
+  <main id="main" class="container">
+    <header class="page-hero">
+      <div class="breadcrumb">
+        <a href="/registry/">Registry</a>
+        <Icon name="chevron" size={12} />
+        <span>{record.name}</span>
+      </div>
+      <span class="eyebrow eyebrow-line">{record.category}</span>
+      <h1>{record.name}</h1>
+      <p class="lead">{record.summary}</p>
+    </header>
+    <div class="longform">
+      <aside class="longform-aside">
+        <span class="pill soft" data-type-status>
+          {typeStatusLabel(record)}
+        </span>
+        <dl class="detail-facts">
+          <div>
+            <dt>Origin</dt>
+            <dd>{record.origin}</dd>
+          </div>
+          <div>
+            <dt>Contributors</dt>
+            <dd>
+              <PartyList parties={record.contributors} />
+            </dd>
+          </div>
+          <div>
+            <dt>Maintained by</dt>
+            <dd>
+              <PartyList parties={record.maintainers} />
+            </dd>
+          </div>
+          <div>
+            <dt>Definition version</dt>
+            <dd>{record.version || 'Not assigned'}</dd>
+          </div>
+          <div>
+            <dt>Execution profile</dt>
+            <dd>{record.profile}</dd>
+          </div>
+        </dl>
+        <nav class="type-contents" aria-label="Type record sections">
+          <a href="#overview">Overview</a>
+          <a href="#operations">Operations</a>
+          <a href="#inputs-and-results">Inputs and results</a>
+          <a href="#example">Example</a>
+          <a href="#existing-standards">Existing standards</a>
+          <a href="#versions">Versions and open questions</a>
+          <a href="#implementations">Implementations</a>
+        </nav>
+        <div class="type-downloads">
+          <a
+            class="type-record-download"
+            href={`/registry/records/${record.slug}.record.json`}
+            download={`${record.slug}.json`}
+          >
+            Download record <Icon size={14} />
+          </a>
+          <a class="type-validation-link" href="/tools/#records">
+            Validate this record <Icon name="northeast" size={12} />
+          </a>
+        </div>
+      </aside>
+      <article class="prose">
+        <h2 id="overview">Overview</h2>
+        <p>{record.overview}</p>
+        {proposed && (
+          <p class="type-stage-note">
+            This is a {record.status === 'Reuse assessment' ? 'reuse assessment' : 'proposal'}. Its
+            operations and representation are still under discussion.
+          </p>
+        )}
+        {record.definition && (
+          <p>
+            <a href={record.definition.href}>{record.definition.label} →</a>
+          </p>
+        )}
+        <h2 id="operations">{proposed ? 'Proposed operations' : 'Operations'}</h2>
+        <p>
+          <strong>Target:</strong> {record.target}
+        </p>
+        <dl class="type-operations">
+          {record.operations.map((operation) => (
+            <div>
+              <dt>{operation.name}</dt>
+              <dd>{operation.description}</dd>
+            </div>
+          ))}
+        </dl>
+        <h2 id="inputs-and-results">Inputs and results</h2>
+        <p>
+          <strong>Inputs.</strong> {record.inputs}
+        </p>
+        <p>
+          <strong>Results.</strong> {record.results}
+        </p>
+        <p>
+          <strong>Permissions.</strong> {record.permissions}
+        </p>
+        <p>
+          <strong>Human participation.</strong> {record.humanRoute}
+        </p>
+        <p>
+          The behaviour is described here. A machine-readable representation has not yet been
+          selected.
+        </p>
+        <h2 id="example">{record.example.title}</h2>
+        <ol>
+          {record.example.steps.map((step) => (
+            <li>{step}</li>
+          ))}
+        </ol>
+        <p>{record.example.exception}</p>
+        {record.slug === 'content-review' && (
+          <p>
+            <a href="/examples/">Try the review example →</a>
+          </p>
+        )}
+        <h2 id="existing-standards">Existing standards</h2>
+        <ul class="type-references">
+          {record.references.map((reference) => (
+            <li>
+              <a href={reference.href}>{reference.title}</a>
+              <p>{reference.description}</p>
+            </li>
+          ))}
+        </ul>
+        <h2 id="versions">Versions and open questions</h2>
+        {record.history.map((item) => (
+          <div>
+            <h3>{item.label}</h3>
+            <p>{item.description}</p>
+            {item.contributionId && (
+              <p class="type-contribution-source">
+                <a href={`/registry/contributions/${item.contributionId}.json`}>
+                  Read the contribution
+                </a>
+                {registry.contributions.find(
+                  (contribution) => contribution.id === item.contributionId,
+                )?.source && (
+                  <Fragment>
+                    {' · '}
+                    <a
+                      href={
+                        registry.contributions.find(
+                          (contribution) => contribution.id === item.contributionId,
+                        )!.source
+                      }
+                    >
+                      Discussion and source
+                    </a>
+                  </Fragment>
+                )}
+              </p>
+            )}
+          </div>
+        ))}
+        <ul>
+          {record.openQuestions.map((question) => (
+            <li>{question}</li>
+          ))}
+        </ul>
+        <p>
+          <a href="/contribute/#review-the-draft">Contribute to this definition →</a>
+        </p>
+        <h2 id="implementations">Implementations</h2>
+        {implementations.length === 0 && (
+          <p>
+            No implementation evidence has been published{' '}
+            {record.version ? 'for this version' : 'for this proposal'}.
+          </p>
+        )}
+        {implementations.map((implementation) => (
+          <section class="type-implementation" aria-label={implementation.product.name}>
+            <span class="pill soft">
+              {implementation.evidence.kind === 'declaration'
+                ? 'Support declaration'
+                : 'Submitted test report'}
+            </span>
+            <h3>
+              <PartyList parties={[implementation.product]} />
+            </h3>
+            <p>
+              Submitted by <PartyList parties={[implementation.contributor]} /> for {record.name}{' '}
+              {implementation.typeVersion}.
+            </p>
+            <dl class="implementation-facts">
+              <div>
+                <dt>Execution profile</dt>
+                <dd>{implementation.profile}</dd>
+              </div>
+              <div>
+                <dt>Operations</dt>
+                <dd>{implementation.operations.join(', ')}</dd>
+              </div>
+            </dl>
+            <p>{implementation.summary}</p>
+            {implementation.evidence.results && <p>{implementation.evidence.results}</p>}
+            {implementation.evidence.reproduction && (
+              <details>
+                <summary>Reproduction instructions</summary>
+                <pre>{implementation.evidence.reproduction}</pre>
+              </details>
+            )}
+            <p>
+              <a href={`/registry/snapshots/${implementation.typeDigest}.json`}>
+                Exact record tested
+              </a>
+              {implementation.evidence.url && (
+                <Fragment>
+                  {' · '}
+                  <a href={implementation.evidence.url}>Submitted evidence</a>
+                </Fragment>
+              )}
+              {' · '}
+              <a href={`/registry/contributions/${implementation.id}.json`}>Declaration source</a>
+            </p>
+            {implementation.typeDigest !== digest && (
+              <p>
+                This declaration targets an earlier record. It does not establish support for the
+                current definition.
+              </p>
+            )}
+          </section>
+        ))}
+        <p>
+          Support declarations and test reports are supplied by their contributors. Listing them
+          does not certify compatibility. Each targets a type version, execution profile and exact
+          record.
+        </p>
+        <p>
+          <a href="/contribute/#implementation-evidence">
+            How to provide implementation evidence →
+          </a>
+        </p>
+      </article>
+    </div>
+  </main>
+</Base>

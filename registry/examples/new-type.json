@@ -1,0 +1,54 @@
+{
+  "format": "mailschema-contribution/1",
+  "contributor": {
+    "name": "Example Document Service",
+    "url": "https://example.com"
+  },
+  "id": "example-document-receipt",
+  "kind": "new-type",
+  "summary": "Illustrative new-type contribution. Replace this example with your own workflow and attribution.",
+  "record": {
+    "slug": "document-receipt",
+    "name": "Document Receipt",
+    "summary": "Acknowledge receipt of a specified document.",
+    "category": "Documents",
+    "status": "Proposal",
+    "version": null,
+    "profile": "Under consideration",
+    "overview": "A service delivers a document and asks the recipient to acknowledge that they received it.",
+    "target": "The delivered document and its revision.",
+    "operations": [
+      {
+        "name": "Acknowledge receipt",
+        "description": "Record receipt of the identified document."
+      }
+    ],
+    "inputs": "The delivery reference and document revision.",
+    "results": "Receipt recorded, or an explanation of why the acknowledgement was not recorded.",
+    "permissions": "The service checks that the caller may acknowledge receipt for the intended recipient.",
+    "humanRoute": "A document page with the same acknowledgement operation.",
+    "example": {
+      "title": "Acknowledge a revised delivery note",
+      "steps": [
+        "The service delivers revision 2 of a delivery note.",
+        "The recipient acknowledges receipt.",
+        "The service records receipt of that revision."
+      ],
+      "exception": "Receipt does not indicate agreement with the document or approval of a separate operation."
+    },
+    "references": [
+      {
+        "title": "Schema.org Actions",
+        "href": "https://schema.org/docs/actions.html",
+        "description": "Candidate vocabulary to assess when describing the acknowledgement operation."
+      }
+    ],
+    "openQuestions": ["Document revision references and retry behaviour."],
+    "maintainers": [
+      {
+        "name": "Example Document Service",
+        "url": "https://example.com"
+      }
+    ]
+  }
+}

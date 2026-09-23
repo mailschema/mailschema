@@ -1,0 +1,46 @@
+{
+  "name": "mailschema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "check": "npm run registry:validate && astro check",
+    "registry:validate": "node scripts/registry.ts validate",
+    "registry:ingest": "node scripts/registry.ts ingest",
+    "verify": "npm run check && npm run build && npm test",
+    "build": "astro build",
+    "deploy": "npm run verify && wrangler deploy",
+    "deploy:dry-run": "npm run build && wrangler deploy --dry-run",
+    "preview": "astro preview --host 127.0.0.1",
+    "social:generate": "node scripts/generate-social-card.mjs",
+    "test": "playwright test",
+    "test:visual": "node scripts/compare-reader.mjs",
+    "packages:prepare": "node scripts/prepare-packages.mjs",
+    "packages:promote": "node scripts/promote-package.mjs",
+    "packages:test": "node --test tests/packages-check.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "astro": "7.3.3",
+    "sourcey": "file:vendor/sourcey-sha256-28216a8095bae26029691de84c767dabc1ee72e0d47fcae01eae40141f9215e5.tgz"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.9",
+    "@astrojs/sitemap": "^3.7.4",
+    "@axe-core/playwright": "4.11.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.13.6",
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0",
+    "prettier": "^3.9.8",
+    "prettier-plugin-astro": "^1.0.1",
+    "typescript": "5.9.3",
+    "wrangler": "^4.136.3"
+  }
+}

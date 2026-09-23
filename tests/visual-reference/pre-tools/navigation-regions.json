@@ -1,0 +1,21 @@
+{
+  "regions": {
+    "header": 1773,
+    "sidebar": 1368,
+    "other": 0
+  },
+  "bounds": {
+    "header": {
+      "minX": 762,
+      "maxX": 1041,
+      "minY": 35,
+      "maxY": 57
+    },
+    "sidebar": {
+      "minX": 35,
+      "maxX": 206,
+      "minY": 796,
+      "maxY": 872
+    }
+  }
+}

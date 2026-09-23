@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import ReviewDemo from '../components/ReviewDemo.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/catalog.css';
+---
+
+<Base
+  title="Try Content Review"
+  theme="light"
+  description="A browser example of a draft review, from feedback and editing to approval."
+>
+  <main id="main" class="container example-page">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Interactive example</span>
+      <h1>Try Content Review</h1>
+      <p class="lead">
+        Review a draft from the inbox. Switch between the email and the structured interaction to
+        see what a person reads and what an agent needs to know.
+      </p>
+    </header>
+    <ReviewDemo />
+    <section class="example-notes">
+      <div>
+        <h2>Try the exchange</h2>
+        <p>
+          Request a change and submit the suggested feedback. Switch to the editor to create the
+          example’s next revision, then return to the reviewer to approve it. The example uses a
+          predetermined edit so you can follow the whole review.
+        </p>
+      </div>
+      <div>
+        <h2>Check the permissions</h2>
+        <p>
+          The reviewer can record a decision. The editor can create a revision. A read-only viewer
+          can do neither. You can also submit an approval for an old revision to see how the service
+          responds.
+        </p>
+        <a href="/registry/content-review/" class="text-link">
+          Read the Content Review definition <Icon size={16} />
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>

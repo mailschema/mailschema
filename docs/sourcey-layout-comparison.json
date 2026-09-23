@@ -1,0 +1,86 @@
+[
+  {
+    "theme": "default",
+    "size": "desktop",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "default",
+    "size": "desktop",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "default",
+    "size": "mobile",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "default",
+    "size": "mobile",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "minimal",
+    "size": "desktop",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "minimal",
+    "size": "desktop",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "minimal",
+    "size": "mobile",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "minimal",
+    "size": "mobile",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "api-first",
+    "size": "desktop",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "api-first",
+    "size": "desktop",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "api-first",
+    "size": "mobile",
+    "route": "introduction/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  },
+  {
+    "theme": "api-first",
+    "size": "mobile",
+    "route": "api/index.html",
+    "sameSize": true,
+    "changedPixels": 0
+  }
+]
