@@ -1,10 +1,10 @@
 {
   "format": "mailschema-readiness-audit/1",
-  "artifactSetSha256": "d25e06cfe9e14ee91f4066750be1fa96454ffffb96d11a79ee4d08322d502071",
+  "artifactSetSha256": "77934036d8d71657b0797c9aee43028665f0ebc5e69f1a8b79c8215cd0df44e0",
   "artifacts": [
     {
       "path": "src/map/reference.ts",
-      "sha256": "4d72d9824a357c3894735a166f9865eb247bf25a0f212b578a9ebe4fbee386a8"
+      "sha256": "d557436b24dc0fe7ce9d7e215fc3e8d7998ba09f3d828c99431ec93552fd7677"
     },
     {
       "path": "public/contexts/map-0.1.jsonld",

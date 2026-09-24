@@ -215,7 +215,7 @@ export class ReferenceMapService {
         'unsupported-type',
         422,
         'Unsupported interaction type',
-        'The service does not implement this exact interaction type record.',
+        'The service does not implement this exact interaction type contract.',
       );
     else if (!this.#description.operations.some((operation) => operation.id === request.operation))
       response = this.#problem(

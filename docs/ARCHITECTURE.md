@@ -13,7 +13,8 @@ MailSchema is the open project for agent interactions through email. Its first s
 - **Shared definitions:** MailSchema Types.
 - **Type-definition registry:** MailSchema Registry.
 - **First interaction type:** Content Review.
-- **Initial implementation proof:** Content Review across independently configured services.
+- **Initial product proof:** One reproducible Content Review exchange through Nitrosend.
+- **Independent adoption milestone:** A separately operated implementation reproduces a core Content Review case.
 - **Project site:** [mailschema.org](https://mailschema.org), published through Cloudflare Workers.
 
 Mail Agent Protocol, Model Email Protocol, A-Mail and MailSchema Interactions are historical candidates. MAP must expand to Mail Action Protocol in all active plans, summaries and new brand work. “Agent” belongs in the opening explanation. The name decision is not to be reopened based solely on earlier ratings or acronym reservations.
@@ -40,7 +41,7 @@ The Registry is organised around submitted types. Services and clients are suppo
 
 Core requirements stay inside the first MAP document. Split a common-requirements document only when multiple real profiles need it. Do not invent another brand or launch workstream merely to fill a family diagram.
 
-The first implementation proof begins with a campaign-email review workflow. Providers and clients must be able to participate without a vendor-specific account, a central runtime or mandatory registry lookup. The Registry begins with maintained type definitions and examples. A type's editorial status and a product's compatibility evidence are distinct.
+The first product proof begins with a campaign-email review workflow in Nitrosend. Compatibility cannot require a MailSchema or Nitrosend account: other services and clients can implement the published contracts without a central runtime or mandatory registry lookup. The Registry begins with maintained type definitions and examples. A type's editorial status and a product's compatibility evidence are distinct.
 
 Adopt suitable existing standards, including competitor work. No new identity system, generic transport, compulsory DNS scheme or universal policy runtime is required by this architecture. Expand the type collection through defined interactions and documented reuse. A name in a proposed collection is not an implemented type.
 
