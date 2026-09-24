@@ -81,7 +81,7 @@ The strategy history is maintained separately from this standalone project. No p
 
 `npm run test:visual` compares all six Sourcey chapters against the saved current-content reader baseline at desktop and mobile sizes. It targets the production preview at `http://127.0.0.1:49328`; override `READER_BASE_URL` to use another origin. Results and diff images are written to ignored `test-results/reader-comparison/`. Earlier language-pass and pre-Tools references are retained separately; see `tests/visual-reference/README.md` for provenance.
 
-The specification reader uses the exact public `sourcey@3.6.7` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
+The specification reader uses the exact public `sourcey@3.6.8` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
 
 ## Published packages
 
