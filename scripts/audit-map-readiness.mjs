@@ -24,8 +24,8 @@ addFormats(ajv);
 const mapSchema = json('public/schemas/map-0.1.schema.json');
 ajv.addSchema(mapSchema);
 const validateMap = ajv.getSchema(mapSchema.$id);
-const validateReview = ajv.compile(json('public/schemas/content-review-0.1.schema.json'));
-const contract = json('public/contracts/content-review-0.1.json');
+const validateReview = ajv.compile(json('public/schemas/content-review-0.2.schema.json'));
+const contract = json('public/contracts/content-review-0.2.json');
 const probes = [];
 const record = (id, requirement, passed, observed) =>
   probes.push({ id, requirement, status: passed ? 'pass' : 'fail', observed });
@@ -225,8 +225,8 @@ const paths = [
   'src/map/reference.ts',
   'public/contexts/map-0.1.jsonld',
   'public/schemas/map-0.1.schema.json',
-  'public/schemas/content-review-0.1.schema.json',
-  'public/contracts/content-review-0.1.json',
+  'public/schemas/content-review-0.2.schema.json',
+  'public/contracts/content-review-0.2.json',
   'public/fixtures/map-0.1/content-review-description.json',
   'public/fixtures/map-0.1/approve.json',
   'public/fixtures/map-0.1/content-review.eml',

@@ -17,8 +17,10 @@ async function put(path, value) {
 const schemaBytes = await read('public/schemas/contribution.schema.json');
 const schema = JSON.parse(schemaBytes);
 const mapSchemaBytes = await read('public/schemas/map-0.1.schema.json');
-const contentReviewSchemaBytes = await read('public/schemas/content-review-0.1.schema.json');
-const contentReviewContractBytes = await read('public/contracts/content-review-0.1.json');
+const contentReview01SchemaBytes = await read('public/schemas/content-review-0.1.schema.json');
+const contentReview01ContractBytes = await read('public/contracts/content-review-0.1.json');
+const contentReview02SchemaBytes = await read('public/schemas/content-review-0.2.schema.json');
+const contentReview02ContractBytes = await read('public/contracts/content-review-0.2.json');
 const versions = JSON.parse(await read('packages/versions.json'));
 for (const registry of ['npm', 'PyPI', 'crates.io', 'Go'])
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
@@ -54,6 +56,8 @@ await put(
       './map-0.1.schema.json': './dist/map-0.1.schema.json',
       './content-review-0.1.schema.json': './dist/content-review-0.1.schema.json',
       './content-review-0.1.contract.json': './dist/content-review-0.1.contract.json',
+      './content-review-0.2.schema.json': './dist/content-review-0.2.schema.json',
+      './content-review-0.2.contract.json': './dist/content-review-0.2.contract.json',
       './package.json': './package.json',
     },
     types: './dist/index.d.ts',
@@ -75,8 +79,10 @@ await put('npm/src/index.ts', await read('packages/javascript/index.ts'));
 await put('npm/src/map.ts', await read('packages/javascript/map.ts'));
 await put('npm/src/contribution.schema.json', schemaBytes);
 await put('npm/src/map-0.1.schema.json', mapSchemaBytes);
-await put('npm/src/content-review-0.1.schema.json', contentReviewSchemaBytes);
-await put('npm/src/content-review-0.1.contract.json', contentReviewContractBytes);
+await put('npm/src/content-review-0.1.schema.json', contentReview01SchemaBytes);
+await put('npm/src/content-review-0.1.contract.json', contentReview01ContractBytes);
+await put('npm/src/content-review-0.2.schema.json', contentReview02SchemaBytes);
+await put('npm/src/content-review-0.2.contract.json', contentReview02ContractBytes);
 await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
 await put('npm/build.mjs', await read('packages/javascript/build.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
@@ -115,8 +121,10 @@ await chmod(resolve(output, 'npm/bin/mailschema.js'), 0o755);
 // Preserve the canonical schema bytes, rather than the compiler's JSON formatting.
 await put('npm/dist/contribution.schema.json', schemaBytes);
 await put('npm/dist/map-0.1.schema.json', mapSchemaBytes);
-await put('npm/dist/content-review-0.1.schema.json', contentReviewSchemaBytes);
-await put('npm/dist/content-review-0.1.contract.json', contentReviewContractBytes);
+await put('npm/dist/content-review-0.1.schema.json', contentReview01SchemaBytes);
+await put('npm/dist/content-review-0.1.contract.json', contentReview01ContractBytes);
+await put('npm/dist/content-review-0.2.schema.json', contentReview02SchemaBytes);
+await put('npm/dist/content-review-0.2.contract.json', contentReview02ContractBytes);
 
 for (const language of ['python', 'rust']) {
   await mkdir(resolve(output, language), { recursive: true });
@@ -128,8 +136,10 @@ for (const language of ['python', 'rust']) {
 }
 await put('python/src/mailschema/contribution.schema.json', schemaBytes);
 await put('python/src/mailschema/map-0.1.schema.json', mapSchemaBytes);
-await put('python/src/mailschema/content-review-0.1.schema.json', contentReviewSchemaBytes);
-await put('python/src/mailschema/content-review-0.1.contract.json', contentReviewContractBytes);
+await put('python/src/mailschema/content-review-0.1.schema.json', contentReview01SchemaBytes);
+await put('python/src/mailschema/content-review-0.1.contract.json', contentReview01ContractBytes);
+await put('python/src/mailschema/content-review-0.2.schema.json', contentReview02SchemaBytes);
+await put('python/src/mailschema/content-review-0.2.contract.json', contentReview02ContractBytes);
 await put('python/tests/new-type.json', await read('registry/examples/new-type.json'));
 await put('python/tests/content-review.json', await read('registry/types/content-review.json'));
 await put(
@@ -144,8 +154,10 @@ await put(
 await put('rust/schemas/contribution.schema.json', schemaBytes);
 await put('rust/schemas/record.schema.json', recordSchema);
 await put('rust/schemas/map-0.1.schema.json', mapSchemaBytes);
-await put('rust/schemas/content-review-0.1.schema.json', contentReviewSchemaBytes);
-await put('rust/contracts/content-review-0.1.json', contentReviewContractBytes);
+await put('rust/schemas/content-review-0.1.schema.json', contentReview01SchemaBytes);
+await put('rust/contracts/content-review-0.1.json', contentReview01ContractBytes);
+await put('rust/schemas/content-review-0.2.schema.json', contentReview02SchemaBytes);
+await put('rust/contracts/content-review-0.2.json', contentReview02ContractBytes);
 
 // Check each source distribution against its own declared release version.
 const python = await read('packages/python/pyproject.toml');
@@ -167,8 +179,10 @@ await put(
     contracts: [
       ['contribution', schemaBytes],
       ['map-0.1', mapSchemaBytes],
-      ['content-review-0.1', contentReviewSchemaBytes],
-      ['content-review-0.1-contract', contentReviewContractBytes],
+      ['content-review-0.1', contentReview01SchemaBytes],
+      ['content-review-0.1-contract', contentReview01ContractBytes],
+      ['content-review-0.2', contentReview02SchemaBytes],
+      ['content-review-0.2-contract', contentReview02ContractBytes],
       ['record', recordSchema],
     ].map(([name, bytes]) => ({
       name,
@@ -178,12 +192,26 @@ await put(
       {
         registry: 'npm',
         version: versions.npm,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
+        contracts: [
+          'contribution',
+          'map-0.1',
+          'content-review-0.1',
+          'content-review-0.1-contract',
+          'content-review-0.2',
+          'content-review-0.2-contract',
+        ],
       },
       {
         registry: 'PyPI',
         version: versions.PyPI,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
+        contracts: [
+          'contribution',
+          'map-0.1',
+          'content-review-0.1',
+          'content-review-0.1-contract',
+          'content-review-0.2',
+          'content-review-0.2-contract',
+        ],
       },
       {
         registry: 'crates.io',
@@ -193,13 +221,22 @@ await put(
           'map-0.1',
           'content-review-0.1',
           'content-review-0.1-contract',
+          'content-review-0.2',
+          'content-review-0.2-contract',
           'record',
         ],
       },
       {
         registry: 'Go',
         version: versions.Go,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
+        contracts: [
+          'contribution',
+          'map-0.1',
+          'content-review-0.1',
+          'content-review-0.1-contract',
+          'content-review-0.2',
+          'content-review-0.2-contract',
+        ],
       },
     ],
     sources: {
@@ -207,6 +244,8 @@ await put(
       'map-0.1': 'public/schemas/map-0.1.schema.json',
       'content-review-0.1': 'public/schemas/content-review-0.1.schema.json',
       'content-review-0.1-contract': 'public/contracts/content-review-0.1.json',
+      'content-review-0.2': 'public/schemas/content-review-0.2.schema.json',
+      'content-review-0.2-contract': 'public/contracts/content-review-0.2.json',
       record: 'derived from contribution.schema.json#/$defs/record',
     },
     status: 'prepared',

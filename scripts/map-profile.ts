@@ -12,8 +12,8 @@ import { simpleParser } from 'mailparser';
 const root = process.cwd();
 const readJson = (path: string) => JSON.parse(readFileSync(resolve(root, path), 'utf8'));
 const mapSchema = readJson('public/schemas/map-0.1.schema.json');
-const contentReviewSchema = readJson('public/schemas/content-review-0.1.schema.json');
-const contentReviewContract = readJson('public/contracts/content-review-0.1.json');
+const contentReviewSchema = readJson('public/schemas/content-review-0.2.schema.json');
+const contentReviewContract = readJson('public/contracts/content-review-0.2.json');
 const contentReviewRecord = readJson('registry/types/content-review.json');
 const profile = readJson('public/profiles/map/0.1.json');
 const sha256 = (path: string) =>
@@ -51,6 +51,7 @@ const validMapFixtures = [
   'public/fixtures/map-0.1/approve.json',
   'public/fixtures/map-0.1/result-completed.json',
   'public/fixtures/map-0.1/result-approval-required.json',
+  'public/fixtures/map-0.1/result-failed.json',
   'public/fixtures/map-0.1/problem-stale-target.json',
 ];
 for (const path of validMapFixtures) {
@@ -125,6 +126,7 @@ assert.deepEqual(JSON.parse(structuredPart.content.toString('utf8')), descriptio
 for (const path of [
   'public/fixtures/map-0.1/result-completed.json',
   'public/fixtures/map-0.1/result-approval-required.json',
+  'public/fixtures/map-0.1/result-failed.json',
 ]) {
   const result = readJson(path);
   const operation = contentReviewContract.operations.find(

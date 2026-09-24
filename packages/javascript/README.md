@@ -63,7 +63,11 @@ Raw Draft 2020-12 schemas are exported as:
 - `mailschema/map-0.1.schema.json`
 - `mailschema/content-review-0.1.schema.json`
 - `mailschema/content-review-0.1.contract.json`
+- `mailschema/content-review-0.2.schema.json`
+- `mailschema/content-review-0.2.contract.json`
 - `mailschema/contribution.schema.json`
+
+The unversioned Content Review helpers use 0.2. The `*ContentReview01*` helpers and 0.1 raw exports remain available for implementations pinned to the earlier draft.
 
 ## Trust boundary
 

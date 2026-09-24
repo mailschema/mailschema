@@ -1,6 +1,6 @@
 ---
 title: Content Review
-description: Request changes or approve a specific revision of content.
+description: Request changes or decide approval for a specific revision of content.
 navTitle: Content Review
 ---
 
@@ -28,7 +28,11 @@ An authorised reviewer records approval of the identified revision. The result n
 
 Approval records a review decision. Any subsequent sending, publication or other operation is subject to the service's separate permissions and workflow.
 
-The service decides how a caller may participate. A caller with no review authority receives `refused`. A caller allowed to propose approval receives `approval-required` and a route for the service's normal human decision. A caller with delegated decision authority may receive `completed` when the service records the approval directly. MAP does not infer authority from whether the caller is a person or an agent.
+The service decides how a caller may participate. A caller with no review authority receives `refused`. A caller allowed to propose approval receives `approval-required` and a route for the service's normal human decision. A caller with decision authority may receive `completed` when the service records the approval directly. MAP does not infer authority from whether the caller is a person or an agent.
+
+The human decision is a separate authorized act. The service may allow another reviewer in the same tenant to decide the proposal under its existing team and role rules. An unauthorized attempt does not change the proposed request. An authorized decline records a terminal `failed` result with reason `declined`.
+
+Before recording approval, the service rechecks the interaction expiry and current target. If the interaction has expired or the content has changed, the proposal ends as `failed` with reason `expired` or `stale-target`. These are results of the already accepted approval workflow, rather than new request failures.
 
 ## Example exchange
 
@@ -36,14 +40,14 @@ The service decides how a caller may participate. A caller with no review author
 2. A reviewer submits feedback on revision 3.
 3. The service confirms that the feedback was recorded.
 4. An editor with permission creates revision 4.
-5. An authorised reviewer approves revision 4.
+5. An authorised reviewer approves revision 4, directly or through the service's approval route.
 6. The service confirms that approval was recorded for revision 4.
 
 The [interactive example](/examples/) simulates this exchange in the browser. It includes requests from a caller without permission and requests that refer to an old revision.
 
 ## Stale and repeated requests
 
-The service refuses a request that targets a stale revision. It does not apply the decision to newer content.
+The service returns a `stale-target` problem when a new request targets a stale revision. If a valid approval proposal becomes stale while waiting for a human decision, it ends with a `failed` result whose reason is `stale-target`. Neither path applies the decision to newer content.
 
 A retry of the same request must not create a duplicate effect. A request with changed inputs or a different revision is a new request and uses a new request identifier. The execution profile defines identification and recovery rules.
 

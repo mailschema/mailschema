@@ -1,6 +1,6 @@
 # Types and Registry: collection proposal
 
-Status: design for discussion. Content Review 0.1 is the only interaction type currently described in the MAP sources. The other four entries below are proposed work, not adopted types or compatible implementations.
+Status: design for discussion. Content Review 0.2 is the only interaction type currently described in the MAP sources. The other four entries below are proposed work, not adopted types or compatible implementations.
 
 ## What the Registry contains
 
@@ -44,7 +44,7 @@ Content Review and Information Request are the first two candidates for MAP-spec
 
 **Definition still needed:** Wire representation, common operation identifiers, revision reference format and retry behaviour.
 
-**Collection status today:** Existing semantic draft, 0.1. The browser example is a simulation.
+**Collection status today:** Existing semantic draft, 0.2. The browser example is a simulation.
 
 ## Information Request
 

@@ -44,7 +44,7 @@ schema = get_contribution_schema()
 
 `validate_record`, `record_errors` and `get_record_schema` handle expanded Registry records. Pass `--record` to the CLI for the corresponding record format.
 
-The package bundles the MAP 0.1 and Registry schemas, the Content Review 0.1 request schema and its canonical type contract. It uses the established `jsonschema` and `referencing` libraries for validation and performs no network requests.
+The package bundles the MAP 0.1 and Registry schemas plus the Content Review 0.1 and 0.2 request schemas and canonical type contracts. Unversioned Content Review helpers use 0.2; `*_content_review_01_*` helpers remain available for implementations pinned to 0.1. It uses the established `jsonschema` and `referencing` libraries for validation and performs no network requests.
 
 ## Trust boundary
 

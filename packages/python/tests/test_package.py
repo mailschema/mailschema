@@ -7,6 +7,7 @@ from mailschema import (
     contribution_errors,
     get_contribution_schema,
     get_content_review_contract,
+    get_content_review_01_contract,
     get_record_schema,
     get_map_schema,
     validate_contribution,
@@ -46,6 +47,8 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(get_record_schema()["$ref"], "#/$defs/record")
         self.assertEqual(get_map_schema()["$id"], "https://mailschema.org/schemas/map-0.1.schema.json")
         self.assertEqual(get_content_review_contract()["id"], "https://mailschema.org/types/content-review")
+        self.assertEqual(get_content_review_contract()["version"], "0.2")
+        self.assertEqual(get_content_review_01_contract()["version"], "0.1")
 
     def test_map_documents(self):
         validate_map_document(self.description)

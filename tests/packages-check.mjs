@@ -14,6 +14,8 @@ import {
   getMapSchema,
   getContentReviewSchema,
   getContentReviewContract,
+  getContentReview01Schema,
+  getContentReview01Contract,
   assertMapDocument,
   assertContentReviewRequest,
 } from '../.release/packages/npm/dist/index.js';
@@ -51,6 +53,8 @@ test('the preparation manifest binds each distributed contract', () => {
       ['map-0.1', 'public/schemas/map-0.1.schema.json'],
       ['content-review-0.1', 'public/schemas/content-review-0.1.schema.json'],
       ['content-review-0.1-contract', 'public/contracts/content-review-0.1.json'],
+      ['content-review-0.2', 'public/schemas/content-review-0.2.schema.json'],
+      ['content-review-0.2-contract', 'public/contracts/content-review-0.2.json'],
     ].map(([name, path]) => [name, createHash('sha256').update(readFileSync(path)).digest('hex')]),
   );
   const contribution = JSON.parse(readFileSync('public/schemas/contribution.schema.json'));
@@ -66,6 +70,8 @@ test('the preparation manifest binds each distributed contract', () => {
     'map-0.1',
     'content-review-0.1',
     'content-review-0.1-contract',
+    'content-review-0.2',
+    'content-review-0.2-contract',
     'record',
   ]);
 });
@@ -124,6 +130,7 @@ test('all distributions include the MAP schema, Content Review schema and type c
   for (const [name, canonical] of [
     ['map-0.1.schema.json', 'public/schemas/map-0.1.schema.json'],
     ['content-review-0.1.schema.json', 'public/schemas/content-review-0.1.schema.json'],
+    ['content-review-0.2.schema.json', 'public/schemas/content-review-0.2.schema.json'],
   ]) {
     const expected = readFileSync(canonical, 'utf8');
     for (const path of [
@@ -136,16 +143,24 @@ test('all distributions include the MAP schema, Content Review schema and type c
   assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.1.schema.json');
   assert.equal(
     getContentReviewSchema().$id,
+    'https://mailschema.org/schemas/content-review-0.2.schema.json',
+  );
+  assert.equal(
+    getContentReview01Schema().$id,
     'https://mailschema.org/schemas/content-review-0.1.schema.json',
   );
-  const contract = readFileSync('public/contracts/content-review-0.1.json', 'utf8');
-  for (const path of [
-    'npm/dist/content-review-0.1.contract.json',
-    'python/src/mailschema/content-review-0.1.contract.json',
-    'rust/contracts/content-review-0.1.json',
-  ])
-    assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), contract);
+  for (const version of ['0.1', '0.2']) {
+    const contract = readFileSync(`public/contracts/content-review-${version}.json`, 'utf8');
+    for (const path of [
+      `npm/dist/content-review-${version}.contract.json`,
+      `python/src/mailschema/content-review-${version}.contract.json`,
+      `rust/contracts/content-review-${version}.json`,
+    ])
+      assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), contract);
+  }
   assert.equal(getContentReviewContract().id, 'https://mailschema.org/types/content-review');
+  assert.equal(getContentReviewContract().version, '0.2');
+  assert.equal(getContentReview01Contract().version, '0.1');
   const description = JSON.parse(
     readFileSync('public/fixtures/map-0.1/content-review-description.json'),
   );

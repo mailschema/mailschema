@@ -12,6 +12,9 @@ export interface PackageContracts {
   contribution: string;
   'map-0.1': string;
   'content-review-0.1': string;
+  'content-review-0.1-contract': string;
+  'content-review-0.2': string;
+  'content-review-0.2-contract': string;
   record: string;
 }
 
@@ -81,6 +84,9 @@ export function assertPackageRelease(
       'contribution',
       'map-0.1',
       'content-review-0.1',
+      'content-review-0.1-contract',
+      'content-review-0.2',
+      'content-review-0.2-contract',
       ...(registry === 'crates.io' ? ['record'] : []),
     ];
     const found = new Map(release.contracts?.map((entry) => [entry.name, entry.sha256]));

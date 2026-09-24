@@ -6,7 +6,11 @@ import addFormats from 'ajv-formats';
 import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
 import { simpleParser } from 'mailparser';
-import { ReferenceMapService, assertTrustedExecution } from '../../src/map/reference.ts';
+import {
+  ReferenceMapClient,
+  ReferenceMapService,
+  assertTrustedExecution,
+} from '../../src/map/reference.ts';
 
 const fixture = async (name) =>
   JSON.parse(
@@ -65,12 +69,20 @@ export const conformanceCases = [
   ),
   caseOf(
     'stable-redelivery',
-    'redelivery preserves the interaction identifier',
-    'same interactionId',
+    'redelivery reuses the client request and applies one effect',
+    'same requestId and one effect',
     async () => {
       const description = await fixture('content-review-description.json');
+      let next = 10;
+      const client = new ReferenceMapClient(
+        () => `urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b85b${next++}`,
+      );
       const service = implementation(description);
-      assert.equal(service.describe()['@id'], service.describe()['@id']);
+      const first = client.prepare(description, 'approve', {});
+      const redelivered = client.prepare(structuredClone(description), 'approve', {});
+      assert.deepEqual(redelivered, first);
+      assert.deepEqual(service.submit(redelivered, context), service.submit(first, context));
+      assert.equal(service.effectCount, 1);
     },
   ),
   caseOf(
@@ -186,14 +198,18 @@ export const conformanceCases = [
   ),
   caseOf(
     'invalid-type-input',
-    'a type-invalid operation input has no effect',
-    '400 invalid-request',
+    'a type-invalid claimed request is recoverable and cannot be replaced',
+    'saved 400 then 409 idempotency-conflict',
     async () => {
       const description = await fixture('content-review-description.json');
       const request = await fixture('approve.json');
       request.input = { unexpected: true };
       const service = implementation(description);
-      assert.equal(service.submit(request, context).body.code, 'invalid-request');
+      const invalid = service.submit(request, context);
+      assert.equal(invalid.body.code, 'invalid-request');
+      assert.deepEqual(service.recover(request.requestId, context), invalid);
+      request.input = {};
+      assert.equal(service.submit(request, context).body.code, 'idempotency-conflict');
       assert.equal(service.effectCount, 0);
     },
   ),
@@ -302,51 +318,102 @@ export const conformanceCases = [
     },
   ),
   caseOf(
-    'pending-work',
-    'outstanding work is recoverable without a recorded effect',
-    '202 pending',
+    'approval-team-decision',
+    'an authorized teammate can decide a proposed approval',
+    '200 completed and one effect',
     async () => {
       const description = await fixture('content-review-description.json');
-      const service = implementation(description, { leavePending: () => true });
-      const request = await fixture('request-changes.json');
-      const result = service.submit(request, context);
-      assert.equal(result.body.state, 'pending');
-      assert.deepEqual(service.recover(request.requestId, context), result);
+      const teammate = { principal: 'reviewer-8', tenant: context.tenant };
+      const service = implementation(description, {
+        requireApproval: () => true,
+        authorizeDecision: (_request, proposer, decider) =>
+          proposer.tenant === decider.tenant && decider.principal === teammate.principal,
+      });
+      const request = await fixture('approve.json');
+      service.submit(request, context);
+      const completed = service.decideApproval(request.requestId, teammate, 'approve');
+      assert.equal(completed?.body.state, 'completed');
+      assert.equal(completed?.body.output.decision, 'approved');
+      assert.equal(service.effectCount, 1);
+    },
+  ),
+  caseOf(
+    'approval-unauthorized-decision',
+    'an unauthorized human cannot decide or terminate a proposed approval',
+    '403 and original approval-required result',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const service = implementation(description, {
+        requireApproval: () => true,
+        authorizeDecision: () => false,
+      });
+      const request = await fixture('approve.json');
+      const proposed = service.submit(request, context);
+      const refused = service.decideApproval(
+        request.requestId,
+        { principal: 'reviewer-8', tenant: context.tenant },
+        'approve',
+      );
+      assert.equal(refused?.status, 403);
+      assert.equal(refused?.body.code, 'refused');
+      assert.deepEqual(service.recover(request.requestId, context), proposed);
       assert.equal(service.effectCount, 0);
     },
   ),
   caseOf(
-    'pending-completion',
-    'a non-terminal result advances once',
-    'latest completed result and one effect',
+    'approval-declined',
+    'an authorized human can decline a proposed approval',
+    '200 failed declined and no effect',
     async () => {
       const description = await fixture('content-review-description.json');
-      const service = implementation(description, { leavePending: () => true });
+      const service = implementation(description, { requireApproval: () => true });
       const request = await fixture('approve.json');
       service.submit(request, context);
-      const completed = service.advance(request.requestId, context, 'completed', {
-        decision: 'approved',
-      });
-      assert.equal(completed?.body.state, 'completed');
-      assert.deepEqual(service.submit(request, context), completed);
-      assert.equal(service.effectCount, 1);
-      assert.throws(() => service.advance(request.requestId, context, 'completed', {}));
+      const failed = service.decideApproval(request.requestId, context, 'decline');
+      assert.equal(failed?.body.state, 'failed');
+      assert.equal(failed?.body.output.reason, 'declined');
+      assert.deepEqual(service.submit(request, context), failed);
+      assert.equal(service.effectCount, 0);
     },
   ),
   caseOf(
-    'pending-failure',
-    'accepted asynchronous work can terminate without an effect',
-    'latest failed result and no effect',
+    'approval-stale-target',
+    'approval fails terminally if the target changes before confirmation',
+    '200 failed stale-target and no effect',
     async () => {
       const description = await fixture('content-review-description.json');
-      const service = implementation(description, { leavePending: () => true });
+      let current = description.target;
+      const service = implementation(description, {
+        requireApproval: () => true,
+        currentTarget: () => current,
+      });
       const request = await fixture('approve.json');
       service.submit(request, context);
-      const failed = service.advance(request.requestId, context, 'failed', {
-        code: 'upstream-failure',
-      });
+      current = { ...description.target, revision: '5' };
+      const failed = service.decideApproval(request.requestId, context, 'approve');
       assert.equal(failed?.body.state, 'failed');
-      assert.deepEqual(service.submit(request, context), failed);
+      assert.equal(failed?.body.output.reason, 'stale-target');
+      assert.equal(service.effectCount, 0);
+    },
+  ),
+  caseOf(
+    'approval-expired',
+    'approval fails terminally if the interaction expires before confirmation',
+    '200 failed expired and no effect',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      let time = clock();
+      const service = new ReferenceMapService(description, {
+        now: () => time,
+        authorize: allow,
+        requireApproval: () => true,
+      });
+      const request = await fixture('approve.json');
+      service.submit(request, context);
+      time = new Date(description.expiresAt);
+      const failed = service.decideApproval(request.requestId, context, 'approve');
+      assert.equal(failed?.body.state, 'failed');
+      assert.equal(failed?.body.output.reason, 'expired');
       assert.equal(service.effectCount, 0);
     },
   ),
@@ -467,7 +534,7 @@ export const conformanceCases = [
     'Registry editorial changes do not change contractDigest',
     async () => {
       const description = await fixture('content-review-description.json');
-      const contract = await fixture('../../contracts/content-review-0.1.json');
+      const contract = await fixture('../../contracts/content-review-0.2.json');
       const registry = await fixture('../../../registry/types/content-review.json');
       const digest = (value) =>
         `sha-256:${createHash('sha256').update(canonicalize(value)).digest('hex')}`;

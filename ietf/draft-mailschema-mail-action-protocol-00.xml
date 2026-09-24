@@ -216,6 +216,10 @@
       is insignificant; array order and member values are significant. An
       implementation can use the JSON Canonicalization Scheme
       <xref target="RFC8785"/> when deriving a request digest.</t>
+      <t>When the same interaction is redelivered and a client has already
+      prepared the same operation and input, the client <bcp14>MUST</bcp14>
+      reuse its complete persisted request, including its
+      <tt>requestId</tt>.</t>
       <t>Reuse with a changed value produces an
       <tt>idempotency-conflict</tt>. The changed request <bcp14>MUST NOT</bcp14>
       be applied.</t>
@@ -225,12 +229,15 @@
       non-terminal result can advance to one terminal result; a terminal result
       <bcp14>MUST NOT</bcp14> advance.</t>
       <t>A malformed request or request for an unknown interaction
-      <bcp14>MUST NOT</bcp14> claim its identifier. For a recognized interaction
-      and authenticated principal, the service <bcp14>MUST</bcp14> isolate an
+      <bcp14>MUST NOT</bcp14> claim its identifier. A syntactically valid
+      request for a recognized interaction and authenticated principal is
+      claimed before type-specific input validation. Its type-validation
+      failure is recoverable, and a corrected body uses a new identifier. For
+      every claimed request, the service <bcp14>MUST</bcp14> isolate an
       existing identifier to its original principal and check current
       authorization before disclosing saved state. A new identifier is claimed
       before an effect begins, and its first recoverable outcome, including a
-      permission refusal, is recorded with that claim. This specification does
+      permission refusal or type-validation failure, is recorded with that claim. This specification does
       not require a total precedence among independent validation failures.</t>
       <t>An authenticated <tt>GET</tt> to the result resource rechecks current
       authorization and returns the latest recorded result or problem. After a timeout, a client
@@ -258,10 +265,13 @@
       <t>A Registry record can add discovery metadata, maintainers, examples,
       evidence, and history without changing the wire contract. Registry
       lookup is not required during an interaction.</t>
-      <t>The initial Content Review 0.1 type offers
+      <t>The initial Content Review 0.2 type offers
       <tt>request-changes</tt> and <tt>approve</tt> for an exact content
       revision. Approval records a review decision; it does not send or publish
-      the content.</t>
+      the content. A proposed approval can complete as approved or fail as
+      declined, stale, or expired. A service authorizes the human decision
+      separately from the proposing request; a different authorized principal
+      in the same tenant can make that decision.</t>
     </section>
 
     <section anchor="security" numbered="true">
@@ -284,6 +294,9 @@
       that produces <tt>approval-required</tt>, or delegated authority that can
       produce <tt>completed</tt>. The protocol does not infer authority from
       whether the caller is a person or an automated client.</t>
+      <t>The service must authorize a human approval decision against current
+      tenant, role, target, and expiry state. An unauthorized decision attempt
+      does not change the saved non-terminal result.</t>
     </section>
 
     <section anchor="privacy" numbered="true">

@@ -7,7 +7,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 
 def _bundled(name: str) -> dict[str, Any]:
@@ -25,12 +25,22 @@ def get_map_schema() -> dict[str, Any]:
 
 
 def get_content_review_schema() -> dict[str, Any]:
-    """Return a fresh copy of the Content Review 0.1 request schema."""
-    return _bundled("content-review-0.1.schema.json")
+    """Return a fresh copy of the current Content Review 0.2 request schema."""
+    return _bundled("content-review-0.2.schema.json")
 
 
 def get_content_review_contract() -> dict[str, Any]:
-    """Return a fresh copy of the canonical Content Review 0.1 type contract."""
+    """Return a fresh copy of the canonical Content Review 0.2 type contract."""
+    return _bundled("content-review-0.2.contract.json")
+
+
+def get_content_review_01_schema() -> dict[str, Any]:
+    """Return a fresh copy of the immutable Content Review 0.1 request schema."""
+    return _bundled("content-review-0.1.schema.json")
+
+
+def get_content_review_01_contract() -> dict[str, Any]:
+    """Return a fresh copy of the immutable Content Review 0.1 type contract."""
     return _bundled("content-review-0.1.contract.json")
 
 
@@ -54,6 +64,11 @@ _map_schema = get_map_schema()
 _map_validator = Draft202012Validator(_map_schema, format_checker=FormatChecker())
 _content_review_validator = Draft202012Validator(
     get_content_review_schema(),
+    registry=Registry().with_resource(_map_schema["$id"], Resource.from_contents(_map_schema)),
+    format_checker=FormatChecker(),
+)
+_content_review_01_validator = Draft202012Validator(
+    get_content_review_01_schema(),
     registry=Registry().with_resource(_map_schema["$id"], Resource.from_contents(_map_schema)),
     format_checker=FormatChecker(),
 )
@@ -85,8 +100,13 @@ def map_errors(value: Any) -> list[str]:
 
 
 def content_review_request_errors(value: Any) -> list[str]:
-    """Return errors for a Content Review 0.1 MAP request."""
+    """Return errors for a Content Review 0.2 MAP request."""
     return _errors(_content_review_validator, value)
+
+
+def content_review_01_request_errors(value: Any) -> list[str]:
+    """Return errors for an immutable Content Review 0.1 MAP request."""
+    return _errors(_content_review_01_validator, value)
 
 
 def validate_contribution(value: Any) -> None:
@@ -111,7 +131,14 @@ def validate_map_document(value: Any) -> None:
 
 
 def validate_content_review_request(value: Any) -> None:
-    """Raise ValueError if a value is not a Content Review 0.1 request."""
+    """Raise ValueError if a value is not a Content Review 0.2 request."""
     errors = content_review_request_errors(value)
+    if errors:
+        raise ValueError("Invalid Content Review 0.2 request:\n" + "\n".join(errors))
+
+
+def validate_content_review_01_request(value: Any) -> None:
+    """Raise ValueError if a value is not an immutable Content Review 0.1 request."""
+    errors = content_review_01_request_errors(value)
     if errors:
         raise ValueError("Invalid Content Review 0.1 request:\n" + "\n".join(errors))

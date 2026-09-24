@@ -62,6 +62,18 @@ async function canonicalContracts(registry) {
       'content-review-0.1',
       await readFile(resolve(root, 'public/schemas/content-review-0.1.schema.json')),
     ],
+    [
+      'content-review-0.1-contract',
+      await readFile(resolve(root, 'public/contracts/content-review-0.1.json')),
+    ],
+    [
+      'content-review-0.2',
+      await readFile(resolve(root, 'public/schemas/content-review-0.2.schema.json')),
+    ],
+    [
+      'content-review-0.2-contract',
+      await readFile(resolve(root, 'public/contracts/content-review-0.2.json')),
+    ],
   ];
   if (registry === 'crates.io') {
     const schema = JSON.parse(contribution.toString('utf8'));
@@ -77,10 +89,15 @@ async function canonicalContracts(registry) {
 
 function contractSuffixes(registry) {
   const prefix = registry === 'npm' ? '/dist/' : registry === 'PyPI' ? '/' : '/schemas/';
+  const separatedContracts = registry === 'crates.io' || registry === 'Go';
+  const contractPrefix = separatedContracts ? '/contracts/' : prefix;
   return {
     contribution: `${prefix}contribution.schema.json`,
     'map-0.1': `${prefix}map-0.1.schema.json`,
     'content-review-0.1': `${prefix}content-review-0.1.schema.json`,
+    'content-review-0.1-contract': `${contractPrefix}content-review-0.1${separatedContracts ? '' : '.contract'}.json`,
+    'content-review-0.2': `${prefix}content-review-0.2.schema.json`,
+    'content-review-0.2-contract': `${contractPrefix}content-review-0.2${separatedContracts ? '' : '.contract'}.json`,
     ...(registry === 'crates.io' ? { record: `${prefix}record.schema.json` } : {}),
   };
 }

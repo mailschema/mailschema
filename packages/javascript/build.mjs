@@ -15,6 +15,8 @@ for (const name of [
   'map-0.1.schema.json',
   'content-review-0.1.schema.json',
   'content-review-0.1.contract.json',
+  'content-review-0.2.schema.json',
+  'content-review-0.2.contract.json',
 ]) {
   await copyFile(resolve(root, 'src', name), resolve(root, 'dist', name));
 }

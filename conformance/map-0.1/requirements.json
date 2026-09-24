@@ -35,7 +35,7 @@
     {
       "id": "MAP-REQ-001",
       "actor": "service",
-      "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect; malformed or unknown-interaction requests do not claim a request identifier.",
+      "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect; malformed or unknown-interaction requests do not claim a request identifier, while a type-invalid request that reached type validation is claimed and recoverable.",
       "cases": [
         "unknown-interaction",
         "malformed-unclaimed",
@@ -63,6 +63,12 @@
       "cases": ["retry-current-authorization", "recovery-current-authorization"]
     },
     {
+      "id": "MAP-AUTH-003",
+      "actor": "service",
+      "requirement": "Authorize each human approval decision in the current tenant and policy context; an unauthorized decision attempt does not change the proposed request's state.",
+      "cases": ["approval-team-decision", "approval-unauthorized-decision"]
+    },
+    {
       "id": "MAP-IDEM-001",
       "actor": "service",
       "requirement": "Bind a claimed request identifier to one principal and complete request value, return the latest saved response for an exact retry, and apply the effect no more than once.",
@@ -70,19 +76,20 @@
     },
     {
       "id": "MAP-IDEM-002",
-      "actor": "service",
-      "requirement": "Preserve one interaction identifier when the same underlying interaction is redelivered.",
+      "actor": "sender and client",
+      "requirement": "Preserve one interaction identifier when the same underlying interaction is redelivered, and reuse the client's exact persisted request for the same selected operation and input.",
       "cases": ["stable-redelivery"]
     },
     {
       "id": "MAP-LIFE-001",
       "actor": "service",
-      "requirement": "Expose the latest recoverable state and permit only a non-terminal result to advance.",
+      "requirement": "Expose the latest recoverable state and permit an approval-required Content Review result to terminate only in a declared completed or failed outcome.",
       "cases": [
-        "pending-work",
         "approval-gate",
-        "pending-completion",
-        "pending-failure",
+        "approval-team-decision",
+        "approval-declined",
+        "approval-stale-target",
+        "approval-expired",
         "lost-response-recovery"
       ]
     },
