@@ -155,10 +155,14 @@
       </dl>
       <t>The description <bcp14>MUST NOT</bcp14> contain an access token,
       session credential, or new authorization grant. Its authentication
-      metadata only names schemes that a configured client may already use.</t>
+      metadata only names schemes that a configured client may already use.
+      Its audience, when present, is the protected resource identifier of the
+      service's MAP API <xref target="RFC9728"/>, used as a resource indicator
+      <xref target="RFC8707"/>.</t>
       <t>A service <bcp14>MUST</bcp14> preserve the same interaction identifier
-      when it redelivers the same underlying interaction. A changed target
-      revision or changed set of offered operations is a new interaction.</t>
+      when it redelivers the same underlying interaction. A changed type
+      contract, target revision, or set of offered operations is a new
+      interaction.</t>
     </section>
 
     <section anchor="trust" numbered="true">
@@ -174,6 +178,17 @@
       <bcp14>MUST NOT</bcp14> automatically fetch or interpret an unknown
       schema, URL, or instruction named by the message. These rules align with
       the Structured Email trust model <xref target="I-D.ietf-sml-trust"/>.</t>
+      <t>A client <bcp14>MAY</bcp14> obtain that configuration from OAuth 2.0
+      Protected Resource Metadata <xref target="RFC9728"/> for a protected
+      resource identifier it already trusts, applying that specification's
+      validation, including that the document names the configured resource.
+      The <tt>map_services</tt> metadata parameter lists the MAP services at
+      the resource. Each entry has an <tt>id</tt> matching the description's
+      service identity, the implemented <tt>profiles</tt>, an exact
+      <tt>execution_url</tt>, and an exact <tt>result_url_template</tt>. Both
+      URLs <bcp14>MUST</bcp14> use HTTPS on the resource identifier's origin;
+      metadata cannot extend trust to another origin, and nothing in an email
+      selects the resource.</t>
     </section>
 
     <section anchor="execution" numbered="true">
@@ -184,6 +199,16 @@
       body conforms to the request definition in the MAP schema. Service
       authentication and OAuth security follow the service's established
       configuration and applicable guidance such as <xref target="RFC9700"/>.</t>
+      <t>Authentication establishes two identities outside the request body.
+      The principal is the subject on whose behalf the request is made. The
+      actor is the client or agent that sent it, such as an OAuth client, the
+      actor of a delegated token <xref target="RFC8693"/>, or a service API key.
+      Request identifiers, authorization, and result access belong to the
+      principal. A service <bcp14>SHOULD</bcp14> record the actor of each
+      claimed request and human decision separately from the principal. MAP
+      defines no identity scheme; a service can take the actor from any
+      authentication it accepts, including HTTP Message Signatures
+      <xref target="RFC9421"/>.</t>
       <t>A successful response uses <tt>application/json</tt>. The service
       returns status 200 for the terminal <tt>accepted</tt>,
       <tt>completed</tt>, or <tt>failed</tt> states, and status 202 for the
@@ -215,7 +240,13 @@
       recorded response without applying the effect again. Object member order
       is insignificant; array order and member values are significant. An
       implementation can use the JSON Canonicalization Scheme
-      <xref target="RFC8785"/> when deriving a request digest.</t>
+      <xref target="RFC8785"/> when deriving a request digest. The request
+      identifier serves the purpose of the HTTP Idempotency-Key header
+      <xref target="I-D.ietf-httpapi-idempotency-key-header"/> but travels in
+      the body, where it binds the complete request value and names a
+      recoverable result. For the same reason, the target digest acts as an
+      entity tag for a conditional request sent to the execution resource
+      rather than to the target.</t>
       <t>When the same interaction is redelivered and a client has already
       prepared the same operation and input, the client <bcp14>MUST</bcp14>
       reuse its complete persisted request, including its
@@ -271,7 +302,10 @@
       the content. A proposed approval can complete as approved or fail as
       declined, stale, or expired. A service authorizes the human decision
       separately from the proposing request; a different authorized principal
-      in the same tenant can make that decision.</t>
+      in the same tenant can make that decision. If the service's content or
+      sending rules do not permit the approval when the decision is made, the
+      service refuses that attempt and the proposal remains pending until it
+      is declined or expires.</t>
     </section>
 
     <section anchor="security" numbered="true">
@@ -295,8 +329,8 @@
       produce <tt>completed</tt>. The protocol does not infer authority from
       whether the caller is a person or an automated client.</t>
       <t>The service must authorize a human approval decision against current
-      tenant, role, target, and expiry state. An unauthorized decision attempt
-      does not change the saved non-terminal result.</t>
+      tenant, role, target, and expiry state. An unauthorized or rule-refused
+      decision attempt does not change the saved non-terminal result.</t>
     </section>
 
     <section anchor="privacy" numbered="true">
@@ -312,9 +346,21 @@
 
     <section anchor="iana" numbered="true">
       <name>IANA Considerations</name>
-      <t>This document requests no IANA action. MAP 0.1 uses existing media
-      types and HTTPS. A future version that introduces a new media type or
-      well-known URI will define the required registration.</t>
+      <t>MAP 0.1 uses existing media types, HTTPS, and the existing OAuth
+      protected resource metadata document. It requests no new media type or
+      well-known URI.</t>
+      <t>IANA is requested to register the following parameter in the "OAuth
+      Protected Resource Metadata" registry established by
+      <xref target="RFC9728"/>:</t>
+      <dl>
+        <dt>Metadata Name:</dt><dd><tt>map_services</tt></dd>
+        <dt>Metadata Description:</dt><dd>Mail Action Protocol services at the
+        protected resource, with their profiles and exact execution and result
+        URLs</dd>
+        <dt>Change Controller:</dt><dd>IETF</dd>
+        <dt>Specification Document(s):</dt><dd><xref target="trust"/> of this
+        document</dd>
+      </dl>
     </section>
 
     <section anchor="implementations" numbered="true">
@@ -347,6 +393,7 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9110.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9700.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
       <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/">
         <front><title>Structured Email</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
         <seriesInfo name="Internet-Draft" value="draft-ietf-sml-structured-email-06"/>
@@ -360,7 +407,11 @@
       <name>Informative References</name>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8707.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8693.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9421.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-httpapi-idempotency-key-header.xml"/>
     </references>
   </back>
 </rfc>

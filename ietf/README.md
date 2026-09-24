@@ -9,4 +9,4 @@ mkdir -p /tmp/mailschema-rfc
 xml2rfc --text --html --path /tmp/mailschema-rfc ietf/draft-mailschema-mail-action-protocol-00.xml
 ```
 
-CI pins `xml2rfc` 3.34.1 and renders both formats. The draft requests no new media type, DNS record, well-known URI or other IANA registration. Implementation claims must remain aligned with the public conformance manifest and linked repository evidence. Rendering is not submission or IETF adoption.
+CI pins `xml2rfc` 3.34.1 and renders both formats. The draft requests no new media type, DNS record or well-known URI. Its only IANA request registers the `map_services` parameter in the existing OAuth Protected Resource Metadata registry. Implementation claims must remain aligned with the public conformance manifest and linked repository evidence. Rendering is not submission or IETF adoption.

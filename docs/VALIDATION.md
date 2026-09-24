@@ -6,7 +6,7 @@
 
 - Registry validation passed with five types, no vendor contributions and no implementation declarations.
 - MAP profile validation passed for six valid documents, two rejected fixtures and one complete multipart email.
-- The conformance manifest verified 20 digest-bound artifacts, 29 executable cases and mappings for 16 normative requirements.
+- The conformance manifest verified 21 digest-bound artifacts, 34 executable cases and mappings for 19 normative requirements.
 - The reference suite covers MIME and JSON-LD processing, completion, feedback acceptance, exact retry, lost-response recovery, changed-payload conflict, refusal, stale targets, expiry, unsupported types, approval requirements, pending work, authenticated principal and tenant binding, current authorization and exact endpoint trust.
 - Thirteen readiness probes passed against the specification, profile, schemas, fixtures, reference boundary, conformance matrix, package promotion contract and Internet-Draft source.
 - The Content Review record, schemas and fixtures agree on the stable operation IDs `request-changes` and `approve`.
@@ -49,7 +49,7 @@
 ## Internet-Draft
 
 - `xml2rfc` 3.34.1 generated text and HTML from `ietf/draft-mailschema-mail-action-protocol-00.xml` without warnings.
-- The draft requests no new media type, DNS record, well-known URI or other IANA registration.
+- The draft requests no new media type, DNS record or well-known URI. Its only IANA request registers the `map_services` parameter in the existing OAuth Protected Resource Metadata registry.
 - The implementation section identifies the reference suite and Nitrosend source without claiming IETF submission, an end-to-end product run or independent adoption. Community discussion and submission remain pending.
 
 ## Release boundary

@@ -48,6 +48,15 @@ type ResultState = 'accepted' | 'completed' | 'failed' | 'pending' | 'approval-r
 export interface RequestContext {
   principal: string;
   tenant: string;
+  /** The client or agent that sent the request, as established by authentication. */
+  actor?: string;
+}
+
+/** Who a claimed request and its human decision are attributed to. */
+export interface Attribution {
+  principal: string;
+  actor?: string;
+  decision?: { principal: string; actor?: string };
 }
 
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
@@ -74,6 +83,12 @@ function requestKey(context: RequestContext, requestId: string) {
   return `${context.tenant}\n${requestId}`;
 }
 
+function attributionOf(context: RequestContext): Attribution {
+  return context.actor
+    ? { principal: context.principal, actor: context.actor }
+    : { principal: context.principal };
+}
+
 function assertContext(context: RequestContext) {
   if (!context?.principal?.trim() || !context?.tenant?.trim())
     throw new Error('Authenticated principal and tenant context are required.');
@@ -93,11 +108,13 @@ export interface ReferenceServiceOptions {
     proposer: RequestContext,
     decider: RequestContext,
   ) => boolean;
+  /** The service's own rules at decision time, such as content or sending checks. */
+  permitsApproval?: (request: MapRequest) => boolean;
 }
 
 type RecordedResponse = {
   fingerprint: string;
-  principal: string;
+  attribution: Attribution;
   tenant: string;
   request: MapRequest;
   response: Response;
@@ -158,7 +175,7 @@ export class ReferenceMapService {
     const key = requestKey(context, request.requestId);
     const previous = this.#responses.get(key);
     if (previous) {
-      if (previous.principal !== context.principal)
+      if (previous.attribution.principal !== context.principal)
         return this.#problem(
           request,
           'refused',
@@ -282,7 +299,7 @@ export class ReferenceMapService {
     );
     this.#responses.set(key, {
       fingerprint: digest,
-      principal: context.principal,
+      attribution: attributionOf(context),
       tenant: context.tenant,
       request: structuredClone(request),
       response,
@@ -300,10 +317,10 @@ export class ReferenceMapService {
     assertContext(context);
     const recorded = this.#responses.get(requestKey(context, requestId));
     if (!recorded) return undefined;
-    const proposer = { principal: recorded.principal, tenant: recorded.tenant };
+    const proposer = { ...recorded.attribution, tenant: recorded.tenant };
     const authorized = this.#options.authorizeDecision
       ? this.#options.authorizeDecision(recorded.request, proposer, context)
-      : recorded.principal === context.principal &&
+      : recorded.attribution.principal === context.principal &&
         this.#options.authorize(recorded.request, context, 'execute');
     if (!authorized)
       return this.#problem(
@@ -316,29 +333,49 @@ export class ReferenceMapService {
     if (recorded.response.body.state !== 'approval-required')
       throw new Error('Only an approval-required result can receive a human decision.');
 
+    let response: Response;
     if (decision === 'decline')
-      recorded.response = this.#result(recorded.request, 'failed', { reason: 'declined' });
+      response = this.#result(recorded.request, 'failed', { reason: 'declined' });
     else if ((this.#options.now?.() ?? new Date()) >= new Date(this.#description.expiresAt))
-      recorded.response = this.#result(recorded.request, 'failed', { reason: 'expired' });
+      response = this.#result(recorded.request, 'failed', { reason: 'expired' });
     else if (
       !sameTarget(
         recorded.request.target,
         this.#options.currentTarget?.() ?? this.#description.target,
       )
     )
-      recorded.response = this.#result(recorded.request, 'failed', { reason: 'stale-target' });
+      response = this.#result(recorded.request, 'failed', { reason: 'stale-target' });
+    // A rule refusal answers this attempt only; the proposal can still be
+    // declined or expire.
+    else if (this.#options.permitsApproval?.(recorded.request) === false)
+      return this.#problem(
+        recorded.request,
+        'refused',
+        403,
+        'Approval refused',
+        'The service rules do not permit this approval.',
+      );
     else {
-      recorded.response = this.#result(recorded.request, 'completed', { decision: 'approved' });
+      response = this.#result(recorded.request, 'completed', { decision: 'approved' });
       this.#effectCount += 1;
     }
-    return structuredClone(recorded.response);
+    recorded.response = response;
+    recorded.attribution.decision = attributionOf(context);
+    return structuredClone(response);
+  }
+
+  /** The principal and actor recorded for a claimed request and its decision. */
+  attribution(requestId: string, context: RequestContext): Attribution | undefined {
+    assertContext(context);
+    const recorded = this.#responses.get(requestKey(context, requestId));
+    return recorded && structuredClone(recorded.attribution);
   }
 
   recover(requestId: string, context: RequestContext): Response {
     assertContext(context);
     const recorded = this.#responses.get(requestKey(context, requestId));
     if (!recorded) return this.#notFound(requestId);
-    if (recorded.principal !== context.principal)
+    if (recorded.attribution.principal !== context.principal)
       return this.#problem(
         recorded.request,
         'refused',
@@ -498,6 +535,37 @@ function checkedHttpsOrigin(value: string, label: string) {
   if (url.protocol !== 'https:') throw new Error(`${label} must use HTTPS.`);
   if (url.username || url.password) throw new Error(`${label} must not contain URL credentials.`);
   return url.origin;
+}
+
+/**
+ * Service configuration from RFC 9728 protected resource metadata that the
+ * client retrieved for a resource identifier it already trusts. The metadata
+ * cannot extend trust beyond that resource's HTTPS origin.
+ */
+export function trustedServicesFromMetadata(resource: string, metadata: JsonObject) {
+  const origin = checkedHttpsOrigin(resource, 'The protected resource');
+  if (metadata.resource !== resource)
+    throw new Error('The metadata describes a different protected resource.');
+  if (!Array.isArray(metadata.map_services) || metadata.map_services.length === 0)
+    throw new Error('The metadata publishes no MAP services.');
+  const endpoint = (url: unknown, label: string) => {
+    if (typeof url !== 'string' || checkedHttpsOrigin(url, label) !== origin)
+      throw new Error(`${label} is outside the protected resource origin.`);
+    return url;
+  };
+  return metadata.map_services.map((entry): TrustedService => {
+    const service = entry as JsonObject;
+    if (typeof service.id !== 'string')
+      throw new Error('A published MAP service has no identifier.');
+    if (!Array.isArray(service.profiles) || !service.profiles.includes(MAP_PROFILE))
+      throw new Error('A published MAP service does not implement this profile.');
+    return {
+      serviceId: service.id,
+      executionUrls: [endpoint(service.execution_url, 'The action endpoint')],
+      resultUrlTemplates: [endpoint(service.result_url_template, 'The result endpoint')],
+      audiences: [resource],
+    };
+  });
 }
 
 /** Email content never establishes trust in an action or result endpoint by itself. */

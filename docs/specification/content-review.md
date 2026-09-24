@@ -34,6 +34,8 @@ The human decision is a separate authorized act. The service may allow another r
 
 Before recording approval, the service rechecks the interaction expiry and current target. If the interaction has expired or the content has changed, the proposal ends as `failed` with reason `expired` or `stale-target`. These are results of the already accepted approval workflow, rather than new request failures.
 
+The service's own content and sending rules still apply when the decision is made. If they do not permit the approval, the service refuses that decision attempt and the proposal stays `approval-required`. The reviewer sees the reason and can decline it; otherwise it ends as `expired`. Content that satisfies the rules is a new revision and therefore a new interaction.
+
 ## Example exchange
 
 1. A service sends a test email for campaign revision 3.

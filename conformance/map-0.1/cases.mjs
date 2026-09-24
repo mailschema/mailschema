@@ -10,6 +10,7 @@ import {
   ReferenceMapClient,
   ReferenceMapService,
   assertTrustedExecution,
+  trustedServicesFromMetadata,
 } from '../../src/map/reference.ts';
 
 const fixture = async (name) =>
@@ -145,6 +146,30 @@ export const conformanceCases = [
       const other = { principal: 'reviewer-8', tenant: context.tenant };
       assert.equal(service.submit(request, other).status, 403);
       assert.equal(service.recover(request.requestId, other)?.status, 403);
+      assert.equal(service.effectCount, 1);
+    },
+  ),
+  caseOf(
+    'actor-attribution',
+    'the acting client is recorded apart from the principal',
+    'principal-scoped retry with the first actor and the decider recorded',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const request = await fixture('approve.json');
+      const agent = { ...context, actor: 'agent-key-3' };
+      const teammate = { principal: 'reviewer-8', tenant: context.tenant, actor: 'session' };
+      const service = implementation(description, {
+        requireApproval: () => true,
+        authorizeDecision: (_request, proposer, decider) => proposer.tenant === decider.tenant,
+      });
+      const proposed = service.submit(request, agent);
+      assert.deepEqual(service.submit(request, { ...context, actor: 'agent-key-4' }), proposed);
+      service.decideApproval(request.requestId, teammate, 'approve');
+      assert.deepEqual(service.attribution(request.requestId, context), {
+        principal: context.principal,
+        actor: agent.actor,
+        decision: { principal: teammate.principal, actor: teammate.actor },
+      });
       assert.equal(service.effectCount, 1);
     },
   ),
@@ -361,6 +386,28 @@ export const conformanceCases = [
     },
   ),
   caseOf(
+    'approval-rule-refusal',
+    'service rules can refuse an approval without ending the proposal',
+    '403, unchanged approval-required result, then a declined result',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const service = implementation(description, {
+        requireApproval: () => true,
+        permitsApproval: () => false,
+      });
+      const request = await fixture('approve.json');
+      const proposed = service.submit(request, context);
+      const refused = service.decideApproval(request.requestId, context, 'approve');
+      assert.equal(refused?.status, 403);
+      assert.equal(refused?.body.code, 'refused');
+      assert.deepEqual(service.recover(request.requestId, context), proposed);
+      const declined = service.decideApproval(request.requestId, context, 'decline');
+      assert.equal(declined?.body.state, 'failed');
+      assert.equal(declined?.body.output.reason, 'declined');
+      assert.equal(service.effectCount, 0);
+    },
+  ),
+  caseOf(
     'approval-declined',
     'an authorized human can decline a proposed approval',
     '200 failed declined and no effect',
@@ -472,6 +519,43 @@ export const conformanceCases = [
         mutate(candidate);
         assert.throws(() => assertTrustedExecution(candidate, trusted));
       }
+    },
+  ),
+  caseOf(
+    'metadata-configuration',
+    'protected resource metadata can configure a service without extending trust',
+    'configured resource anchors every endpoint and audience',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const resource = description.service.authorization.audience;
+      const metadata = {
+        resource,
+        bearer_methods_supported: ['header'],
+        map_services: [
+          {
+            id: description.service.id,
+            profiles: [description.profile],
+            execution_url: description.service.execution.url,
+            result_url_template: description.service.execution.resultUrlTemplate,
+          },
+        ],
+      };
+      const [trusted] = trustedServicesFromMetadata(resource, metadata);
+      assert.doesNotThrow(() => assertTrustedExecution(description, trusted));
+      for (const mutate of [
+        (candidate) => (candidate.resource = 'https://attacker.example/'),
+        (candidate) => (candidate.map_services[0].execution_url = 'https://attacker.example/map'),
+        (candidate) =>
+          (candidate.map_services[0].result_url_template = 'http://reviews.example/{requestId}'),
+        (candidate) => (candidate.map_services[0].profiles = ['https://example.com/other']),
+      ]) {
+        const candidate = structuredClone(metadata);
+        mutate(candidate);
+        assert.throws(() => trustedServicesFromMetadata(resource, candidate));
+      }
+      const elsewhere = structuredClone(description);
+      elsewhere.service.authorization.audience = 'https://other.example/';
+      assert.throws(() => assertTrustedExecution(elsewhere, trusted));
     },
   ),
   caseOf(
