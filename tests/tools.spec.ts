@@ -92,7 +92,7 @@ test('language tabs restore deep links and support keyboard navigation and exact
       },
     });
   });
-  await page.goto('/tools/#python');
+  await page.goto('/tools#python');
   const python = page.getByRole('tab', { name: 'Python PyPI' });
   await expect(python).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tabpanel')).toHaveCount(1);
@@ -130,7 +130,7 @@ test('clipboard failure leaves selectable code with feedback', async ({ page }) 
       },
     });
   });
-  await page.goto('/tools/');
+  await page.goto('/tools');
   const panel = page.locator('#javascript');
   await panel.getByRole('button', { name: 'Copy Install', exact: true }).click();
   await expect(panel.getByRole('button', { name: 'Copy Install', exact: true })).toContainText(
@@ -145,7 +145,7 @@ test('record downloads work directly with validators and retain existing digest 
   request,
 }) => {
   for (const type of typeRecords) {
-    await page.goto(`/registry/${type.slug}/`);
+    await page.goto(`/registry/${type.slug}`);
     const link = page.getByRole('link', { name: 'Download record', exact: true });
     await expect(link).toHaveAttribute('download', `${type.slug}.json`);
     const record = await (await request.get((await link.getAttribute('href'))!)).json();
@@ -156,10 +156,10 @@ test('record downloads work directly with validators and retain existing digest 
     expect(envelope.digest).toMatch(/^[a-f0-9]{64}$/);
     await expect(page.getByRole('link', { name: 'Validate this record' })).toHaveAttribute(
       'href',
-      '/tools/#records',
+      '/tools#records',
     );
   }
-  await page.goto('/tools/#records');
+  await page.goto('/tools#records');
   await expect(page.locator('#records')).toContainText(recordCheckCommands.javascript);
 });
 
@@ -169,25 +169,25 @@ test('tooling remains readable without JavaScript and is linked from the contrib
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await context.newPage();
-  await staticPage.goto('http://127.0.0.1:49327/tools/');
+  await staticPage.goto('http://127.0.0.1:49327/tools');
   for (const tool of tooling) {
     await expect(staticPage.locator(`#${tool.id}`)).toBeVisible();
     await expect(staticPage.locator(`#${tool.id}`)).toContainText(tool.install);
   }
   await expect(staticPage.locator('[data-copy-code]:visible')).toHaveCount(0);
   await context.close();
-  await page.goto('/contribute/');
+  await page.goto('/contribute');
   await page.getByRole('link', { name: 'Prefer to validate locally?' }).click();
   await expect(page).toHaveURL(/#local-validation$/);
   await expect(page.locator('#local-validation')).toContainText(localCheckCommands.javascript);
   await page.getByRole('link', { name: 'Installation and API reference' }).click();
-  await expect(page).toHaveURL(/\/tools\/$/);
-  await page.goto('/search/?q=Python');
+  await expect(page).toHaveURL(/\/tools$/);
+  await page.goto('/search?q=Python');
   await page
     .locator('[data-search]:visible')
     .getByRole('heading', { name: 'Python package' })
     .click();
   await expect(page.locator('#python')).toBeVisible();
-  await page.goto('/specification/');
+  await page.goto('/specification');
   await expect(page.getByRole('link', { name: 'Registry tools', exact: true })).toBeVisible();
 });

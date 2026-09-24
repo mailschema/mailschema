@@ -38,9 +38,9 @@ Validation is shared between the website and CLI. Full repository validation add
 
 ## Prepare and preview
 
-Use `/contribute/` to load a file or start from an example. The checker validates its format and references against `/registry/catalog.json`, previews attribution and prepares the exact JSON for GitHub. Editing the file invalidates the previous result. An unavailable Registry cannot produce a successful reference check. The contribution remains in the browser until the contributor chooses to continue to GitHub. A checked download remains available for local review or command-line use.
+Use `/contribute` to load a file or start from an example. The checker validates its format and references against `/registry/catalog.json`, previews attribution and prepares the exact JSON for GitHub. Editing the file invalidates the previous result. An unavailable Registry cannot produce a successful reference check. The contribution remains in the browser until the contributor chooses to continue to GitHub. A checked download remains available for local review or command-line use.
 
-The `/tools/` page documents the published JavaScript, Python, Rust and Go packages with pinned installation commands and executable examples. JavaScript and Python validate MAP and Registry documents locally; the JavaScript API can also check references against a supplied catalogue. Rust provides canonical schemas for an existing validator. Go provides typed MAP documents, strict decoding and core validation. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the CLI validators' `--record` option.
+The `/tools` page documents the published JavaScript, Python, Rust and Go packages with pinned installation commands and executable examples. JavaScript and Python validate MAP and Registry documents locally; the JavaScript API can also check references against a supplied catalogue. Rust provides canonical schemas for an existing validator. Go provides typed MAP documents, strict decoding and core validation. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the CLI validators' `--record` option.
 
 In a checkout:
 

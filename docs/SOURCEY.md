@@ -1,6 +1,6 @@
 # MailSchema on Sourcey
 
-The specification is rendered by Sourcey's built-in `reader` theme. The Astro host serves the homepage, Types, Registry, example and site search; `sourcey/astro` owns `/specification/`. There is no second Astro Markdown reader, iframe, prebuild script or committed generated docs tree.
+The specification is rendered by Sourcey's built-in `reader` theme. The Astro host serves the homepage, Types, Registry, example and site search; `sourcey/astro` owns `/specification`. There is no second Astro Markdown reader, iframe, prebuild script or committed generated docs tree.
 
 ## Ownership
 

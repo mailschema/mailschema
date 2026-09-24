@@ -20,7 +20,7 @@ The service includes enough information for a client to identify the interaction
 | Execution route        | The service endpoint that accepts requests.                                          |
 | Human route            | A normal service interface through which a person can complete the interaction.      |
 
-The [MAP 0.1 profile](/specification/profile/) assigns these concepts exact JSON fields and binds descriptions to a versioned profile, canonical type contract and target revision.
+The [MAP 0.1 profile](/specification/profile) assigns these concepts exact JSON fields and binds descriptions to a versioned profile, canonical type contract and target revision.
 
 ## Request
 
@@ -36,7 +36,7 @@ The service reports the state of the requested operation. It identifies the requ
 
 The result distinguishes work that has been accepted from work that has completed. It also reports refusal, stale content, pending work or a required approval when those conditions apply.
 
-[Results and retries](/specification/outcomes/) explains the distinctions clients preserve. The [profile](/specification/profile/) defines their wire values and HTTP mappings.
+[Results and retries](/specification/outcomes) explains the distinctions clients preserve. The [profile](/specification/profile) defines their wire values and HTTP mappings.
 
 ## Human participation
 

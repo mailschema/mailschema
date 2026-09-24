@@ -24,23 +24,23 @@ npm run verify
 ## Site structure
 
 - `/`: identity, protocol explanation and local review demonstration.
-- `/specification/`: MAP 0.1 draft reader, including the exact MIME and authenticated HTTPS profile.
-- `/types/`: the complete interaction collection, with operations, examples, maturity labels and guidance on using or proposing a type.
-- `/registry/`: five type records, searchable by name and description and filterable by category and status.
-- `/registry/<type>/`: definition brief, operations, example, existing standards, open questions and implementation evidence.
-- `/examples/`: interactive local Content Review simulation.
-- `/tools/`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
-- `/about/`, `/contribute/`, `/search/`: project, browser contribution intake and guide, and local search.
+- `/specification`: MAP 0.1 draft reader, including the exact MIME and authenticated HTTPS profile.
+- `/types`: the complete interaction collection, with operations, examples, maturity labels and guidance on using or proposing a type.
+- `/registry`: five type records, searchable by name and description and filterable by category and status.
+- `/registry/<type>`: definition brief, operations, example, existing standards, open questions and implementation evidence.
+- `/examples`: interactive local Content Review simulation.
+- `/tools`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
+- `/about`, `/contribute`, `/search`: project, browser contribution intake and guide, and local search.
 - `/registry/catalog.json`, `/registry/records/<type>.json`, `/registry/snapshots/<digest>.json`: generated Registry data and exact record snapshots.
 - `/registry/records/<type>.record.json`: a raw record accepted directly by the package validators; used by each type page's download link.
 
-Specification content and Sourcey configuration live in `docs/specification/`. Sourcey owns the reader theme, rendering, chapter navigation and machine-readable specification output. `sourcey/astro` mounts it at `/specification/` in development and production. The rest of the site uses Astro components and small native TypeScript modules. Shared chapter metadata is authored once in `docs/specification/navigation.ts`. Fonts are self-hosted and shared across the Astro and Sourcey surfaces. There are no runtime account, analytics, AI, email or registry services.
+Specification content and Sourcey configuration live in `docs/specification/`. Sourcey owns the reader theme, rendering, chapter navigation and machine-readable specification output. `sourcey/astro` mounts it at `/specification` in development and production. The rest of the site uses Astro components and small native TypeScript modules. Shared chapter metadata is authored once in `docs/specification/navigation.ts`. Fonts are self-hosted and shared across the Astro and Sourcey surfaces. There are no runtime account, analytics, AI, email or registry services.
 
 ## Content and implementation boundaries
 
 MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. Nitrosend exposes the first deployed Content Review boundary: an agent can propose approval of an exact flow revision, a signed-in person can decide it and both paths resolve through the same retained result. A provider-delivered inbox round trip and an independently operated implementation remain outstanding, so the project does not claim end-to-end interoperability or IETF adoption. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
 
-The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review/` address redirects to its Registry record.
+The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review` address redirects to its Registry record.
 
 The example runs in the browser and never sends email. It illustrates revision binding, feedback acceptance, a predetermined edit, separate approval, permission refusal and stale requests. Sourcey renders the documentation; it is not presented as a MAP implementation.
 

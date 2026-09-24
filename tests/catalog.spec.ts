@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { typeContracts, typeRecords, typeHref, typeStatusLabel } from '../src/data/types';
+import {
+  definitionHref,
+  typeContracts,
+  typeRecords,
+  typeHref,
+  typeStatusLabel,
+} from '../src/data/types';
 
 test('type collection stays consistent across Types, Registry, detail pages, About and search', async ({
   page,
@@ -12,7 +18,7 @@ test('type collection stays consistent across Types, Registry, detail pages, Abo
   ).toBe(typeRecords.length);
   expect(new Set(names).size, 'Type names must be unique').toBe(typeRecords.length);
 
-  await page.goto('/types/');
+  await page.goto('/types');
   await expect(page.locator('[data-type-summary] h2')).toHaveText(names);
   await expect(page.locator('[data-type-summary] [data-type-description]')).toHaveText(summaries);
   for (const type of typeRecords) {
@@ -25,7 +31,7 @@ test('type collection stays consistent across Types, Registry, detail pages, Abo
     await expect(entry.locator('.type-example')).toContainText(type.example.title);
   }
 
-  await page.goto('/registry/');
+  await page.goto('/registry');
   await expect(page.locator('[data-type-record] h2')).toHaveText(names);
   await expect(page.locator('[data-type-description]')).toHaveText(summaries);
   for (const type of typeRecords) {
@@ -34,14 +40,14 @@ test('type collection stays consistent across Types, Registry, detail pages, Abo
     await expect(entry.locator('.registry-version')).toContainText(type.version || 'Not assigned');
   }
 
-  await page.goto('/search/');
+  await page.goto('/search');
   for (const type of typeRecords) {
     const entry = page.locator(`.search-result[href="${typeHref(type.slug)}"]`);
     await expect(entry.locator('h2')).toHaveText(type.name);
     await expect(entry.locator('p')).toHaveText(`${type.summary} ${typeStatusLabel(type)}.`);
   }
 
-  await page.goto('/about/');
+  await page.goto('/about');
   for (const type of typeRecords) {
     const link = page.locator(`.prose a[href="${typeHref(type.slug)}"]`);
     await expect(link).toHaveText(type.name);
@@ -104,7 +110,7 @@ test('linked specification definitions agree with their type records', async ({ 
       expect(type.definition, `${type.name} needs a maintained definition`).toBeTruthy();
     }
     if (!type.definition) continue;
-    const response = await page.goto(type.definition.href);
+    const response = await page.goto(definitionHref(type.definition));
     expect(response?.status()).toBe(200);
     await expect(page.locator('main h1')).toHaveText(type.name);
     await expect(page.locator('.doc-title p')).toHaveText(type.summary);

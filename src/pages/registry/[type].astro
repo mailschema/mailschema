@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import PartyList from '../../components/PartyList.astro';
 import {
+  definitionHref,
   registry,
   typeContracts,
   typeRecords,
@@ -30,7 +31,7 @@ const digest = recordDigest(record);
   <main id="main" class="container">
     <header class="page-hero">
       <div class="breadcrumb">
-        <a href="/registry/">Registry</a>
+        <a href="/registry">Registry</a>
         <Icon name="chevron" size={12} />
         <span>{record.name}</span>
       </div>
@@ -86,7 +87,7 @@ const digest = recordDigest(record);
           >
             Download record <Icon size={14} />
           </a>
-          <a class="type-validation-link" href="/tools/#records">
+          <a class="type-validation-link" href="/tools#records">
             Validate this record <Icon name="northeast" size={12} />
           </a>
         </div>
@@ -102,7 +103,7 @@ const digest = recordDigest(record);
         )}
         {record.definition && (
           <p>
-            <a href={record.definition.href}>{record.definition.label} →</a>
+            <a href={definitionHref(record.definition)}>{record.definition.label} →</a>
           </p>
         )}
         <h2 id="operations">{proposed ? 'Proposed operations' : 'Operations'}</h2>
@@ -164,7 +165,7 @@ const digest = recordDigest(record);
         <p>{record.example.exception}</p>
         {record.slug === 'content-review' && (
           <p>
-            <a href="/examples/">Try the review example →</a>
+            <a href="/examples">Try the review example →</a>
           </p>
         )}
         <h2 id="existing-standards">Existing standards</h2>
@@ -212,7 +213,7 @@ const digest = recordDigest(record);
           ))}
         </ul>
         <p>
-          <a href="/contribute/#review-the-draft">Contribute to this definition →</a>
+          <a href="/contribute#review-the-draft">Contribute to this definition →</a>
         </p>
         <h2 id="implementations">Implementations</h2>
         {implementations.length === 0 && (
@@ -280,7 +281,7 @@ const digest = recordDigest(record);
           record.
         </p>
         <p>
-          <a href="/contribute/#implementation-evidence">
+          <a href="/contribute#implementation-evidence">
             How to provide implementation evidence →
           </a>
         </p>

@@ -8,7 +8,12 @@ export const typeContracts = loadTypeContractCatalog();
 assertContractCoverage(registry.types, typeContracts);
 export const typeRecords = registry.types;
 
-export const typeHref = (slug: string) => `/registry/${slug}/`;
+export const typeHref = (slug: string) => `/registry/${slug}`;
+
+// The contribution format names a specification chapter by its slash path;
+// the site serves every page without the trailing slash.
+export const definitionHref = (definition: { href: string }) =>
+  definition.href.replace(/(?<=.)\/$/, '');
 
 export const typeStatusLabel = (type: TypeRecord) =>
   `${type.status}${type.version ? ` · ${type.version}` : ''}`;

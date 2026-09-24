@@ -45,7 +45,7 @@ The service's own content and sending rules still apply when the decision is mad
 5. An authorised reviewer approves revision 4, directly or through the service's approval route.
 6. The service confirms that approval was recorded for revision 4.
 
-The [interactive example](/examples/) simulates this exchange in the browser. It includes requests from a caller without permission and requests that refer to an old revision.
+The [interactive example](/examples) simulates this exchange in the browser. It includes requests from a caller without permission and requests that refer to an old revision.
 
 ## Stale and repeated requests
 

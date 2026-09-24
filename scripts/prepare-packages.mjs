@@ -50,7 +50,7 @@ await put(
     type: 'module',
     license: 'MIT',
     author: 'MailSchema contributors',
-    homepage: 'https://mailschema.org/tools/',
+    homepage: 'https://mailschema.org/tools',
     repository: { type: 'git', url: 'git+https://github.com/mailschema/javascript.git' },
     bugs: { url: 'https://github.com/mailschema/javascript/issues' },
     engines: { node: '>=22' },

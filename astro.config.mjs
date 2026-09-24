@@ -6,13 +6,14 @@ import { specNavigation } from './docs/specification/navigation.ts';
 export default defineConfig({
   site: 'https://mailschema.org',
   output: 'static',
-  trailingSlash: 'always',
-  redirects: { '/types/content-review/': '/registry/content-review/' },
+  trailingSlash: 'never',
+  build: { format: 'file' },
+  redirects: { '/types/content-review': '/registry/content-review' },
   devToolbar: { enabled: false },
   integrations: [
     sitemap({
       customPages: specNavigation.map(
-        (page) => `https://mailschema.org/specification/${page.slug ? `${page.slug}/` : ''}`,
+        (page) => `https://mailschema.org/specification${page.slug ? `/${page.slug}` : ''}`,
       ),
     }),
     {
@@ -38,7 +39,7 @@ export default defineConfig({
     sourcey({
       config: './docs/specification/sourcey.config.ts',
       routeBase: '/specification',
-      prettyUrls: 'slash',
+      prettyUrls: 'strip',
     }),
   ],
 });

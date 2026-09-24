@@ -76,13 +76,15 @@ The [24 September scope audit](SCOPE-AUDIT.md) records the baseline defects and 
 
 ## Specification renderer
 
-The approved reader is a reusable Sourcey OSS `reader` theme. MailSchema configures and serves it through `sourcey/astro` at `/specification/`, keeping all other routes in the Astro host. Authored specifications live in `docs/specification/`; Sourcey emits their HTML, search and machine-readable indexes. See `SOURCEY.md` for ownership and validation.
+The approved reader is a reusable Sourcey OSS `reader` theme. MailSchema configures and serves it through `sourcey/astro` at `/specification`, keeping all other routes in the Astro host. Authored specifications live in `docs/specification/`; Sourcey emits their HTML, search and machine-readable indexes. See `SOURCEY.md` for ownership and validation.
+
+Every page has one address without a trailing slash. Astro and Sourcey (`prettyUrls: 'strip'`) emit one HTML file per page, Cloudflare assets serve it without the slash, and the Worker permanently redirects any slash address in a single hop. Links in published artifacts, such as the MAP 0.1 profile's specification link, therefore keep resolving without changing their bytes.
 
 ## Language and collection review
 
 The applied review packet is in [editorial-review/README.md](editorial-review/README.md). It covers the homepage, supporting pages, all six specification chapters and a five-entry collection. Content Review remains the only semantic type draft. Information Request and Subscription Preferences are proposals. Task Assignment and Event Response are assessments of how existing standards could be reused. Publishing these records on the project site does not expand the implemented protocol or establish compatibility.
 
-Registry records have canonical `/registry/<type>/` addresses. The old Content Review address redirects to its record; the former Sourcey product listing has been removed. Each record documents operations, examples, references, version status and open questions. Implementation evidence will be attached to the relevant type version and profile, rather than listed as a separate directory of products.
+Registry records have canonical `/registry/<type>` addresses. The old Content Review address redirects to its record; the former Sourcey product listing has been removed. Each record documents operations, examples, references, version status and open questions. Implementation evidence will be attached to the relevant type version and profile, rather than listed as a separate directory of products.
 
 ## Content ownership
 
@@ -98,7 +100,7 @@ The browser checks a contribution against the current Registry, previews it and 
 
 ## Package documentation
 
-The approved integration places package installation, examples and API reference at `/tools/` within the MailSchema site. Tools is linked from the main navigation, search, contribution guide, type record downloads and the specification reader's resource links. The packages validate or expose MAP 0.1, the deliberately bundled Content Review reference contracts and Registry records. They do not send email, establish endpoint trust or grant authorization. Normative MAP requirements remain in the specification.
+The approved integration places package installation, examples and API reference at `/tools` within the MailSchema site. Tools is linked from the main navigation, search, contribution guide, type record downloads and the specification reader's resource links. The packages validate or expose MAP 0.1, the deliberately bundled Content Review reference contracts and Registry records. They do not send email, establish endpoint trust or grant authorization. Normative MAP requirements remain in the specification.
 
 The Registry is not distributed by rebuilding every language package. Accepted types are versioned Registry data with immutable schema and contract artifacts. The generated `/registry/catalog.json` index lists every executable version with its type ID, profile, operations, canonical digest and exact-byte SHA-256. A service or client selects the exact types it implements and vendors those bytes; MAP execution has no mandatory online Registry dependency. Adding a type therefore updates the Registry and site without releasing npm, PyPI, Rust or Go packages. A language package advances only when its own generic tooling, public API or declared compatibility artifacts change. Content Review remains bundled for compatibility with the first package APIs, not as a precedent for mirroring the catalogue.
 

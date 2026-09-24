@@ -1,4 +1,4 @@
-import { registry, typeContracts } from '../../data/types';
+import { registry, typeContracts, typeHref } from '../../data/types';
 import { recordDigest } from '../../registry/catalog';
 export function GET() {
   return Response.json({
@@ -7,7 +7,7 @@ export function GET() {
     types: registry.types.map((record) => ({
       record,
       digest: recordDigest(record),
-      href: `/registry/${record.slug}/`,
+      href: typeHref(record.slug),
     })),
     contracts: typeContracts,
     snapshots: [...registry.snapshots].map(([digest, record]) => ({ digest, record })),

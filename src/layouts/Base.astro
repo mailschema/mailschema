@@ -15,7 +15,12 @@ const {
   theme = 'dark',
   reader = false,
 } = Astro.props;
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+// `build.format: 'file'` gives Astro.url the emitted file during the build;
+// the page's address has neither the extension nor an index segment.
+const canonicalUrl = new URL(
+  Astro.url.pathname.replace(/(?:\/index)?\.html$/, '') || '/',
+  Astro.site,
+);
 const socialImageUrl = new URL('/og/mailschema-v1.png', Astro.site);
 ---
 
