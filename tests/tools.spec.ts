@@ -1,13 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import npmRelease from '../docs/releases/npm-0.1.3.json' with { type: 'json' };
-import pythonRelease from '../docs/releases/pypi-0.1.2.json' with { type: 'json' };
-import rustRelease from '../docs/releases/crates-0.1.2.json' with { type: 'json' };
-import goRelease from '../docs/releases/go-0.1.0.json' with { type: 'json' };
+import { createHash } from 'node:crypto';
 import current from '../docs/releases/current.json' with { type: 'json' };
 import {
   assertPackageRelease,
   assertPackageSet,
+  type PackageContracts,
   type PackageRelease,
   type PackageSetSelection,
 } from '../src/lib/package-release';
@@ -15,34 +13,81 @@ import { tooling, localCheckCommands, recordCheckCommands } from '../src/data/to
 import { typeRecords } from '../src/data/types';
 import { assertTypeRecord } from '../src/registry/validation';
 
+const contributionSchema = readFileSync('public/schemas/contribution.schema.json', 'utf8');
+const contribution = JSON.parse(contributionSchema);
+const contracts: PackageContracts = {
+  contribution: contributionSchema,
+  'map-0.1': readFileSync('public/schemas/map-0.1.schema.json', 'utf8'),
+  'content-review-0.1': readFileSync('public/schemas/content-review-0.1.schema.json', 'utf8'),
+  record: `${JSON.stringify(
+    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
+    null,
+    2,
+  )}\n`,
+};
+const releases = new Map<string, PackageRelease>(
+  current.channels.map(({ evidence }) => [
+    evidence,
+    JSON.parse(readFileSync(`docs/releases/${evidence}.json`, 'utf8')) as PackageRelease,
+  ]),
+);
+const selected = assertPackageSet(current as PackageSetSelection, releases, contracts);
+const npmRelease = selected.get('npm')!;
+
 test('advertised tooling refuses schema drift and unverified or mixed releases', () => {
-  const schema = readFileSync('public/schemas/contribution.schema.json', 'utf8');
-  const releases = new Map<string, PackageRelease>([
-    ['npm-0.1.3', npmRelease as PackageRelease],
-    ['pypi-0.1.2', pythonRelease as PackageRelease],
-    ['crates-0.1.2', rustRelease as PackageRelease],
-    ['go-0.1.0', goRelease as PackageRelease],
-  ]);
   for (const release of releases.values())
-    expect(() => assertPackageRelease(release, schema)).not.toThrow();
-  expect(assertPackageSet(current as PackageSetSelection, releases, schema).size).toBe(4);
-  expect(() => assertPackageRelease(npmRelease, schema + '\n')).toThrow(
-    /differs from the advertised/,
-  );
+    expect(() => assertPackageRelease(release, contracts)).not.toThrow();
+  expect(assertPackageSet(current as PackageSetSelection, releases, contracts).size).toBe(4);
+  expect(() =>
+    assertPackageRelease(releases.get(current.channels[0].evidence)!, {
+      ...contracts,
+      contribution: contracts.contribution + '\n',
+    }),
+  ).toThrow(/differs from the advertised/);
   for (const alteration of [
     { status: 'submitted' },
     { version: '9.9.9' },
     { url: 'https://example.com/package' },
   ]) {
-    const changed = structuredClone(npmRelease);
+    const changed = structuredClone(releases.get(current.channels[0].evidence)!);
     Object.assign(changed.channels[0], alteration);
-    expect(() => assertPackageRelease(changed, schema)).toThrow();
+    expect(() => assertPackageRelease(changed, contracts)).toThrow();
   }
   const wrongSelection = structuredClone(current);
   wrongSelection.channels[0].version = '9.9.9';
-  expect(() => assertPackageSet(wrongSelection as PackageSetSelection, releases, schema)).toThrow(
-    /not verified/,
-  );
+  expect(() =>
+    assertPackageSet(wrongSelection as PackageSetSelection, releases, contracts),
+  ).toThrow(/not verified/);
+});
+
+test('full-contract release evidence binds every distributed protocol schema', () => {
+  const hash = (value: string) => createHash('sha256').update(value).digest('hex');
+  const release: PackageRelease = {
+    format: 'mailschema-package-release/2',
+    version: '1.0.0',
+    schemaSha256: hash(contracts.contribution),
+    contracts: ['contribution', 'map-0.1', 'content-review-0.1'].map((name) => ({
+      name,
+      sha256: hash(contracts[name as keyof PackageContracts]),
+    })),
+    channels: [
+      {
+        registry: 'npm',
+        name: 'mailschema',
+        version: '1.0.0',
+        url: 'https://www.npmjs.com/package/mailschema/v/1.0.0',
+        status: 'verified',
+      },
+    ],
+  };
+
+  expect(() => assertPackageRelease(release, contracts)).not.toThrow();
+  expect(() =>
+    assertPackageRelease(release, { ...contracts, 'map-0.1': `${contracts['map-0.1']}\n` }),
+  ).toThrow(/map-0.1 contract differs/);
+  const missing = structuredClone(release);
+  missing.contracts!.pop();
+  expect(() => assertPackageRelease(missing, contracts)).toThrow(/Invalid release contract set/);
 });
 
 test('language tabs restore deep links and support keyboard navigation and exact copying', async ({
@@ -72,7 +117,7 @@ test('language tabs restore deep links and support keyboard navigation and exact
   const panel = page.locator('#javascript');
   await expect(panel.getByRole('link', { name: `npm · ${npmRelease.version}` })).toHaveAttribute(
     'href',
-    npmRelease.channels[0].url,
+    npmRelease.url,
   );
   await panel.getByRole('button', { name: 'Copy Install', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).copiedCode)).toBe(tooling[0].install);

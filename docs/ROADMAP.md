@@ -2,6 +2,8 @@
 
 Status date: 24 September 2026. This is the canonical dependency-ordered plan for publishing, proving and advancing MailSchema and Mail Action Protocol (MAP).
 
+The [scope and readiness audit](SCOPE-AUDIT.md) reopened milestones 2–4. The local protocol repairs now pass their reference and conformance gates; product deployment, changed package releases and independent adoption remain separate evidence gates. Its findings F1–F11 and acceptance criteria continue to govern those claims.
+
 ## Objective
 
 Make MAP a useful open standard for service actions carried through email, with MailSchema as its specification, type Registry and implementation ecosystem. Prove the protocol in products we control, record exact evidence, accept external contributions through an open source workflow and approach the IETF with working code rather than a paper-only proposal.
@@ -19,21 +21,21 @@ Make MAP a useful open standard for service actions carried through email, with 
 
 ## Current execution state
 
-| Surface                     | State                                                       | Evidence or next gate                                                                                                                                                                                                                                                            |
-| --------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Project source and site     | Live                                                        | [`mailschema/mailschema`](https://github.com/mailschema/mailschema) and [`mailschema.org`](https://mailschema.org)                                                                                                                                                               |
-| GitHub organization         | Live                                                        | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path                                                                                                     |
-| MAP 0.1 profile             | Published                                                   | JSON-LD context, profile record, exact schemas, complete email fixture and specification reader                                                                                                                                                                                  |
-| Content Review 0.1          | Published                                                   | Stable `request-changes` and `approve` operations with revision and digest binding                                                                                                                                                                                               |
-| Reference implementation    | Passing                                                     | Deterministic description, request, result, retry, refusal, expiry, stale-target and approval tests                                                                                                                                                                              |
-| Conformance artifacts       | Passing                                                     | Digest-bound manifest covering 12 artifacts and 12 core cases                                                                                                                                                                                                                    |
-| JavaScript, Python and Rust | JavaScript `0.1.3`; Python and Rust `0.1.2`                 | Maintained repositories, green CI, tagged releases and verified public artifacts containing the canonical schemas                                                                                                                                                                |
-| Go                          | `v0.1.0` published and CI green                             | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy                                                                                                                                                                                                      |
-| Package promotion           | Verified                                                    | npm, PyPI, crates.io and Go artifacts were independently downloaded and matched to the canonical schema bytes                                                                                                                                                                    |
-| Nitrosend API               | Deployed; public contract verified                          | [`nitrosend/api#522`](https://github.com/nitrosend/api/pull/522), successful [`main` CI](https://github.com/nitrosend/api/actions/runs/35862102718), successful [production deployment](https://github.com/nitrosend/api/actions/runs/35863539893) and the live OpenAPI contract |
-| Nitrosend Node SDK          | Merged                                                      | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract                                                                                                                                                                    |
-| Sourcey                     | `3.6.6` published and in production; action service pending | The exact public npm release serves the specification. Content Review execution remains dogfood work.                                                                                                                                                                            |
-| Internet-Draft              | Source builds cleanly                                       | Submission waits for public product evidence and an implementation-status update                                                                                                                                                                                                 |
+| Surface                     | State                                                     | Evidence or next gate                                                                                                                                                                                                          |
+| --------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Project source and site     | Live                                                      | [`mailschema/mailschema`](https://github.com/mailschema/mailschema) and [`mailschema.org`](https://mailschema.org)                                                                                                             |
+| GitHub organization         | Live                                                      | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path                                                   |
+| MAP 0.1 profile             | Revised working draft; local contract checks pass         | Exact context and schema digests, Structured Email placement, authorization, lifecycle and compatibility decisions are executable                                                                                              |
+| Content Review 0.1          | Published                                                 | Stable `request-changes` and `approve` operations with revision and digest binding                                                                                                                                             |
+| Reference implementation    | 25 cases and 11 readiness probes pass locally             | Required principal/tenant context, current authorization, exact targets, lifecycle, recovery and endpoint trust are exercised                                                                                                  |
+| Conformance artifacts       | Requirement-mapped local suite                            | 19 digest-bound artifacts, 25 executable cases and 14 requirements; deployment-only checks remain explicit manual evidence                                                                                                     |
+| JavaScript, Python and Rust | JavaScript `0.1.3`; Python and Rust `0.1.2`               | Maintained repositories, green CI, tagged releases and verified public artifacts containing the canonical schemas                                                                                                              |
+| Go                          | `v0.1.0` published and CI green                           | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy                                                                                                                                                    |
+| Package promotion           | Full-contract gate implemented; changed releases pending  | Public readback verifies registry integrity and every distributed contract; current selected releases remain honestly labelled as Registry-schema-only evidence                                                                |
+| Nitrosend API               | Sending support deployed; action service tested on branch | Existing deployed description support remains live; authenticated Content Review execution, recovery, inbound extraction and corrected MIME pass 1,407 email, MAP service and request examples plus OpenAPI validation locally |
+| Nitrosend Node SDK          | Merged                                                    | [`nitrosend/node-sdk#11`](https://github.com/nitrosend/node-sdk/pull/11) carries the generated typed contract                                                                                                                  |
+| Sourcey                     | `3.6.6` published and in production                       | Sourcey remains the generic specification renderer. No stateful action service is added without an existing Sourcey product workflow.                                                                                          |
+| Internet-Draft              | Standards Track source renders cleanly in CI              | Reconciled semantics, named author/contact and exact SML-06 dependency are present; community discussion and submission have not occurred                                                                                      |
 
 ## Repository map
 
@@ -62,7 +64,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 2. MAP 0.1 and Content Review 0.1
 
-**Status:** complete and published
+**Status:** revised working draft; local contract decisions and checks pass
 
 - Carry the structured description as JSON-LD in an `application/ld+json` Structured Email body part.
 - Define exact description, request, result and Problem Details schemas.
@@ -71,22 +73,22 @@ Create another MailSchema repository only when a maintained implementation has i
 - Bind Content Review operations to stable IDs and exact target revisions and digests.
 - Publish valid and invalid fixtures, including a complete multipart email.
 
-**Done when:** two implementations can be written without selecting unspecified field names, operation identifiers or status behavior.
+**Done when:** two implementations can be written without inventing representation, caller/tenant binding, state transitions, error, recovery, retention or compatibility behaviour. Audit F1–F7 decisions are recorded and consistent across the specification, schema and fixtures.
 
 ### 3. Reference implementation and conformance
 
-**Status:** complete and published
+**Status:** 25 executable cases and a 14-requirement matrix pass locally
 
 - Run deterministic client and service behavior around Content Review.
 - Cover completion, refusal, stale revisions, approval requirements, duplicate requests, changed-payload conflicts, lost-response recovery, expiry and unsupported contracts.
 - Publish a conformance manifest that binds every fixture, schema and expected result to exact SHA-256 digests.
 - Keep product-specific send-policy configuration outside the shared protocol while testing recipient, content, attachment, rate and human-approval controls in the product layer.
 
-**Done when:** the public harness reproduces every normative state and failure condition without a network account.
+**Done when:** the public harness maps every normative requirement to executed assertions or explicit manual evidence at an immutable suite revision, including JSON-LD expansion, parsed MIME, authorization, concurrency, restart and recovery. The readiness probes pass without weakening their requirements.
 
 ### 4. Developer distributions
 
-**Status:** complete and published
+**Status:** current packages published; next full-contract releases deliberately pending
 
 - Publish MAP and Registry validators for JavaScript and Python.
 - Publish canonical embedded schemas for Rust.
@@ -94,31 +96,33 @@ Create another MailSchema repository only when a maintained implementation has i
 - Verify every public artifact against the canonical schema bytes before selecting it on the website.
 - Keep package versions independent of the MAP profile version and show the exact selected release per ecosystem.
 
-**Done when:** npm, PyPI, crates.io and Go releases all have immutable public evidence, the Tools page builds from that evidence and a clean consumer can run each documented example.
+**Done when:** npm, PyPI, crates.io and Go releases have immutable evidence for every distributed contract, one source owner per library, passing clean-consumer examples and a tested path from release to website promotion. Existing versions remain unless an actual package change requires a separately assessed release.
 
-### 5. Nitrosend and Sourcey implementation
+### 5. Nitrosend implementation
 
 **Status:** in progress
 
 - Nitrosend API support for an optional typed MAP description in transactional sends is merged and deployed.
 - Nitrosend preserves the readable text and HTML parts and adds the structured `application/ld+json` alternative only on providers that support exact MIME construction.
 - Nitrosend includes the MAP description in idempotency and rejects unsupported delivery paths before calling a provider.
+- Correct SML designation and representation in the MIME builder, then verify the received message using a MIME parser.
+- Implement Nitrosend's own campaign Content Review execution boundary and inbound consumer against authenticated callers, current content revisions and durable review records. Generic transactional description support alone does not complete this workflow.
 - Release matching SDK types after the API contract lands.
-- Add Sourcey Content Review operations against an exact content revision using Sourcey's existing authentication and authorization.
-- Keep Sourcey theming and rendering generic; MAP behavior belongs in an implementation boundary, not fixed reader-theme content.
+- Keep Sourcey theming and rendering generic. Add MAP behavior to a Sourcey product only if that product already owns the authenticated revision, review and result state.
 
-**Done when:** both services implement the exact released profile and schemas, with focused tests and public source or reproducible build evidence.
+**Done when:** Nitrosend implements Content Review against its own current flow revisions, authorization and durable review state. A received test message, stale target, denied permission, exact retry and result recovery are reproduced without coupling the protocol to the documentation renderer.
 
 ### 6. End-to-end dogfood and Registry evidence
 
 **Status:** planned; depends on milestone 5
 
-- Create an exact Sourcey content revision and Content Review description.
+- Complete a real Nitrosend campaign-test review round before selecting a second product implementation.
 - Send a readable test email and MAP description through Nitrosend to a configured test inbox.
-- Have an independently configured client submit `request-changes` and `approve` through Sourcey's trusted authenticated endpoint.
+- Have an independently configured client submit `request-changes` and `approve` through Nitrosend's trusted authenticated endpoint.
 - Prove stale revision rejection, approval policy, exact retry and lost-response recovery.
 - Exercise Nitrosend sending restrictions and human approval before any follow-on email.
 - Record source versions, profile, type digest, operation, request and result digests in a reproducible run packet.
+- Preserve a redacted received-MIME artifact, context and suite digests, observed business effects and negative no-effect cases. Include a human route and distinguish ordinary reply feedback from an authenticated action.
 - Add the implementation declaration to the Content Review Registry record only after the behavior is deployed and reproduced.
 
 **Done when:** another operator can reproduce the public run and obtain the recorded outcomes. The evidence discloses common ownership.
@@ -137,30 +141,37 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 8. IETF discussion and submission
 
-**Status:** draft source prepared; submission depends on milestone 6 evidence
+**Status:** Standards Track source renders cleanly; discussion and submission pending
 
 - Maintain the XML Internet-Draft source with terminology, architecture, processing rules, security, privacy, IANA considerations and implementation status.
 - Position MAP as an action vocabulary and authenticated execution profile carried by Structured Email, not a replacement for email transport, Structured Email, OAuth or HTTP.
 - Re-run author tooling and update the implementation section from public evidence.
 - Ask the relevant application-area and Structured Email community for early scope feedback.
+- Distinguish MAP HTTPS execution from SML's deferred structured-email reply work. Do not presume charter fit or split documents before feedback establishes a useful contribution.
 - Submit an individual draft, then revise from list and meeting feedback before asking for working-group adoption.
+
+Product evidence is this project's quality gate for the intended submission, not an IETF requirement for every individual draft. Any independent-implementation requirement must be checked against the applicable venue and stage.
 
 **Done when:** the submitted draft passes IETF tooling and every implementation claim links to reproducible evidence.
 
 ## Immediate dependency sequence
 
-1. Implement the first Content Review service boundary on an exact product revision and test it with the same fixtures.
-2. Run and publish the common-ownership dogfood evidence, then add exact implementation declarations to the Registry.
-3. Refresh the Internet-Draft implementation status and begin IETF community review.
-4. Use the conformance kit and Registry contribution path to recruit an external implementation.
+1. Close the representation, authority, lifecycle, digest and compatibility decisions in audit F1–F7; reconcile the XML and profile.
+2. Repair the reference boundary and build a requirement-to-test matrix. Prove MIME/JSON-LD processing, durable effects and safe recovery.
+3. Resolve library source ownership and full-contract package promotion, preserving unchanged published versions.
+4. Complete and deploy the Nitrosend review workflow, then select a second service only from a real product workflow.
+5. Publish reproducible common-ownership evidence and attach exact implementation declarations to the Registry.
+6. Apply reviewed homepage framing grounded in those outcomes; refresh the Internet-Draft and pursue an external implementation.
+
+The detailed deliverables, owners and acceptance gates are in [SCOPE-AUDIT.md](SCOPE-AUDIT.md). Early standards feedback can run alongside this sequence; implementation and publication claims depend on the actual evidence.
 
 ## Release and consistency gates
 
 - Canonical schemas live under `public/schemas/`; packages and product integrations pin exact copies or digests.
-- `conformance/map-0.1/manifest.json` binds normative artifacts and expected cases.
-- `docs/releases/current.json` selects only independently downloaded package artifacts whose embedded contribution schema matches the current canonical bytes.
-- Language repositories own package CI, tags and registry publication; this repository owns canonical schemas, coordinated source preparation and public artifact promotion.
-- A schema change requires new affected package releases and promotion evidence before the site can build.
+- `conformance/map-0.1/manifest.json` binds the profile, context, schemas, fixtures, reference implementation, requirements and executable suite. Deployment-specific requirements stay marked as manual evidence.
+- `docs/releases/current.json` selects independently downloaded package artifacts. Legacy evidence binds the contribution schema; new `mailschema-package-release/2` evidence binds every contract distributed by that artifact.
+- This repository owns the normative schemas, profile and conformance suite. Language repositories own their language APIs, CI, tags and registry publication; their vendored contracts are exact projections and cannot redefine MAP.
+- A contract change requires an explicit compatibility and distribution assessment. Release only changed packages after that assessment; do not bump unaffected languages or publish bookkeeping-only versions. The full-contract promotion gate is additive: existing immutable evidence is not rewritten, and a changed package is not promoted until its public artifact matches every canonical contract byte.
 - The Nitrosend SDK follows the merged API schema; it is not published ahead of that API contract.
 - Registry implementation claims require deployed behavior and reproducible evidence, not an open pull request.
 - Protected `main` must pass repository verification before Cloudflare deployment.
@@ -192,3 +203,5 @@ The Registry may later expose discovery views over implementations, but its firs
 ## Plan provenance
 
 The first dependency graph was validated by the Runx `work-plan` package in run `run_work-plan-agent_dbd35f81ed05879f`, receipt `sha256:069ced3883c313625149c16987a1002bbeaa5fe20387fa1dd48c32df449e25fa`. This document records the implemented state and supersedes earlier provisional milestone wording.
+
+The 24 September readiness audit corrects completion claims using source inspection and executable probes. It does not revalidate the historical Runx receipt or claim independent review.

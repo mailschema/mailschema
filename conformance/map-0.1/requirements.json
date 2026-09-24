@@ -1,0 +1,113 @@
+{
+  "format": "mailschema-requirements/1",
+  "profile": "https://mailschema.org/profiles/map/0.1",
+  "requirements": [
+    {
+      "id": "MAP-REP-001",
+      "actor": "sender",
+      "requirement": "Designate exactly one application/ld+json part with Content-Purpose: Machine-readable and preserve readable content.",
+      "cases": ["structured-email-designation"]
+    },
+    {
+      "id": "MAP-REP-002",
+      "actor": "client",
+      "requirement": "Expand the pinned JSON-LD context without remote loading or base-dependent identities.",
+      "cases": ["jsonld-identity"]
+    },
+    {
+      "id": "MAP-TRUST-001",
+      "actor": "client",
+      "requirement": "Match the service, exact HTTPS action resource, result template and credential audience against independent configuration.",
+      "cases": ["untrusted-endpoints"]
+    },
+    {
+      "id": "MAP-TRUST-002",
+      "actor": "client",
+      "requirement": "Reapply endpoint and audience checks to every redirect before sending a credential.",
+      "manual": "Record the redirect chain and configured destination for each credential-bearing client adapter."
+    },
+    {
+      "id": "MAP-REQ-001",
+      "actor": "service",
+      "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect.",
+      "cases": [
+        "unknown-interaction",
+        "invalid-type-input",
+        "unsupported-type",
+        "unsupported-operation"
+      ]
+    },
+    {
+      "id": "MAP-AUTH-001",
+      "actor": "service",
+      "requirement": "Establish tenant and principal outside the request body and authorize execution against current service state.",
+      "cases": [
+        "authentication-context",
+        "permission-refusal",
+        "principal-isolation",
+        "stale-revision",
+        "expired-interaction"
+      ]
+    },
+    {
+      "id": "MAP-AUTH-002",
+      "actor": "service",
+      "requirement": "Recheck current access before disclosing a saved response through retry or recovery.",
+      "cases": ["retry-current-authorization", "recovery-current-authorization"]
+    },
+    {
+      "id": "MAP-IDEM-001",
+      "actor": "service",
+      "requirement": "Bind a request identifier to one principal and request value and apply an exact retry no more than once.",
+      "cases": ["exact-retry", "changed-request", "principal-isolation"]
+    },
+    {
+      "id": "MAP-LIFE-001",
+      "actor": "service",
+      "requirement": "Expose the latest recoverable state and permit only a non-terminal result to advance.",
+      "cases": [
+        "pending-work",
+        "approval-gate",
+        "pending-completion",
+        "pending-failure",
+        "lost-response-recovery"
+      ]
+    },
+    {
+      "id": "MAP-LIFE-002",
+      "actor": "service",
+      "requirement": "Retain result and duplicate-suppression state through the specified boundaries.",
+      "cases": ["retention-expiry"]
+    },
+    {
+      "id": "MAP-ERR-001",
+      "actor": "service",
+      "requirement": "Keep Problem Details type, status and MAP code correlated and apply no effect for a problem response.",
+      "cases": [
+        "problem-correlation",
+        "invalid-type-input",
+        "permission-refusal",
+        "stale-revision",
+        "changed-request"
+      ]
+    },
+    {
+      "id": "MAP-STORE-001",
+      "actor": "service",
+      "requirement": "Make request claiming, effect initiation and recoverable state atomic, or reconcile an interrupted effect without repeating it.",
+      "manual": "Run simultaneous duplicate, process restart and failure-after-effect tests against the implementation's durable store and count the business effect."
+    },
+    {
+      "id": "MAP-HTTP-001",
+      "actor": "service",
+      "requirement": "Keep human GET routes side-effect free and protect session mutations from cross-site requests and link scanners.",
+      "manual": "Exercise link preview and cross-site requests against the deployed human route and show no business-state change."
+    },
+    {
+      "id": "MAP-MIME-001",
+      "actor": "sender",
+      "requirement": "Use multipart/alternative only for a full representation and multipart/related for a partial representation.",
+      "manual": "Parse a message received through the delivery provider and record the MIME tree, exact structured payload and representation decision."
+    }
+  ]
+}

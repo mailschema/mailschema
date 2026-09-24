@@ -1,9 +1,18 @@
 import { createHash } from 'node:crypto';
 
 export interface PackageRelease {
+  format?: string;
   version: string;
   schemaSha256: string;
+  contracts?: { name: string; sha256: string }[];
   channels: PackageReleaseChannel[];
+}
+
+export interface PackageContracts {
+  contribution: string;
+  'map-0.1': string;
+  'content-review-0.1': string;
+  record: string;
 }
 
 export interface PackageReleaseChannel {
@@ -31,8 +40,17 @@ function schemaDigest(schema: string): string {
   return createHash('sha256').update(schema).digest('hex');
 }
 
+function normalizedContracts(value: PackageContracts | string): PackageContracts | undefined {
+  return typeof value === 'string' ? undefined : value;
+}
+
 /** Refuse to advertise release evidence against a different contribution schema. */
-export function assertPackageRelease(release: PackageRelease, schema: string): void {
+export function assertPackageRelease(
+  release: PackageRelease,
+  contractsOrSchema: PackageContracts | string,
+): void {
+  const contracts = normalizedContracts(contractsOrSchema);
+  const schema: string = contracts ? contracts.contribution : (contractsOrSchema as string);
   if (!/^\d+\.\d+\.\d+$/.test(release.version)) throw new Error('Invalid package release version.');
   if (schemaDigest(schema) !== release.schemaSha256)
     throw new Error(
@@ -55,14 +73,39 @@ export function assertPackageRelease(release: PackageRelease, schema: string): v
     )
       throw new Error(`Invalid ${entry.registry} package release evidence.`);
   }
+  if (release.format === 'mailschema-package-release/2') {
+    if (!contracts)
+      throw new Error('Full-contract release evidence needs canonical contract bytes.');
+    const registry = release.channels[0]?.registry;
+    const expectedNames = [
+      'contribution',
+      'map-0.1',
+      'content-review-0.1',
+      ...(registry === 'crates.io' ? ['record'] : []),
+    ];
+    const found = new Map(release.contracts?.map((entry) => [entry.name, entry.sha256]));
+    assertExactMembers(found, expectedNames, 'release contract');
+    for (const name of expectedNames)
+      if (found.get(name) !== schemaDigest(contracts[name as keyof PackageContracts]))
+        throw new Error(`The ${name} contract differs from the advertised package release.`);
+  } else if (release.format) {
+    throw new Error(`Unknown package release evidence format ${release.format}.`);
+  }
+}
+
+function assertExactMembers(found: Map<string, string>, expected: string[], label: string): void {
+  if (found.size !== expected.length || expected.some((name) => !found.has(name)))
+    throw new Error(`Invalid ${label} set.`);
 }
 
 /** Resolve the exact independently verified channel versions promoted to the website. */
 export function assertPackageSet(
   selection: PackageSetSelection,
   evidence: Map<string, PackageRelease>,
-  schema: string,
+  contractsOrSchema: PackageContracts | string,
 ): Map<string, PackageReleaseChannel> {
+  const contracts = normalizedContracts(contractsOrSchema);
+  const schema: string = contracts ? contracts.contribution : (contractsOrSchema as string);
   if (selection.schema !== 'mailschema-package-set/1')
     throw new Error('Invalid package-set selection format.');
   if (schemaDigest(schema) !== selection.schemaSha256)
@@ -77,7 +120,7 @@ export function assertPackageSet(
       throw new Error(`Duplicate selected ${channel.registry} package.`);
     const release = evidence.get(channel.evidence);
     if (!release) throw new Error(`Missing release evidence ${channel.evidence}.`);
-    assertPackageRelease(release, schema);
+    assertPackageRelease(release, contractsOrSchema);
     if (release.schemaSha256 !== selection.schemaSha256)
       throw new Error(`Release evidence ${channel.evidence} targets a different schema.`);
     const matches = release.channels.filter(

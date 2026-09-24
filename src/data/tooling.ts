@@ -3,9 +3,26 @@ import { resolve } from 'node:path';
 import selection from '../../docs/releases/current.json' with { type: 'json' };
 import {
   assertPackageSet,
+  type PackageContracts,
   type PackageRelease,
   type PackageSetSelection,
 } from '../lib/package-release';
+
+const contributionSchema = readFileSync(resolve('public/schemas/contribution.schema.json'), 'utf8');
+const contribution = JSON.parse(contributionSchema);
+const contracts: PackageContracts = {
+  contribution: contributionSchema,
+  'map-0.1': readFileSync(resolve('public/schemas/map-0.1.schema.json'), 'utf8'),
+  'content-review-0.1': readFileSync(
+    resolve('public/schemas/content-review-0.1.schema.json'),
+    'utf8',
+  ),
+  record: `${JSON.stringify(
+    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
+    null,
+    2,
+  )}\n`,
+};
 
 const evidence = new Map<string, PackageRelease>();
 for (const reference of new Set(selection.channels.map((entry) => entry.evidence)))
@@ -13,11 +30,7 @@ for (const reference of new Set(selection.channels.map((entry) => entry.evidence
     reference,
     JSON.parse(readFileSync(resolve('docs/releases', `${reference}.json`), 'utf8')),
   );
-const selectedChannels = assertPackageSet(
-  selection as PackageSetSelection,
-  evidence,
-  readFileSync(resolve('public/schemas/contribution.schema.json'), 'utf8'),
-);
+const selectedChannels = assertPackageSet(selection as PackageSetSelection, evidence, contracts);
 const channel = (name: string) => {
   const selected = selectedChannels.get(name);
   if (!selected) throw new Error(`Package registry ${name} is not selected for the website.`);
@@ -31,6 +44,9 @@ const versions = new Set(selectedChannels.values().map((entry) => entry.version)
 const sharedVersion = [...versions][0];
 export const packageSetLabel =
   versions.size === 1 ? `Package set ${sharedVersion}` : 'Verified package set';
+export const packageContractCoverage = [...evidence.values()].every(
+  (release) => release.format === 'mailschema-package-release/2',
+);
 
 export const tooling = [
   {

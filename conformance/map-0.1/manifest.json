@@ -8,12 +8,20 @@
   },
   "artifacts": [
     {
+      "path": "public/profiles/map/0.1.json",
+      "sha256": "1a896a323bcfd4d9003199f8316a26e964872a4c2462f95b453d351c5430a085"
+    },
+    {
+      "path": "public/contexts/map-0.1.jsonld",
+      "sha256": "c977c6009d893fe2d0fc73eb500bee5e61e2b95c8f4f7ce42f6c603f076d7a46"
+    },
+    {
       "path": "public/schemas/map-0.1.schema.json",
-      "sha256": "56a1d70e1f6eb6b525d0c2d692b98b3aaf666cb684c875fadb35f15a750c69b9"
+      "sha256": "d908a960f53fade9ab47876bf69b1b3d037adeb7096091e22ca71fbc3909429c"
     },
     {
       "path": "public/schemas/content-review-0.1.schema.json",
-      "sha256": "feaa03c3fac72d8a7a0cd10dd3f562cc936061a60e31c187620184155caa35ed"
+      "sha256": "dba2a2f1e57f843f43080f5a40ced2d9c84e7c7036ec306c371a82d39f6d6c9f"
     },
     {
       "path": "registry/types/content-review.json",
@@ -25,7 +33,7 @@
     },
     {
       "path": "public/fixtures/map-0.1/content-review.eml",
-      "sha256": "b4298a4ef0b718c82df1cb497e2e48a5447978083a90f39b31abc27141c0ef3c"
+      "sha256": "3f2f1fd7e17faed4bd698ffcd71ab59cfffd5098b368cf75e77aaa8dcf9bacc8"
     },
     {
       "path": "public/fixtures/map-0.1/request-changes.json",
@@ -37,11 +45,11 @@
     },
     {
       "path": "public/fixtures/map-0.1/result-completed.json",
-      "sha256": "37b9046c4ed112939fa377d1c7ad6efb8d309db1bf7b2a3926823b1a78011d41"
+      "sha256": "1f071d02c177f479944717e1790312bab794ed6256690d7aac139d216ed313f8"
     },
     {
       "path": "public/fixtures/map-0.1/result-approval-required.json",
-      "sha256": "cc5404fbb5ffb126d89ad6f826f9bac1ebb41a530d52acc7259a477b71ee7bb6"
+      "sha256": "67061dbb995f98f827e373fe57f4c7549789bbb36ecbd59695a00caa4d2ddfaa"
     },
     {
       "path": "public/fixtures/map-0.1/problem-stale-target.json",
@@ -54,22 +62,160 @@
     {
       "path": "public/fixtures/map-0.1/invalid/unknown-operation.json",
       "sha256": "659785e65387db18d58a17a62f6df2533d0c8635333de6968be2065978908cee"
+    },
+    {
+      "path": "src/map/reference.ts",
+      "sha256": "0d5d48ba1192df898b2a973f0feb1fdbd8016f9bc20295795714d95823aa3844"
+    },
+    {
+      "path": "conformance/map-0.1/cases.mjs",
+      "sha256": "f2726ce3ee4cc5a93013df12bc487090512ea9d990a6e5d89e94e497c9da2500"
+    },
+    {
+      "path": "conformance/map-0.1/requirements.json",
+      "sha256": "99911966fcec5a6efeba0219bea61bc919d364b0cc2dc2359124911b10d106d0"
+    },
+    {
+      "path": "tests/map-profile.test.mjs",
+      "sha256": "d4c1844117b29584a05db9e6a7f23f1f01b7ed4964cc0e39582bc34006af17d2"
+    },
+    {
+      "path": "scripts/map-profile.ts",
+      "sha256": "52c302d73ce6deaf96b2c901670df156b1764a2d70c7df3d96f868e3abb59166"
     }
   ],
   "cases": [
-    { "id": "approve-completed", "expected": "200 completed" },
-    { "id": "feedback-accepted", "expected": "200 accepted" },
-    { "id": "exact-retry", "expected": "original response, no repeated effect" },
-    { "id": "lost-response-recovery", "expected": "recorded response from result URL" },
-    { "id": "changed-request", "expected": "409 idempotency-conflict" },
-    { "id": "permission-refusal", "expected": "403 refused" },
-    { "id": "stale-revision", "expected": "409 stale-target" },
-    { "id": "expired-interaction", "expected": "410 expired-interaction" },
-    { "id": "unsupported-type", "expected": "422 unsupported-type" },
-    { "id": "approval-gate", "expected": "202 approval-required" },
-    { "id": "pending-work", "expected": "202 pending" },
-    { "id": "untrusted-endpoint", "expected": "client refusal before credential use" }
+    {
+      "id": "approve-completed",
+      "title": "approval records one completed effect",
+      "expected": "200 completed"
+    },
+    {
+      "id": "feedback-accepted",
+      "title": "feedback is recorded against the described revision",
+      "expected": "200 accepted"
+    },
+    {
+      "id": "exact-retry",
+      "title": "an exact retry returns the saved result without another effect",
+      "expected": "saved response and one effect"
+    },
+    {
+      "id": "lost-response-recovery",
+      "title": "an authorized caller retrieves a saved result",
+      "expected": "saved response from result resource"
+    },
+    {
+      "id": "retry-current-authorization",
+      "title": "a retry rechecks current access",
+      "expected": "403 after revocation and one effect"
+    },
+    {
+      "id": "recovery-current-authorization",
+      "title": "result recovery rechecks current access",
+      "expected": "403 after revocation"
+    },
+    {
+      "id": "principal-isolation",
+      "title": "request identifiers do not cross principals",
+      "expected": "403 and no duplicate effect"
+    },
+    {
+      "id": "changed-request",
+      "title": "changed reuse of a request ID conflicts",
+      "expected": "409 idempotency-conflict"
+    },
+    {
+      "id": "unknown-interaction",
+      "title": "a request cannot select another interaction",
+      "expected": "400 invalid-request"
+    },
+    {
+      "id": "invalid-type-input",
+      "title": "a type-invalid operation input has no effect",
+      "expected": "400 invalid-request"
+    },
+    {
+      "id": "permission-refusal",
+      "title": "an unauthorized caller has no effect",
+      "expected": "403 refused"
+    },
+    {
+      "id": "authentication-context",
+      "title": "execution requires server-established principal and tenant",
+      "expected": "request rejected before processing"
+    },
+    {
+      "id": "stale-revision",
+      "title": "a request is compared with current service state",
+      "expected": "409 stale-target"
+    },
+    {
+      "id": "expired-interaction",
+      "title": "expiry is exclusive at the stated instant",
+      "expected": "410 expired-interaction"
+    },
+    {
+      "id": "unsupported-type",
+      "title": "the exact type reference is enforced",
+      "expected": "422 unsupported-type"
+    },
+    {
+      "id": "unsupported-operation",
+      "title": "only an operation offered by the interaction can run",
+      "expected": "422 unsupported-operation"
+    },
+    {
+      "id": "approval-gate",
+      "title": "additional service approval is a non-terminal result",
+      "expected": "202 approval-required"
+    },
+    {
+      "id": "pending-work",
+      "title": "outstanding work is recoverable without a recorded effect",
+      "expected": "202 pending"
+    },
+    {
+      "id": "pending-completion",
+      "title": "a non-terminal result advances once",
+      "expected": "latest completed result and one effect"
+    },
+    {
+      "id": "pending-failure",
+      "title": "accepted asynchronous work can terminate without an effect",
+      "expected": "latest failed result and no effect"
+    },
+    {
+      "id": "retention-expiry",
+      "title": "expired retained results never cause another effect",
+      "expected": "410 retry, missing recovery, one effect"
+    },
+    {
+      "id": "untrusted-endpoints",
+      "title": "all credential-bearing endpoints and audiences are configured",
+      "expected": "client refusal before credential use"
+    },
+    {
+      "id": "jsonld-identity",
+      "title": "JSON-LD identity is stable without remote resolution",
+      "expected": "base-independent MAP IRIs"
+    },
+    {
+      "id": "structured-email-designation",
+      "title": "a real MIME parser finds the designated structured part",
+      "expected": "one designated JSON-LD part"
+    },
+    {
+      "id": "problem-correlation",
+      "title": "problem type, status and code agree",
+      "expected": "contradictory problem rejected"
+    }
   ],
   "referenceImplementation": "src/map/reference.ts",
-  "reproduce": ["npm run profile:validate", "npm run map:test", "npm run conformance:check"]
+  "reproduce": [
+    "npm run profile:validate",
+    "npm run map:test",
+    "npm run readiness:audit",
+    "npm run conformance:check"
+  ]
 }

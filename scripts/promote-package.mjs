@@ -39,6 +39,52 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function verifyIntegrity(bytes, integrity) {
+  if (!integrity) return;
+  const candidates = integrity.split(/\s+/).filter(Boolean);
+  const matched = candidates.some((candidate) => {
+    const separator = candidate.indexOf('-');
+    if (separator < 1) return false;
+    const algorithm = candidate.slice(0, separator);
+    const expected = candidate.slice(separator + 1).split('?')[0];
+    if (!['sha256', 'sha384', 'sha512'].includes(algorithm)) return false;
+    return createHash(algorithm).update(bytes).digest('base64') === expected;
+  });
+  if (!matched) throw new Error('Downloaded npm artifact does not match its published integrity.');
+}
+
+async function canonicalContracts(registry) {
+  const contribution = await readFile(resolve(root, 'public/schemas/contribution.schema.json'));
+  const contracts = [
+    ['contribution', contribution],
+    ['map-0.1', await readFile(resolve(root, 'public/schemas/map-0.1.schema.json'))],
+    [
+      'content-review-0.1',
+      await readFile(resolve(root, 'public/schemas/content-review-0.1.schema.json')),
+    ],
+  ];
+  if (registry === 'crates.io') {
+    const schema = JSON.parse(contribution.toString('utf8'));
+    contracts.push([
+      'record',
+      Buffer.from(
+        `${JSON.stringify({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/record' }, null, 2)}\n`,
+      ),
+    ]);
+  }
+  return contracts;
+}
+
+function contractSuffixes(registry) {
+  const prefix = registry === 'npm' ? '/dist/' : registry === 'PyPI' ? '/' : '/schemas/';
+  return {
+    contribution: `${prefix}contribution.schema.json`,
+    'map-0.1': `${prefix}map-0.1.schema.json`,
+    'content-review-0.1': `${prefix}content-review-0.1.schema.json`,
+    ...(registry === 'crates.io' ? { record: `${prefix}record.schema.json` } : {}),
+  };
+}
+
 async function getJson(url) {
   const response = await fetch(url, {
     headers: { accept: 'application/json', 'user-agent': userAgent },
@@ -84,7 +130,6 @@ async function registryArtifact(registry, version) {
       publicUrl: `https://www.npmjs.com/package/${packageName}/v/${version}`,
       metadataSha256: null,
       integrity: metadata.dist.integrity,
-      schemaSuffix: '/dist/contribution.schema.json',
       archive: 'tar',
     };
   }
@@ -103,7 +148,6 @@ async function registryArtifact(registry, version) {
       publicUrl: `https://pypi.org/project/${packageName}/${version}/`,
       metadataSha256: artifact.digests?.sha256,
       integrity: null,
-      schemaSuffix: '/contribution.schema.json',
       archive: 'zip',
     };
   }
@@ -118,7 +162,6 @@ async function registryArtifact(registry, version) {
       publicUrl: `https://crates.io/crates/${packageName}/${version}`,
       metadataSha256: metadata.version.checksum,
       integrity: null,
-      schemaSuffix: '/schemas/contribution.schema.json',
       archive: 'tar',
     };
   }
@@ -135,7 +178,6 @@ async function registryArtifact(registry, version) {
       publicUrl: `https://pkg.go.dev/${module}@${moduleVersion}`,
       metadataSha256: null,
       integrity: null,
-      schemaSuffix: '/schemas/contribution.schema.json',
       archive: 'zip',
     };
   }
@@ -144,36 +186,43 @@ async function registryArtifact(registry, version) {
 }
 
 async function verify(registry, version) {
-  const schema = await readFile(resolve(root, 'public/schemas/contribution.schema.json'));
+  const contracts = await canonicalContracts(registry);
+  const schema = contracts.find(([name]) => name === 'contribution')[1];
   const schemaSha256 = sha256(schema);
   const artifact = await registryArtifact(registry, version);
   const bytes = await download(artifact.downloadUrl);
   const artifactSha256 = sha256(bytes);
   if (artifact.metadataSha256 && artifact.metadataSha256 !== artifactSha256)
     throw new Error(`${registry} metadata and downloaded artifact hashes disagree.`);
+  verifyIntegrity(bytes, artifact.integrity);
 
   const temporary = await mkdtemp(resolve(tmpdir(), 'mailschema-release-'));
   const archive = resolve(temporary, artifact.name);
   try {
     await writeFile(archive, bytes);
-    const packagedSchema =
-      artifact.archive === 'zip'
-        ? zipEntry(archive, artifact.schemaSuffix)
-        : tarEntry(archive, artifact.schemaSuffix);
-    if (!packagedSchema.equals(schema))
-      throw new Error(
-        `${registry} ${version} does not contain the canonical MailSchema schema bytes.`,
-      );
+    const suffixes = contractSuffixes(registry);
+    for (const [name, expected] of contracts) {
+      const packaged =
+        artifact.archive === 'zip'
+          ? zipEntry(archive, suffixes[name])
+          : tarEntry(archive, suffixes[name]);
+      if (!packaged.equals(expected))
+        throw new Error(
+          `${registry} ${version} does not contain the canonical ${name} contract bytes.`,
+        );
+    }
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
 
   return {
+    format: 'mailschema-package-release/2',
     checkedAt: new Date().toISOString(),
     version,
     schemaSha256,
+    contracts: contracts.map(([name, bytes]) => ({ name, sha256: sha256(bytes) })),
     verification:
-      'Public registry metadata and an independent artifact download matched the canonical MailSchema schema bytes.',
+      'Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.',
     channels: [
       {
         registry,
@@ -194,7 +243,7 @@ async function verify(registry, version) {
 }
 
 async function writePromotion(registry, version, evidence) {
-  const reference = `${slugs[registry]}-${version}`;
+  const reference = `${slugs[registry]}-${version}-contracts`;
   const evidencePath = resolve(root, 'docs/releases', `${reference}.json`);
   const selectionPath = resolve(root, 'docs/releases/current.json');
   const existingEvidence = await readFile(evidencePath, 'utf8').catch((error) => {
