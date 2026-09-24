@@ -37,6 +37,11 @@
   },
   "references": [
     {
+      "title": "Content Review 0.1 contract",
+      "href": "https://mailschema.org/contracts/content-review-0.1.json",
+      "description": "Normative canonical type contract used by MAP wire messages."
+    },
+    {
       "title": "Schema.org Actions",
       "href": "https://schema.org/docs/actions.html",
       "description": "Candidate vocabulary for describing available operations and their routes."

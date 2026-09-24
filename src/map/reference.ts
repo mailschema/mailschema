@@ -10,13 +10,12 @@ export const CONTENT_REVIEW_TYPE = 'https://mailschema.org/types/content-review'
 
 type JsonObject = Record<string, unknown>;
 type Target = { id: string; revision: string; digest: string; title?: string };
-type TypeReference = { id: string; version: string; recordDigest: string };
+type TypeReference = { id: string; version: string; contractDigest: string };
 type MapRequest = {
   kind: 'MapRequest';
   profile: string;
   requestId: string;
   interactionId: string;
-  requestedAt: string;
   type: TypeReference;
   operation: string;
   target: Target;
@@ -40,7 +39,7 @@ type MapDescription = {
 type Response = {
   status: number;
   mediaType: 'application/json' | 'application/problem+json';
-  location: string;
+  location?: string;
   body: JsonObject;
 };
 type ResultState = 'accepted' | 'completed' | 'failed' | 'pending' | 'approval-required';
@@ -122,6 +121,10 @@ export class ReferenceMapService {
     return this.#effectCount;
   }
 
+  describe(): MapDescription {
+    return structuredClone(this.#description);
+  }
+
   submit(request: MapRequest, context: RequestContext): Response {
     assertContext(context);
     if (!validateMap(request))
@@ -131,6 +134,8 @@ export class ReferenceMapService {
         400,
         'Invalid MAP request',
         'The request does not satisfy the MAP document contract.',
+        undefined,
+        false,
       );
     if (request.interactionId !== this.#description['@id'])
       return this.#problem(
@@ -139,14 +144,8 @@ export class ReferenceMapService {
         400,
         'Unknown interaction',
         'The request does not identify this interaction.',
-      );
-    if (!this.#options.authorize(request, context, 'execute'))
-      return this.#problem(
-        request,
-        'refused',
-        403,
-        'Operation refused',
-        'The authenticated caller is not permitted to perform this operation.',
+        undefined,
+        false,
       );
 
     const digest = fingerprint(request);
@@ -160,6 +159,14 @@ export class ReferenceMapService {
           403,
           'Operation refused',
           'The request identifier belongs to another authenticated caller.',
+        );
+      if (!this.#options.authorize(previous.request, context, 'execute'))
+        return this.#problem(
+          request,
+          'refused',
+          403,
+          'Operation refused',
+          'The authenticated caller is not permitted to access this request.',
         );
       if (previous.fingerprint === digest) {
         if ((this.#options.now?.() ?? new Date()) >= previous.retainUntil)
@@ -182,7 +189,15 @@ export class ReferenceMapService {
     }
 
     let response: Response;
-    if (request.profile !== MAP_PROFILE || request.profile !== this.#description.profile)
+    if (!this.#options.authorize(request, context, 'execute'))
+      response = this.#problem(
+        request,
+        'refused',
+        403,
+        'Operation refused',
+        'The authenticated caller is not permitted to perform this operation.',
+      );
+    else if (request.profile !== MAP_PROFILE || request.profile !== this.#description.profile)
       response = this.#problem(
         request,
         'unsupported-profile',
@@ -193,7 +208,7 @@ export class ReferenceMapService {
     else if (
       request.type.id !== this.#description.type.id ||
       request.type.version !== this.#description.type.version ||
-      request.type.recordDigest !== this.#description.type.recordDigest
+      request.type.contractDigest !== this.#description.type.contractDigest
     )
       response = this.#problem(
         request,
@@ -299,10 +314,10 @@ export class ReferenceMapService {
     return structuredClone(recorded.response);
   }
 
-  recover(requestId: string, context: RequestContext): Response | undefined {
+  recover(requestId: string, context: RequestContext): Response {
     assertContext(context);
     const recorded = this.#responses.get(requestKey(context, requestId));
-    if (!recorded) return undefined;
+    if (!recorded) return this.#notFound(requestId);
     if (recorded.principal !== context.principal)
       return this.#problem(
         recorded.request,
@@ -310,6 +325,8 @@ export class ReferenceMapService {
         403,
         'Result access refused',
         'The request identifier belongs to another authenticated caller.',
+        undefined,
+        false,
       );
     if (!this.#options.authorize(recorded.request, context, 'read-result'))
       return this.#problem(
@@ -318,8 +335,11 @@ export class ReferenceMapService {
         403,
         'Result access refused',
         'The authenticated caller is not permitted to retrieve this result.',
+        undefined,
+        false,
       );
-    if ((this.#options.now?.() ?? new Date()) >= recorded.retainUntil) return undefined;
+    if ((this.#options.now?.() ?? new Date()) >= recorded.retainUntil)
+      return this.#notFound(requestId);
     return structuredClone(recorded.response);
   }
 
@@ -355,26 +375,49 @@ export class ReferenceMapService {
     title: string,
     detail: string,
     target?: Target,
+    correlated = true,
   ): Response {
-    const location = resultUrl(
-      this.#description.service.execution.resultUrlTemplate,
-      request.requestId,
-    );
+    const location = correlated
+      ? resultUrl(this.#description.service.execution.resultUrlTemplate, request.requestId)
+      : undefined;
     return {
       status,
       mediaType: 'application/problem+json',
-      location,
+      ...(location ? { location } : {}),
       body: {
         type: `https://mailschema.org/problems/${code}`,
         title,
         status,
         detail,
+        ...(correlated
+          ? {
+              instance: location,
+              profile: MAP_PROFILE,
+              requestId: request.requestId,
+              interactionId: request.interactionId,
+              code,
+            }
+          : {}),
+        ...(target ? { target } : {}),
+      },
+    };
+  }
+
+  #notFound(requestId: string): Response {
+    const location = resultUrl(this.#description.service.execution.resultUrlTemplate, requestId);
+    return {
+      status: 404,
+      mediaType: 'application/problem+json',
+      location,
+      body: {
+        type: 'https://mailschema.org/problems/result-not-found',
+        title: 'Result not found',
+        status: 404,
+        detail: 'No retained result exists for this request identifier.',
         instance: location,
         profile: MAP_PROFILE,
-        requestId: request.requestId,
-        interactionId: request.interactionId,
-        code,
-        ...(target ? { target } : {}),
+        requestId,
+        code: 'result-not-found',
       },
     };
   }

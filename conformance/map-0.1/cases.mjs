@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
 import { simpleParser } from 'mailparser';
 import { ReferenceMapService, assertTrustedExecution } from '../../src/map/reference.ts';
@@ -59,6 +61,16 @@ export const conformanceCases = [
       const first = service.submit(request, context);
       assert.deepEqual(service.submit(structuredClone(request), context), first);
       assert.equal(service.effectCount, 1);
+    },
+  ),
+  caseOf(
+    'stable-redelivery',
+    'redelivery preserves the interaction identifier',
+    'same interactionId',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const service = implementation(description);
+      assert.equal(service.describe()['@id'], service.describe()['@id']);
     },
   ),
   caseOf(
@@ -147,7 +159,28 @@ export const conformanceCases = [
       const request = await fixture('approve.json');
       request.interactionId = 'urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b85b99';
       const service = implementation(description);
-      assert.equal(service.submit(request, context).body.code, 'invalid-request');
+      const response = service.submit(request, context);
+      assert.equal(response.status, 400);
+      assert.equal(response.body.type, 'https://mailschema.org/problems/invalid-request');
+      assert.equal(response.body.requestId, undefined);
+      assert.equal(service.recover(request.requestId, context).body.code, 'result-not-found');
+      assert.equal(service.effectCount, 0);
+    },
+  ),
+  caseOf(
+    'malformed-unclaimed',
+    'a malformed request does not claim its request identifier',
+    '400 problem and later 404 result-not-found',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const request = await fixture('approve.json');
+      request.kind = 'UnknownRequest';
+      const service = implementation(description);
+      const response = service.submit(request, context);
+      assert.equal(response.status, 400);
+      assert.equal(response.body.requestId, undefined);
+      assert.equal(response.location, undefined);
+      assert.equal(service.recover(request.requestId, context).body.code, 'result-not-found');
       assert.equal(service.effectCount, 0);
     },
   ),
@@ -164,12 +197,23 @@ export const conformanceCases = [
       assert.equal(service.effectCount, 0);
     },
   ),
-  caseOf('permission-refusal', 'an unauthorized caller has no effect', '403 refused', async () => {
-    const description = await fixture('content-review-description.json');
-    const service = implementation(description, { authorize: () => false });
-    assert.equal(service.submit(await fixture('approve.json'), context).body.code, 'refused');
-    assert.equal(service.effectCount, 0);
-  }),
+  caseOf(
+    'permission-refusal',
+    'a recognized unauthorized request records one terminal refusal',
+    'stable 403 refused and no effect',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      let permitted = false;
+      const service = implementation(description, { authorize: () => permitted });
+      const request = await fixture('approve.json');
+      const refused = service.submit(request, context);
+      permitted = true;
+      assert.equal(refused.body.code, 'refused');
+      assert.deepEqual(service.submit(request, context), refused);
+      assert.deepEqual(service.recover(request.requestId, context), refused);
+      assert.equal(service.effectCount, 0);
+    },
+  ),
   caseOf(
     'authentication-context',
     'execution requires server-established principal and tenant',
@@ -317,9 +361,24 @@ export const conformanceCases = [
       const service = new ReferenceMapService(description, { now: () => time, authorize: allow });
       service.submit(request, context);
       time = new Date('2026-10-01T01:06:02Z');
-      assert.equal(service.recover(request.requestId, context), undefined);
+      assert.equal(service.recover(request.requestId, context).body.code, 'result-not-found');
       assert.equal(service.submit(request, context).body.code, 'expired-interaction');
       assert.equal(service.effectCount, 1);
+    },
+  ),
+  caseOf(
+    'unknown-result',
+    'an unknown result does not invent an interaction identifier',
+    '404 result-not-found correlated only to requestId',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const response = implementation(description).recover(
+        'urn:uuid:018f47a2-b4d3-7c02-b491-7bdf2eaac699',
+        context,
+      );
+      assert.equal(response.status, 404);
+      assert.equal(response.body.code, 'result-not-found');
+      assert.equal(response.body.interactionId, undefined);
     },
   ),
   caseOf(
@@ -378,13 +437,44 @@ export const conformanceCases = [
         new URL('../../public/fixtures/map-0.1/content-review.eml', import.meta.url),
       );
       const email = await simpleParser(raw);
+      const outerContentType = email.headers.get('content-type');
+      const outerMediaType =
+        typeof outerContentType === 'string'
+          ? outerContentType.split(';', 1)[0]
+          : outerContentType &&
+              typeof outerContentType === 'object' &&
+              'value' in outerContentType &&
+              typeof outerContentType.value === 'string'
+            ? outerContentType.value
+            : undefined;
+      assert.equal(outerMediaType, 'multipart/related');
       const parts = email.attachments.filter((part) => part.contentType === 'application/ld+json');
       assert.equal(parts.length, 1);
       assert.equal(parts[0].headers.get('content-purpose'), 'Machine-readable');
+      assert.match(
+        String(parts[0].headers.get('content-transfer-encoding')),
+        /^(?:base64|quoted-printable)$/i,
+      );
       assert.deepEqual(
         JSON.parse(parts[0].content.toString('utf8')),
         await fixture('content-review-description.json'),
       );
+    },
+  ),
+  caseOf(
+    'contract-identity',
+    'wire compatibility is bound to the canonical type contract',
+    'Registry editorial changes do not change contractDigest',
+    async () => {
+      const description = await fixture('content-review-description.json');
+      const contract = await fixture('../../contracts/content-review-0.1.json');
+      const registry = await fixture('../../../registry/types/content-review.json');
+      const digest = (value) =>
+        `sha-256:${createHash('sha256').update(canonicalize(value)).digest('hex')}`;
+      const editedRecord = { ...registry, summary: `${registry.summary} Editorial clarification.` };
+      assert.equal(description.type.contractDigest, digest(contract));
+      assert.notEqual(digest(registry), digest(editedRecord));
+      assert.equal(description.type.contractDigest, digest(contract));
     },
   ),
   caseOf(

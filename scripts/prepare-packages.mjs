@@ -18,6 +18,7 @@ const schemaBytes = await read('public/schemas/contribution.schema.json');
 const schema = JSON.parse(schemaBytes);
 const mapSchemaBytes = await read('public/schemas/map-0.1.schema.json');
 const contentReviewSchemaBytes = await read('public/schemas/content-review-0.1.schema.json');
+const contentReviewContractBytes = await read('public/contracts/content-review-0.1.json');
 const versions = JSON.parse(await read('packages/versions.json'));
 for (const registry of ['npm', 'PyPI', 'crates.io', 'Go'])
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
@@ -52,6 +53,7 @@ await put(
       './contribution.schema.json': './dist/contribution.schema.json',
       './map-0.1.schema.json': './dist/map-0.1.schema.json',
       './content-review-0.1.schema.json': './dist/content-review-0.1.schema.json',
+      './content-review-0.1.contract.json': './dist/content-review-0.1.contract.json',
       './package.json': './package.json',
     },
     types: './dist/index.d.ts',
@@ -74,6 +76,7 @@ await put('npm/src/map.ts', await read('packages/javascript/map.ts'));
 await put('npm/src/contribution.schema.json', schemaBytes);
 await put('npm/src/map-0.1.schema.json', mapSchemaBytes);
 await put('npm/src/content-review-0.1.schema.json', contentReviewSchemaBytes);
+await put('npm/src/content-review-0.1.contract.json', contentReviewContractBytes);
 await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
 await put('npm/build.mjs', await read('packages/javascript/build.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
@@ -113,6 +116,7 @@ await chmod(resolve(output, 'npm/bin/mailschema.js'), 0o755);
 await put('npm/dist/contribution.schema.json', schemaBytes);
 await put('npm/dist/map-0.1.schema.json', mapSchemaBytes);
 await put('npm/dist/content-review-0.1.schema.json', contentReviewSchemaBytes);
+await put('npm/dist/content-review-0.1.contract.json', contentReviewContractBytes);
 
 for (const language of ['python', 'rust']) {
   await mkdir(resolve(output, language), { recursive: true });
@@ -125,6 +129,7 @@ for (const language of ['python', 'rust']) {
 await put('python/src/mailschema/contribution.schema.json', schemaBytes);
 await put('python/src/mailschema/map-0.1.schema.json', mapSchemaBytes);
 await put('python/src/mailschema/content-review-0.1.schema.json', contentReviewSchemaBytes);
+await put('python/src/mailschema/content-review-0.1.contract.json', contentReviewContractBytes);
 await put('python/tests/new-type.json', await read('registry/examples/new-type.json'));
 await put('python/tests/content-review.json', await read('registry/types/content-review.json'));
 await put(
@@ -140,6 +145,7 @@ await put('rust/schemas/contribution.schema.json', schemaBytes);
 await put('rust/schemas/record.schema.json', recordSchema);
 await put('rust/schemas/map-0.1.schema.json', mapSchemaBytes);
 await put('rust/schemas/content-review-0.1.schema.json', contentReviewSchemaBytes);
+await put('rust/contracts/content-review-0.1.json', contentReviewContractBytes);
 
 // Check each source distribution against its own declared release version.
 const python = await read('packages/python/pyproject.toml');
@@ -162,6 +168,7 @@ await put(
       ['contribution', schemaBytes],
       ['map-0.1', mapSchemaBytes],
       ['content-review-0.1', contentReviewSchemaBytes],
+      ['content-review-0.1-contract', contentReviewContractBytes],
       ['record', recordSchema],
     ].map(([name, bytes]) => ({
       name,
@@ -171,28 +178,35 @@ await put(
       {
         registry: 'npm',
         version: versions.npm,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
       },
       {
         registry: 'PyPI',
         version: versions.PyPI,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
       },
       {
         registry: 'crates.io',
         version: versions['crates.io'],
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'record'],
+        contracts: [
+          'contribution',
+          'map-0.1',
+          'content-review-0.1',
+          'content-review-0.1-contract',
+          'record',
+        ],
       },
       {
         registry: 'Go',
         version: versions.Go,
-        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'content-review-0.1-contract'],
       },
     ],
     sources: {
       contribution: 'public/schemas/contribution.schema.json',
       'map-0.1': 'public/schemas/map-0.1.schema.json',
       'content-review-0.1': 'public/schemas/content-review-0.1.schema.json',
+      'content-review-0.1-contract': 'public/contracts/content-review-0.1.json',
       record: 'derived from contribution.schema.json#/$defs/record',
     },
     status: 'prepared',

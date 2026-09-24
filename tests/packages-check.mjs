@@ -13,6 +13,7 @@ import {
   referenceErrors,
   getMapSchema,
   getContentReviewSchema,
+  getContentReviewContract,
   assertMapDocument,
   assertContentReviewRequest,
 } from '../.release/packages/npm/dist/index.js';
@@ -49,6 +50,7 @@ test('the preparation manifest binds each distributed contract', () => {
       ['contribution', 'public/schemas/contribution.schema.json'],
       ['map-0.1', 'public/schemas/map-0.1.schema.json'],
       ['content-review-0.1', 'public/schemas/content-review-0.1.schema.json'],
+      ['content-review-0.1-contract', 'public/contracts/content-review-0.1.json'],
     ].map(([name, path]) => [name, createHash('sha256').update(readFileSync(path)).digest('hex')]),
   );
   const contribution = JSON.parse(readFileSync('public/schemas/contribution.schema.json'));
@@ -63,6 +65,7 @@ test('the preparation manifest binds each distributed contract', () => {
     'contribution',
     'map-0.1',
     'content-review-0.1',
+    'content-review-0.1-contract',
     'record',
   ]);
 });
@@ -117,7 +120,7 @@ test('published schema bytes agree across all three distributions', () => {
   assert.notEqual(getContributionSchema().title, 'mutated');
 });
 
-test('all distributions include the MAP and Content Review schemas', () => {
+test('all distributions include the MAP schema, Content Review schema and type contract', () => {
   for (const [name, canonical] of [
     ['map-0.1.schema.json', 'public/schemas/map-0.1.schema.json'],
     ['content-review-0.1.schema.json', 'public/schemas/content-review-0.1.schema.json'],
@@ -135,6 +138,14 @@ test('all distributions include the MAP and Content Review schemas', () => {
     getContentReviewSchema().$id,
     'https://mailschema.org/schemas/content-review-0.1.schema.json',
   );
+  const contract = readFileSync('public/contracts/content-review-0.1.json', 'utf8');
+  for (const path of [
+    'npm/dist/content-review-0.1.contract.json',
+    'python/src/mailschema/content-review-0.1.contract.json',
+    'rust/contracts/content-review-0.1.json',
+  ])
+    assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), contract);
+  assert.equal(getContentReviewContract().id, 'https://mailschema.org/types/content-review');
   const description = JSON.parse(
     readFileSync('public/fixtures/map-0.1/content-review-description.json'),
   );

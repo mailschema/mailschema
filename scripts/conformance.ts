@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { recordDigest } from '../src/registry/catalog.ts';
+import canonicalize from 'canonicalize';
 import { conformanceCases } from '../conformance/map-0.1/cases.mjs';
 
 const root = process.cwd();
@@ -20,10 +20,13 @@ for (const artifact of manifest.artifacts) {
   assert.equal(digest, artifact.sha256, `Stale conformance digest: ${artifact.path}`);
 }
 
-const record = JSON.parse(read('registry/types/content-review.json').toString('utf8'));
+const contract = JSON.parse(read('public/contracts/content-review-0.1.json').toString('utf8'));
+const contractBytes = canonicalize(contract);
+assert.notEqual(contractBytes, undefined);
+const contractDigest = createHash('sha256').update(contractBytes!).digest('hex');
 assert.equal(manifest.type.id, 'https://mailschema.org/types/content-review');
-assert.equal(manifest.type.version, record.version);
-assert.equal(manifest.type.recordDigest, `sha-256:${recordDigest(record)}`);
+assert.equal(manifest.type.version, contract.version);
+assert.equal(manifest.type.contractDigest, `sha-256:${contractDigest}`);
 assert.deepEqual(
   manifest.cases.map((entry: { id: string }) => entry.id),
   conformanceCases.map((entry) => entry.id),

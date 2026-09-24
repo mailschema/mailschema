@@ -1,42 +1,55 @@
 {
   "format": "mailschema-readiness-audit/1",
-  "artifactSetSha256": "a4be414248140aaedb83b734f7f31c478dbca09b36c7a9697550afae621196f7",
+  "artifactSetSha256": "d25e06cfe9e14ee91f4066750be1fa96454ffffb96d11a79ee4d08322d502071",
   "artifacts": [
     {
       "path": "src/map/reference.ts",
-      "sha256": "0d5d48ba1192df898b2a973f0feb1fdbd8016f9bc20295795714d95823aa3844"
+      "sha256": "4d72d9824a357c3894735a166f9865eb247bf25a0f212b578a9ebe4fbee386a8"
     },
     {
       "path": "public/contexts/map-0.1.jsonld",
-      "sha256": "c977c6009d893fe2d0fc73eb500bee5e61e2b95c8f4f7ce42f6c603f076d7a46"
+      "sha256": "feacf153c7ab0908dfff2c0509c5042a1c05a4ccb1cd6f47553feb24a999b46c"
     },
     {
       "path": "public/schemas/map-0.1.schema.json",
-      "sha256": "d908a960f53fade9ab47876bf69b1b3d037adeb7096091e22ca71fbc3909429c"
+      "sha256": "c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85"
     },
     {
       "path": "public/schemas/content-review-0.1.schema.json",
-      "sha256": "dba2a2f1e57f843f43080f5a40ced2d9c84e7c7036ec306c371a82d39f6d6c9f"
+      "sha256": "10e2263c820ba3a6ef0381c377078e2c1f324c3b142a6f8caf92b298cc66c692"
+    },
+    {
+      "path": "public/contracts/content-review-0.1.json",
+      "sha256": "754ab7245ddb09ff4da000fccc60d746724379d4146ea227973e5d87f105f800"
     },
     {
       "path": "public/fixtures/map-0.1/content-review-description.json",
-      "sha256": "03c08f59bc548a989b9147a28f40824e2ebd49f9388e62e697555ef01352ecab"
+      "sha256": "02f646fb3f4c38bf48cd201531bbe4014f893eab96e30a6c7a84cd4facec0e6e"
     },
     {
       "path": "public/fixtures/map-0.1/approve.json",
-      "sha256": "4992345aa71023ea68c06e96af64da27995989bf91d5d9331cc61db1f3909a0b"
+      "sha256": "6b4ce16c6da309fc9bc68065de395b9202ac1028bbf0c579dfd3b76c06f99751"
     },
     {
       "path": "public/fixtures/map-0.1/content-review.eml",
-      "sha256": "3f2f1fd7e17faed4bd698ffcd71ab59cfffd5098b368cf75e77aaa8dcf9bacc8"
+      "sha256": "d1e6be33e59368d15ed956e4de37dfad77ca38c7a1fdc0d6f6dfdb000703df89"
     },
     {
       "path": "scripts/audit-map-readiness.mjs",
-      "sha256": "1e40a343cbc5a26a066fcbb20f5ac7d61cf870fe9f7b171292111abde70b7420"
+      "sha256": "d70cc29bff86f2ba1900fe49a58a807feb686dc9ab4c636069476ebe823d6b52"
     }
   ],
   "scope": "Local reference implementation and fixtures. Not a deployed security test or full conformance certification.",
   "probes": [
+    {
+      "id": "type-contract",
+      "requirement": "The wire type reference binds the canonical Content Review contract.",
+      "status": "pass",
+      "observed": {
+        "advertised": "sha-256:deba8fc588c83c7cdf9d4e47d23b114861aea35c3daaf71854dc6c626c8a1d05",
+        "computed": "sha-256:deba8fc588c83c7cdf9d4e47d23b114861aea35c3daaf71854dc6c626c8a1d05"
+      }
+    },
     {
       "id": "control",
       "requirement": "A valid, authorized approval completes exactly once.",
@@ -51,6 +64,21 @@
       "requirement": "A request for an unknown interaction cannot complete.",
       "status": "pass",
       "observed": 400
+    },
+    {
+      "id": "unknown-result-correlation",
+      "requirement": "A missing result is correlated to the request identifier without inventing an interaction.",
+      "status": "pass",
+      "observed": {
+        "type": "https://mailschema.org/problems/result-not-found",
+        "title": "Result not found",
+        "status": 404,
+        "detail": "No retained result exists for this request identifier.",
+        "instance": "https://reviews.example/map/results/urn%3Auuid%3A018f47a2-5d7c-7b11-9a3d-4d2160b86fff",
+        "profile": "https://mailschema.org/profiles/map/0.1",
+        "requestId": "urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b86fff",
+        "code": "result-not-found"
+      }
     },
     {
       "id": "request-validation",
@@ -99,10 +127,13 @@
     },
     {
       "id": "sml-designation",
-      "requirement": "The structured MIME part carries SML-06 Content-Purpose: Machine-readable.",
+      "requirement": "The partial MAP representation is designated and safely transfer encoded.",
       "status": "pass",
       "observed": {
-        "present": true
+        "outerType": "multipart/related",
+        "structuredParts": 1,
+        "purpose": true,
+        "transferEncoding": "base64"
       }
     },
     {
@@ -110,12 +141,8 @@
       "requirement": "The vocabulary type is the MAP type IRI and is independent of document base.",
       "status": "pass",
       "observed": [
-        [
-          "https://mailschema.org/ns/map#MailAction"
-        ],
-        [
-          "https://mailschema.org/ns/map#MailAction"
-        ]
+        ["https://mailschema.org/ns/map#MailAction"],
+        ["https://mailschema.org/ns/map#MailAction"]
       ]
     },
     {
@@ -123,14 +150,8 @@
       "requirement": "Shared operation tokens do not change with the document base.",
       "status": "pass",
       "observed": [
-        [
-          "request-changes",
-          "approve"
-        ],
-        [
-          "request-changes",
-          "approve"
-        ]
+        ["request-changes", "approve"],
+        ["request-changes", "approve"]
       ]
     },
     {

@@ -28,6 +28,8 @@ An authorised reviewer records approval of the identified revision. The result n
 
 Approval records a review decision. Any subsequent sending, publication or other operation is subject to the service's separate permissions and workflow.
 
+The service decides how a caller may participate. A caller with no review authority receives `refused`. A caller allowed to propose approval receives `approval-required` and a route for the service's normal human decision. A caller with delegated decision authority may receive `completed` when the service records the approval directly. MAP does not infer authority from whether the caller is a person or an agent.
+
 ## Example exchange
 
 1. A service sends a test email for campaign revision 3.
@@ -43,7 +45,7 @@ The [interactive example](/examples/) simulates this exchange in the browser. It
 
 The service refuses a request that targets a stale revision. It does not apply the decision to newer content.
 
-A retry of the same request must not create a duplicate effect. A request with changed inputs or a different revision is a new request. The execution profile will define identification and recovery rules.
+A retry of the same request must not create a duplicate effect. A request with changed inputs or a different revision is a new request and uses a new request identifier. The execution profile defines identification and recovery rules.
 
 ## Service responsibilities
 

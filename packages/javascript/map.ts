@@ -2,6 +2,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import mapSchema from './map-0.1.schema.json' with { type: 'json' };
 import contentReviewSchema from './content-review-0.1.schema.json' with { type: 'json' };
+import contentReviewContract from './content-review-0.1.contract.json' with { type: 'json' };
 
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
 addFormats(ajv);
@@ -40,4 +41,8 @@ export function getMapSchema(): Record<string, unknown> {
 
 export function getContentReviewSchema(): Record<string, unknown> {
   return structuredClone(contentReviewSchema);
+}
+
+export function getContentReviewContract(): Record<string, unknown> {
+  return structuredClone(contentReviewContract);
 }

@@ -6,15 +6,15 @@
 
 - Registry validation passed with five types, no vendor contributions and no implementation declarations.
 - MAP profile validation passed for six valid documents, two rejected fixtures and one complete multipart email.
-- The conformance manifest verified 19 digest-bound artifacts, 25 executable cases and mappings for 14 normative requirements.
+- The conformance manifest verified 20 digest-bound artifacts, 29 executable cases and mappings for 16 normative requirements.
 - The reference suite covers MIME and JSON-LD processing, completion, feedback acceptance, exact retry, lost-response recovery, changed-payload conflict, refusal, stale targets, expiry, unsupported types, approval requirements, pending work, authenticated principal and tenant binding, current authorization and exact endpoint trust.
-- Eleven readiness probes passed against the specification, profile, schemas, fixtures, reference boundary, conformance matrix, package promotion contract and Internet-Draft source.
+- Thirteen readiness probes passed against the specification, profile, schemas, fixtures, reference boundary, conformance matrix, package promotion contract and Internet-Draft source.
 - The Content Review record, schemas and fixtures agree on the stable operation IDs `request-changes` and `approve`.
 
 ## Packages
 
 - JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `v0.1.0` were independently downloaded from their public registries. Their immutable evidence verifies the Registry contribution contract shipped at the time; it does not claim the revised MAP contract.
-- Nine local distribution checks passed across declared versions, a full-contract preparation manifest, canonical schema copies, clean build output, maintained repository metadata, MAP and Content Review schemas, compiled validation, Registry reference checks and CLI behavior.
+- Nine local distribution checks passed across declared versions, a full-contract preparation manifest, canonical schema copies, clean build output, maintained repository metadata, MAP and Content Review schemas, the canonical type contract, compiled validation, Registry reference checks and CLI behavior.
 - The four maintained language repositories contain byte-exact projections of the revised MAP and Content Review schemas and pass their language tests. Their published versions remain unchanged while the release need is assessed; no bookkeeping-only version bump is required.
 - A clean public npm invocation accepted the MAP description with `--map`.
 - A fresh Python virtual environment installed `mailschema==0.1.2`, reported `0.1.2` and validated the MAP description.
@@ -25,7 +25,7 @@
 
 ## Site
 
-- Astro diagnostics reported zero errors, warnings and hints across 61 files.
+- Astro diagnostics reported zero errors, warnings and hints across 63 files.
 - The static build completed and Sourcey generated seven specification pages, including the MAP 0.1 profile.
 - The complete `.eml` and JSON fixtures are emitted directly from their canonical files under `/fixtures/map-0.1/`.
 - All 27 Playwright checks passed. They cover every public route and internal destination, Registry compilation and ingestion, contribution previews, full-contract package evidence, four language tabs, clipboard fallbacks, mobile layout, no-JavaScript reading, search, exact review behavior and automated WCAG AA checks.

@@ -18,11 +18,10 @@ The initial execution profile delivers action descriptions by email and submits 
 
 ## Participants
 
-| Participant | Responsibility                                                                                                             |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Service     | Describes available actions, checks permission, performs operations and reports results.                                   |
-| Client      | Recognises supported interaction types, presents or selects an action and submits the request.                             |
-| Connector   | Connects a client or service to a particular environment while preserving the interaction's meaning and permission checks. |
+| Participant | Responsibility                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| Service     | Describes available actions, checks permission, performs operations and reports results.       |
+| Client      | Recognises supported interaction types, presents or selects an action and submits the request. |
 
 Services still require integration and configuration. Supporting a type allows a client to reuse its interpretation of the interaction; it does not give the client access to every service that publishes the type.
 
@@ -46,9 +45,9 @@ The approval applies to revision 4. A request to approve the old revision is ref
 
 ## Types and the Registry
 
-A type defines a particular interaction's operations, inputs and results. The MailSchema Registry holds submitted type definitions, their versions, examples and review status. A record may also link to implementations that declare support for a particular type version.
+A type contract defines a particular interaction's target, operations, inputs and results. The MailSchema Registry supplies discovery, review status, maintainers, examples and implementation evidence for those contracts.
 
-Registering a type does not demonstrate that a product implements it correctly. Type status and implementation evidence are recorded separately. Clients can support a type without making a Registry lookup during an interaction.
+Registering a type does not demonstrate that a product implements it correctly. Type status and implementation evidence are recorded separately. A wire message binds the canonical contract rather than the editable Registry record, and clients can support a type without making a Registry lookup during an interaction.
 
 ## Scope
 

@@ -76,17 +76,20 @@
       <tt>Content-Purpose: Machine-readable</tt>. A receiver
       <bcp14>MUST NOT</bcp14> infer a MAP description from an undesignated JSON
       attachment.</t>
-      <t>When the structured document is a full representation of the readable
-      content, the sender <bcp14>MUST</bcp14> use the
-      <tt>multipart/alternative</tt> placement defined by Structured Email.
-      When the structured document describes only part of the message, such as
-      an offered service action, the sender <bcp14>MUST</bcp14> use
-      <tt>multipart/related</tt>. The readable text and HTML variants, when both
-      are present, remain a nested <tt>multipart/alternative</tt> part.</t>
+      <t>A MAP action description represents part of a message. The sender
+      <bcp14>MUST</bcp14> use <tt>multipart/related</tt>. The readable text and
+      HTML variants, when both are present, remain a nested
+      <tt>multipart/alternative</tt> part. The structured part
+      <bcp14>MUST</bcp14> use <tt>base64</tt> or
+      <tt>quoted-printable</tt> content-transfer encoding.</t>
       <t>A receiving system <bcp14>MAY</bcp14> extract and validate the
       description before it knows whether it will offer execution. Extraction
       and schema validation <bcp14>MUST NOT</bcp14> execute an operation or
       grant authority.</t>
+      <t>The structured value is ordinary JSON. JSON-LD expansion is optional.
+      An implementation that expands the document <bcp14>MUST</bcp14> use the
+      bundled profile context and <bcp14>MUST NOT</bcp14> retrieve a context
+      named by an untrusted message.</t>
     </section>
 
     <section anchor="terms" numbered="true">
@@ -140,8 +143,8 @@
       <xref target="RFC8259"/>:</t>
       <dl>
         <dt>@id</dt><dd>A UUID URN identifying the interaction.</dd>
-        <dt>type</dt><dd>The interaction type URI, version, and exact record
-        digest.</dd>
+        <dt>type</dt><dd>The interaction type URI, version, and exact canonical
+        contract digest.</dd>
         <dt>service</dt><dd>The service identity, HTTPS execution and result
         routes, human route, retention interval, and informational
         authentication metadata.</dd>
@@ -153,6 +156,9 @@
       <t>The description <bcp14>MUST NOT</bcp14> contain an access token,
       session credential, or new authorization grant. Its authentication
       metadata only names schemes that a configured client may already use.</t>
+      <t>A service <bcp14>MUST</bcp14> preserve the same interaction identifier
+      when it redelivers the same underlying interaction. A changed target
+      revision or changed set of offered operations is a new interaction.</t>
     </section>
 
     <section anchor="trust" numbered="true">
@@ -218,6 +224,14 @@
       an interrupted operation without repeating the business effect. A
       non-terminal result can advance to one terminal result; a terminal result
       <bcp14>MUST NOT</bcp14> advance.</t>
+      <t>A malformed request or request for an unknown interaction
+      <bcp14>MUST NOT</bcp14> claim its identifier. For a recognized interaction
+      and authenticated principal, the service <bcp14>MUST</bcp14> isolate an
+      existing identifier to its original principal and check current
+      authorization before disclosing saved state. A new identifier is claimed
+      before an effect begins, and its first recoverable outcome, including a
+      permission refusal, is recorded with that claim. This specification does
+      not require a total precedence among independent validation failures.</t>
       <t>An authenticated <tt>GET</tt> to the result resource rechecks current
       authorization and returns the latest recorded result or problem. After a timeout, a client
       <bcp14>SHOULD</bcp14> retrieve that resource before issuing a request that
@@ -227,15 +241,23 @@
       recorded. A service <bcp14>MUST</bcp14> preserve enough duplicate
       suppression state after result disclosure ends to prevent the same
       scoped request identifier from applying the effect again.</t>
+      <t>A <tt>result-not-found</tt> problem identifies the requested
+      <tt>requestId</tt>. When the service has no known interaction for that
+      identifier, it <bcp14>MUST NOT</bcp14> invent an
+      <tt>interactionId</tt>.</t>
     </section>
 
     <section anchor="types" numbered="true">
       <name>Interaction Types</name>
       <t>MAP separates the execution profile from interaction semantics. A type
-      record defines the target, stable operations, required inputs, results,
-      permissions, human route, examples, and related standards. A description
-      binds the type URI, version, and record digest so implementations do not
+      contract defines the target semantics, stable operations, required
+      inputs, and normal results. A description binds the type URI, version,
+      and SHA-256 digest of that complete contract serialized with the JSON
+      Canonicalization Scheme <xref target="RFC8785"/>. Implementations do not
       guess compatibility.</t>
+      <t>A Registry record can add discovery metadata, maintainers, examples,
+      evidence, and history without changing the wire contract. Registry
+      lookup is not required during an interaction.</t>
       <t>The initial Content Review 0.1 type offers
       <tt>request-changes</tt> and <tt>approve</tt> for an exact content
       revision. Approval records a review decision; it does not send or publish
@@ -258,6 +280,10 @@
       <t>Clients should present the operation, target, scope, and consequence
       before obtaining human approval. A changed target or materially changed
       action requires a new decision according to service policy.</t>
+      <t>A service can grant a caller no approval authority, proposal authority
+      that produces <tt>approval-required</tt>, or delegated authority that can
+      produce <tt>completed</tt>. The protocol does not infer authority from
+      whether the caller is a person or an automated client.</t>
     </section>
 
     <section anchor="privacy" numbered="true">

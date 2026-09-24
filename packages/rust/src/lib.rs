@@ -15,7 +15,11 @@ pub const RECORD_SCHEMA: &str = include_str!("../schemas/record.schema.json");
 pub const MAP_0_1_SCHEMA: &str = include_str!("../schemas/map-0.1.schema.json");
 
 /// Content Review 0.1 request binding.
-pub const CONTENT_REVIEW_0_1_SCHEMA: &str = include_str!("../schemas/content-review-0.1.schema.json");
+pub const CONTENT_REVIEW_0_1_SCHEMA: &str =
+    include_str!("../schemas/content-review-0.1.schema.json");
+
+/// Canonical Content Review 0.1 type contract.
+pub const CONTENT_REVIEW_0_1_CONTRACT: &str = include_str!("../contracts/content-review-0.1.json");
 
 /// Supported local schema documents.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -51,13 +55,25 @@ mod tests {
             Schema::ContentReview01,
         ] {
             let value: serde_json::Value = serde_json::from_str(schema.as_str()).unwrap();
-            assert_eq!(value["$schema"], "https://json-schema.org/draft/2020-12/schema");
+            assert_eq!(
+                value["$schema"],
+                "https://json-schema.org/draft/2020-12/schema"
+            );
         }
         let contribution: serde_json::Value = serde_json::from_str(CONTRIBUTION_SCHEMA).unwrap();
         assert!(contribution["$defs"]["record"].is_object());
         let map: serde_json::Value = serde_json::from_str(MAP_0_1_SCHEMA).unwrap();
-        assert_eq!(map["$id"], "https://mailschema.org/schemas/map-0.1.schema.json");
+        assert_eq!(
+            map["$id"],
+            "https://mailschema.org/schemas/map-0.1.schema.json"
+        );
         let record: serde_json::Value = serde_json::from_str(RECORD_SCHEMA).unwrap();
         assert_eq!(record["$ref"], "#/$defs/record");
+        let contract: serde_json::Value =
+            serde_json::from_str(CONTENT_REVIEW_0_1_CONTRACT).unwrap();
+        assert_eq!(
+            contract["id"],
+            "https://mailschema.org/types/content-review"
+        );
     }
 }

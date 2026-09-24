@@ -11,7 +11,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["email", "schema", "json-schema", "agents"]
 categories = ["data-structures", "email"]
-include = ["src/**", "schemas/**", "Cargo.toml", "README.md", "LICENSE"]
+include = ["src/**", "schemas/**", "contracts/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [dev-dependencies]
 serde_json = "1"

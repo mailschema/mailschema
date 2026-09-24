@@ -3,11 +3,10 @@
   "profile": "https://mailschema.org/profiles/map/0.1",
   "requestId": "urn:uuid:018f47a2-d443-76e8-a912-36038dcc49af",
   "interactionId": "urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b85b10",
-  "requestedAt": "2026-09-23T01:07:00Z",
   "type": {
     "id": "https://mailschema.org/types/content-review",
     "version": "0.1",
-    "recordDigest": "sha-256:0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c"
+    "contractDigest": "sha-256:deba8fc588c83c7cdf9d4e47d23b114861aea35c3daaf71854dc6c626c8a1d05"
   },
   "operation": "publish",
   "target": {

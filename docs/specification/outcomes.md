@@ -4,45 +4,28 @@ description: Reporting operation state and recovering from an interrupted exchan
 navTitle: Results and retries
 ---
 
-A result tells the client what happened to the requested operation. Successful delivery of a request is insufficient to establish that the operation completed.
-
-## Operation states
-
-The draft requires the following distinctions where they apply. The type defines which states its operations use. MAP 0.1 assigns the service result values and HTTP status mappings in the [execution profile](/specification/profile/).
-
-| State             | Meaning                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------- |
-| Accepted          | The service accepted the request. Further work, such as an edit following recorded feedback, may remain. |
-| Completed         | The requested effect occurred. For Content Review approval, this means the review decision was recorded. |
-| Refused           | The operation was not performed because permission or another required condition was absent.             |
-| Stale revision    | The request referred to an outdated revision and was not applied to the current content.                 |
-| Approval required | An additional decision is needed before the operation can proceed.                                       |
-| Pending           | The work is outstanding. The result provides any available status or follow-up reference.                |
-| Failed            | Work previously accepted by the service ended without completing the requested effect.                   |
-| Uncertain         | The client cannot determine whether the effect occurred.                                                 |
-
-These distinctions describe operation meaning. In particular, an uncertain state may result from a lost response; it need not be a state returned by the service.
+A response tells the client what the service recorded for a request. Successful HTTP delivery alone does not establish that the operation completed. The [MAP 0.1 outcome table](/specification/profile/#outcomes) defines every result state, problem code and HTTP mapping.
 
 ## Request and target references
 
-The result identifies the request and the target it concerns. Where the type binds operations to revisions, the result identifies the affected revision. A service may also provide a reference through which an authorised client can inspect the recorded result.
+A result identifies the request, interaction, type, operation and target it concerns. Where a type binds an operation to a revision, the result names that revision. For Content Review, an approval without an identifiable content revision is insufficient.
 
-For Content Review, an approval result without an identifiable content revision is insufficient.
+The response also identifies the result resource. That resource is authoritative for later state and is read with the caller's current service authorization.
 
 ## Duplicate requests
 
-A client may lose the response after the service has performed an operation. Retrying that request must not apply the same effect a second time.
+A client can lose a response after the service applies an operation. It persists the original `requestId` and reuses the complete original request when retrying. The service returns the recorded response without applying the effect again.
 
-The execution profile binds one complete request value and authenticated principal to a client-generated request ID. An exact retry returns the latest recorded result after a current access check. A changed value, including a changed target revision, produces an idempotency conflict and no effect.
+Changing an input, operation or target revision creates a different request and requires a new identifier. Reusing an existing identifier with changed values produces an idempotency conflict.
 
 ## Interrupted exchanges
 
-After a timeout, the client cannot assume that the request failed. It should recover the authoritative result before retrying in a way that could duplicate the operation.
+After a timeout, the client cannot assume that the operation failed. It should retrieve the result resource before taking another action that could duplicate the effect.
 
-The description advertises a result URL template and retention period. Every response identifies that result resource. An authenticated client retrieves it after an interrupted exchange before deciding whether another request is safe. Retrieval is side-effect free and rechecks current permission. The service keeps duplicate-suppression state after the response body expires so an old request cannot apply the effect again.
+A missing retained result does not prove that an effect never occurred. The service keeps enough duplicate-suppression state after the response expires to prevent an old request from being applied again. `uncertain` describes what the client knows after an interrupted exchange; it is not a service result state.
 
 ## Non-terminal work
 
-`pending` and `approval-required` can advance to `accepted`, `completed` or `failed`. The result resource is authoritative, so recovery and an exact retry can return a newer state than the initial response. A service records each transition durably before returning it.
+`pending` and `approval-required` may advance once to a terminal result. Recovery and an exact retry return the latest recorded state, which can differ from the initial response. Each transition is durable before the service returns it.
 
-Claiming a request identifier, applying or durably initiating its effect, and recording recoverable state must be atomic or covered by a reconciliation process. A service restart cannot turn an uncertain response into a second effect.
+Claiming a request identifier, applying or durably initiating its effect and recording recoverable state are atomic or covered by reconciliation. A service restart cannot turn a lost response into a second effect.
