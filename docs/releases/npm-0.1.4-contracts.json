@@ -1,0 +1,49 @@
+{
+  "format": "mailschema-package-release/2",
+  "checkedAt": "2026-09-24T12:25:42.185Z",
+  "version": "0.1.4",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "contracts": [
+    {
+      "name": "contribution",
+      "sha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564"
+    },
+    {
+      "name": "map-0.1",
+      "sha256": "c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85"
+    },
+    {
+      "name": "content-review-0.1",
+      "sha256": "10e2263c820ba3a6ef0381c377078e2c1f324c3b142a6f8caf92b298cc66c692"
+    },
+    {
+      "name": "content-review-0.1-contract",
+      "sha256": "754ab7245ddb09ff4da000fccc60d746724379d4146ea227973e5d87f105f800"
+    },
+    {
+      "name": "content-review-0.2",
+      "sha256": "d2286ffe410cceae56f9caa145634fd9613f5ce51e11ba089cad67b9f62259b7"
+    },
+    {
+      "name": "content-review-0.2-contract",
+      "sha256": "3bd1cd4a86e00d00590eeb150b7b29cebece589058d6094a40aa9d497dc8efe0"
+    }
+  ],
+  "verification": "Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.",
+  "channels": [
+    {
+      "registry": "npm",
+      "name": "mailschema",
+      "version": "0.1.4",
+      "url": "https://www.npmjs.com/package/mailschema/v/0.1.4",
+      "artifacts": [
+        {
+          "name": "mailschema-0.1.4.tgz",
+          "sha256": "a03247689eff22ce779cb42f0cc182cfe1ddc594c94fdfc9fc6c365959dca164",
+          "integrity": "sha512-Byl86zOXaldkqpoywpRAtd5zZX3o5VVi7nxxml77FZvcktfc4Y3zeM8LLjV7dBZhgOD1sGr511b4fxzomUt2RA=="
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}
