@@ -1,13 +1,13 @@
 {
   "slug": "content-review",
   "name": "Content Review",
-  "summary": "Request changes or approve a specific revision of content.",
+  "summary": "Request changes or decide approval for a specific revision of content.",
   "category": "Review",
   "status": "Draft",
-  "version": "0.1",
+  "version": "0.2",
   "origin": "MailSchema draft",
   "profile": "https://mailschema.org/profiles/map/0.1",
-  "overview": "A service sends content for review. The recipient can submit feedback or record approval of the revision they received. Editing the draft and sending or publishing it remain separate service operations.",
+  "overview": "A service sends content for review. The recipient can submit feedback or decide whether to approve the revision they received. A proposed approval may require an authorized human decision and ends as approved, declined, stale or expired. Editing the draft and sending or publishing it remain separate service operations.",
   "target": "Service-owned content identified by its exact revision.",
   "operations": [
     {
@@ -18,12 +18,12 @@
     {
       "id": "approve",
       "name": "Approve",
-      "description": "Record approval of that revision."
+      "description": "Propose or record approval of that revision."
     }
   ],
   "inputs": "The target revision and, for a change request, review feedback.",
-  "results": "Feedback recorded or approval recorded, with the revision identified. Requests without permission or against stale revisions leave the current review decision unchanged.",
-  "permissions": "The service checks the caller’s review permission. Editing and any later sending or publication require their own permissions.",
+  "results": "Feedback recorded; approval recorded; or a proposed approval closed as declined, stale or expired. Every result identifies the request and exact revision.",
+  "permissions": "The service checks permission when the request is proposed and again when a human decides it. An authorized teammate may decide for the same service tenant. An unauthorized attempt does not change the proposed request. Editing and any later sending or publication require their own permissions.",
   "humanRoute": "A review page showing the same content and revision.",
   "example": {
     "title": "Review a campaign draft",
@@ -37,8 +37,8 @@
   },
   "references": [
     {
-      "title": "Content Review 0.1 contract",
-      "href": "https://mailschema.org/contracts/content-review-0.1.json",
+      "title": "Content Review 0.2 contract",
+      "href": "https://mailschema.org/contracts/content-review-0.2.json",
       "description": "Normative canonical type contract used by MAP wire messages."
     },
     {
@@ -53,10 +53,14 @@
     }
   ],
   "openQuestions": [
-    "Which independent services and clients can reproduce the 0.1 conformance cases?",
+    "Which independent services and clients can reproduce the 0.2 conformance cases?",
     "Which content digest representations need bindings beyond SHA-256?"
   ],
   "history": [
+    {
+      "label": "0.2 · Working draft",
+      "description": "Declares completed and terminal failed outcomes for supervised approval, including declined, stale and expired decisions. Human decisions are authorized independently of the proposing client."
+    },
     {
       "label": "0.1 · Working draft",
       "description": "The MAP 0.1 profile defines review feedback, revision approval, exact target binding, retries and recovery."

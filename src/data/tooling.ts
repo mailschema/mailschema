@@ -17,6 +17,18 @@ const contracts: PackageContracts = {
     resolve('public/schemas/content-review-0.1.schema.json'),
     'utf8',
   ),
+  'content-review-0.1-contract': readFileSync(
+    resolve('public/contracts/content-review-0.1.json'),
+    'utf8',
+  ),
+  'content-review-0.2': readFileSync(
+    resolve('public/schemas/content-review-0.2.schema.json'),
+    'utf8',
+  ),
+  'content-review-0.2-contract': readFileSync(
+    resolve('public/contracts/content-review-0.2.json'),
+    'utf8',
+  ),
   record: `${JSON.stringify(
     { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
     null,
@@ -80,7 +92,7 @@ assertMapDocument(description);`,
       },
       {
         name: 'assertContentReviewRequest(value)',
-        description: 'Apply the Content Review 0.1 request binding.',
+        description: 'Apply the current Content Review 0.2 request binding.',
       },
       {
         name: 'getMapSchema() / getContentReviewSchema()',
@@ -130,7 +142,7 @@ validate_map_document(description)`,
       },
       {
         name: 'validate_content_review_request(value)',
-        description: 'Apply the Content Review 0.1 request binding.',
+        description: 'Apply the current Content Review 0.2 request binding.',
       },
       {
         name: 'get_map_schema() / get_content_review_schema()',
@@ -157,20 +169,20 @@ validate_map_document(description)`,
     installLanguage: 'toml' as const,
     language: 'rust' as const,
     filename: 'src/main.rs',
-    example: `use mailschema::{MAP_0_1_SCHEMA, CONTENT_REVIEW_0_1_SCHEMA};
+    example: `use mailschema::{MAP_0_1_SCHEMA, CONTENT_REVIEW_0_2_SCHEMA};
 
 fn main() -> std::io::Result<()> {
     std::fs::write("map-0.1.schema.json", MAP_0_1_SCHEMA)?;
     std::fs::write(
-        "content-review-0.1.schema.json",
-        CONTENT_REVIEW_0_1_SCHEMA,
+        "content-review-0.2.schema.json",
+        CONTENT_REVIEW_0_2_SCHEMA,
     )?;
     Ok(())
 }`,
     exampleNote: 'Writes the canonical schemas to local files for use with your chosen validator.',
     api: [
       {
-        name: 'MAP_0_1_SCHEMA / CONTENT_REVIEW_0_1_SCHEMA',
+        name: 'MAP_0_1_SCHEMA / CONTENT_REVIEW_0_2_SCHEMA',
         description: 'The protocol schemas as static strings.',
       },
       {
@@ -178,7 +190,7 @@ fn main() -> std::io::Result<()> {
         description: 'The Registry schemas as static strings.',
       },
       {
-        name: 'Schema::Map01.as_str() / Schema::ContentReview01.as_str()',
+        name: 'Schema::Map01.as_str() / Schema::ContentReview02.as_str()',
         description: 'Select a bundled protocol schema through the typed enum.',
       },
     ],

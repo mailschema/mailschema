@@ -21,6 +21,13 @@ pub const CONTENT_REVIEW_0_1_SCHEMA: &str =
 /// Canonical Content Review 0.1 type contract.
 pub const CONTENT_REVIEW_0_1_CONTRACT: &str = include_str!("../contracts/content-review-0.1.json");
 
+/// Content Review 0.2 request binding.
+pub const CONTENT_REVIEW_0_2_SCHEMA: &str =
+    include_str!("../schemas/content-review-0.2.schema.json");
+
+/// Canonical Content Review 0.2 type contract.
+pub const CONTENT_REVIEW_0_2_CONTRACT: &str = include_str!("../contracts/content-review-0.2.json");
+
 /// Supported local schema documents.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Schema {
@@ -28,6 +35,7 @@ pub enum Schema {
     Record,
     Map01,
     ContentReview01,
+    ContentReview02,
 }
 
 impl Schema {
@@ -38,6 +46,7 @@ impl Schema {
             Self::Record => RECORD_SCHEMA,
             Self::Map01 => MAP_0_1_SCHEMA,
             Self::ContentReview01 => CONTENT_REVIEW_0_1_SCHEMA,
+            Self::ContentReview02 => CONTENT_REVIEW_0_2_SCHEMA,
         }
     }
 }
@@ -53,6 +62,7 @@ mod tests {
             Schema::Record,
             Schema::Map01,
             Schema::ContentReview01,
+            Schema::ContentReview02,
         ] {
             let value: serde_json::Value = serde_json::from_str(schema.as_str()).unwrap();
             assert_eq!(
@@ -75,5 +85,8 @@ mod tests {
             contract["id"],
             "https://mailschema.org/types/content-review"
         );
+        let current_contract: serde_json::Value =
+            serde_json::from_str(CONTENT_REVIEW_0_2_CONTRACT).unwrap();
+        assert_eq!(current_contract["version"], "0.2");
     }
 }

@@ -15,9 +15,13 @@ export {
   assertMapDocument,
   contentReviewRequestErrors,
   assertContentReviewRequest,
+  contentReview01RequestErrors,
+  assertContentReview01Request,
   getMapSchema,
   getContentReviewSchema,
   getContentReviewContract,
+  getContentReview01Schema,
+  getContentReview01Contract,
 } from './map.js';
 
 /** Return an independent copy of the contribution JSON Schema (Draft 2020-12). */

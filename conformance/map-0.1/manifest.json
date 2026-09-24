@@ -3,8 +3,8 @@
   "profile": "https://mailschema.org/profiles/map/0.1",
   "type": {
     "id": "https://mailschema.org/types/content-review",
-    "version": "0.1",
-    "contractDigest": "sha-256:deba8fc588c83c7cdf9d4e47d23b114861aea35c3daaf71854dc6c626c8a1d05"
+    "version": "0.2",
+    "contractDigest": "sha-256:6ee5b086138799f70f2489e851e1db6e11ff91cd1141bd36fe202a47d8c1e637"
   },
   "artifacts": [
     {
@@ -20,40 +20,44 @@
       "sha256": "c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85"
     },
     {
-      "path": "public/schemas/content-review-0.1.schema.json",
-      "sha256": "10e2263c820ba3a6ef0381c377078e2c1f324c3b142a6f8caf92b298cc66c692"
+      "path": "public/schemas/content-review-0.2.schema.json",
+      "sha256": "d2286ffe410cceae56f9caa145634fd9613f5ce51e11ba089cad67b9f62259b7"
     },
     {
-      "path": "public/contracts/content-review-0.1.json",
-      "sha256": "754ab7245ddb09ff4da000fccc60d746724379d4146ea227973e5d87f105f800"
+      "path": "public/contracts/content-review-0.2.json",
+      "sha256": "3bd1cd4a86e00d00590eeb150b7b29cebece589058d6094a40aa9d497dc8efe0"
     },
     {
       "path": "registry/types/content-review.json",
-      "sha256": "52f3d5c3d6f1a3d5b7c7dc850e3227aba9a37454ad472b9288bf3fe787d2f311"
+      "sha256": "f3417302a06f1ffeeebf973d18328e22bf5e6ca602bfaca42a7a46d0dae440ca"
     },
     {
       "path": "public/fixtures/map-0.1/content-review-description.json",
-      "sha256": "02f646fb3f4c38bf48cd201531bbe4014f893eab96e30a6c7a84cd4facec0e6e"
+      "sha256": "08db92f7c8f9d8a37983e01c42e70b4736bb22f69790d4da4e413293728ecb05"
     },
     {
       "path": "public/fixtures/map-0.1/content-review.eml",
-      "sha256": "d1e6be33e59368d15ed956e4de37dfad77ca38c7a1fdc0d6f6dfdb000703df89"
+      "sha256": "0d513c2256d6139ef73f454a0c38bc2bc9f947281ac13f4760b5b96ba7d007d7"
     },
     {
       "path": "public/fixtures/map-0.1/request-changes.json",
-      "sha256": "d436698288740d549bdc7d9229316406f816ed365733f4aab9e8ee29ad6cead9"
+      "sha256": "84db9bfa94bf6ab7c062866335424a272c1d1a3d5b439f1b3a6afe1d45755bc5"
     },
     {
       "path": "public/fixtures/map-0.1/approve.json",
-      "sha256": "6b4ce16c6da309fc9bc68065de395b9202ac1028bbf0c579dfd3b76c06f99751"
+      "sha256": "ccfa747fdd2e98b22c55dee7549f718483fb59dbc07c852ecb8945cf6f9002bd"
     },
     {
       "path": "public/fixtures/map-0.1/result-completed.json",
-      "sha256": "020dee97468a9d3727950f5205453fe8f4e246d8ac0f24e451f7745295912e59"
+      "sha256": "5f46602f327827c8602f4bbe2db56aeb120e61f94d06b9bed6bc3c9f819500bc"
     },
     {
       "path": "public/fixtures/map-0.1/result-approval-required.json",
-      "sha256": "43488d70c1c67ace078db753649e578b7dfe0e74dbd6739ecb01f6e72898f596"
+      "sha256": "25eb5c58e551909b5a70bb812949487464b73ab1dba688ef78fd98493cd925de"
+    },
+    {
+      "path": "public/fixtures/map-0.1/result-failed.json",
+      "sha256": "2fc1685e3b40359dd5d4fc6c339c67532f980ab78eb35b5892f60d841ec0b131"
     },
     {
       "path": "public/fixtures/map-0.1/problem-stale-target.json",
@@ -61,23 +65,23 @@
     },
     {
       "path": "public/fixtures/map-0.1/invalid/inline-credential.json",
-      "sha256": "5152bf84fd0fe40891764003753062f5e638b4b65d5a3f4bf6351f51f225c5e6"
+      "sha256": "a1b0e66ccc4e3fa39c20d68eb4508ce637c73f1920b720bc62eaeeed2db8aa90"
     },
     {
       "path": "public/fixtures/map-0.1/invalid/unknown-operation.json",
-      "sha256": "006649f30943f11d1243044675b615d373c48fac29d59ebc52a037a37aa8a6b5"
+      "sha256": "6bbe5c80a7e58e045bb153c1593267fe4c8995dd64a94e0fa2c1034174f1181c"
     },
     {
       "path": "src/map/reference.ts",
-      "sha256": "d557436b24dc0fe7ce9d7e215fc3e8d7998ba09f3d828c99431ec93552fd7677"
+      "sha256": "748711652f5962514ab6a13eeb80fe91db0b14f0cf0099fa614a59a13fc4210b"
     },
     {
       "path": "conformance/map-0.1/cases.mjs",
-      "sha256": "9279ef640d1e8cbf58cedf06b5a20cc6b8497a4edeb4a5e4e1393d7edd14b142"
+      "sha256": "3724135c5e9e55ada058319c4767870def19c4ecf710389a90d26a63d5a7dbbe"
     },
     {
       "path": "conformance/map-0.1/requirements.json",
-      "sha256": "51ff577d53155219eb08bc871a35a758d6cd553f87ba938d7dc99dde9e276d58"
+      "sha256": "e9424d504eeab657191b2d6573bee22c793e9654c7f4519d8af8ff638a50cc41"
     },
     {
       "path": "tests/map-profile.test.mjs",
@@ -85,7 +89,7 @@
     },
     {
       "path": "scripts/map-profile.ts",
-      "sha256": "21ba387948e917817077a49960b0cb36fe7245e9517ceb3191aaf9c0f92c8258"
+      "sha256": "027d6edeb1bd338bf21a0892283398a448ac981352b006998c3bdc71472eea05"
     }
   ],
   "cases": [
@@ -106,8 +110,8 @@
     },
     {
       "id": "stable-redelivery",
-      "title": "redelivery preserves the interaction identifier",
-      "expected": "same interactionId"
+      "title": "redelivery reuses the client request and applies one effect",
+      "expected": "same requestId and one effect"
     },
     {
       "id": "lost-response-recovery",
@@ -146,8 +150,8 @@
     },
     {
       "id": "invalid-type-input",
-      "title": "a type-invalid operation input has no effect",
-      "expected": "400 invalid-request"
+      "title": "a type-invalid claimed request is recoverable and cannot be replaced",
+      "expected": "saved 400 then 409 idempotency-conflict"
     },
     {
       "id": "permission-refusal",
@@ -185,19 +189,29 @@
       "expected": "202 approval-required"
     },
     {
-      "id": "pending-work",
-      "title": "outstanding work is recoverable without a recorded effect",
-      "expected": "202 pending"
+      "id": "approval-team-decision",
+      "title": "an authorized teammate can decide a proposed approval",
+      "expected": "200 completed and one effect"
     },
     {
-      "id": "pending-completion",
-      "title": "a non-terminal result advances once",
-      "expected": "latest completed result and one effect"
+      "id": "approval-unauthorized-decision",
+      "title": "an unauthorized human cannot decide or terminate a proposed approval",
+      "expected": "403 and original approval-required result"
     },
     {
-      "id": "pending-failure",
-      "title": "accepted asynchronous work can terminate without an effect",
-      "expected": "latest failed result and no effect"
+      "id": "approval-declined",
+      "title": "an authorized human can decline a proposed approval",
+      "expected": "200 failed declined and no effect"
+    },
+    {
+      "id": "approval-stale-target",
+      "title": "approval fails terminally if the target changes before confirmation",
+      "expected": "200 failed stale-target and no effect"
+    },
+    {
+      "id": "approval-expired",
+      "title": "approval fails terminally if the interaction expires before confirmation",
+      "expected": "200 failed expired and no effect"
     },
     {
       "id": "retention-expiry",

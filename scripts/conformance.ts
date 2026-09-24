@@ -20,7 +20,7 @@ for (const artifact of manifest.artifacts) {
   assert.equal(digest, artifact.sha256, `Stale conformance digest: ${artifact.path}`);
 }
 
-const contract = JSON.parse(read('public/contracts/content-review-0.1.json').toString('utf8'));
+const contract = JSON.parse(read('public/contracts/content-review-0.2.json').toString('utf8'));
 const contractBytes = canonicalize(contract);
 assert.notEqual(contractBytes, undefined);
 const contractDigest = createHash('sha256').update(contractBytes!).digest('hex');

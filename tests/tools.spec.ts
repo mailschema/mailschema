@@ -19,6 +19,9 @@ const contracts: PackageContracts = {
   contribution: contributionSchema,
   'map-0.1': readFileSync('public/schemas/map-0.1.schema.json', 'utf8'),
   'content-review-0.1': readFileSync('public/schemas/content-review-0.1.schema.json', 'utf8'),
+  'content-review-0.1-contract': readFileSync('public/contracts/content-review-0.1.json', 'utf8'),
+  'content-review-0.2': readFileSync('public/schemas/content-review-0.2.schema.json', 'utf8'),
+  'content-review-0.2-contract': readFileSync('public/contracts/content-review-0.2.json', 'utf8'),
   record: `${JSON.stringify(
     { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
     null,
@@ -66,7 +69,14 @@ test('full-contract release evidence binds every distributed protocol schema', (
     format: 'mailschema-package-release/2',
     version: '1.0.0',
     schemaSha256: hash(contracts.contribution),
-    contracts: ['contribution', 'map-0.1', 'content-review-0.1'].map((name) => ({
+    contracts: [
+      'contribution',
+      'map-0.1',
+      'content-review-0.1',
+      'content-review-0.1-contract',
+      'content-review-0.2',
+      'content-review-0.2-contract',
+    ].map((name) => ({
       name,
       sha256: hash(contracts[name as keyof PackageContracts]),
     })),

@@ -19,25 +19,26 @@ Rust 1.70 or newer is required.
 ## Use a schema
 
 ```rust
-use mailschema::{Schema, CONTENT_REVIEW_0_1_CONTRACT, MAP_0_1_SCHEMA};
+use mailschema::{Schema, CONTENT_REVIEW_0_2_CONTRACT, MAP_0_1_SCHEMA};
 
 assert_eq!(Schema::Map01.as_str(), MAP_0_1_SCHEMA);
 
-let content_review = Schema::ContentReview01.as_str();
+let content_review = Schema::ContentReview02.as_str();
 assert!(content_review.contains("Content Review"));
-assert!(CONTENT_REVIEW_0_1_CONTRACT.contains("MapTypeContract"));
+assert!(CONTENT_REVIEW_0_2_CONTRACT.contains("MapTypeContract"));
 ```
 
-The crate exposes four Draft 2020-12 documents:
+The crate exposes five Draft 2020-12 documents:
 
 - `MAP_0_1_SCHEMA`
 - `CONTENT_REVIEW_0_1_SCHEMA`
+- `CONTENT_REVIEW_0_2_SCHEMA`
 - `CONTRIBUTION_SCHEMA`
 - `RECORD_SCHEMA`
 
 Parse the strings with your JSON library and pass them to a Draft 2020-12 validator with format checking enabled. The crate deliberately does not select a validation engine for its consumers.
 
-`CONTENT_REVIEW_0_1_CONTRACT` exposes the canonical type contract used by MAP wire messages.
+`CONTENT_REVIEW_0_1_CONTRACT` and `CONTENT_REVIEW_0_2_CONTRACT` expose the immutable canonical type contracts used by MAP wire messages. New integrations should use 0.2.
 
 ## Trust boundary
 

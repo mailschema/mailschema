@@ -1,6 +1,6 @@
 # MailSchema packages
 
-MailSchema package sources are generated from the exact MAP 0.1, Content Review 0.1 and Registry schemas for use at implementation boundaries. The packages validate or expose the contract; they do not establish endpoint trust, grant authority or send email.
+MailSchema package sources are generated from the exact MAP 0.1, Content Review 0.1 and 0.2, and Registry schemas for use at implementation boundaries. The packages validate or expose the contract; they do not establish endpoint trust, grant authority or send email.
 
 | Distribution                                                      | Contents                                                                                                        |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -13,7 +13,7 @@ The selected releases are JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `0
 
 ## One source
 
-`public/schemas/map-0.1.schema.json`, `public/schemas/content-review-0.1.schema.json` and `public/schemas/contribution.schema.json` are canonical. JavaScript model and validation code come from the same sources used by the website. Python delegates JSON Schema interpretation to the established `jsonschema` library. Rust embeds schema documents for applications to use with their chosen validator. The Go module is maintained in [`mailschema/go`](https://github.com/mailschema/go) and embeds byte-identical schema files.
+The files under `public/schemas/` and `public/contracts/` are canonical. JavaScript model and validation code come from the same sources used by the website. Python delegates JSON Schema interpretation to the established `jsonschema` library. Rust embeds schema documents for applications to use with their chosen validator. The Go module is maintained in [`mailschema/go`](https://github.com/mailschema/go) and embeds byte-identical schema files.
 
 `packages/versions.json` declares the source version for every ecosystem. `npm run packages:prepare` creates npm, Python and Rust release sources in `.release/packages/` and checks each package against its declared version. A tested copy of each release source is committed to its language repository, where CI, tags and registry publication are owned. The generated schema and shared validation files remain canonical here rather than being edited independently in multiple repositories. The Go implementation is maintained and released from its own repository. No vendor credentials or private operational data are included.
 

@@ -3,7 +3,8 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import canonicalize from 'canonicalize';
 import mapSchema from '../../public/schemas/map-0.1.schema.json' with { type: 'json' };
-import contentReviewSchema from '../../public/schemas/content-review-0.1.schema.json' with { type: 'json' };
+import contentReviewSchema from '../../public/schemas/content-review-0.2.schema.json' with { type: 'json' };
+import contentReviewContract from '../../public/contracts/content-review-0.2.json' with { type: 'json' };
 
 export const MAP_PROFILE = 'https://mailschema.org/profiles/map/0.1';
 export const CONTENT_REVIEW_TYPE = 'https://mailschema.org/types/content-review';
@@ -87,12 +88,17 @@ export interface ReferenceServiceOptions {
   ) => boolean;
   currentTarget?: () => Target;
   requireApproval?: (request: MapRequest, context: RequestContext) => boolean;
-  leavePending?: (request: MapRequest, context: RequestContext) => boolean;
+  authorizeDecision?: (
+    request: MapRequest,
+    proposer: RequestContext,
+    decider: RequestContext,
+  ) => boolean;
 }
 
 type RecordedResponse = {
   fingerprint: string;
   principal: string;
+  tenant: string;
   request: MapRequest;
   response: Response;
   retainUntil: Date;
@@ -256,8 +262,6 @@ export class ReferenceMapService {
       response = this.#result(request, 'approval-required', {
         approvalUrl: `${new URL(this.#description.service.execution.url).origin}/approvals/${encodeURIComponent(request.requestId)}`,
       });
-    else if (this.#options.leavePending?.(request, context))
-      response = this.#result(request, 'pending', {});
     else {
       this.#effectCount += 1;
       response = this.#result(
@@ -279,6 +283,7 @@ export class ReferenceMapService {
     this.#responses.set(key, {
       fingerprint: digest,
       principal: context.principal,
+      tenant: context.tenant,
       request: structuredClone(request),
       response,
       retainUntil,
@@ -286,31 +291,46 @@ export class ReferenceMapService {
     return structuredClone(response);
   }
 
-  /** Simulate the service completing work that previously returned a non-terminal result. */
-  advance(
+  /** Record an authorized human decision for an approval-required request. */
+  decideApproval(
     requestId: string,
     context: RequestContext,
-    state: 'accepted' | 'completed' | 'failed',
-    output: JsonObject,
+    decision: 'approve' | 'decline',
   ): Response | undefined {
     assertContext(context);
     const recorded = this.#responses.get(requestKey(context, requestId));
     if (!recorded) return undefined;
-    if (
-      recorded.principal !== context.principal ||
-      !this.#options.authorize(recorded.request, context, 'execute')
-    )
+    const proposer = { principal: recorded.principal, tenant: recorded.tenant };
+    const authorized = this.#options.authorizeDecision
+      ? this.#options.authorizeDecision(recorded.request, proposer, context)
+      : recorded.principal === context.principal &&
+        this.#options.authorize(recorded.request, context, 'execute');
+    if (!authorized)
       return this.#problem(
         recorded.request,
         'refused',
         403,
         'Operation refused',
-        'The authenticated caller is not permitted to complete this operation.',
+        'The authenticated caller is not permitted to decide this approval.',
       );
-    if (!['pending', 'approval-required'].includes(String(recorded.response.body.state)))
-      throw new Error('Only a pending or approval-required result can advance.');
-    recorded.response = this.#result(recorded.request, state, output);
-    if (state !== 'failed') this.#effectCount += 1;
+    if (recorded.response.body.state !== 'approval-required')
+      throw new Error('Only an approval-required result can receive a human decision.');
+
+    if (decision === 'decline')
+      recorded.response = this.#result(recorded.request, 'failed', { reason: 'declined' });
+    else if ((this.#options.now?.() ?? new Date()) >= new Date(this.#description.expiresAt))
+      recorded.response = this.#result(recorded.request, 'failed', { reason: 'expired' });
+    else if (
+      !sameTarget(
+        recorded.request.target,
+        this.#options.currentTarget?.() ?? this.#description.target,
+      )
+    )
+      recorded.response = this.#result(recorded.request, 'failed', { reason: 'stale-target' });
+    else {
+      recorded.response = this.#result(recorded.request, 'completed', { decision: 'approved' });
+      this.#effectCount += 1;
+    }
     return structuredClone(recorded.response);
   }
 
@@ -344,6 +364,14 @@ export class ReferenceMapService {
   }
 
   #result(request: MapRequest, state: ResultState, output: JsonObject): Response {
+    const declared = contentReviewContract.operations
+      .find((operation) => operation.id === request.operation)
+      ?.results.find((result) => result.state === state);
+    if (!declared)
+      throw new Error(`Content Review does not declare ${request.operation}/${state}.`);
+    const validateOutput = ajv.compile(declared.outputSchema);
+    if (!validateOutput(output))
+      throw new Error(`Invalid Content Review ${request.operation}/${state} output.`);
     const location = resultUrl(
       this.#description.service.execution.resultUrlTemplate,
       request.requestId,
@@ -420,6 +448,41 @@ export class ReferenceMapService {
         code: 'result-not-found',
       },
     };
+  }
+}
+
+/** Minimal deterministic client state for duplicate message delivery and retries. */
+export class ReferenceMapClient {
+  readonly #requestId: () => string;
+  readonly #requests = new Map<string, MapRequest>();
+
+  constructor(requestId: () => string) {
+    this.#requestId = requestId;
+  }
+
+  prepare(description: MapDescription, operation: string, input: JsonObject): MapRequest {
+    const intent = canonicalize({
+      interactionId: description['@id'],
+      type: description.type,
+      operation,
+      target: description.target,
+      input,
+    });
+    if (intent === undefined) throw new Error('MAP request intent must contain JSON values.');
+    const existing = this.#requests.get(intent);
+    if (existing) return structuredClone(existing);
+    const request: MapRequest = {
+      kind: 'MapRequest',
+      profile: description.profile,
+      requestId: this.#requestId(),
+      interactionId: description['@id'],
+      type: structuredClone(description.type),
+      operation,
+      target: structuredClone(description.target),
+      input: structuredClone(input),
+    };
+    this.#requests.set(intent, request);
+    return structuredClone(request);
   }
 }
 
