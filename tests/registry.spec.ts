@@ -136,7 +136,8 @@ test('website checks all contribution kinds, previews attribution and invalidate
   await page.goto('/contribute/');
   const editor = page.getByLabel('Contribution JSON', { exact: true });
   const check = page.getByRole('button', { name: 'Check and preview' });
-  const download = page.getByRole('button', { name: 'Download checked JSON' });
+  const download = page.locator('[data-download]');
+  const submit = page.locator('[data-submit]');
   for (const kind of ['new-type', 'amendment', 'implementation']) {
     await page.locator(`[data-example="${kind}"]`).click();
     await expect(editor).toHaveValue(new RegExp(`"kind"\\s*:\\s*"${kind}"`));
@@ -144,12 +145,18 @@ test('website checks all contribution kinds, previews attribution and invalidate
     await expect(page.locator('[data-check-status]')).toHaveText('File checks passed.');
     await expect(page.locator('[data-preview]')).toContainText('Example Document Service');
     await expect(download).toBeEnabled();
+    const submissionUrl = new URL((await submit.getAttribute('href'))!);
+    expect(submissionUrl.origin).toBe('https://github.com');
+    expect(submissionUrl.pathname).toBe('/mailschema/mailschema/new/main/registry/contributions');
+    expect(submissionUrl.searchParams.get('filename')).toMatch(/\.json$/);
+    expect(JSON.parse(submissionUrl.searchParams.get('value')!)).toMatchObject({ kind });
   }
   const downloadEvent = page.waitForEvent('download');
   await download.click();
   expect((await downloadEvent).suggestedFilename()).toBe('example-review-service.json');
   await editor.fill('{ broken json');
   await expect(download).toBeDisabled();
+  await expect(submit).not.toHaveAttribute('href');
   await expect(page.locator('[data-preview]')).toBeHidden();
   await check.click();
   await expect(page.getByRole('alert')).toContainText('not valid JSON');
@@ -159,6 +166,17 @@ test('website checks all contribution kinds, previews attribution and invalidate
   await check.click();
   await expect(page.getByRole('alert')).toContainText('Stale or unknown');
   await expect(download).toBeDisabled();
+
+  const large = example('new-type');
+  large.record.overview = 'A'.repeat(8_000);
+  await editor.fill(JSON.stringify(large));
+  await check.click();
+  const upload = page.getByRole('link', { name: 'Upload in GitHub' });
+  await expect(upload).toHaveAttribute(
+    'href',
+    'https://github.com/mailschema/mailschema/upload/main/registry/contributions',
+  );
+  await expect(page.locator('[data-submit-note]')).toContainText('too large to prefill');
 });
 
 test('vendor contributions produce real Registry pages, history and version-bound implementation sections', async () => {
@@ -245,5 +263,5 @@ test('website preview renders contributor text safely and fails when reference d
   );
   await page.getByRole('button', { name: 'Check and preview' }).click();
   await expect(page.getByRole('alert')).toContainText('Could not load the Registry');
-  await expect(page.getByRole('button', { name: 'Download checked JSON' })).toBeDisabled();
+  await expect(page.locator('[data-download]')).toBeDisabled();
 });

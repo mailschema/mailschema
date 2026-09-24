@@ -11,7 +11,8 @@ import '../styles/contribution.css';
     </div>
     <p>
       Start from an example or load your JSON file. Check its fields and references, then preview
-      how the contribution will appear. Everything runs in your browser; nothing is submitted.
+      how the contribution will appear. When it passes, continue to GitHub with the checked file
+      already prepared.
       <a href="#local-validation" class="contribution-local-link">
         Prefer to validate locally? <Icon size={14} />
       </a>
@@ -48,9 +49,6 @@ import '../styles/contribution.css';
       <button class="button dark-button" type="submit">
         Check and preview <Icon size={16} />
       </button>
-      <button class="text-link" type="button" data-download disabled>
-        Download checked JSON <Icon size={14} />
-      </button>
       <span role="status" data-check-status></span>
     </div>
     <div class="contribution-errors" role="alert" hidden>
@@ -70,6 +68,34 @@ import '../styles/contribution.css';
       The file checks passed. Inclusion, scope and contributor details still need review. This
       preview is not a published Registry record.
     </p>
+    <div class="contribution-submit">
+      <div>
+        <span class="eyebrow">Ready for review</span>
+        <h4>Send this file to the Registry.</h4>
+        <p>
+          GitHub handles your identity, branch and pull request. MailSchema publishes the
+          contribution only after repository review and merge.
+        </p>
+        <p class="contribution-submit-note" data-submit-note>
+          The checked JSON will be prefilled in GitHub.
+        </p>
+      </div>
+      <div class="contribution-submit-actions">
+        <a
+          class="button primary"
+          data-submit
+          target="_blank"
+          rel="noreferrer"
+          aria-disabled="true"
+          tabindex="-1"
+        >
+          <span data-submit-label>Continue in GitHub</span> <Icon name="northeast" size={16} />
+        </a>
+        <button class="contribution-download" type="button" data-download disabled>
+          Download checked JSON <Icon name="file" size={14} />
+        </button>
+      </div>
+    </div>
   </div>
 </section>
 <script>

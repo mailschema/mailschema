@@ -30,7 +30,7 @@ npm run verify
 - `/registry/<type>/`: definition brief, operations, example, existing standards, open questions and implementation evidence.
 - `/examples/`: interactive local Content Review simulation.
 - `/tools/`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
-- `/about/`, `/contribute/`, `/search/`: project, contribution checker and guide, and local search.
+- `/about/`, `/contribute/`, `/search/`: project, browser contribution intake and guide, and local search.
 - `/registry/catalog.json`, `/registry/records/<type>.json`, `/registry/snapshots/<digest>.json`: generated Registry data and exact record snapshots.
 - `/registry/records/<type>.record.json`: a raw record accepted directly by the package validators; used by each type page's download link.
 
@@ -44,7 +44,7 @@ The Registry centres on submitted types. Product support belongs to a type versi
 
 The example runs in the browser and never sends email. It illustrates revision binding, feedback acceptance, a predetermined edit, separate approval, permission refusal and stale requests. Sourcey renders the documentation; it is not presented as a MAP implementation.
 
-The contribution page validates and previews new types, amendments and implementation declarations locally in the browser. The CLI imports the same JSON format into reviewable repository changes. Contributors submit those files through pull requests to the public repository; a hosted one-click submission endpoint remains future work. See [Contributions](docs/CONTRIBUTIONS.md) for the format and operating process.
+The contribution page validates and previews new types, amendments and implementation declarations locally in the browser, then opens the checked file in GitHub for repository review. GitHub owns contributor identity, forks, branches and pull requests; MailSchema does not maintain a second submission queue. The CLI imports the same JSON format into a local checkout. See [Contributions](docs/CONTRIBUTIONS.md) for the format and operating process.
 
 ## Keeping content in sync
 

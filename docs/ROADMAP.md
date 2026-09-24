@@ -114,28 +114,25 @@ Create another MailSchema repository only when a maintained implementation has i
 
 **Done when:** Nitrosend implements Content Review against its own current flow revisions, authorization and durable review state. A received test message, stale target, denied permission, exact retry and result recovery are reproduced without coupling the protocol to the documentation renderer.
 
-### 6. End-to-end dogfood and Registry evidence
+### 6. Product dogfood and Registry evidence
 
 **Status:** ready for a live run on the deployed product surfaces
 
-- Complete a real Nitrosend campaign-test review round before selecting a second product implementation.
-- Send a readable test email and MAP description through Nitrosend to a configured test inbox.
-- Have an independently configured client submit `request-changes` and `approve` through Nitrosend's trusted authenticated endpoint.
-- Prove stale revision rejection, approval policy, exact retry and lost-response recovery.
-- Exercise Nitrosend sending restrictions and human approval before any follow-on email.
-- Record source versions, profile, type digest, operation, request and result digests in a reproducible run packet.
-- Preserve a redacted received-MIME artifact, context and suite digests, observed business effects and negative no-effect cases. Include a human route and distinguish ordinary reply feedback from an authenticated action.
-- Add the implementation declaration to the Content Review Registry record only after the behavior is deployed and reproduced.
+- Send one readable MAP-bearing review email through Nitrosend to a configured inbox.
+- Apply one Content Review operation through Nitrosend's authenticated endpoint and record its retained result.
+- Record the product versions, exact MAP profile and type contract, the request and result, the observed review effect and one permission or stale-target refusal.
+- Link the deployed source and reproducible run from a Content Review implementation declaration. Disclose common ownership and keep independent adoption as a separate claim.
+- Keep this proof in product and Registry evidence. MailSchema does not acquire an operational inbox, account system or action runtime.
 
-**Done when:** another operator can reproduce the public run and obtain the recorded outcomes. The evidence discloses common ownership.
+**Done when:** another operator can follow the public evidence and reproduce the recorded product behavior. The evidence discloses common ownership.
 
 ### 7. Contribution and adoption loop
 
-**Status:** open for pull requests; hosted submission and external evidence remain
+**Status:** browser intake and pull-request review are live; external evidence remains
 
 - Accept new types, amendments and implementation declarations through one versioned JSON format and GitHub review.
 - Keep the browser checker local and use Git as the only source of accepted Registry state.
-- Add a narrowly scoped website-to-pull-request flow only when it reduces real contributor friction.
+- Hand checked contributions to GitHub without a MailSchema submission service, credential store or second queue.
 - Publish conformance fixtures and exact reproduction commands for implementers.
 - Seek one implementation outside the common ownership group before using language such as independent interoperability.
 
@@ -158,11 +155,11 @@ Product evidence is this project's quality gate for the intended submission, not
 
 ## Immediate dependency sequence
 
-1. Reproduce the deployed Nitrosend review workflow through a configured inbox, preserving the received MIME, request, result and exact business effect.
-2. Publish the redacted common-ownership run packet and attach an exact implementation declaration to the Content Review Registry record.
-3. Run the same client logic against a second useful service, then seek an externally operated implementation before claiming independent interoperability.
+1. Publish the browser-to-Git contribution path while retaining Git as the only accepted Registry state.
+2. Complete one reproducible Nitrosend Content Review exchange and attach its common-ownership evidence to the Registry.
+3. Seek an externally operated implementation before claiming independent interoperability.
 4. Update the Internet-Draft implementation section from public evidence, seek early community feedback and submit the individual draft.
-5. Release and promote a language package only when its distributed contract or maintained API changes and the public artifact passes the full-contract gate.
+5. Maintain the JavaScript, Python, Rust and Go packages; release and promote each package when its distributed contract or maintained API changes and the public artifact passes the full-contract gate.
 
 The detailed deliverables, owners and acceptance gates are in [SCOPE-AUDIT.md](SCOPE-AUDIT.md). Early standards feedback can run alongside this sequence; implementation and publication claims depend on the actual evidence.
 
