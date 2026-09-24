@@ -21,6 +21,7 @@ on:
           - npm
           - PyPI
           - crates.io
+          - Go
       version:
         description: Exact published version, such as 0.1.1
         required: true
@@ -80,5 +81,5 @@ jobs:
               --base "${GITHUB_REF_NAME}" \
               --head "$branch" \
               --title "Promote ${REGISTRY} ${VERSION}" \
-              --body "Public registry metadata and the published artifact were independently read back. The packaged schema matches the canonical MailSchema schema bytes, and the complete site verification passed. Merging this pull request promotes the exact version on the Tools page."
+              --body "Public registry metadata and the published artifact were independently read back. Every contract distributed by the package matches the canonical MailSchema bytes, and the complete site verification passed. Merging this pull request promotes the exact version on the Tools page."
           fi

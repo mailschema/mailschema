@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
-     category="info"
+     category="std"
+     consensus="true"
      docName="draft-mailschema-mail-action-protocol-00"
      ipr="trust200902"
      submissionType="IETF"
      version="3">
   <front>
-    <title abbrev="Mail Action Protocol">Mail Action Protocol</title>
+    <title abbrev="Mail Action Protocol">Mail Action Protocol (MAP)</title>
     <seriesInfo name="Internet-Draft" value="draft-mailschema-mail-action-protocol-00"/>
-    <author fullname="MailSchema Editors">
+    <author fullname="Kam Low" initials="K." surname="Low">
       <organization>MailSchema</organization>
       <address>
+        <email>oss@0state.com</email>
         <uri>https://mailschema.org/</uri>
       </address>
     </author>
-    <date year="2026" month="September" day="23"/>
+    <date year="2026" month="September" day="24"/>
     <area>Applications and Real-Time</area>
     <workgroup>Individual Submission</workgroup>
     <keyword>email</keyword>
@@ -54,8 +56,8 @@
 
     <section anchor="scope" numbered="true">
       <name>Scope and Relationship to Existing Work</name>
-      <t>MAP descriptions are JSON-LD documents carried in the
-      <tt>application/ld+json</tt> alternative defined by Structured Email
+      <t>MAP descriptions are JSON-LD documents carried in an
+      <tt>application/ld+json</tt> MIME part designated by Structured Email
       <xref target="I-D.ietf-sml-structured-email"/>. SMTP, Internet Message
       Format, MIME, mailbox access, and provider APIs continue to perform their
       existing roles <xref target="RFC5322"/> <xref target="RFC2046"/>.</t>
@@ -64,6 +66,27 @@
       mandatory online registry lookup, or general permission-policy
       language. A later specification can define a different execution profile
       without changing email transport.</t>
+    </section>
+
+    <section anchor="representation" numbered="true">
+      <name>Structured Email Representation</name>
+      <t>A MAP message <bcp14>MUST</bcp14> contain readable content and exactly
+      one <tt>application/ld+json</tt> part containing the MAP description. The
+      structured part <bcp14>MUST</bcp14> carry
+      <tt>Content-Purpose: Machine-readable</tt>. A receiver
+      <bcp14>MUST NOT</bcp14> infer a MAP description from an undesignated JSON
+      attachment.</t>
+      <t>When the structured document is a full representation of the readable
+      content, the sender <bcp14>MUST</bcp14> use the
+      <tt>multipart/alternative</tt> placement defined by Structured Email.
+      When the structured document describes only part of the message, such as
+      an offered service action, the sender <bcp14>MUST</bcp14> use
+      <tt>multipart/related</tt>. The readable text and HTML variants, when both
+      are present, remain a nested <tt>multipart/alternative</tt> part.</t>
+      <t>A receiving system <bcp14>MAY</bcp14> extract and validate the
+      description before it knows whether it will offer execution. Extraction
+      and schema validation <bcp14>MUST NOT</bcp14> execute an operation or
+      grant authority.</t>
     </section>
 
     <section anchor="terms" numbered="true">
@@ -108,9 +131,13 @@
       <t>The MAP 0.1 profile URI is
       <tt>https://mailschema.org/profiles/map/0.1</tt>. A client
       <bcp14>MUST</bcp14> match this value exactly.</t>
-      <t>The complete field contract is the JSON Schema at
-      <tt>https://mailschema.org/schemas/map-0.1.schema.json</tt>. Its principal
-      members use the JSON data model <xref target="RFC8259"/>:</t>
+      <t>The field contract is the JSON Schema at
+      <tt>https://mailschema.org/schemas/map-0.1.schema.json</tt>. A conforming
+      profile release binds the exact schema and JSON-LD context bytes by
+      SHA-256 digest; an implementation <bcp14>MUST NOT</bcp14> treat mutable
+      content later retrieved from those URLs as the contract for an already
+      supported profile. The principal members use the JSON data model
+      <xref target="RFC8259"/>:</t>
       <dl>
         <dt>@id</dt><dd>A UUID URN identifying the interaction.</dd>
         <dt>type</dt><dd>The interaction type URI, version, and exact record
@@ -132,11 +159,12 @@
       <name>Endpoint Trust</name>
       <t>A description and every value derived from it are untrusted input.
       Before credential use, a client <bcp14>MUST</bcp14> match the service
-      identity and exact HTTPS execution origin against configuration obtained
-      independently of the email. Message authentication alone is
-      insufficient.</t>
-      <t>A client <bcp14>MUST NOT</bcp14> follow an execution redirect to a
-      different origin without applying the same trust check. A client
+      identity, exact HTTPS execution URL, result URL template, and credential
+      audience against configuration obtained independently of the email.
+      Matching only the origin is insufficient. Message authentication alone
+      is also insufficient.</t>
+      <t>A client <bcp14>MUST</bcp14> apply the same checks to every redirect
+      before sending a credential. A client
       <bcp14>MUST NOT</bcp14> automatically fetch or interpret an unknown
       schema, URL, or instruction named by the message. These rules align with
       the Structured Email trust model <xref target="I-D.ietf-sml-trust"/>.</t>
@@ -151,11 +179,18 @@
       authentication and OAuth security follow the service's established
       configuration and applicable guidance such as <xref target="RFC9700"/>.</t>
       <t>A successful response uses <tt>application/json</tt>. The service
-      returns status 200 for <tt>accepted</tt> or <tt>completed</tt>, and status
-      202 for <tt>pending</tt> or <tt>approval-required</tt>. Every response
-      carries a <tt>Location</tt> header for the request's result resource.</t>
+      returns status 200 for the terminal <tt>accepted</tt>,
+      <tt>completed</tt>, or <tt>failed</tt> states, and status 202 for the
+      non-terminal <tt>pending</tt> or <tt>approval-required</tt> states. A
+      <tt>failed</tt> result reports work that the service previously accepted
+      but could not complete; a request rejected before acceptance uses a
+      Problem Details response. Every response carries a <tt>Location</tt>
+      header for the request's result resource and repeats the exact type and
+      target references.</t>
       <t>Errors use <tt>application/problem+json</tt> <xref target="RFC9457"/>.
-      MAP 0.1 defines <tt>invalid-request</tt>, <tt>refused</tt>,
+      MAP 0.1 defines <tt>invalid-request</tt>,
+      <tt>authentication-required</tt>, <tt>refused</tt>,
+      <tt>result-not-found</tt>,
       <tt>stale-target</tt>, <tt>expired-interaction</tt>,
       <tt>unsupported-profile</tt>, <tt>unsupported-type</tt>,
       <tt>unsupported-operation</tt>, <tt>idempotency-conflict</tt>, and
@@ -165,20 +200,33 @@
 
     <section anchor="idempotency" numbered="true">
       <name>Idempotency and Recovery</name>
-      <t>A client generates a UUID URN as <tt>requestId</tt>. Within one
-      service, the first use binds that identifier to the complete JSON request
-      value. Repeating the identifier with the same JSON values is an exact
-      retry. The service <bcp14>MUST</bcp14> return the recorded response without
-      applying the effect again. Object member order is insignificant; array
-      order and member values are significant.</t>
+      <t>A client generates a UUID URN as <tt>requestId</tt>. The service
+      establishes the tenant and principal from its authenticated transport
+      context, not from request fields. Within that scope, the first use binds
+      the identifier to the complete JSON request value. Repeating the
+      identifier with the same JSON values is an exact retry. The service
+      <bcp14>MUST</bcp14> recheck current authorization, then return the latest
+      recorded response without applying the effect again. Object member order
+      is insignificant; array order and member values are significant. An
+      implementation can use the JSON Canonicalization Scheme
+      <xref target="RFC8785"/> when deriving a request digest.</t>
       <t>Reuse with a changed value produces an
       <tt>idempotency-conflict</tt>. The changed request <bcp14>MUST NOT</bcp14>
       be applied.</t>
-      <t>An authenticated <tt>GET</tt> to the result resource returns the
-      recorded result or problem. After a timeout, a client
+      <t>Request claiming, effect initiation, and recoverable state
+      <bcp14>MUST</bcp14> be atomic, or the service <bcp14>MUST</bcp14> reconcile
+      an interrupted operation without repeating the business effect. A
+      non-terminal result can advance to one terminal result; a terminal result
+      <bcp14>MUST NOT</bcp14> advance.</t>
+      <t>An authenticated <tt>GET</tt> to the result resource rechecks current
+      authorization and returns the latest recorded result or problem. After a timeout, a client
       <bcp14>SHOULD</bcp14> retrieve that resource before issuing a request that
       might repeat the effect. An uncertain outcome is local client state; it
       is not a MAP result value.</t>
+      <t>The advertised retention interval begins when the first response is
+      recorded. A service <bcp14>MUST</bcp14> preserve enough duplicate
+      suppression state after result disclosure ends to prevent the same
+      scoped request identifier from applying the effect again.</t>
     </section>
 
     <section anchor="types" numbered="true">
@@ -200,8 +248,8 @@
       The endpoint trust checks in <xref target="trust"/> prevent an email from
       redirecting a service credential. Schema validation does not establish
       trust or permission.</t>
-      <t>Services must protect result resources with authorization equivalent
-      to the underlying operation. Error detail should disclose no token,
+      <t>Services must protect result resources with current authorization
+      equivalent to the underlying operation, including on exact retry. Error detail should disclose no token,
       private target content, or permission information beyond what the caller
       is allowed to know.</t>
       <t>A target revision and digest prevent an approval from silently moving
@@ -234,21 +282,19 @@
       <name>Implementation Status</name>
       <t>This section follows <xref target="RFC7942"/> and may be removed before
       publication as an RFC.</t>
-      <t>The MailSchema repository contains JSON Schemas, valid and invalid
+      <t>The MailSchema repository contains digest-bound JSON Schemas, valid and invalid
       fixtures, a complete MIME message, a deterministic client/service
-      harness, and conformance cases for completion, refusal, stale targets,
+      harness, a requirement matrix, and conformance cases for completion, refusal, stale targets,
       approval, exact retry, conflict, recovery, expiry, unsupported contracts,
       and untrusted endpoints. JavaScript, Python, Rust, and Go packages expose
       the schemas. The materials are available at
       <eref target="https://github.com/mailschema/mailschema"/>.</t>
-      <t>A Nitrosend implementation that validates MAP descriptions and emits
-      the JSON-LD MIME alternative was merged through
-      <eref target="https://github.com/nitrosend/api/pull/522"/> and deployed
-      from that commit after its production checks passed. The live OpenAPI
-      contract exposes the MAP description field. No authenticated end-to-end
-      message receipt has yet been published, and the implementation is not
-      independently operated. MailSchema, Nitrosend, and Sourcey share
-      ownership.</t>
+      <t>Nitrosend has an implementation of partial-representation MIME
+      generation and inbound description extraction. An authenticated Content
+      Review service implementation, durable retry and recovery storage, and
+      its OpenAPI contract are under test. No deployed end-to-end conformance
+      result or independent implementation is claimed. MailSchema and
+      Nitrosend share ownership.</t>
     </section>
   </middle>
 
@@ -275,6 +321,7 @@
       <name>Informative References</name>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
     </references>
   </back>
 </rfc>

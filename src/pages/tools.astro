@@ -2,7 +2,12 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import CodeBlock from '../components/CodeBlock.astro';
-import { tooling, packageSetLabel, recordCheckCommands } from '../data/tooling';
+import {
+  tooling,
+  packageSetLabel,
+  packageContractCoverage,
+  recordCheckCommands,
+} from '../data/tooling';
 import '../styles/tools.css';
 ---
 
@@ -24,9 +29,11 @@ import '../styles/tools.css';
       <div class="tools-hero-aside">
         <span class="pill soft">{packageSetLabel}</span>
         <p>
-          The same schema bytes,
+          {packageContractCoverage
+            ? 'The complete contract bytes,'
+            : 'Registry schema bytes verified;'}
           <br />
-          verified in four ecosystems.
+          {packageContractCoverage ? 'verified in four ecosystems.' : 'MAP patch releases pending.'}
         </p>
         <a href="/specification/profile/" class="text-link">
           Read the MAP 0.1 profile <Icon size={16} />
@@ -189,8 +196,10 @@ import '../styles/tools.css';
       </a>
     </aside>
     <p class="tools-scope">
-      These packages implement the published MAP 0.1 and Registry schemas. They validate documents;
-      they do not establish endpoint trust, grant authorization or send email. Read the{' '}
+      These packages include MAP 0.1 and Registry validators. The selected public releases have
+      Registry-schema readback evidence; full-contract readback will replace that label with the
+      next changed package releases. They validate documents; they do not establish endpoint trust,
+      grant authorization or send email. Read the{' '}
       <a href="/specification/profile/">MAP 0.1 execution profile</a> before acting on a message.
       Package and specification versions are independent.
     </p>

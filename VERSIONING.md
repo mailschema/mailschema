@@ -11,4 +11,8 @@ MailSchema has four independent version lines.
 
 Draft `0.x` profiles may change. Implementations must use exact profile and type identifiers rather than treating all `0.x` revisions as compatible.
 
+The profile record publishes digests for its JSON-LD context and JSON Schema. Implementations pin and bundle those exact bytes; they do not resolve a context from an untrusted message at runtime. The conformance manifest binds the complete artifact set used by a suite revision.
+
+Registry record digests use SHA-256 over RFC 8785 JSON Canonicalization Scheme bytes for the complete record. A changed digest always requires explicit implementation support, even when review concludes that the changed record remains semantically compatible.
+
 The website promotes an explicit verified package version for each registry. It never resolves a registry's mutable `latest` label during a build.

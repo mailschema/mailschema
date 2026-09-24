@@ -1,27 +1,19 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, lstatSync } from 'node:fs';
 import { resolve, basename } from 'node:path';
+import canonicalize from 'canonicalize';
 import { assertContribution, assertTypeRecord, referenceErrors } from './validation.ts';
 import type { Contribution, Implementation, Party, TypeRecord } from './model.ts';
 
 export const registryRoot = resolve(process.cwd(), 'registry');
 export const MAX_CONTRIBUTION_BYTES = 256 * 1024;
 
-// Digests identify a repository record, not a MAP wire message.
-function ordered(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(ordered);
-  if (value && typeof value === 'object')
-    return Object.fromEntries(
-      Object.entries(value)
-        .sort(([a], [b]) => a.localeCompare(b, 'en'))
-        .map(([key, item]) => [key, ordered(item)]),
-    );
-  return value;
-}
+// Digests identify the complete Registry record. RFC 8785 makes the value
+// reproducible across implementations; it is not a digest of a MAP wire message.
 export function recordDigest(value: unknown) {
-  return createHash('sha256')
-    .update(JSON.stringify(ordered(value)))
-    .digest('hex');
+  const canonical = canonicalize(value);
+  if (canonical === undefined) throw new Error('Registry record is not canonical JSON.');
+  return createHash('sha256').update(canonical).digest('hex');
 }
 export function readJson(path: string): unknown {
   const stat = lstatSync(path);

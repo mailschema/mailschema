@@ -1,17 +1,23 @@
 import { createHash } from 'node:crypto';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
+import canonicalize from 'canonicalize';
+import mapSchema from '../../public/schemas/map-0.1.schema.json' with { type: 'json' };
+import contentReviewSchema from '../../public/schemas/content-review-0.1.schema.json' with { type: 'json' };
 
 export const MAP_PROFILE = 'https://mailschema.org/profiles/map/0.1';
 export const CONTENT_REVIEW_TYPE = 'https://mailschema.org/types/content-review';
 
 type JsonObject = Record<string, unknown>;
 type Target = { id: string; revision: string; digest: string; title?: string };
+type TypeReference = { id: string; version: string; recordDigest: string };
 type MapRequest = {
   kind: 'MapRequest';
   profile: string;
   requestId: string;
   interactionId: string;
   requestedAt: string;
-  type: { id: string; version: string; recordDigest: string };
+  type: TypeReference;
   operation: string;
   target: Target;
   input: JsonObject;
@@ -19,11 +25,14 @@ type MapRequest = {
 type MapDescription = {
   '@id': string;
   profile: string;
-  type: MapRequest['type'];
+  type: TypeReference;
+  describedAt: string;
   expiresAt: string;
   service: {
     id: string;
-    execution: { url: string; resultUrlTemplate: string };
+    execution: { url: string; resultUrlTemplate: string; resultRetentionSeconds: number };
+    humanUrl: string;
+    authorization: { kind: string; schemes: string[]; audience?: string };
   };
   target: Target;
   operations: { id: string }[];
@@ -34,19 +43,23 @@ type Response = {
   location: string;
   body: JsonObject;
 };
+type ResultState = 'accepted' | 'completed' | 'failed' | 'pending' | 'approval-required';
 
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
-  if (value && typeof value === 'object')
-    return `{${Object.entries(value)
-      .sort(([left], [right]) => left.localeCompare(right, 'en'))
-      .map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`)
-      .join(',')}}`;
-  return JSON.stringify(value);
+export interface RequestContext {
+  principal: string;
+  tenant: string;
 }
 
+const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
+addFormats(ajv);
+ajv.addSchema(mapSchema);
+const validateMap = ajv.getSchema(mapSchema.$id)!;
+const validateContentReview = ajv.compile(contentReviewSchema);
+
 function fingerprint(request: MapRequest) {
-  return createHash('sha256').update(canonical(request)).digest('hex');
+  const bytes = canonicalize(request);
+  if (bytes === undefined) throw new Error('MAP requests must contain JSON values.');
+  return createHash('sha256').update(bytes).digest('hex');
 }
 
 function sameTarget(left: Target, right: Target) {
@@ -57,29 +70,108 @@ function resultUrl(template: string, requestId: string) {
   return template.replace('{requestId}', encodeURIComponent(requestId));
 }
 
-export interface ReferenceServiceOptions {
-  now?: () => Date;
-  authorize?: (request: MapRequest) => boolean;
-  requireApproval?: (request: MapRequest) => boolean;
-  leavePending?: (request: MapRequest) => boolean;
+function requestKey(context: RequestContext, requestId: string) {
+  return `${context.tenant}\n${requestId}`;
 }
 
-/** Deterministic example service used by the MAP conformance fixtures. */
+function assertContext(context: RequestContext) {
+  if (!context?.principal?.trim() || !context?.tenant?.trim())
+    throw new Error('Authenticated principal and tenant context are required.');
+}
+
+export interface ReferenceServiceOptions {
+  now?: () => Date;
+  authorize: (
+    request: MapRequest,
+    context: RequestContext,
+    access: 'execute' | 'read-result',
+  ) => boolean;
+  currentTarget?: () => Target;
+  requireApproval?: (request: MapRequest, context: RequestContext) => boolean;
+  leavePending?: (request: MapRequest, context: RequestContext) => boolean;
+}
+
+type RecordedResponse = {
+  fingerprint: string;
+  principal: string;
+  request: MapRequest;
+  response: Response;
+  retainUntil: Date;
+};
+
+/**
+ * Deterministic Content Review service for conformance tests.
+ *
+ * Callers supply the principal and tenant established by server-side
+ * authentication. Neither value is accepted from the MAP request body.
+ */
 export class ReferenceMapService {
   readonly #description: MapDescription;
   readonly #options: ReferenceServiceOptions;
-  readonly #responses = new Map<string, { fingerprint: string; response: Response }>();
+  readonly #responses = new Map<string, RecordedResponse>();
+  #effectCount = 0;
 
-  constructor(description: MapDescription, options: ReferenceServiceOptions = {}) {
+  constructor(description: MapDescription, options: ReferenceServiceOptions) {
+    if (!validateMap(description))
+      throw new Error('Reference description is not a valid MAP document.');
     this.#description = structuredClone(description);
     this.#options = options;
   }
 
-  submit(request: MapRequest): Response {
+  get effectCount() {
+    return this.#effectCount;
+  }
+
+  submit(request: MapRequest, context: RequestContext): Response {
+    assertContext(context);
+    if (!validateMap(request))
+      return this.#problem(
+        request,
+        'invalid-request',
+        400,
+        'Invalid MAP request',
+        'The request does not satisfy the MAP document contract.',
+      );
+    if (request.interactionId !== this.#description['@id'])
+      return this.#problem(
+        request,
+        'invalid-request',
+        400,
+        'Unknown interaction',
+        'The request does not identify this interaction.',
+      );
+    if (!this.#options.authorize(request, context, 'execute'))
+      return this.#problem(
+        request,
+        'refused',
+        403,
+        'Operation refused',
+        'The authenticated caller is not permitted to perform this operation.',
+      );
+
     const digest = fingerprint(request);
-    const previous = this.#responses.get(request.requestId);
+    const key = requestKey(context, request.requestId);
+    const previous = this.#responses.get(key);
     if (previous) {
-      if (previous.fingerprint === digest) return structuredClone(previous.response);
+      if (previous.principal !== context.principal)
+        return this.#problem(
+          request,
+          'refused',
+          403,
+          'Operation refused',
+          'The request identifier belongs to another authenticated caller.',
+        );
+      if (previous.fingerprint === digest) {
+        if ((this.#options.now?.() ?? new Date()) >= previous.retainUntil)
+          return this.#problem(
+            request,
+            'expired-interaction',
+            410,
+            'Interaction and retained result expired',
+            'The request will not be applied again. Its retained result is no longer available.',
+          );
+        return structuredClone(previous.response);
+      }
       return this.#problem(
         request,
         'idempotency-conflict',
@@ -118,7 +210,7 @@ export class ReferenceMapService {
         'Unsupported operation',
         'The operation was not offered in this interaction.',
       );
-    else if ((this.#options.now?.() ?? new Date()) > new Date(this.#description.expiresAt))
+    else if ((this.#options.now?.() ?? new Date()) >= new Date(this.#description.expiresAt))
       response = this.#problem(
         request,
         'expired-interaction',
@@ -126,7 +218,9 @@ export class ReferenceMapService {
         'Interaction expired',
         'The interaction expired before the request was processed.',
       );
-    else if (!sameTarget(request.target, this.#description.target))
+    else if (
+      !sameTarget(request.target, this.#options.currentTarget?.() ?? this.#description.target)
+    )
       response = this.#problem(
         request,
         'stale-target',
@@ -135,31 +229,22 @@ export class ReferenceMapService {
         'The request does not refer to the current target revision. No effect was applied.',
         request.target,
       );
-    else if (this.#options.authorize && !this.#options.authorize(request))
-      response = this.#problem(
-        request,
-        'refused',
-        403,
-        'Operation refused',
-        'The authenticated caller is not permitted to perform this operation.',
-      );
-    else if (
-      request.operation === 'request-changes' &&
-      (typeof request.input.feedback !== 'string' || !request.input.feedback.trim())
-    )
+    else if (!validateContentReview(request))
       response = this.#problem(
         request,
         'invalid-request',
         400,
-        'Invalid request',
-        'The request-changes operation requires non-empty feedback.',
+        'Invalid Content Review request',
+        'The request does not satisfy the selected operation input contract.',
       );
-    else if (this.#options.requireApproval?.(request))
+    else if (this.#options.requireApproval?.(request, context))
       response = this.#result(request, 'approval-required', {
         approvalUrl: `${new URL(this.#description.service.execution.url).origin}/approvals/${encodeURIComponent(request.requestId)}`,
       });
-    else if (this.#options.leavePending?.(request)) response = this.#result(request, 'pending', {});
-    else
+    else if (this.#options.leavePending?.(request, context))
+      response = this.#result(request, 'pending', {});
+    else {
+      this.#effectCount += 1;
       response = this.#result(
         request,
         request.operation === 'request-changes' ? 'accepted' : 'completed',
@@ -167,17 +252,78 @@ export class ReferenceMapService {
           ? { feedbackRecorded: true }
           : { decision: 'approved' },
       );
+    }
 
-    this.#responses.set(request.requestId, { fingerprint: digest, response });
+    const recordedAt = this.#options.now?.() ?? new Date();
+    const retainUntil = new Date(
+      Math.max(
+        new Date(this.#description.expiresAt).getTime(),
+        recordedAt.getTime() + this.#description.service.execution.resultRetentionSeconds * 1000,
+      ),
+    );
+    this.#responses.set(key, {
+      fingerprint: digest,
+      principal: context.principal,
+      request: structuredClone(request),
+      response,
+      retainUntil,
+    });
     return structuredClone(response);
   }
 
-  recover(requestId: string): Response | undefined {
-    const response = this.#responses.get(requestId)?.response;
-    return response ? structuredClone(response) : undefined;
+  /** Simulate the service completing work that previously returned a non-terminal result. */
+  advance(
+    requestId: string,
+    context: RequestContext,
+    state: 'accepted' | 'completed' | 'failed',
+    output: JsonObject,
+  ): Response | undefined {
+    assertContext(context);
+    const recorded = this.#responses.get(requestKey(context, requestId));
+    if (!recorded) return undefined;
+    if (
+      recorded.principal !== context.principal ||
+      !this.#options.authorize(recorded.request, context, 'execute')
+    )
+      return this.#problem(
+        recorded.request,
+        'refused',
+        403,
+        'Operation refused',
+        'The authenticated caller is not permitted to complete this operation.',
+      );
+    if (!['pending', 'approval-required'].includes(String(recorded.response.body.state)))
+      throw new Error('Only a pending or approval-required result can advance.');
+    recorded.response = this.#result(recorded.request, state, output);
+    if (state !== 'failed') this.#effectCount += 1;
+    return structuredClone(recorded.response);
   }
 
-  #result(request: MapRequest, state: string, output: JsonObject): Response {
+  recover(requestId: string, context: RequestContext): Response | undefined {
+    assertContext(context);
+    const recorded = this.#responses.get(requestKey(context, requestId));
+    if (!recorded) return undefined;
+    if (recorded.principal !== context.principal)
+      return this.#problem(
+        recorded.request,
+        'refused',
+        403,
+        'Result access refused',
+        'The request identifier belongs to another authenticated caller.',
+      );
+    if (!this.#options.authorize(recorded.request, context, 'read-result'))
+      return this.#problem(
+        recorded.request,
+        'refused',
+        403,
+        'Result access refused',
+        'The authenticated caller is not permitted to retrieve this result.',
+      );
+    if ((this.#options.now?.() ?? new Date()) >= recorded.retainUntil) return undefined;
+    return structuredClone(recorded.response);
+  }
+
+  #result(request: MapRequest, state: ResultState, output: JsonObject): Response {
     const location = resultUrl(
       this.#description.service.execution.resultUrlTemplate,
       request.requestId,
@@ -191,6 +337,7 @@ export class ReferenceMapService {
         profile: MAP_PROFILE,
         requestId: request.requestId,
         interactionId: request.interactionId,
+        type: request.type,
         operation: request.operation,
         state,
         target: request.target,
@@ -235,15 +382,32 @@ export class ReferenceMapService {
 
 export interface TrustedService {
   serviceId: string;
-  executionOrigins: string[];
+  executionUrls: string[];
+  resultUrlTemplates: string[];
+  audiences?: string[];
 }
 
-/** Email content never establishes trust in an action endpoint by itself. */
+function checkedHttpsOrigin(value: string, label: string) {
+  const url = new URL(value);
+  if (url.protocol !== 'https:') throw new Error(`${label} must use HTTPS.`);
+  if (url.username || url.password) throw new Error(`${label} must not contain URL credentials.`);
+  return url.origin;
+}
+
+/** Email content never establishes trust in an action or result endpoint by itself. */
 export function assertTrustedExecution(description: MapDescription, trusted: TrustedService) {
   if (description.service.id !== trusted.serviceId)
     throw new Error('The message names an unconfigured service identity.');
-  const origin = new URL(description.service.execution.url).origin;
-  if (!trusted.executionOrigins.includes(origin))
-    throw new Error('The action endpoint is outside the configured service origins.');
   if (description.profile !== MAP_PROFILE) throw new Error('The MAP profile is not supported.');
+  checkedHttpsOrigin(description.service.execution.url, 'The action endpoint');
+  checkedHttpsOrigin(description.service.execution.resultUrlTemplate, 'The result endpoint');
+  if (!trusted.executionUrls.includes(description.service.execution.url))
+    throw new Error('The action endpoint is not configured for this service.');
+  if (!trusted.resultUrlTemplates.includes(description.service.execution.resultUrlTemplate))
+    throw new Error('The result endpoint is not configured for this service.');
+  if (
+    description.service.authorization.audience &&
+    !trusted.audiences?.includes(description.service.authorization.audience)
+  )
+    throw new Error('The message names an unconfigured credential audience.');
 }

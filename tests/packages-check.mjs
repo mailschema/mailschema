@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
 import {
   getContributionSchema,
   getRecordSchema,
@@ -26,6 +27,7 @@ const versions = JSON.parse(readFileSync('packages/versions.json', 'utf8'));
 const prepared = JSON.parse(readFileSync('.release/packages/prepared.json', 'utf8'));
 
 test('each distribution uses its independently declared package version', () => {
+  assert.equal(prepared.format, 'mailschema-package-build/2');
   assert.deepEqual(prepared.versions, versions);
   assert.equal(
     JSON.parse(readFileSync('.release/packages/npm/package.json')).version,
@@ -39,6 +41,30 @@ test('each distribution uses its independently declared package version', () => 
     readFileSync('.release/packages/rust/Cargo.toml', 'utf8'),
     new RegExp(`^version = "${versions['crates.io'].replaceAll('.', '\\.')}"$`, 'm'),
   );
+});
+
+test('the preparation manifest binds each distributed contract', () => {
+  const expected = new Map(
+    [
+      ['contribution', 'public/schemas/contribution.schema.json'],
+      ['map-0.1', 'public/schemas/map-0.1.schema.json'],
+      ['content-review-0.1', 'public/schemas/content-review-0.1.schema.json'],
+    ].map(([name, path]) => [name, createHash('sha256').update(readFileSync(path)).digest('hex')]),
+  );
+  const contribution = JSON.parse(readFileSync('public/schemas/contribution.schema.json'));
+  const record = `${JSON.stringify(
+    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
+    null,
+    2,
+  )}\n`;
+  expected.set('record', createHash('sha256').update(record).digest('hex'));
+  assert.deepEqual(new Map(prepared.contracts.map(({ name, sha256 }) => [name, sha256])), expected);
+  assert.deepEqual(prepared.channels.find(({ registry }) => registry === 'crates.io').contracts, [
+    'contribution',
+    'map-0.1',
+    'content-review-0.1',
+    'record',
+  ]);
 });
 
 test('distribution metadata and READMEs point to maintained language repositories', () => {

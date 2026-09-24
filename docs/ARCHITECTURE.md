@@ -52,7 +52,7 @@ MAP 0.1 begins with **Content Review**. A structured email describes the review 
 
 An email service sends a test, a reviewer requests changes, a permitted agent revises the draft, and an authorized person approves the exact new revision. Stale approval fails. Approval records a decision; sending the campaign remains a separate authorized operation.
 
-The specification must define enough shared request/result behavior for the same type-specific consumer logic to work with a second service. Sourcey is a candidate second application; common ownership is disclosed. Independent adoption is a separate later claim.
+The specification must define enough shared request/result behavior for the same type-specific consumer logic to work with a second service. The second service must come from a real product workflow that already owns authenticated revisions and durable review state. Sourcey's renderer is not made stateful to manufacture that proof. Common ownership is disclosed, and independent adoption remains a separate later claim.
 
 Use the requirement-selection rule in the current charter: interoperability needs, correct and authorized effects with truthful outcomes, or a dependency's conformance requirement. Broader A-Mail machinery stays deferred unless it earns its place.
 
@@ -72,6 +72,8 @@ The new identity brief lives in [brand/MAILSCHEMA-MAP-IDENTITY.md](../brand/IDEN
 4. Older naming and strategy documents remain dated research. Their provisional names do not override this decision.
 
 Publication of the project site, exact profile and Registry tooling does not claim IETF adoption, deployed MAP product conformance or independent implementation of the specification.
+
+The [24 September scope audit](SCOPE-AUDIT.md) identifies unresolved representation, authorization, lifecycle and release-consistency requirements. Its findings and the corrected [execution plan](ROADMAP.md) supersede earlier completion claims; they do not reopen the selected names or expand the protocol's scope.
 
 ## Specification renderer
 
@@ -95,19 +97,19 @@ Full specification prose remains authored Markdown rendered by Sourcey. Linked t
 
 The selected first implementation combines a website checker with Git-based review. One contribution format covers new types, amendments and implementation declarations. Contributors and maintainers are record data; declarations belong to the exact type version, profile and record digest. The website, CLI, page renderer and JSON exports share the validation and projection pipeline. See [CONTRIBUTIONS.md](CONTRIBUTIONS.md) for the channel tradeoffs and operating process.
 
-Local ingestion and previews are implemented. Public repository setup, contribution terms and the future website-to-pull-request connection remain publication work. There are no real vendor submissions in the current collection; examples stay separate from it.
+Local ingestion, previews, public repository setup and contribution terms are implemented. A website-to-pull-request connection remains optional future work. There are no real vendor submissions in the current collection; examples stay separate from it.
 
 ## Package documentation
 
 The approved integration places package installation, examples and API reference at `/tools/` within the MailSchema site. Tools is linked from the main navigation, search, contribution guide, type record downloads and the specification reader's resource links. The packages validate or expose MAP 0.1, Content Review 0.1 and Registry contracts. They do not send email, establish endpoint trust or grant authorization. Normative MAP requirements remain in the specification.
 
-The repository owns both the site and packages. Published package versions are independent of specification versions and may differ between language ecosystems. `packages/versions.json` declares the version prepared for each registry without requiring synchronized releases. `docs/releases/current.json` is the explicit package set promoted to the website. Each channel points to immutable release evidence; `src/data/tooling.ts` supplies the selected versions, registry links and commands. A build guard checks every selected registry identity, version and verification result against the canonical schema digest. A schema change requires matching verified package releases before the site can advertise them.
+This repository is the sole normative source for the profile, context, JSON Schemas, type records, fixtures and conformance requirements. Language repositories own their language APIs, CI, tags and publication. Their schema files are vendored projections of the canonical bytes and do not define MAP. Published package versions are independent of specification versions and may differ between language ecosystems. `packages/versions.json` records the current release declarations without requiring synchronized releases. `docs/releases/current.json` is the explicit package set promoted to the website. Each channel points to immutable release evidence; `src/data/tooling.ts` supplies the selected versions, registry links and commands. Legacy evidence is labelled as contribution-schema-only. New release evidence verifies every contract distributed by the package.
 
 Registry publication and website promotion are separate phases. Publishing an artifact does not mutate the static site or make it recommended. Independent registry readback first records evidence; changing the package-set manifest then becomes a reviewable source change and deploy. Once repository automation exists, it may prepare that promotion after every successful verified release, but it must retain the evidence gate rather than scrape “latest” versions during a site build.
 
-The reusable promotion workflow is deliberately pull-request based. It can be started manually or called by a package-publishing workflow. Given one registry and exact version, it downloads the public artifact, compares the registry checksum where available, extracts the packaged contribution schema and compares its exact bytes with the canonical schema. It then writes immutable evidence, changes only that registry's selected version, runs the complete verification suite and opens a promotion pull request. Other language packages keep their existing versions. After merge, the `main` workflow verifies the repository again and deploys that exact build to Cloudflare.
+The reusable promotion workflow is deliberately pull-request based. It can be started manually or called by a package-publishing workflow. Given one registry and exact version, it downloads the public artifact, verifies published integrity where available, extracts every distributed contract and compares its exact bytes with the canonical source. It then writes additive immutable evidence, changes only that registry's selected version, runs the complete verification suite and opens a promotion pull request. Other language packages keep their existing versions. After merge, the `main` workflow verifies the repository again and deploys that exact build to Cloudflare.
 
-Type pages offer raw record downloads that work directly with package validators. Existing digest-envelope exports remain available for consumers. The contribution flow distinguishes structural validation, checks against Registry references and review. The Rust package embeds schemas; JavaScript and Python provide validation; Go provides typed documents, strict decoding and core reference checks. Public artifact readback binds every promoted package to the exact contribution schema bytes.
+Type pages offer raw record downloads that work directly with package validators. Existing digest-envelope exports remain available for consumers. The contribution flow distinguishes structural validation, checks against Registry references and review. The Rust package embeds schemas; JavaScript and Python provide validation; Go provides typed documents, strict decoding and core reference checks. Public artifact readback for the next changed release binds every distributed contract to the exact canonical bytes.
 
 The main navigation is shared between Astro and MailSchema's Sourcey configuration. The reader's additional resource link is project configuration; the Sourcey package and generic reader theme are unchanged.
 

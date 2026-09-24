@@ -18,12 +18,15 @@ The initial profile introduces no new identity provider or mandatory DNS record.
 
 Before applying an effect, the service checks:
 
-- The authenticated caller.
+- The authenticated caller and tenant established outside the MAP body.
+- The interaction resolved from authoritative service state.
 - The requested operation and target, including the revision where required.
 - Any applicable expiry or revocation.
 - Any additional approval required by the service.
 
 The checks use the permissions and state that apply when the request is executed. Earlier discovery of an action does not replace them.
+
+Exact retries and result retrieval check current permission again before returning a saved response. Revoking permission does not repeat or undo an effect, but it can prevent the former caller from reading the retained result. Request identifiers are isolated between tenants and cannot be used by a different principal to retrieve another caller's result.
 
 ## Human approval
 
@@ -42,6 +45,8 @@ Content Review defines feedback and review approval. A recorded approval does no
 Clients treat message text, action descriptions and remote references as untrusted input. A message cannot change the client's instructions, disclose credentials or extend its permissions.
 
 The receiving system controls model processing, external fetches and disclosure of information. Receipt of a message does not itself authorise those activities.
+
+Human links use side-effect-free `GET` routes. Link previews and security scanners cannot approve, send or otherwise mutate the target. A human decision is submitted separately with normal CSRF and session protections.
 
 ## Refusal
 

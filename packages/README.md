@@ -1,6 +1,6 @@
 # MailSchema packages
 
-MailSchema distributes the exact MAP 0.1, Content Review 0.1 and Registry schemas for use at implementation boundaries. The packages validate or expose the contract; they do not establish endpoint trust, grant authority or send email.
+MailSchema package sources are generated from the exact MAP 0.1, Content Review 0.1 and Registry schemas for use at implementation boundaries. The packages validate or expose the contract; they do not establish endpoint trust, grant authority or send email.
 
 | Distribution                                                      | Contents                                                                                                        |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -9,7 +9,7 @@ MailSchema distributes the exact MAP 0.1, Content Review 0.1 and Registry schema
 | [crates.io `mailschema`](https://github.com/mailschema/rust)      | MAP, Content Review and Registry schemas embedded without runtime dependencies                                  |
 | [Go `github.com/mailschema/go`](https://github.com/mailschema/go) | Typed MAP documents, strict decoding, core reference validation and the canonical schemas                       |
 
-The selected releases are JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `0.1.0`. Package versions are independent of the MAP profile version and advance separately when a language-specific fix requires it. Distribution code and included schema assets use the MIT license in this directory. This file does not assign a license to unrelated website assets or other project documents.
+The selected releases are JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `0.1.0`. Their existing evidence verifies the Registry contract shipped in those artifacts; the revised MAP and Content Review contract remains source-only until changed packages pass full-contract public readback. Package versions are independent of the MAP profile version and advance separately when a language-specific change requires it. Distribution code and included schema assets use the MIT license in this directory. This file does not assign a license to unrelated website assets or other project documents.
 
 ## One source
 
@@ -34,6 +34,8 @@ The JavaScript archive is checked with a clean installation outside the reposito
 
 Publication runs from the tagged language repository after its native CI passes. Registry credentials use repository secrets or trusted publishing and must not appear in arguments, package files or release records.
 
-After publishing one distribution, run `npm run packages:promote -- --registry <registry> --version <version>` to read public registry metadata, download the artifact, check the registry digest where available and compare its embedded contribution schema byte for byte with the canonical file. Supported registry names are `npm`, `PyPI`, `crates.io` and `Go`. Add `--promote` to write immutable evidence and update only that registry in `docs/releases/current.json`. A successful upload alone is not treated as verification.
+After publishing one distribution, run `npm run packages:promote -- --registry <registry> --version <version>` to read public registry metadata, download the artifact, check registry integrity where available and compare every contract it distributes byte for byte with the canonical files. Supported registry names are `npm`, `PyPI`, `crates.io` and `Go`. Add `--promote` to write immutable evidence and update only that registry in `docs/releases/current.json`. A successful upload alone is not treated as verification.
+
+The versions in `packages/versions.json` remain the currently published versions until a release is deliberately prepared. Contract work can advance on branches without changing those package versions. Do not publish a rebuilt artifact under an existing version; the release change must choose the next version explicitly and then pass public readback before website promotion.
 
 JSR, RubyGems and NuGet remain pending account setup. The npm `@mailschema` organization scope is separate from the published unscoped package and has not been created by this release.

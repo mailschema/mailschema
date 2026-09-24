@@ -18,6 +18,7 @@ The draft requires the following distinctions where they apply. The type defines
 | Stale revision    | The request referred to an outdated revision and was not applied to the current content.                 |
 | Approval required | An additional decision is needed before the operation can proceed.                                       |
 | Pending           | The work is outstanding. The result provides any available status or follow-up reference.                |
+| Failed            | Work previously accepted by the service ended without completing the requested effect.                   |
 | Uncertain         | The client cannot determine whether the effect occurred.                                                 |
 
 These distinctions describe operation meaning. In particular, an uncertain state may result from a lost response; it need not be a state returned by the service.
@@ -32,10 +33,16 @@ For Content Review, an approval result without an identifiable content revision 
 
 A client may lose the response after the service has performed an operation. Retrying that request must not apply the same effect a second time.
 
-The execution profile binds one complete request value to a client-generated request ID. An exact retry returns the recorded response. A changed value, including a changed target revision, produces an idempotency conflict and no effect.
+The execution profile binds one complete request value and authenticated principal to a client-generated request ID. An exact retry returns the latest recorded result after a current access check. A changed value, including a changed target revision, produces an idempotency conflict and no effect.
 
 ## Interrupted exchanges
 
 After a timeout, the client cannot assume that the request failed. It should recover the authoritative result before retrying in a way that could duplicate the operation.
 
-The description advertises a result URL template and retention period. Every response identifies that result resource. An authenticated client retrieves it after an interrupted exchange before deciding whether another request is safe.
+The description advertises a result URL template and retention period. Every response identifies that result resource. An authenticated client retrieves it after an interrupted exchange before deciding whether another request is safe. Retrieval is side-effect free and rechecks current permission. The service keeps duplicate-suppression state after the response body expires so an old request cannot apply the effect again.
+
+## Non-terminal work
+
+`pending` and `approval-required` can advance to `accepted`, `completed` or `failed`. The result resource is authoritative, so recovery and an exact retry can return a newer state than the initial response. A service records each transition durably before returning it.
+
+Claiming a request identifier, applying or durably initiating its effect, and recording recoverable state must be atomic or covered by a reconciliation process. A service restart cannot turn an uncertain response into a second effect.

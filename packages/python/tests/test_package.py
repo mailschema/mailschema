@@ -22,6 +22,7 @@ class PackageTests(unittest.TestCase):
         self.record = json.loads(Path("tests/content-review.json").read_text())
         self.description = json.loads(Path("tests/map-description.json").read_text())
         self.request = json.loads(Path("tests/map-request.json").read_text())
+        self.result = json.loads(Path("tests/map-result.json").read_text())
 
     def test_valid_contribution_and_record(self):
         validate_contribution(self.fixture)
@@ -47,6 +48,8 @@ class PackageTests(unittest.TestCase):
     def test_map_documents(self):
         validate_map_document(self.description)
         validate_map_document(self.request)
+        validate_map_document(self.result)
+        self.assertEqual(self.result["type"], self.request["type"])
         validate_content_review_request(self.request)
         invalid = copy.deepcopy(self.request)
         invalid["operation"] = "publish"

@@ -23,6 +23,7 @@ Content-Transfer-Encoding: 8bit
 --map-example-boundary
 Content-Type: application/ld+json; charset="utf-8"
 Content-Transfer-Encoding: 8bit
+Content-Purpose: Machine-readable
 
 {
   "@context": "https://mailschema.org/contexts/map-0.1.jsonld",

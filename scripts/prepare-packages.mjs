@@ -84,6 +84,7 @@ await put(
   await read('public/fixtures/map-0.1/content-review-description.json'),
 );
 await put('npm/test/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
+await put('npm/test/map-result.json', await read('public/fixtures/map-0.1/result-completed.json'));
 await put(
   'npm/tsconfig.json',
   json({
@@ -131,6 +132,10 @@ await put(
   await read('public/fixtures/map-0.1/content-review-description.json'),
 );
 await put('python/tests/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
+await put(
+  'python/tests/map-result.json',
+  await read('public/fixtures/map-0.1/result-completed.json'),
+);
 await put('rust/schemas/contribution.schema.json', schemaBytes);
 await put('rust/schemas/record.schema.json', recordSchema);
 await put('rust/schemas/map-0.1.schema.json', mapSchemaBytes);
@@ -150,18 +155,49 @@ if (
 await put(
   'prepared.json',
   json({
+    format: 'mailschema-package-build/2',
     versions,
     schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
+    contracts: [
+      ['contribution', schemaBytes],
+      ['map-0.1', mapSchemaBytes],
+      ['content-review-0.1', contentReviewSchemaBytes],
+      ['record', recordSchema],
+    ].map(([name, bytes]) => ({
+      name,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+    })),
     channels: [
-      { registry: 'npm', version: versions.npm },
-      { registry: 'PyPI', version: versions.PyPI },
-      { registry: 'crates.io', version: versions['crates.io'] },
-      { registry: 'Go', version: versions.Go },
+      {
+        registry: 'npm',
+        version: versions.npm,
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+      },
+      {
+        registry: 'PyPI',
+        version: versions.PyPI,
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+      },
+      {
+        registry: 'crates.io',
+        version: versions['crates.io'],
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1', 'record'],
+      },
+      {
+        registry: 'Go',
+        version: versions.Go,
+        contracts: ['contribution', 'map-0.1', 'content-review-0.1'],
+      },
     ],
-    source: 'public/schemas/contribution.schema.json',
+    sources: {
+      contribution: 'public/schemas/contribution.schema.json',
+      'map-0.1': 'public/schemas/map-0.1.schema.json',
+      'content-review-0.1': 'public/schemas/content-review-0.1.schema.json',
+      record: 'derived from contribution.schema.json#/$defs/record',
+    },
     status: 'prepared',
   }),
 );
 console.log(
-  `Prepared MailSchema packages from one canonical schema: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}, Go ${versions.Go}.`,
+  `Prepared MailSchema packages from the canonical contracts: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}, Go ${versions.Go}.`,
 );

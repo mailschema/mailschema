@@ -12,6 +12,8 @@ The first example is a campaign test email. The same review model could apply to
 
 A review identifies the content and its exact revision. The reviewer must be able to determine which version the decision concerns.
 
+The target digest is a service-issued SHA-256 digest of that authoritative review revision. The service defines and preserves the exact bytes used to compute it. A client treats it as an opaque state validator unless the service separately publishes the representation. Interoperability depends on comparing the exact token, not reproducing another service's content serialization.
+
 When content changes, the new revision requires its own review. An approval of an earlier revision does not carry forward automatically.
 
 ## Request changes

@@ -19,6 +19,9 @@ test('exposes the canonical schema identifiers', () => {
 test('validates MAP and Content Review fixtures', async () => {
   assertMapDocument(await load('map-description.json'));
   assertContentReviewRequest(await load('map-request.json'));
+  const result = await load('map-result.json');
+  assertMapDocument(result);
+  assert.equal(result.type.id, 'https://mailschema.org/types/content-review');
 });
 
 test('preserves canonical schema bytes during the build', async () => {

@@ -1,0 +1,145 @@
+{
+  "format": "mailschema-readiness-audit/1",
+  "artifactSetSha256": "a4be414248140aaedb83b734f7f31c478dbca09b36c7a9697550afae621196f7",
+  "artifacts": [
+    {
+      "path": "src/map/reference.ts",
+      "sha256": "0d5d48ba1192df898b2a973f0feb1fdbd8016f9bc20295795714d95823aa3844"
+    },
+    {
+      "path": "public/contexts/map-0.1.jsonld",
+      "sha256": "c977c6009d893fe2d0fc73eb500bee5e61e2b95c8f4f7ce42f6c603f076d7a46"
+    },
+    {
+      "path": "public/schemas/map-0.1.schema.json",
+      "sha256": "d908a960f53fade9ab47876bf69b1b3d037adeb7096091e22ca71fbc3909429c"
+    },
+    {
+      "path": "public/schemas/content-review-0.1.schema.json",
+      "sha256": "dba2a2f1e57f843f43080f5a40ced2d9c84e7c7036ec306c371a82d39f6d6c9f"
+    },
+    {
+      "path": "public/fixtures/map-0.1/content-review-description.json",
+      "sha256": "03c08f59bc548a989b9147a28f40824e2ebd49f9388e62e697555ef01352ecab"
+    },
+    {
+      "path": "public/fixtures/map-0.1/approve.json",
+      "sha256": "4992345aa71023ea68c06e96af64da27995989bf91d5d9331cc61db1f3909a0b"
+    },
+    {
+      "path": "public/fixtures/map-0.1/content-review.eml",
+      "sha256": "3f2f1fd7e17faed4bd698ffcd71ab59cfffd5098b368cf75e77aaa8dcf9bacc8"
+    },
+    {
+      "path": "scripts/audit-map-readiness.mjs",
+      "sha256": "1e40a343cbc5a26a066fcbb20f5ac7d61cf870fe9f7b171292111abde70b7420"
+    }
+  ],
+  "scope": "Local reference implementation and fixtures. Not a deployed security test or full conformance certification.",
+  "probes": [
+    {
+      "id": "control",
+      "requirement": "A valid, authorized approval completes exactly once.",
+      "status": "pass",
+      "observed": {
+        "status": 200,
+        "effects": 1
+      }
+    },
+    {
+      "id": "interaction-binding",
+      "requirement": "A request for an unknown interaction cannot complete.",
+      "status": "pass",
+      "observed": 400
+    },
+    {
+      "id": "request-validation",
+      "requirement": "The service rejects input rejected by the Content Review schema without an effect.",
+      "status": "pass",
+      "observed": {
+        "schemaValid": false,
+        "status": 400
+      }
+    },
+    {
+      "id": "retry-access",
+      "requirement": "A retry checks current access before disclosing a saved result.",
+      "status": "pass",
+      "observed": {
+        "status": 403,
+        "authorizationCalls": 3,
+        "effects": 1
+      }
+    },
+    {
+      "id": "recovery-access",
+      "requirement": "Recovery checks current access before disclosing a saved result.",
+      "status": "pass",
+      "observed": {
+        "status": 403,
+        "authorizationCalls": 3
+      }
+    },
+    {
+      "id": "https-only",
+      "requirement": "Schema and endpoint trust both require HTTPS.",
+      "status": "pass",
+      "observed": {
+        "schemaValid": false,
+        "helperRejected": true
+      }
+    },
+    {
+      "id": "recovery-origin",
+      "requirement": "Credential-bearing result retrieval needs an independently trusted origin.",
+      "status": "pass",
+      "observed": {
+        "helperRejected": true
+      }
+    },
+    {
+      "id": "sml-designation",
+      "requirement": "The structured MIME part carries SML-06 Content-Purpose: Machine-readable.",
+      "status": "pass",
+      "observed": {
+        "present": true
+      }
+    },
+    {
+      "id": "jsonld-type",
+      "requirement": "The vocabulary type is the MAP type IRI and is independent of document base.",
+      "status": "pass",
+      "observed": [
+        [
+          "https://mailschema.org/ns/map#MailAction"
+        ],
+        [
+          "https://mailschema.org/ns/map#MailAction"
+        ]
+      ]
+    },
+    {
+      "id": "jsonld-operation-ids",
+      "requirement": "Shared operation tokens do not change with the document base.",
+      "status": "pass",
+      "observed": [
+        [
+          "request-changes",
+          "approve"
+        ],
+        [
+          "request-changes",
+          "approve"
+        ]
+      ]
+    },
+    {
+      "id": "problem-correlation",
+      "requirement": "A Problem Details code cannot contradict its type or HTTP status.",
+      "status": "pass",
+      "observed": {
+        "schemaValid": false
+      }
+    }
+  ]
+}
