@@ -2,11 +2,9 @@
 
 MailSchema is the open project for agent interactions through email. Its first specification is **Mail Action Protocol (MAP)**, which defines how agents discover and complete service actions offered through email, with people retaining control.
 
-**Status: founder-selected foundational architecture, 22 September 2026.** The project name, specification name and acronym are locked. The founder selected Direction 03, the yellow-and-blue board; the technical specification is still a draft, and conformance must be demonstrated.
+**Status: selected foundational architecture, 22 September 2026.** The project name, specification name and acronym are settled. Direction 03 is the selected yellow-and-blue identity; the technical specification remains a working draft.
 
-## Decision and authority
-
-The founder instructed us to lock the names, update the current plan and create fresh imagegen identity concepts. The immediate correction was **“mail action protocol”**, followed by **“you sasid it was better”**. That correction controls the expansion of MAP.
+## Names and hierarchy
 
 - **Project / publishing home:** MailSchema.
 - **Specification:** Mail Action Protocol.
@@ -38,7 +36,7 @@ The human path and receiver control remain in scope. Agent-first positioning doe
 
 MailSchema is the open project and home for related specifications. MAP is a specification it publishes. Types define interaction semantics; the Registry collects their submitted definitions and maintains their versions, examples and review history. Implementation declarations and evidence are associated with a type and version. These are responsibilities within one ecosystem, without a required central runtime.
 
-The founder's latest correction supersedes the earlier implementation-directory design: the Registry is about the submitted type. Services and clients are supporting records within it. The website now follows that model, with a shared type collection supplying the Registry, detail pages and site search.
+The Registry is organised around submitted types. Services and clients are supporting records within a type version. The website follows that model, with one validated collection supplying the Registry, detail pages and site search.
 
 Core requirements stay inside the first MAP document. Split a common-requirements document only when multiple real profiles need it. Do not invent another brand or launch workstream merely to fill a family diagram.
 
@@ -62,7 +60,7 @@ One MailSchema identity supports the project, Types and Registry. A related **MA
 
 Develop all new visual directions from the chosen architecture and fresh creative briefs. Do not adapt the old A-Mail wordmarks, symbols, boards or prompt concepts. The new boards should show the homepage, specification reader, Types, Registry and a real review interaction together.
 
-The new identity brief lives in [brand/MAILSCHEMA-MAP-IDENTITY.md](../brand/IDENTITY.md). Names and hierarchy are settled. The founder selected the second board displayed, labelled Direction 03: charcoal, acid yellow-lime and blue-violet. The first website is a standalone Astro project at `/Users/kam/dev/mailschema`, published at `https://mailschema.org`, with a homepage, specification reader, Types, Registry and a browser-local Content Review example.
+The identity brief lives in [brand/IDENTITY.md](../brand/IDENTITY.md). Direction 03 uses charcoal, acid yellow-lime and blue-violet. The Astro site is published at `https://mailschema.org` with a homepage, specification reader, Types, Registry and a browser-local Content Review example.
 
 ## Source of truth
 
@@ -71,17 +69,15 @@ The new identity brief lives in [brand/MAILSCHEMA-MAP-IDENTITY.md](../brand/IDEN
 3. The implementation and demo brief records the product workflow and known gaps.
 4. Older naming and strategy documents remain dated research. Their provisional names do not override this decision.
 
-Publication of the project site, exact profile and Registry tooling does not claim IETF adoption, deployed MAP product conformance or independent implementation of the specification.
+Publication of the project site, exact profile and Registry tooling does not claim IETF adoption, a reproduced end-to-end product run or an independent implementation of the specification.
 
-The [24 September scope audit](SCOPE-AUDIT.md) identifies unresolved representation, authorization, lifecycle and release-consistency requirements. Its findings and the corrected [execution plan](ROADMAP.md) supersede earlier completion claims; they do not reopen the selected names or expand the protocol's scope.
+The [24 September scope audit](SCOPE-AUDIT.md) records the baseline defects and their current resolution state. Its findings and the [execution plan](ROADMAP.md) govern the remaining product, release and adoption evidence; they do not reopen the selected names or expand the protocol's scope.
 
 ## Specification renderer
 
 The approved reader is a reusable Sourcey OSS `reader` theme. MailSchema configures and serves it through `sourcey/astro` at `/specification/`, keeping all other routes in the Astro host. Authored specifications live in `docs/specification/`; Sourcey emits their HTML, search and machine-readable indexes. See `SOURCEY.md` for ownership and validation.
 
 ## Language and collection review
-
-The founder approved the framing of email as a common interface between agents and services and requested an end-to-end language pass, starting with the homepage and then the specification. The review packet was prepared before implementation; the subsequent instruction “proceed update content” authorised applying it. Future site-wide rewrites still require consultation.
 
 The applied review packet is in [editorial-review/README.md](editorial-review/README.md). It covers the homepage, supporting pages, all six specification chapters and a five-entry collection. Content Review remains the only semantic type draft. Information Request and Subscription Preferences are proposals. Task Assignment and Event Response are assessments of how existing standards could be reused. Publishing these records on the project site does not expand the implemented protocol or establish compatibility.
 

@@ -12,13 +12,13 @@ Agent builders, email service developers and specification implementers assessin
 
 MailSchema is building an open standard for agents to work with services through email. Mail Action Protocol (MAP) defines the common exchange. Shared Types define particular interactions, and the Registry holds submitted type definitions, versions, examples and review history. Services and clients may declare support within a type's record, tied to its exact version and execution profile.
 
-The first type is Content Review bound to an exact revision. The initial proof must apply that workflow across independently configured services. Sourcey is a candidate service, not an independent adopter. The site must explain the practical opportunity and invite participation without implying a finished wire standard or IETF status.
+The first type is Content Review bound to an exact revision. The initial proof must apply that workflow across independently configured services. Sourcey renders the specification and is not counted as an action service. The site must explain the practical opportunity and invite participation without implying independent adoption or IETF status.
 
 ## Brand Personality
 
-Precise, assured, luminous. The founder selected the yellow-and-blue Direction 03 identity and requested a refined, ambitious specification site using simple Astro. Infrastructure with a strong identity, legible technical detail and restrained movement.
+Precise, assured, luminous. The selected yellow-and-blue Direction 03 identity gives the Astro specification site a strong infrastructure character, legible technical detail and restrained movement.
 
-The language should explain familiar work and why a common standard is useful. Use ordinary sentences and concrete examples. The founder rejected both generic future-facing slogans and a homepage dominated by implementation criteria or technical punchlines. Present proposed language for review before applying another site-wide rewrite.
+The language explains familiar work and why a common standard is useful. Use ordinary sentences and concrete examples. Avoid generic future-facing slogans and a homepage dominated by implementation criteria or technical punchlines. Review proposed language before applying another site-wide rewrite.
 
 ## Anti-references
 
@@ -41,4 +41,4 @@ Readable at mobile and desktop widths, keyboard access, visible focus, semantic 
 
 ## Source decisions
 
-Derived from ARCHITECTURE.md, MAILSCHEMA-CHARTER-2026-09-22.md, founder naming correction to Mail Action Protocol, and founder selection of Direction 03. The founder subsequently accepted the framing of email as a common interface between agents and services and clarified that the Registry centres on submitted types. The copy and collection review in docs/editorial-review/ was approved with “proceed update content” and applied on 23 September 2026. The build preserves the chosen visual shape.
+The selected name, hierarchy and scope are recorded in `docs/ARCHITECTURE.md` and `MAILSCHEMA-CHARTER-2026-09-22.md`. The copy and collection review in `docs/editorial-review/` was applied on 23 September 2026. The build preserves the selected visual direction.

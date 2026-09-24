@@ -38,7 +38,7 @@ Specification content and Sourcey configuration live in `docs/specification/`. S
 
 ## Content and implementation boundaries
 
-MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. Nitrosend exposes the first deployed sending-side contract; the project does not yet claim a reproduced end-to-end product run, independent conformance or IETF adoption. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
+MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. Nitrosend exposes the first deployed Content Review boundary: an agent can propose approval of an exact flow revision, a signed-in person can decide it and both paths resolve through the same retained result. A provider-delivered inbox round trip and an independently operated implementation remain outstanding, so the project does not claim end-to-end interoperability or IETF adoption. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. These are MailSchema-authored records, not external submissions or claims of implemented support.
 
 The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review/` address redirects to its Registry record.
 

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "founder_selected",
+  "status": "selected",
   "date": "2026-09-22",
   "timezone": "Australia/Sydney",
   "project": {
@@ -25,7 +25,7 @@
     "proof": "Content Review across independently configured services",
     "requires_vendor_account_for_compatibility": false
   },
-  "founder_correction": ["mail action protocol", "you sasid it was better"],
+  "selected_expansion": "Mail Action Protocol",
   "superseded_names": [
     "Mail Agent Protocol",
     "Model Email Protocol",
@@ -38,23 +38,21 @@
     "Reuse existing standards including competitor work where suitable",
     "First proof remains revision-bound Content Review",
     "No mandatory central registry, new identity, universal transport or policy runtime",
-    "New imagegen identity concepts from fresh prompts and no old references"
+    "New identity concepts from fresh prompts and no old references"
   ],
   "visual_identity": {
-    "status": "founder_selected",
+    "status": "selected",
     "names_locked": true,
     "selected_direction": "03",
-    "generation": "built-in imagegen",
     "fresh_prompts": true,
     "selection_note": "Second board displayed, labelled Direction 03: charcoal, yellow-lime and blue-violet.",
     "asset": "brand/direction-03-selected.png"
   },
   "canonical_document": "docs/ARCHITECTURE.md",
   "scope_document": "Project charter",
-  "implementation_claim": "No completed wire specification or product conformance implied by the naming decision.",
+  "implementation_claim": "The naming decision alone implies no product conformance or independent adoption.",
   "website": {
     "framework": "Astro",
-    "workspace": "/Users/kam/dev/mailschema",
     "status": "production",
     "production_deployed": true,
     "url": "https://mailschema.org"

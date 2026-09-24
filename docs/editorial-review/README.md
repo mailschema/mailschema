@@ -1,6 +1,6 @@
 # MailSchema language and type collection review
 
-Status: approved with “proceed update content” and applied to the local site on 23 September 2026. This packet preserves the copy and collection assessment presented for review. It is not a deployment record.
+Status: accepted and applied on 23 September 2026. This packet preserves the copy and collection assessment. It is not a deployment record.
 
 ## Agreed direction
 
