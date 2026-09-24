@@ -1,49 +1,68 @@
-From: Example Review Service <reviews@reviews.example>
-To: Reviewer <reviewer@example.net>
-Date: Wed, 23 Sep 2026 01:00:00 +0000
-Message-ID: <map-018f47a2-5d7c-7b11-9a3d-4d2160b85b10@reviews.example>
-Subject: Review requested: September product update
+From: reviews@example.test
+To: reviewer@example.test
+Subject: Review September product update
+Date: Tue, 23 Sep 2026 01:00:00 +0000
+Message-ID: <content-review-4@example.test>
 MIME-Version: 1.0
-Content-Type: multipart/alternative; boundary="map-example-boundary"
+Content-Type: multipart/related; boundary="map-related-boundary"
 
---map-example-boundary
+--map-related-boundary
+Content-Type: multipart/alternative; boundary="map-readable-boundary"
+
+--map-readable-boundary
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 
-Please review revision 4 of “September product update”.
+September product update is ready for review.
 
-Open the review: https://reviews.example/reviews/campaign-42/revision/4
+Review revision 4, request changes, or approve it in the review service.
 
---map-example-boundary
+--map-readable-boundary
 Content-Type: text/html; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 
-<!doctype html><html><body><h1>Review requested</h1><p>Please review revision 4 of <strong>September product update</strong>.</p><p><a href="https://reviews.example/reviews/campaign-42/revision/4">Open the review</a></p></body></html>
+<!doctype html>
+<html><body><h1>September product update</h1><p>Revision 4 is ready for review.</p><p>Request changes or approve it in the review service.</p></body></html>
 
---map-example-boundary
+--map-readable-boundary--
+
+--map-related-boundary
 Content-Type: application/ld+json; charset="utf-8"
-Content-Transfer-Encoding: 8bit
 Content-Purpose: Machine-readable
+Content-Disposition: inline
+Content-Transfer-Encoding: base64
 
-{
-  "@context": "https://mailschema.org/contexts/map-0.1.jsonld",
-  "@type": "MailAction",
-  "@id": "urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b85b10",
-  "profile": "https://mailschema.org/profiles/map/0.1",
-  "type": {"id":"https://mailschema.org/types/content-review","version":"0.1","recordDigest":"sha-256:0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c"},
-  "describedAt": "2026-09-23T01:00:00Z",
-  "expiresAt": "2026-09-30T01:00:00Z",
-  "service": {
-    "id": "https://reviews.example/service",
-    "name": "Example Review Service",
-    "execution": {"url":"https://reviews.example/map/actions","method":"POST","requestMediaType":"application/json","resultMediaType":"application/json","resultUrlTemplate":"https://reviews.example/map/results/{requestId}","resultRetentionSeconds":604800},
-    "humanUrl": "https://reviews.example/reviews/campaign-42/revision/4",
-    "authorization": {"kind":"service-configured","schemes":["oauth2"],"audience":"https://reviews.example/"}
-  },
-  "target": {"id":"https://reviews.example/content/campaign-42","revision":"4","title":"September product update","digest":"sha-256:9096ce5e9226696d3bdc80f7d62a8e1ca4995c4fd8c4b9f0155287529aefe8fd"},
-  "operations": [
-    {"id":"request-changes","name":"Request changes","description":"Record feedback on revision 4.","inputSchema":"https://mailschema.org/schemas/content-review-0.1.schema.json"},
-    {"id":"approve","name":"Approve","description":"Record approval of revision 4.","inputSchema":"https://mailschema.org/schemas/content-review-0.1.schema.json"}
-  ]
-}
---map-example-boundary--
+ewogICJAY29udGV4dCI6ICJodHRwczovL21haWxzY2hlbWEub3JnL2NvbnRleHRzL21hcC0wLjEu
+anNvbmxkIiwKICAiQHR5cGUiOiAiTWFpbEFjdGlvbiIsCiAgIkBpZCI6ICJ1cm46dXVpZDowMThm
+NDdhMi01ZDdjLTdiMTEtOWEzZC00ZDIxNjBiODViMTAiLAogICJwcm9maWxlIjogImh0dHBzOi8v
+bWFpbHNjaGVtYS5vcmcvcHJvZmlsZXMvbWFwLzAuMSIsCiAgInR5cGUiOiB7CiAgICAiaWQiOiAi
+aHR0cHM6Ly9tYWlsc2NoZW1hLm9yZy90eXBlcy9jb250ZW50LXJldmlldyIsCiAgICAidmVyc2lv
+biI6ICIwLjEiLAogICAgImNvbnRyYWN0RGlnZXN0IjogInNoYS0yNTY6ZGViYThmYzU4OGM4M2M3
+Y2RmOWQ0ZTQ3ZDIzYjExNDg2MWFlYTM1YzNkYWFmNzE4NTRkYzZjNjI2YzhhMWQwNSIKICB9LAog
+ICJkZXNjcmliZWRBdCI6ICIyMDI2LTA5LTIzVDAxOjAwOjAwWiIsCiAgImV4cGlyZXNBdCI6ICIy
+MDI2LTA5LTMwVDAxOjAwOjAwWiIsCiAgInNlcnZpY2UiOiB7CiAgICAiaWQiOiAiaHR0cHM6Ly9y
+ZXZpZXdzLmV4YW1wbGUvc2VydmljZSIsCiAgICAibmFtZSI6ICJFeGFtcGxlIFJldmlldyBTZXJ2
+aWNlIiwKICAgICJleGVjdXRpb24iOiB7CiAgICAgICJ1cmwiOiAiaHR0cHM6Ly9yZXZpZXdzLmV4
+YW1wbGUvbWFwL2FjdGlvbnMiLAogICAgICAibWV0aG9kIjogIlBPU1QiLAogICAgICAicmVxdWVz
+dE1lZGlhVHlwZSI6ICJhcHBsaWNhdGlvbi9qc29uIiwKICAgICAgInJlc3VsdE1lZGlhVHlwZSI6
+ICJhcHBsaWNhdGlvbi9qc29uIiwKICAgICAgInJlc3VsdFVybFRlbXBsYXRlIjogImh0dHBzOi8v
+cmV2aWV3cy5leGFtcGxlL21hcC9yZXN1bHRzL3tyZXF1ZXN0SWR9IiwKICAgICAgInJlc3VsdFJl
+dGVudGlvblNlY29uZHMiOiA2MDQ4MDAKICAgIH0sCiAgICAiaHVtYW5VcmwiOiAiaHR0cHM6Ly9y
+ZXZpZXdzLmV4YW1wbGUvcmV2aWV3cy9jYW1wYWlnbi00Mi9yZXZpc2lvbi80IiwKICAgICJhdXRo
+b3JpemF0aW9uIjogewogICAgICAia2luZCI6ICJzZXJ2aWNlLWNvbmZpZ3VyZWQiLAogICAgICAi
+c2NoZW1lcyI6IFsib2F1dGgyIl0sCiAgICAgICJhdWRpZW5jZSI6ICJodHRwczovL3Jldmlld3Mu
+ZXhhbXBsZS8iCiAgICB9CiAgfSwKICAidGFyZ2V0IjogewogICAgImlkIjogImh0dHBzOi8vcmV2
+aWV3cy5leGFtcGxlL2NvbnRlbnQvY2FtcGFpZ24tNDIiLAogICAgInJldmlzaW9uIjogIjQiLAog
+ICAgInRpdGxlIjogIlNlcHRlbWJlciBwcm9kdWN0IHVwZGF0ZSIsCiAgICAiZGlnZXN0IjogInNo
+YS0yNTY6OTA5NmNlNWU5MjI2Njk2ZDNiZGM4MGY3ZDYyYThlMWNhNDk5NWM0ZmQ4YzRiOWYwMTU1
+Mjg3NTI5YWVmZThmZCIKICB9LAogICJvcGVyYXRpb25zIjogWwogICAgewogICAgICAiaWQiOiAi
+cmVxdWVzdC1jaGFuZ2VzIiwKICAgICAgIm5hbWUiOiAiUmVxdWVzdCBjaGFuZ2VzIiwKICAgICAg
+ImRlc2NyaXB0aW9uIjogIlJlY29yZCBmZWVkYmFjayBvbiByZXZpc2lvbiA0LiIsCiAgICAgICJp
+bnB1dFNjaGVtYSI6ICJodHRwczovL21haWxzY2hlbWEub3JnL3NjaGVtYXMvY29udGVudC1yZXZp
+ZXctMC4xLnNjaGVtYS5qc29uIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImFwcHJvdmUiLAog
+ICAgICAibmFtZSI6ICJBcHByb3ZlIiwKICAgICAgImRlc2NyaXB0aW9uIjogIlJlY29yZCBhcHBy
+b3ZhbCBvZiByZXZpc2lvbiA0LiIsCiAgICAgICJpbnB1dFNjaGVtYSI6ICJodHRwczovL21haWxz
+Y2hlbWEub3JnL3NjaGVtYXMvY29udGVudC1yZXZpZXctMC4xLnNjaGVtYS5qc29uIgogICAgfQog
+IF0KfQo=
+
+--map-related-boundary--

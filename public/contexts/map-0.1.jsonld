@@ -18,7 +18,7 @@
       }
     },
     "version": "schema:version",
-    "recordDigest": "map:recordDigest",
+    "contractDigest": "map:contractDigest",
     "describedAt": {
       "@id": "schema:dateCreated",
       "@type": "http://www.w3.org/2001/XMLSchema#dateTime"

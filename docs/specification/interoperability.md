@@ -14,7 +14,7 @@ MAP 0.1 selects a narrow profile over existing formats and protocols.
 
 | Work                                                                                                                                     | Use in MAP                                                                                             |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [Structured Email, draft-ietf-sml-structured-email-06](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06)         | Supplies the model for carrying a machine-readable alternative beside readable email content.          |
+| [Structured Email, draft-ietf-sml-structured-email-06](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06)         | Supplies the MIME designation and partial-representation model used to carry a MAP description.        |
 | [MIME, RFC 2046](https://www.rfc-editor.org/rfc/rfc2046) and [Internet Message Format, RFC 5322](https://www.rfc-editor.org/rfc/rfc5322) | Carry the readable and `application/ld+json` body parts without changing email transport.              |
 | [JSON-LD 1.1](https://www.w3.org/TR/json-ld11/)                                                                                          | Gives descriptions explicit vocabulary identity while retaining ordinary JSON processing.              |
 | [HTTP Semantics, RFC 9110](https://www.rfc-editor.org/rfc/rfc9110)                                                                       | Carries authenticated operation requests, result retrieval and status semantics.                       |
@@ -28,7 +28,7 @@ For proposed types, the Registry record should identify existing definitions and
 
 ## Cross-service testing
 
-The public fixture kit exercises description, request, result, retry and refusal behaviour without a product account. Its reference tests cover selected completion, feedback, retry, recovery, conflict, refusal, stale-target, expiry, type, approval, pending and endpoint cases. They do not yet establish complete conformance: representation, authorization, persistent state transitions and recovery require further specification and tests.
+The public fixture kit exercises description, request, result, retry and refusal behaviour without a product account. Its reference tests cover completion, feedback, retry, recovery, conflict, refusal, stale targets, expiry, type contracts, approval, pending work, MIME structure, JSON-LD expansion and endpoint trust. Persistent concurrency, crash recovery and deployed provider delivery remain separate implementation evidence.
 
 The first product compatibility test will apply Content Review to two independently configured action services using the same client review logic. It will exercise feedback, editing through the service's own workflow, approval, stale revisions, permission failures and recovery after a lost response. Sending a description to one action service is an integration test; cross-service compatibility requires a second execution service. The recorded product runs remain outstanding.
 
@@ -44,6 +44,4 @@ Registry inclusion does not grant execution permission. Clients need not consult
 
 ## Current interoperability status
 
-MAP 0.1 publishes draft message, request, result and Content Review contracts. The current specification and reference implementation still have unresolved representation, authorization, lifecycle and compatibility requirements.
-
-The next work is to resolve those requirements, expand conformance coverage, reproduce the exchange through deployed services and publish the exact run record. An implementation outside the initial common-ownership group is a further step. Published fixtures and passing reference tests do not establish deployed conformance or independent interoperability.
+MAP 0.1 publishes a working draft, a canonical Content Review contract and a local reference suite. The next evidence threshold is a reproducible exchange through deployed services, including provider delivery, durable concurrent request claiming, recovery after interruption and the human approval path. An implementation outside the initial common-ownership group remains a separate adoption milestone.

@@ -27,8 +27,8 @@ Make MAP a useful open standard for service actions carried through email, with 
 | GitHub organization         | Live                                                      | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path                                                   |
 | MAP 0.1 profile             | Revised working draft; local contract checks pass         | Exact context and schema digests, Structured Email placement, authorization, lifecycle and compatibility decisions are executable                                                                                              |
 | Content Review 0.1          | Published                                                 | Stable `request-changes` and `approve` operations with revision and digest binding                                                                                                                                             |
-| Reference implementation    | 25 cases and 11 readiness probes pass locally             | Required principal/tenant context, current authorization, exact targets, lifecycle, recovery and endpoint trust are exercised                                                                                                  |
-| Conformance artifacts       | Requirement-mapped local suite                            | 19 digest-bound artifacts, 25 executable cases and 14 requirements; deployment-only checks remain explicit manual evidence                                                                                                     |
+| Reference implementation    | 29 cases and 13 readiness probes pass locally             | Required principal/tenant context, current authorization, exact targets, lifecycle, recovery and endpoint trust are exercised                                                                                                  |
+| Conformance artifacts       | Requirement-mapped local suite                            | 20 digest-bound artifacts, 29 executable cases and 16 requirements; deployment-only checks remain explicit manual evidence                                                                                                     |
 | JavaScript, Python and Rust | JavaScript `0.1.3`; Python and Rust `0.1.2`               | Maintained repositories, green CI, tagged releases and verified public artifacts containing the canonical schemas                                                                                                              |
 | Go                          | `v0.1.0` published and CI green                           | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy                                                                                                                                                    |
 | Package promotion           | Full-contract gate implemented; changed releases pending  | Public readback verifies registry integrity and every distributed contract; current selected releases remain honestly labelled as Registry-schema-only evidence                                                                |
@@ -77,7 +77,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 3. Reference implementation and conformance
 
-**Status:** 25 executable cases and a 14-requirement matrix pass locally
+**Status:** 29 executable cases and a 16-requirement matrix pass locally
 
 - Run deterministic client and service behavior around Content Review.
 - Cover completion, refusal, stale revisions, approval requirements, duplicate requests, changed-payload conflicts, lost-response recovery, expiry and unsupported contracts.

@@ -6,7 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
+import { simpleParser } from 'mailparser';
 import { ReferenceMapService, assertTrustedExecution } from '../src/map/reference.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -23,6 +25,7 @@ const mapSchema = json('public/schemas/map-0.1.schema.json');
 ajv.addSchema(mapSchema);
 const validateMap = ajv.getSchema(mapSchema.$id);
 const validateReview = ajv.compile(json('public/schemas/content-review-0.1.schema.json'));
+const contract = json('public/contracts/content-review-0.1.json');
 const probes = [];
 const record = (id, requirement, passed, observed) =>
   probes.push({ id, requirement, status: passed ? 'pass' : 'fail', observed });
@@ -36,6 +39,14 @@ const throws = (callback) => {
 };
 const reference = (options = {}) =>
   new ReferenceMapService(description, { now, authorize: allow, ...options });
+
+const contractDigest = `sha-256:${createHash('sha256').update(canonicalize(contract)).digest('hex')}`;
+record(
+  'type-contract',
+  'The wire type reference binds the canonical Content Review contract.',
+  description.type.contractDigest === contractDigest,
+  { advertised: description.type.contractDigest, computed: contractDigest },
+);
 
 const controlService = reference();
 const control = controlService.submit(request, context);
@@ -54,6 +65,16 @@ record(
   'A request for an unknown interaction cannot complete.',
   unrelatedResponse.status === 400,
   unrelatedResponse.status,
+);
+
+const unknownResult = reference().recover('urn:uuid:018f47a2-5d7c-7b11-9a3d-4d2160b86fff', context);
+record(
+  'unknown-result-correlation',
+  'A missing result is correlated to the request identifier without inventing an interaction.',
+  unknownResult.status === 404 &&
+    unknownResult.body.code === 'result-not-found' &&
+    !('interactionId' in unknownResult.body),
+  unknownResult.body,
 );
 
 const malformed = structuredClone(request);
@@ -127,15 +148,37 @@ record(
   { helperRejected: rejectedRecovery },
 );
 
-const email = read('public/fixtures/map-0.1/content-review.eml');
-const structuredHeaders =
-  email.match(/Content-Type: application\/ld\+json[^\r\n]*\r?\n([\s\S]*?)\r?\n\r?\n/i)?.[1] ?? '';
-const purpose = /^Content-Purpose:\s*Machine-readable\s*$/im.test(structuredHeaders);
+const email = await simpleParser(
+  readFileSync(resolve(root, 'public/fixtures/map-0.1/content-review.eml')),
+);
+const structuredParts = email.attachments.filter(
+  (part) => part.contentType === 'application/ld+json',
+);
+const purpose = structuredParts[0]?.headers.get('content-purpose') === 'Machine-readable';
+const transferEncoding = String(structuredParts[0]?.headers.get('content-transfer-encoding') ?? '');
+const outerContentType = email.headers.get('content-type');
+const outerMediaType =
+  typeof outerContentType === 'string'
+    ? outerContentType.split(';', 1)[0]
+    : outerContentType &&
+        typeof outerContentType === 'object' &&
+        'value' in outerContentType &&
+        typeof outerContentType.value === 'string'
+      ? outerContentType.value
+      : undefined;
 record(
   'sml-designation',
-  'The structured MIME part carries SML-06 Content-Purpose: Machine-readable.',
-  purpose,
-  { present: purpose },
+  'The partial MAP representation is designated and safely transfer encoded.',
+  outerMediaType === 'multipart/related' &&
+    structuredParts.length === 1 &&
+    purpose &&
+    /^(?:base64|quoted-printable)$/i.test(transferEncoding),
+  {
+    outerType: outerMediaType,
+    structuredParts: structuredParts.length,
+    purpose,
+    transferEncoding,
+  },
 );
 
 const jsonldContext = json('public/contexts/map-0.1.jsonld');
@@ -183,6 +226,7 @@ const paths = [
   'public/contexts/map-0.1.jsonld',
   'public/schemas/map-0.1.schema.json',
   'public/schemas/content-review-0.1.schema.json',
+  'public/contracts/content-review-0.1.json',
   'public/fixtures/map-0.1/content-review-description.json',
   'public/fixtures/map-0.1/approve.json',
   'public/fixtures/map-0.1/content-review.eml',

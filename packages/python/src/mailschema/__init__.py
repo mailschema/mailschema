@@ -29,6 +29,11 @@ def get_content_review_schema() -> dict[str, Any]:
     return _bundled("content-review-0.1.schema.json")
 
 
+def get_content_review_contract() -> dict[str, Any]:
+    """Return a fresh copy of the canonical Content Review 0.1 type contract."""
+    return _bundled("content-review-0.1.contract.json")
+
+
 def get_record_schema() -> dict[str, Any]:
     """Return the schema for expanded Registry records."""
     schema = get_contribution_schema()

@@ -5,14 +5,20 @@
     {
       "id": "MAP-REP-001",
       "actor": "sender",
-      "requirement": "Designate exactly one application/ld+json part with Content-Purpose: Machine-readable and preserve readable content.",
+      "requirement": "Carry a partial MAP action description in multipart/related, preserve readable content, and designate exactly one safely transfer-encoded application/ld+json part with Content-Purpose: Machine-readable.",
       "cases": ["structured-email-designation"]
     },
     {
       "id": "MAP-REP-002",
       "actor": "client",
-      "requirement": "Expand the pinned JSON-LD context without remote loading or base-dependent identities.",
+      "requirement": "Process the description as ordinary JSON; if JSON-LD expansion is used, use the bundled context without remote loading or base-dependent identities.",
       "cases": ["jsonld-identity"]
+    },
+    {
+      "id": "MAP-TYPE-001",
+      "actor": "client and service",
+      "requirement": "Match the type URI, version and RFC 8785 digest of the normative type contract; Registry record metadata does not determine wire compatibility.",
+      "cases": ["contract-identity"]
     },
     {
       "id": "MAP-TRUST-001",
@@ -29,9 +35,10 @@
     {
       "id": "MAP-REQ-001",
       "actor": "service",
-      "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect.",
+      "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect; malformed or unknown-interaction requests do not claim a request identifier.",
       "cases": [
         "unknown-interaction",
+        "malformed-unclaimed",
         "invalid-type-input",
         "unsupported-type",
         "unsupported-operation"
@@ -40,7 +47,7 @@
     {
       "id": "MAP-AUTH-001",
       "actor": "service",
-      "requirement": "Establish tenant and principal outside the request body and authorize execution against current service state.",
+      "requirement": "Establish tenant and principal outside the request body, authorize execution against current service state, and retain a terminal refusal for a recognized claimed request.",
       "cases": [
         "authentication-context",
         "permission-refusal",
@@ -58,8 +65,14 @@
     {
       "id": "MAP-IDEM-001",
       "actor": "service",
-      "requirement": "Bind a request identifier to one principal and request value and apply an exact retry no more than once.",
+      "requirement": "Bind a claimed request identifier to one principal and complete request value, return the latest saved response for an exact retry, and apply the effect no more than once.",
       "cases": ["exact-retry", "changed-request", "principal-isolation"]
+    },
+    {
+      "id": "MAP-IDEM-002",
+      "actor": "service",
+      "requirement": "Preserve one interaction identifier when the same underlying interaction is redelivered.",
+      "cases": ["stable-redelivery"]
     },
     {
       "id": "MAP-LIFE-001",
@@ -82,13 +95,14 @@
     {
       "id": "MAP-ERR-001",
       "actor": "service",
-      "requirement": "Keep Problem Details type, status and MAP code correlated and apply no effect for a problem response.",
+      "requirement": "Keep Problem Details type, status and MAP code correlated, omit unknown interaction data from result-not-found, and apply no effect for a problem response.",
       "cases": [
         "problem-correlation",
         "invalid-type-input",
         "permission-refusal",
         "stale-revision",
-        "changed-request"
+        "changed-request",
+        "unknown-result"
       ]
     },
     {
@@ -106,8 +120,8 @@
     {
       "id": "MAP-MIME-001",
       "actor": "sender",
-      "requirement": "Use multipart/alternative only for a full representation and multipart/related for a partial representation.",
-      "manual": "Parse a message received through the delivery provider and record the MIME tree, exact structured payload and representation decision."
+      "requirement": "Use multipart/related for a partial MAP action description and a nested multipart/alternative for readable text and HTML.",
+      "cases": ["structured-email-designation"]
     }
   ]
 }

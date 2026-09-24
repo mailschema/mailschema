@@ -12,11 +12,11 @@
   "artifacts": {
     "context": {
       "url": "https://mailschema.org/contexts/map-0.1.jsonld",
-      "sha256": "c977c6009d893fe2d0fc73eb500bee5e61e2b95c8f4f7ce42f6c603f076d7a46"
+      "sha256": "feacf153c7ab0908dfff2c0509c5042a1c05a4ccb1cd6f47553feb24a999b46c"
     },
     "schema": {
       "url": "https://mailschema.org/schemas/map-0.1.schema.json",
-      "sha256": "d908a960f53fade9ab47876bf69b1b3d037adeb7096091e22ca71fbc3909429c"
+      "sha256": "c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85"
     },
     "conformance": {
       "url": "https://github.com/mailschema/mailschema/blob/main/conformance/map-0.1/manifest.json"

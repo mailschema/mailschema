@@ -4,52 +4,56 @@
   "type": {
     "id": "https://mailschema.org/types/content-review",
     "version": "0.1",
-    "recordDigest": "sha-256:0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c"
+    "contractDigest": "sha-256:deba8fc588c83c7cdf9d4e47d23b114861aea35c3daaf71854dc6c626c8a1d05"
   },
   "artifacts": [
     {
       "path": "public/profiles/map/0.1.json",
-      "sha256": "1a896a323bcfd4d9003199f8316a26e964872a4c2462f95b453d351c5430a085"
+      "sha256": "81041622121c5e65aa8a069b51e37a80cffa0bbc2030b4373e087e1df5d791b7"
     },
     {
       "path": "public/contexts/map-0.1.jsonld",
-      "sha256": "c977c6009d893fe2d0fc73eb500bee5e61e2b95c8f4f7ce42f6c603f076d7a46"
+      "sha256": "feacf153c7ab0908dfff2c0509c5042a1c05a4ccb1cd6f47553feb24a999b46c"
     },
     {
       "path": "public/schemas/map-0.1.schema.json",
-      "sha256": "d908a960f53fade9ab47876bf69b1b3d037adeb7096091e22ca71fbc3909429c"
+      "sha256": "c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85"
     },
     {
       "path": "public/schemas/content-review-0.1.schema.json",
-      "sha256": "dba2a2f1e57f843f43080f5a40ced2d9c84e7c7036ec306c371a82d39f6d6c9f"
+      "sha256": "10e2263c820ba3a6ef0381c377078e2c1f324c3b142a6f8caf92b298cc66c692"
+    },
+    {
+      "path": "public/contracts/content-review-0.1.json",
+      "sha256": "754ab7245ddb09ff4da000fccc60d746724379d4146ea227973e5d87f105f800"
     },
     {
       "path": "registry/types/content-review.json",
-      "sha256": "5c0c9af570c7869a52a74919ef2386c79ffd8d556eb230d89df07b394921e27c"
+      "sha256": "52f3d5c3d6f1a3d5b7c7dc850e3227aba9a37454ad472b9288bf3fe787d2f311"
     },
     {
       "path": "public/fixtures/map-0.1/content-review-description.json",
-      "sha256": "03c08f59bc548a989b9147a28f40824e2ebd49f9388e62e697555ef01352ecab"
+      "sha256": "02f646fb3f4c38bf48cd201531bbe4014f893eab96e30a6c7a84cd4facec0e6e"
     },
     {
       "path": "public/fixtures/map-0.1/content-review.eml",
-      "sha256": "3f2f1fd7e17faed4bd698ffcd71ab59cfffd5098b368cf75e77aaa8dcf9bacc8"
+      "sha256": "d1e6be33e59368d15ed956e4de37dfad77ca38c7a1fdc0d6f6dfdb000703df89"
     },
     {
       "path": "public/fixtures/map-0.1/request-changes.json",
-      "sha256": "bf47b2ea89effc4bac46aeb4a7d2318046e0630602c1e458c6df08fcd1affe58"
+      "sha256": "d436698288740d549bdc7d9229316406f816ed365733f4aab9e8ee29ad6cead9"
     },
     {
       "path": "public/fixtures/map-0.1/approve.json",
-      "sha256": "4992345aa71023ea68c06e96af64da27995989bf91d5d9331cc61db1f3909a0b"
+      "sha256": "6b4ce16c6da309fc9bc68065de395b9202ac1028bbf0c579dfd3b76c06f99751"
     },
     {
       "path": "public/fixtures/map-0.1/result-completed.json",
-      "sha256": "1f071d02c177f479944717e1790312bab794ed6256690d7aac139d216ed313f8"
+      "sha256": "020dee97468a9d3727950f5205453fe8f4e246d8ac0f24e451f7745295912e59"
     },
     {
       "path": "public/fixtures/map-0.1/result-approval-required.json",
-      "sha256": "67061dbb995f98f827e373fe57f4c7549789bbb36ecbd59695a00caa4d2ddfaa"
+      "sha256": "43488d70c1c67ace078db753649e578b7dfe0e74dbd6739ecb01f6e72898f596"
     },
     {
       "path": "public/fixtures/map-0.1/problem-stale-target.json",
@@ -57,23 +61,23 @@
     },
     {
       "path": "public/fixtures/map-0.1/invalid/inline-credential.json",
-      "sha256": "e85d73beca20f4755847bec643bdcdd08fad0d299d876febedd74397cf3386e4"
+      "sha256": "5152bf84fd0fe40891764003753062f5e638b4b65d5a3f4bf6351f51f225c5e6"
     },
     {
       "path": "public/fixtures/map-0.1/invalid/unknown-operation.json",
-      "sha256": "659785e65387db18d58a17a62f6df2533d0c8635333de6968be2065978908cee"
+      "sha256": "006649f30943f11d1243044675b615d373c48fac29d59ebc52a037a37aa8a6b5"
     },
     {
       "path": "src/map/reference.ts",
-      "sha256": "0d5d48ba1192df898b2a973f0feb1fdbd8016f9bc20295795714d95823aa3844"
+      "sha256": "4d72d9824a357c3894735a166f9865eb247bf25a0f212b578a9ebe4fbee386a8"
     },
     {
       "path": "conformance/map-0.1/cases.mjs",
-      "sha256": "f2726ce3ee4cc5a93013df12bc487090512ea9d990a6e5d89e94e497c9da2500"
+      "sha256": "9279ef640d1e8cbf58cedf06b5a20cc6b8497a4edeb4a5e4e1393d7edd14b142"
     },
     {
       "path": "conformance/map-0.1/requirements.json",
-      "sha256": "99911966fcec5a6efeba0219bea61bc919d364b0cc2dc2359124911b10d106d0"
+      "sha256": "51ff577d53155219eb08bc871a35a758d6cd553f87ba938d7dc99dde9e276d58"
     },
     {
       "path": "tests/map-profile.test.mjs",
@@ -81,7 +85,7 @@
     },
     {
       "path": "scripts/map-profile.ts",
-      "sha256": "52c302d73ce6deaf96b2c901670df156b1764a2d70c7df3d96f868e3abb59166"
+      "sha256": "21ba387948e917817077a49960b0cb36fe7245e9517ceb3191aaf9c0f92c8258"
     }
   ],
   "cases": [
@@ -99,6 +103,11 @@
       "id": "exact-retry",
       "title": "an exact retry returns the saved result without another effect",
       "expected": "saved response and one effect"
+    },
+    {
+      "id": "stable-redelivery",
+      "title": "redelivery preserves the interaction identifier",
+      "expected": "same interactionId"
     },
     {
       "id": "lost-response-recovery",
@@ -131,14 +140,19 @@
       "expected": "400 invalid-request"
     },
     {
+      "id": "malformed-unclaimed",
+      "title": "a malformed request does not claim its request identifier",
+      "expected": "400 problem and later 404 result-not-found"
+    },
+    {
       "id": "invalid-type-input",
       "title": "a type-invalid operation input has no effect",
       "expected": "400 invalid-request"
     },
     {
       "id": "permission-refusal",
-      "title": "an unauthorized caller has no effect",
-      "expected": "403 refused"
+      "title": "a recognized unauthorized request records one terminal refusal",
+      "expected": "stable 403 refused and no effect"
     },
     {
       "id": "authentication-context",
@@ -191,6 +205,11 @@
       "expected": "410 retry, missing recovery, one effect"
     },
     {
+      "id": "unknown-result",
+      "title": "an unknown result does not invent an interaction identifier",
+      "expected": "404 result-not-found correlated only to requestId"
+    },
+    {
       "id": "untrusted-endpoints",
       "title": "all credential-bearing endpoints and audiences are configured",
       "expected": "client refusal before credential use"
@@ -204,6 +223,11 @@
       "id": "structured-email-designation",
       "title": "a real MIME parser finds the designated structured part",
       "expected": "one designated JSON-LD part"
+    },
+    {
+      "id": "contract-identity",
+      "title": "wire compatibility is bound to the canonical type contract",
+      "expected": "Registry editorial changes do not change contractDigest"
     },
     {
       "id": "problem-correlation",

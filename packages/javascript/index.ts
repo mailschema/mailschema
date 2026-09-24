@@ -17,6 +17,7 @@ export {
   assertContentReviewRequest,
   getMapSchema,
   getContentReviewSchema,
+  getContentReviewContract,
 } from './map.js';
 
 /** Return an independent copy of the contribution JSON Schema (Draft 2020-12). */

@@ -4,29 +4,30 @@ description: The JSON-LD, MIME and authenticated HTTPS contract for Mail Action 
 navTitle: MAP 0.1 profile
 ---
 
-MAP 0.1 carries an action description in a readable email and executes the action through the service's authenticated HTTPS API. This page defines the fields and processing rules needed for two implementations to exchange that interaction.
+MAP 0.1 carries an action description in readable email and executes the action through the service's authenticated HTTPS API. This page defines the fields and processing rules needed for two implementations to exchange that interaction.
 
 The key words **MUST**, **MUST NOT**, **SHOULD** and **MAY** are to be interpreted as described by [BCP 14](https://www.rfc-editor.org/info/bcp14) when they appear in capitals.
 
 ## Published artifacts
 
-| Artifact               | Address                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| Profile record         | [`/profiles/map/0.1.json`](/profiles/map/0.1.json)                                   |
-| JSON-LD context        | [`/contexts/map-0.1.jsonld`](/contexts/map-0.1.jsonld)                               |
-| MAP schema             | [`/schemas/map-0.1.schema.json`](/schemas/map-0.1.schema.json)                       |
-| Content Review binding | [`/schemas/content-review-0.1.schema.json`](/schemas/content-review-0.1.schema.json) |
-| Complete email         | [`content-review.eml`](/fixtures/map-0.1/content-review.eml)                         |
+| Artifact                | Address                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| Profile record          | [`/profiles/map/0.1.json`](/profiles/map/0.1.json)                                   |
+| JSON-LD context         | [`/contexts/map-0.1.jsonld`](/contexts/map-0.1.jsonld)                               |
+| MAP schema              | [`/schemas/map-0.1.schema.json`](/schemas/map-0.1.schema.json)                       |
+| Content Review contract | [`/contracts/content-review-0.1.json`](/contracts/content-review-0.1.json)           |
+| Content Review schema   | [`/schemas/content-review-0.1.schema.json`](/schemas/content-review-0.1.schema.json) |
+| Complete email          | [`content-review.eml`](/fixtures/map-0.1/content-review.eml)                         |
 
 The profile URI is `https://mailschema.org/profiles/map/0.1`. A client MUST match that value exactly. A client that does not implement the profile can still display the readable email.
 
 ## Email representation
 
-The service adds the MAP description as an `application/ld+json` body part with `Content-Purpose: Machine-readable`. When the structured value fully represents the readable message, the service places the text, HTML and JSON-LD parts in `multipart/alternative`. Partial representations follow Structured Email's `multipart/related` rules instead. A sender MUST NOT label arbitrary campaign copy and an action description as full alternatives unless the structured part represents all material information in the readable content.
+A MAP action description represents part of a message. The service MUST place it in an `application/ld+json` part within `multipart/related`. Readable text and HTML variants, when both are present, form a nested `multipart/alternative` part. The structured part MUST carry `Content-Purpose: Machine-readable` and use `base64` or `quoted-printable` content-transfer encoding.
 
-The structured part MUST validate against the MAP schema. Its `@context`, `@type`, `@id` and `profile` fields identify the representation and interaction. `type` binds the interaction to an exact Registry type version and record digest. `target` binds it to the service object, revision and SHA-256 digest on which the operations act.
+The structured value is ordinary JSON and MUST validate against the MAP schema. Its `@context`, `@type`, `@id` and `profile` fields identify the representation and interaction. `type` binds the interaction to an exact type contract. `target` binds it to the service object, revision and SHA-256 digest on which the operations act.
 
-A MAP processor MUST use a bundled, digest-checked copy of the profile context. It MUST NOT retrieve a context named by an untrusted message while processing that message. `MailAction` expands to `https://mailschema.org/ns/map#MailAction`; operation IDs such as `approve` are literal tokens, not relative IRIs. The profile record publishes SHA-256 digests for its current schema and context, and the conformance manifest binds the complete tested artifact set.
+JSON-LD expansion is optional. An implementation that expands the document MUST use a bundled, digest-checked copy of the profile context and MUST NOT retrieve a context named by an untrusted message. `MailAction` expands to `https://mailschema.org/ns/map#MailAction`; operation IDs such as `approve` remain literal tokens. The profile record binds its schema and context bytes, and the conformance manifest binds the tested artifact set.
 
 The description MUST NOT contain access tokens, session credentials or a new authorization grant. The `authorization` object only tells a configured client which existing service authentication schemes may be used.
 
@@ -40,10 +41,10 @@ Before submitting a request, a client MUST establish all of the following indepe
 - the exact HTTPS execution resource and result URL template are configured for that service;
 - the client already holds an applicable service credential;
 - the configured credential audience agrees with the advertised audience, when present;
-- the profile, interaction type, type version, record digest and operation are supported;
+- the profile, type URI, type version, contract digest and operation are supported;
 - the description has not expired.
 
-A client MUST NOT send service credentials to an endpoint solely because that endpoint appears in an email. Every credential-bearing URL MUST use HTTPS and MUST NOT contain URL credentials. A client MUST NOT follow an execution or result redirect without applying the same trust and audience checks to the destination. It MUST NOT automatically fetch or interpret an unknown schema, context, URL or instruction named by the message.
+A client MUST NOT send service credentials to an endpoint solely because that endpoint appears in an email. Every credential-bearing URL MUST use HTTPS and MUST NOT contain URL credentials. A client MUST apply the same trust and audience checks to every redirect before sending a credential. It MUST NOT automatically fetch or interpret an unknown schema, context, URL or instruction named by the message.
 
 ## Description
 
@@ -53,75 +54,81 @@ The [MAP schema](/schemas/map-0.1.schema.json) is the field-level contract. A de
 | -------------------------- | ------------------------------------------------------------------------------------------------ |
 | `@id`                      | A UUID URN identifying the interaction.                                                          |
 | `profile`                  | The exact MAP profile URI.                                                                       |
-| `type`                     | The type URI, version and Registry record digest.                                                |
+| `type`                     | The type URI, version and canonical contract digest.                                             |
 | `describedAt`, `expiresAt` | The description's creation and expiry times. Expiry MUST be later than creation.                 |
 | `service`                  | The service identity, execution route, result route, human route and authentication metadata.    |
 | `target`                   | The service object, exact revision and service-issued SHA-256 state digest presented for action. |
 | `operations`               | Stable operation IDs and readable labels offered for this interaction.                           |
 
+A service MUST preserve the same `@id` when it redelivers the same underlying interaction. A changed target revision or changed set of available operations is a new interaction and MUST use a new identifier.
+
 The service advertises how long it retains results. The minimum permitted value is 300 seconds. A service MUST make the result available for at least the advertised interval after it first records the request outcome.
 
-## Request
+## Requests and processing
 
-The client sends an authenticated `POST` to `service.execution.url` with `Content-Type: application/json`. The body MUST validate as a MAP request and against the named interaction type's input rules before the service applies an effect.
+The client sends an authenticated `POST` to `service.execution.url` with `Content-Type: application/json`. The body MUST validate as a MAP request and against the named type's request schema before the service applies an effect.
 
-`requestId` is a UUID URN created by the client. `interactionId` repeats the description's `@id`. The request repeats the exact type reference, target and selected operation so that authorization and stale-target checks do not depend on mutable client state.
+`requestId` is a UUID URN created by the client and persisted for retries and result recovery. `interactionId` repeats the description's `@id`. The request repeats the exact type reference, target and selected operation so that authorization and stale-target checks do not depend on mutable client state.
 
-Receiving the description does not authorize the request. Authentication establishes the caller and tenant outside the request body. At execution time the service MUST check that caller's permission for the operation and target. It MUST also resolve the interaction and current target from authoritative service state, then check expiry, revocation and any service approval policy. Values repeated by the client are assertions to verify, not state to trust.
+Authentication establishes the caller and tenant outside the request body. Receiving the description does not authorize the request. The service resolves the interaction and current target from authoritative state and checks the caller's permission, the offered operation, target revision, expiry, revocation and any service approval policy. Values repeated by the client are assertions to verify.
+
+Malformed requests and requests for an unknown interaction MUST NOT claim their `requestId`. Once the service has a syntactically valid request, a recognized interaction and an authenticated principal, it applies these security constraints:
+
+- an existing request identifier is isolated to its original principal;
+- current authorization is checked before a saved response is disclosed;
+- a changed reuse of the identifier cannot replace the original request;
+- a new identifier is claimed before an effect begins;
+- the claim and its first recoverable outcome, including a permission refusal, are recorded together.
+
+The profile does not require a total precedence among independent validation failures. An implementation may perform checks in a different order provided it preserves the constraints above, applies no effect for a problem response and does not reveal protected state.
 
 ## Idempotency and recovery
 
-Within one service tenant, a `requestId` identifies one complete request document and the authenticated principal that first used it.
+Within one service tenant, a claimed `requestId` identifies one complete request document and the authenticated principal that first used it.
 
-- The first request using an identifier establishes its request value.
-- A later request from the same principal with the same identifier and the same JSON values is a retry. Object member order is irrelevant; array order and every member value remain significant. The service MUST return the latest recorded result without applying the effect again. A non-terminal result may therefore have advanced since the first response.
+- A later request from the same principal with the same identifier and the same JSON values is an exact retry. Object member order is irrelevant; array order and every member value remain significant. The service MUST return the latest recorded response without applying the effect again.
 - Reuse of the identifier with any changed value is an `idempotency-conflict`. The changed request MUST NOT be applied.
-- Use of the identifier by another principal MUST be refused without disclosing the saved result.
+- Use of the identifier by another principal MUST be refused without disclosing the saved response.
 
-The service returns a `Location` header containing the expanded `resultUrlTemplate`. An authenticated, side-effect-free `GET` to that address returns the latest recorded result or problem response. Result retrieval and exact retries MUST recheck current permission before disclosing the saved response. After a timeout, the client SHOULD retrieve that resource before deciding whether to retry. A timeout is a client-local uncertain state; `uncertain` is not a service result value.
+The service returns a `Location` header containing the expanded `resultUrlTemplate`. An authenticated, side-effect-free `GET` to that address returns the latest recorded result or problem. Result retrieval and exact retries MUST recheck current permission before disclosing a saved response. A client SHOULD retrieve the result after a timeout before deciding whether another request is safe. A timeout is a client-local uncertain state; `uncertain` is not a MAP result value.
 
-The service MUST make the result retrievable until at least the later of the interaction expiry and the advertised retention interval measured from the first recorded response. After that point it MAY remove the response, but it MUST retain enough request identity to prevent the operation from being applied again. An exact retry after both periods have ended returns `expired-interaction`; a changed reuse remains an idempotency conflict.
+The service MUST make the response retrievable until at least the later of the interaction expiry and the advertised retention interval measured from the first recorded response. It MAY then remove the response, but it MUST retain enough request identity to prevent the operation from being applied again. An exact retry after both periods have ended returns `expired-interaction`; a changed reuse remains an idempotency conflict.
 
-An implementation MUST make claiming the request ID, applying or durably initiating the effect, and recording recoverable state one atomic transaction or provide reconciliation that produces the same externally observable result after a crash. A successful response before durable state exists is non-conforming.
+Claiming the request identifier, applying or durably initiating the effect and recording recoverable state MUST be one atomic transaction, or the service MUST reconcile an interrupted operation without repeating the effect. A successful response before durable state exists is non-conforming.
 
-## Results
+## Outcomes
 
-A successful response uses `application/json` and a MAP result body.
+Successful responses use `application/json` with a MAP result. Problems use `application/problem+json` and the standard [Problem Details](https://www.rfc-editor.org/info/rfc9457) members. This table is the canonical MAP 0.1 status mapping.
 
-| State               | HTTP status | Meaning                                                                              |
-| ------------------- | ----------- | ------------------------------------------------------------------------------------ |
-| `accepted`          | 200         | The requested record was accepted; later work may remain.                            |
-| `completed`         | 200         | The requested effect completed.                                                      |
-| `failed`            | 200         | Previously accepted asynchronous work ended without completing its requested effect. |
-| `pending`           | 202         | Work is still in progress.                                                           |
-| `approval-required` | 202         | A service approval is required before the effect can complete.                       |
+| Outcome                   | HTTP | Document | Lifecycle or client handling                                                                   |
+| ------------------------- | ---: | -------- | ---------------------------------------------------------------------------------------------- |
+| `accepted`                |  200 | Result   | Terminal. The requested record was accepted; separate downstream work may remain.              |
+| `completed`               |  200 | Result   | Terminal. The requested effect completed.                                                      |
+| `failed`                  |  200 | Result   | Terminal. Previously accepted asynchronous work ended without completing its effect.           |
+| `pending`                 |  202 | Result   | Non-terminal. Retrieve the result resource for a later state.                                  |
+| `approval-required`       |  202 | Result   | Non-terminal. Use the service's approval route, then retrieve the result resource.             |
+| `invalid-request`         |  400 | Problem  | Correct the request. A malformed or unknown-interaction request remains unclaimed.             |
+| `authentication-required` |  401 | Problem  | Establish acceptable service authentication before retrying.                                   |
+| `refused`                 |  403 | Problem  | Terminal when recorded for a claimed request. Use a new request ID if authority later changes. |
+| `result-not-found`        |  404 | Problem  | No retained result exists in the authenticated principal and tenant scope.                     |
+| `stale-target`            |  409 | Problem  | Terminal. Obtain a description for the current target before creating a new request.           |
+| `idempotency-conflict`    |  409 | Problem  | The identifier already belongs to another request value; do not replace it.                    |
+| `request-in-progress`     |  409 | Problem  | The identifier is claimed but no result is available yet; retrieve the result resource.        |
+| `expired-interaction`     |  410 | Problem  | Terminal. Obtain a new interaction before creating a new request.                              |
+| `unsupported-profile`     |  422 | Problem  | The exact profile is not implemented.                                                          |
+| `unsupported-type`        |  422 | Problem  | The exact type URI, version or contract digest is not implemented.                             |
+| `unsupported-operation`   |  422 | Problem  | The operation was not offered or implemented.                                                  |
 
-The result repeats the request, interaction, exact type, operation and target references. It includes the authoritative result URL and the time at which this state was recorded. `pending` and `approval-required` are non-terminal. A later authenticated retrieval or exact retry may return `accepted`, `completed` or `failed` for the same request. `accepted`, `completed` and `failed` are terminal in MAP 0.1. A `failed` result describes work that was already accepted; a request rejected before acceptance uses a problem response.
+A result repeats the request, interaction, exact type, operation and target references and includes the authoritative result URL and recording time. `pending` and `approval-required` may advance to `accepted`, `completed` or `failed`; terminal outcomes MUST NOT advance.
 
-## Problems
+MAP problems add `profile`, `requestId`, `interactionId`, `code` and, when relevant, `target`. The problem `type`, HTTP status and `code` MUST agree. When a result lookup has no known interaction, `result-not-found` includes `requestId` but MUST NOT invent an `interactionId`. If a malformed request does not supply usable correlation identifiers, the service returns an ordinary RFC 9457 response without MAP correlation members.
 
-Errors use `application/problem+json` and the [Problem Details](https://www.rfc-editor.org/info/rfc9457) members. MAP adds `profile`, `requestId`, `interactionId`, `code` and, when relevant, `target`. The problem `type`, HTTP status and MAP `code` MUST use the combination shown below.
+## Type contracts and the Registry
 
-| Code                      | Status | Required interpretation                                                               |
-| ------------------------- | -----: | ------------------------------------------------------------------------------------- |
-| `invalid-request`         |    400 | The body or type-specific input is invalid.                                           |
-| `authentication-required` |    401 | The request has no acceptable service authentication.                                 |
-| `refused`                 |    403 | The authenticated caller lacks permission or another required condition.              |
-| `result-not-found`        |    404 | No result exists for that identifier in the authenticated tenant and principal scope. |
-| `stale-target`            |    409 | The target reference is not current; no effect was applied.                           |
-| `idempotency-conflict`    |    409 | The request ID was reused with changed values.                                        |
-| `request-in-progress`     |    409 | The same request is still being resolved and no recorded result is available yet.     |
-| `expired-interaction`     |    410 | The interaction expired before execution.                                             |
-| `unsupported-profile`     |    422 | The exact profile is not implemented.                                                 |
-| `unsupported-type`        |    422 | The exact type version or record digest is not implemented.                           |
-| `unsupported-operation`   |    422 | The operation was not offered or implemented.                                         |
+Profile, type version and contract digest are exact-match contracts in MAP 0.1. A client or service MUST NOT guess compatibility with an unknown value.
 
-The service MUST leave its target and business state unchanged when returning one of these problems.
+`contractDigest` is SHA-256 over the complete type contract serialized with the JSON Canonicalization Scheme (RFC 8785), prefixed with `sha-256:`. The contract binds the type's target semantics, operation meanings, request schema digest and normal result shapes. It does not contain its own digest.
 
-If the service cannot recover syntactically valid `requestId` and `interactionId` values from a malformed request, it returns an ordinary RFC 9457 response without MAP correlation members. A result lookup authenticates the caller before it distinguishes a missing identifier from inaccessible state.
+The Registry record supplies discovery, status, maintainers, examples, implementation evidence and history. Its independent record digest identifies that catalogue record. Registry metadata can change without changing a compatible type contract, and clients do not need an online Registry lookup during an interaction.
 
-## Version handling
-
-Profile, type version and Registry digest are exact-match contracts in 0.1. A client or service MUST NOT guess compatibility with an unknown value. The Registry digest is SHA-256 over the complete record serialized with the JSON Canonicalization Scheme (RFC 8785). It is record identity rather than a claim that every changed field alters execution semantics. A new compatible type record still has a new digest and must be declared explicitly by an implementation.
-
-MAP 0.1 defines no custom DNS discovery, global identity provider, mandatory Registry lookup or universal permission language. Service configuration supplies endpoint trust and credentials. Registry documents and schemas can be bundled with implementations and checked offline.
+MAP 0.1 defines no custom DNS discovery, global identity provider or universal permission language. Service configuration supplies endpoint trust and credentials. Contracts, schemas and contexts can be bundled with implementations and checked offline.

@@ -34,6 +34,10 @@ An approval must identify the action and, where applicable, the content revision
 
 A changed revision or materially changed action requires a new decision according to the service's policy. While approval is pending, the client reports the work as awaiting approval.
 
+Authority is explicit service state. A caller can have no authority to approve, authority to propose a decision for human review, or delegated authority to record the decision. Those levels produce `refused`, `approval-required` or `completed` respectively. MAP does not assign an authority level merely because the caller is automated.
+
+An approval route identifies the exact pending request, operation and target revision. Its `GET` representation is side-effect free; the service records a decision only through an authenticated mutation protected by its normal session and cross-site request controls.
+
 ## Sending email
 
 The sending service enforces recipient restrictions, content rules, attachment controls, limits and approval requirements on the send operation.
@@ -50,4 +54,4 @@ Human links use side-effect-free `GET` routes. Link previews and security scanne
 
 ## Refusal
 
-When a request is refused, the service reports that result. The client preserves the distinction between refusal, pending approval, completion and an execution state it cannot determine.
+When a recognized request from an authenticated caller is refused, the service records that terminal problem under the request identifier. The client preserves the distinction between refusal, pending approval, completion and an execution state it cannot determine.

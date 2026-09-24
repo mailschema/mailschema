@@ -18,10 +18,11 @@ Python 3.10 or newer is required.
 ## Validate MAP documents
 
 ```python
-from mailschema import validate_map_document, validate_content_review_request
+from mailschema import get_content_review_contract, validate_map_document, validate_content_review_request
 
 validate_map_document(description)
 validate_content_review_request(request)
+contract = get_content_review_contract()
 ```
 
 The CLI performs the same checks against local JSON files:
@@ -43,7 +44,7 @@ schema = get_contribution_schema()
 
 `validate_record`, `record_errors` and `get_record_schema` handle expanded Registry records. Pass `--record` to the CLI for the corresponding record format.
 
-The package bundles the MAP 0.1, Content Review 0.1 and Registry schemas. It uses the established `jsonschema` and `referencing` libraries for validation and performs no network requests.
+The package bundles the MAP 0.1 and Registry schemas, the Content Review 0.1 request schema and its canonical type contract. It uses the established `jsonschema` and `referencing` libraries for validation and performs no network requests.
 
 ## Trust boundary
 

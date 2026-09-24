@@ -18,11 +18,17 @@ Node.js 22 or newer is required. The package is ESM and includes TypeScript decl
 ## Validate MAP documents
 
 ```js
-import { assertMapDocument, assertContentReviewRequest, getMapSchema } from 'mailschema';
+import {
+  assertMapDocument,
+  assertContentReviewRequest,
+  getContentReviewContract,
+  getMapSchema,
+} from 'mailschema';
 
 assertMapDocument(description);
 assertContentReviewRequest(request);
 const mapSchema = getMapSchema();
+const contentReviewContract = getContentReviewContract();
 ```
 
 The CLI performs the same checks against local JSON files:
@@ -56,6 +62,7 @@ Raw Draft 2020-12 schemas are exported as:
 
 - `mailschema/map-0.1.schema.json`
 - `mailschema/content-review-0.1.schema.json`
+- `mailschema/content-review-0.1.contract.json`
 - `mailschema/contribution.schema.json`
 
 ## Trust boundary
