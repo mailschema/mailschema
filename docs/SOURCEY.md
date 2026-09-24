@@ -14,13 +14,13 @@ The MailSchema Registry contains type definitions. Sourcey's earlier candidate p
 
 ## Package handoff
 
-`package.json` and `package-lock.json` pin the exact public `sourcey@3.6.6` release. The npm tarball has SHA-256 `f451ebecf67120d003049706731d15fa7b10f9af163df268bd1b4a5289fe0f47` and npm shasum `89b7d9e5a2a3ac669ebf08469f7841ca41b2e2b7`; both match the verified release artifact. A clean consumer install imported Sourcey and contained the packaged reader theme before MailSchema adopted it.
+`package.json` and `package-lock.json` pin the exact public `sourcey@3.6.7` release. The npm tarball has SHA-256 `ee70f6a9920889c7fe8023bd077bccbb417c8314fcdd411bafac9490aff9d07c` and npm shasum `7e24543ed4560679c858bc7d4f1f0e158ea4ffdc`; both match the verified release artifact. A clean consumer install imported Sourcey and contained the packaged reader theme before MailSchema adopted it.
 
 Sourcey is maintained in [`sourcey/sourcey`](https://github.com/sourcey/sourcey). Updating MailSchema requires an intentional exact-version change, public registry readback, a clean install and the complete build, browser and visual checks. MailSchema does not track a mutable npm tag or a local Sourcey checkout.
 
 ## Verification
 
-All six chapters are compared at 1440 × 1000 and 390 × 844 in `tests/visual-reference/`. The current baseline reflects the approved language pass and sidebar changes. The preceding references and comparison report are retained in `tests/visual-reference/pre-language-pass/`. Refreshing the content baseline is not a new claim of renderer migration parity. `npm run test:visual` checks full-page dimensions and requires zero raw RGBA pixel differences in the recorded Chromium environment. Pixelmatch additionally produces human-readable diff images; its threshold does not relax the raw-pixel acceptance condition.
+All six chapters are compared at 1440 × 1000 and 390 × 844 in `tests/visual-reference/`. The current baseline includes Sourcey 3.6.7's shared responsive frame for the masthead, navigation and document content. The preceding references and comparison report are retained in `tests/visual-reference/pre-language-pass/`. Refreshing the content baseline is not a new claim of renderer migration parity. `npm run test:visual` checks full-page dimensions and requires zero raw RGBA pixel differences in the recorded Chromium environment. Pixelmatch additionally produces human-readable diff images; its threshold does not relax the raw-pixel acceptance condition.
 
 Sourcey's existing default, minimal and API-first layouts were compared against a clean checkout of their prior source, on Markdown and OpenAPI pages at desktop and mobile sizes. All 12 comparisons had zero visible differences. Sourcey's full test suite, type checking and lint passed. The artifact also contains a test proving every registered theme's compiled assets are packaged.
 

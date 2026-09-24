@@ -25,6 +25,7 @@
 
 ## Site
 
+- The public `sourcey@3.6.7` artifact and release were verified by registry readback. Its reader theme places the masthead, navigation and document content on one responsive frame; MailSchema carries no local alignment override.
 - Astro diagnostics reported zero errors, warnings and hints across 63 files.
 - The static build completed and Sourcey generated seven specification pages, including the MAP 0.1 profile.
 - The complete `.eml` and JSON fixtures are emitted directly from their canonical files under `/fixtures/map-0.1/`.

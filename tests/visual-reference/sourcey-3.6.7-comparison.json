@@ -1,110 +1,110 @@
 [
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30540,
     "name": "overview-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 2917,
     "actualHeight": 2917,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9701,
+    "changedPercent": 0.2309
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30401,
     "name": "interaction-model-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 2449,
     "actualHeight": 2449,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9855,
+    "changedPercent": 0.2795
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30588,
     "name": "content-review-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 2580,
     "actualHeight": 2580,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9742,
+    "changedPercent": 0.2622
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30959,
     "name": "authorization-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 2781,
     "actualHeight": 2781,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9797,
+    "changedPercent": 0.2446
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30238,
     "name": "outcomes-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 1791,
     "actualHeight": 1791,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9873,
+    "changedPercent": 0.3828
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 30627,
     "name": "interoperability-desktop",
     "dimensionsMatch": true,
     "expectedHeight": 2641,
     "actualHeight": 2641,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 9796,
+    "changedPercent": 0.2576
   },
   {
     "rawChangedPixels": 0,
     "name": "overview-mobile",
-    "dimensionsMatch": true,
-    "expectedHeight": 3944,
+    "dimensionsMatch": false,
+    "expectedHeight": 4030,
     "actualHeight": 3944,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 142322,
+    "changedPercent": 9.0553
   },
   {
     "rawChangedPixels": 0,
     "name": "interaction-model-mobile",
-    "dimensionsMatch": true,
-    "expectedHeight": 3417,
+    "dimensionsMatch": false,
+    "expectedHeight": 3474,
     "actualHeight": 3417,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 102355,
+    "changedPercent": 7.5547
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 197860,
     "name": "content-review-mobile",
     "dimensionsMatch": true,
     "expectedHeight": 3713,
     "actualHeight": 3713,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 102777,
+    "changedPercent": 7.0975
   },
   {
     "rawChangedPixels": 0,
     "name": "authorization-mobile",
-    "dimensionsMatch": true,
-    "expectedHeight": 3972,
+    "dimensionsMatch": false,
+    "expectedHeight": 4056,
     "actualHeight": 3972,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 149211,
+    "changedPercent": 9.4327
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 132063,
     "name": "outcomes-mobile",
     "dimensionsMatch": true,
     "expectedHeight": 2523,
     "actualHeight": 2523,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 67158,
+    "changedPercent": 6.8252
   },
   {
-    "rawChangedPixels": 0,
+    "rawChangedPixels": 211817,
     "name": "interoperability-mobile",
     "dimensionsMatch": true,
     "expectedHeight": 3966,
     "actualHeight": 3966,
-    "changedPixels": 0,
-    "changedPercent": 0
+    "changedPixels": 105534,
+    "changedPercent": 6.823
   }
 ]
