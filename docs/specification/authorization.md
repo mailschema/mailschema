@@ -12,7 +12,7 @@ Sender identity, email authentication and permission to perform an operation ser
 
 Receiving or forwarding the message does not transfer those permissions. Knowledge of an interaction identifier is also insufficient.
 
-The initial profile introduces no new identity provider or mandatory DNS record. Implementations use the service's authentication and applicable authorization standards.
+The initial profile introduces no new identity provider or mandatory DNS record. Implementations use the service's authentication and applicable authorization standards. That authentication establishes both the principal a request acts for and the actor that sent it, such as an agent acting for a user through a delegated OAuth token; the [profile](/specification/profile/#principal-and-actor) describes how services record each.
 
 ## Execution checks
 

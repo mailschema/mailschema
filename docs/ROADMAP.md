@@ -27,8 +27,8 @@ Make MAP a useful open standard for service actions carried through email, with 
 | GitHub organization         | Live                                                     | Public metadata and the [`mailschema/.github`](https://github.com/mailschema/.github) profile identify the project, working-draft status, repositories and contribution path                                                                  |
 | MAP 0.1 profile             | Revised working draft; local contract checks pass        | Exact context and schema digests, Structured Email placement, authorization, lifecycle and compatibility decisions are executable                                                                                                             |
 | Content Review 0.2          | Published                                                | Stable `request-changes` and `approve` operations with revision and digest binding                                                                                                                                                            |
-| Reference implementation    | 29 cases and 13 readiness probes pass locally            | Required principal/tenant context, current authorization, exact targets, lifecycle, recovery and endpoint trust are exercised                                                                                                                 |
-| Conformance artifacts       | Requirement-mapped local suite                           | 20 digest-bound artifacts, 29 executable cases and 16 requirements; deployment-only checks remain explicit manual evidence                                                                                                                    |
+| Reference implementation    | 34 cases and 13 readiness probes pass locally            | Required principal/tenant context, current authorization, exact targets, lifecycle, recovery and endpoint trust are exercised                                                                                                                 |
+| Conformance artifacts       | Requirement-mapped local suite                           | 21 digest-bound artifacts, 34 executable cases and 19 requirements; deployment-only checks remain explicit manual evidence                                                                                                                    |
 | JavaScript, Python and Rust | JavaScript `0.1.3`; Python and Rust `0.1.2`              | Maintained repositories, green CI, tagged releases and verified public artifacts containing the canonical schemas                                                                                                                             |
 | Go                          | `v0.1.0` published and CI green                          | [`mailschema/go`](https://github.com/mailschema/go) and the Go module proxy                                                                                                                                                                   |
 | Package promotion           | Full-contract gate implemented; changed releases pending | Public readback verifies registry integrity and every distributed contract; current selected releases remain honestly labelled as Registry-schema-only evidence                                                                               |
@@ -78,7 +78,7 @@ Create another MailSchema repository only when a maintained implementation has i
 
 ### 3. Reference implementation and conformance
 
-**Status:** 29 executable cases and a 16-requirement matrix pass locally
+**Status:** 34 executable cases and a 19-requirement matrix pass locally
 
 - Run deterministic client and service behavior around Content Review.
 - Cover completion, refusal, stale revisions, approval requirements, duplicate requests, changed-payload conflicts, lost-response recovery, expiry and unsupported contracts.
@@ -185,6 +185,14 @@ The detailed deliverables, owners and acceptance gates are in [SCOPE-AUDIT.md](S
 | MailSchema overclaims adoption                                        | Implementation state is recorded per exact type, profile, operations and digest; common ownership is disclosed       |
 | Package versions drift silently                                       | Every advertised channel is selected explicitly from immutable public readback evidence                              |
 | The IETF draft duplicates existing work                               | MAP reuses Structured Email, MIME, HTTP, Problem Details and service authentication and keeps its new surface narrow |
+
+## Next profile version
+
+These breaking improvements are recorded here and ship together in the next MAP profile version, once another breaking need justifies one. MAP 0.1 and its published artifacts stay unchanged until then.
+
+- Replace the description's `authorization` object with the protected resource identifier alone; schemes and configuration come from RFC 9728 metadata.
+- Require services to record the actor, and let a result carry an opaque actor reference.
+- Let a target name the revision it supersedes and give recorded feedback a reference that a later revision can cite, so an agent can confirm its feedback was addressed.
 
 ## Deliberately deferred
 

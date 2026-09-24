@@ -29,7 +29,7 @@ The structured value is ordinary JSON and MUST validate against the MAP schema. 
 
 JSON-LD expansion is optional. An implementation that expands the document MUST use a bundled, digest-checked copy of the profile context and MUST NOT retrieve a context named by an untrusted message. `MailAction` expands to `https://mailschema.org/ns/map#MailAction`; operation IDs such as `approve` remain literal tokens. The profile record binds its schema and context bytes, and the conformance manifest binds the tested artifact set.
 
-The description MUST NOT contain access tokens, session credentials or a new authorization grant. The `authorization` object only tells a configured client which existing service authentication schemes may be used.
+The description MUST NOT contain access tokens, session credentials or a new authorization grant. The `authorization` object only tells a configured client which existing service authentication schemes may be used. Its `audience`, when present, is the protected resource identifier of the service's MAP API, as defined by [OAuth 2.0 Protected Resource Metadata](https://www.rfc-editor.org/rfc/rfc9728) and used as a [resource indicator](https://www.rfc-editor.org/rfc/rfc8707).
 
 ## Trust before execution
 
@@ -38,13 +38,28 @@ Every description and every value derived from it is untrusted input. Email auth
 Before submitting a request, a client MUST establish all of the following independently of the email:
 
 - the service identifier is configured for the client;
-- the exact HTTPS execution resource and result URL template are configured for that service;
+- the exact HTTPS execution resource and result URL template are configured for that service, directly or through [service configuration](#service-configuration);
 - the client already holds an applicable service credential;
 - the configured credential audience agrees with the advertised audience, when present;
 - the profile, type URI, type version, contract digest and operation are supported;
 - the description has not expired.
 
 A client MUST NOT send service credentials to an endpoint solely because that endpoint appears in an email. Every credential-bearing URL MUST use HTTPS and MUST NOT contain URL credentials. A client MUST apply the same trust and audience checks to every redirect before sending a credential. It MUST NOT automatically fetch or interpret an unknown schema, context, URL or instruction named by the message.
+
+## Service configuration
+
+A client MAY obtain a service's MAP configuration from its [OAuth 2.0 Protected Resource Metadata](https://www.rfc-editor.org/rfc/rfc9728) instead of configuring each URL directly. The client starts from a protected resource identifier it already trusts, retrieves that identifier's metadata document and applies the RFC 9728 validation rules, including that the document's `resource` value equals the configured identifier. Nothing in an email selects the resource or its metadata.
+
+The metadata parameter `map_services` lists the MAP services at that resource:
+
+| Member                | Meaning                                                              |
+| --------------------- | -------------------------------------------------------------------- |
+| `id`                  | The service identifier that a description names in `service.id`.     |
+| `profiles`            | The MAP profile URIs the service implements.                         |
+| `execution_url`       | The exact execution resource, compared with `service.execution.url`. |
+| `result_url_template` | The exact result URL template.                                       |
+
+Both URLs MUST use HTTPS on the resource identifier's origin; metadata cannot extend trust to another origin. A description from a service configured this way names the resource identifier as its `authorization.audience`. The `map_services` parameter is defined by this profile; the Internet-Draft requests its IANA registration.
 
 ## Description
 
@@ -60,7 +75,7 @@ The [MAP schema](/schemas/map-0.1.schema.json) is the field-level contract. A de
 | `target`                   | The service object, exact revision and service-issued SHA-256 state digest presented for action. |
 | `operations`               | Stable operation IDs and readable labels offered for this interaction.                           |
 
-A service MUST preserve the same `@id` when it redelivers the same underlying interaction. A changed target revision or changed set of available operations is a new interaction and MUST use a new identifier. When a client receives a redelivery of an interaction for which it has already prepared the same operation and input, it MUST reuse the complete persisted request, including its `requestId`, rather than create a second request for the same intent.
+A service MUST preserve the same `@id` when it redelivers the same underlying interaction. A changed type contract, target revision or set of available operations is a new interaction and MUST use a new identifier. When a client receives a redelivery of an interaction for which it has already prepared the same operation and input, it MUST reuse the complete persisted request, including its `requestId`, rather than create a second request for the same intent.
 
 The service advertises how long it retains results. The minimum permitted value is 300 seconds. A service MUST make the result available for at least the advertised interval after it first records the request outcome.
 
@@ -68,9 +83,9 @@ The service advertises how long it retains results. The minimum permitted value 
 
 The client sends an authenticated `POST` to `service.execution.url` with `Content-Type: application/json`. The body MUST validate as a MAP request and against the named type's request schema before the service applies an effect.
 
-`requestId` is a UUID URN created by the client and persisted for retries and result recovery. `interactionId` repeats the description's `@id`. The request repeats the exact type reference, target and selected operation so that authorization and stale-target checks do not depend on mutable client state.
+`requestId` is a UUID URN created by the client and persisted for retries and result recovery. `interactionId` repeats the description's `@id`. The request repeats the exact type reference, target and selected operation so that authorization and stale-target checks do not depend on mutable client state. The target digest acts as an entity tag in the sense of [HTTP conditional requests](https://www.rfc-editor.org/rfc/rfc9110#name-conditional-requests); MAP carries it in the body because the request goes to the execution resource rather than to the target.
 
-Authentication establishes the caller and tenant outside the request body. Receiving the description does not authorize the request. The service resolves the interaction and current target from authoritative state and checks the caller's permission, the offered operation, target revision, expiry, revocation and any service approval policy. Values repeated by the client are assertions to verify.
+Authentication establishes the caller and tenant outside the request body, as described under [Principal and actor](#principal-and-actor). Receiving the description does not authorize the request. The service resolves the interaction and current target from authoritative state and checks the caller's permission, the offered operation, target revision, expiry, revocation and any service approval policy. Values repeated by the client are assertions to verify.
 
 Malformed requests and requests for an unknown interaction MUST NOT claim their `requestId`. A syntactically valid request for a recognized interaction and authenticated principal is claimed before type-specific input validation; a type-invalid response is therefore recoverable, and a corrected body needs a new `requestId`. Once a request reaches this boundary, the service applies these security constraints:
 
@@ -82,9 +97,15 @@ Malformed requests and requests for an unknown interaction MUST NOT claim their 
 
 The profile does not require a total precedence among independent validation failures. An implementation may perform checks in a different order provided it preserves the constraints above, applies no effect for a problem response and does not reveal protected state.
 
+## Principal and actor
+
+The service's authentication establishes two identities. The principal is the subject on whose behalf the request is made, such as a user. The actor is the client or agent that sent it: an OAuth client identifier, the actor named by a delegated token's `act` claim ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)) or a service API key. Request identifiers, authorization and result access belong to the principal.
+
+A service SHOULD record the actor of each claimed request and of each human decision separately from the principal, so its records show which agent acted for whom. Neither identity comes from the MAP body. MAP defines no identity scheme of its own; a service can take the actor from any authentication it accepts, including agent delegation and [HTTP Message Signatures](https://www.rfc-editor.org/rfc/rfc9421) where it supports them.
+
 ## Idempotency and recovery
 
-Within one service tenant, a claimed `requestId` identifies one complete request document and the authenticated principal that first used it.
+Within one service tenant, a claimed `requestId` identifies one complete request document and the authenticated principal that first used it. It serves the purpose of the HTTP [`Idempotency-Key` header](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/) but travels in the body, where it binds the complete request value and names a recoverable result.
 
 - A later request from the same principal with the same identifier and the same JSON values is an exact retry. Object member order is irrelevant; array order and every member value remain significant. The service MUST return the latest recorded response without applying the effect again.
 - Reuse of the identifier with any changed value is an `idempotency-conflict`. The changed request MUST NOT be applied.
@@ -119,7 +140,7 @@ Successful responses use `application/json` with a MAP result. Problems use `app
 | `unsupported-type`        |  422 | Problem  | The exact type URI, version or contract digest is not implemented.                                                                             |
 | `unsupported-operation`   |  422 | Problem  | The operation was not offered or implemented.                                                                                                  |
 
-A result repeats the request, interaction, exact type, operation and target references and includes the authoritative result URL and recording time. `pending` and `approval-required` may advance only to terminal states declared by the selected type and operation. A service MUST authorize the human decision that advances an `approval-required` result. That decision may be made by a different authorized principal in the same service tenant; it does not inherit authority from the principal that proposed the request. An unauthorized decision attempt returns `refused` without changing the saved result. Terminal outcomes MUST NOT advance.
+A result repeats the request, interaction, exact type, operation and target references and includes the authoritative result URL and recording time. `pending` and `approval-required` may advance only to terminal states declared by the selected type and operation. A service MUST authorize the human decision that advances an `approval-required` result. That decision may be made by a different authorized principal in the same service tenant; it does not inherit authority from the principal that proposed the request. An unauthorized decision attempt, or one the service's own rules do not permit at that moment, returns `refused` without changing the saved result. Terminal outcomes MUST NOT advance.
 
 MAP problems add `profile`, `requestId`, `interactionId`, `code` and, when relevant, `target`. The problem `type`, HTTP status and `code` MUST agree. When a result lookup has no known interaction, `result-not-found` includes `requestId` but MUST NOT invent an `interactionId`. If a malformed request does not supply usable correlation identifiers, the service returns an ordinary RFC 9457 response without MAP correlation members.
 

@@ -33,6 +33,12 @@
       "manual": "Record the redirect chain and configured destination for each credential-bearing client adapter."
     },
     {
+      "id": "MAP-TRUST-003",
+      "actor": "client",
+      "requirement": "Accept service configuration from RFC 9728 protected resource metadata only for a configured resource identifier that the document names, and only for HTTPS endpoints on that resource's origin.",
+      "cases": ["metadata-configuration"]
+    },
+    {
       "id": "MAP-REQ-001",
       "actor": "service",
       "requirement": "Resolve the interaction and validate the generic and type-specific request before any effect; malformed or unknown-interaction requests do not claim a request identifier, while a type-invalid request that reached type validation is claimed and recoverable.",
@@ -65,8 +71,14 @@
     {
       "id": "MAP-AUTH-003",
       "actor": "service",
-      "requirement": "Authorize each human approval decision in the current tenant and policy context; an unauthorized decision attempt does not change the proposed request's state.",
-      "cases": ["approval-team-decision", "approval-unauthorized-decision"]
+      "requirement": "Authorize each human approval decision in the current tenant and policy context; an unauthorized or rule-refused decision attempt does not change the proposed request's state.",
+      "cases": ["approval-team-decision", "approval-unauthorized-decision", "approval-rule-refusal"]
+    },
+    {
+      "id": "MAP-AUTH-004",
+      "actor": "service",
+      "requirement": "Record the actor that sent each claimed request and human decision separately from the principal, as established by authentication and never by the MAP body.",
+      "cases": ["actor-attribution"]
     },
     {
       "id": "MAP-IDEM-001",
@@ -77,7 +89,7 @@
     {
       "id": "MAP-IDEM-002",
       "actor": "sender and client",
-      "requirement": "Preserve one interaction identifier when the same underlying interaction is redelivered, and reuse the client's exact persisted request for the same selected operation and input.",
+      "requirement": "Preserve one interaction identifier when the same underlying interaction is redelivered, use a new identifier for a changed type contract, target revision or operation set, and reuse the client's exact persisted request for the same selected operation and input.",
       "cases": ["stable-redelivery"]
     },
     {
