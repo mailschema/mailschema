@@ -1,6 +1,6 @@
 # Release validation
 
-24 September 2026. This record distinguishes the currently deployed site and packages from the revised MAP 0.1 working tree. The revised contract is not presented as deployed or released until its exact artifacts pass the normal promotion gates.
+24 September 2026. This record distinguishes the deployed specification and first-party product surfaces from published package versions and the remaining live interoperability work. Package releases remain unchanged until a changed artifact passes its own version and promotion decision.
 
 ## Protocol and Registry
 
@@ -39,7 +39,10 @@
 - Nitrosend API pull request [#522](https://github.com/nitrosend/api/pull/522) passed RSpec, RuboCop, Brakeman and dependency-audit checks and was merged. The resulting `main` commit passed [CI](https://github.com/nitrosend/api/actions/runs/35862102718), passed the [production deployment](https://github.com/nitrosend/api/actions/runs/35863539893), returned a healthy production response and exposes `mail_action` in the live OpenAPI contract.
 - This verifies deployed admission and contract support. An authenticated MAP-bearing test send and inspection of the received MIME message remain part of the end-to-end dogfood milestone.
 - Nitrosend Node SDK pull request [#11](https://github.com/nitrosend/node-sdk/pull/11) was merged after the API contract.
-- A Nitrosend working branch implements authenticated Content Review description, execution and result recovery against immutable flow revisions, plus inbound MAP extraction and corrected Structured Email MIME. All 1,417 email, MAP service and request examples pass on the rebased branch; OpenAPI validation and Rails eager loading also pass. It remains undeployed and has no Registry implementation declaration.
+- Nitrosend API pull request [#527](https://github.com/nitrosend/api/pull/527) merged as `c3419bfda880872e64bef555388a51ac91268907`. Its [main CI run](https://github.com/nitrosend/api/actions/runs/35969077603) passed the 13,591-example RSpec suite, RuboCop, Brakeman and dependency audit; its [production deployment](https://github.com/nitrosend/api/actions/runs/35970435081) then completed through the normal commit-gated workflow.
+- Production returned a healthy response and its live OpenAPI document contains the exact-revision review and request-approval endpoints. The deployed boundary uses stable user principals, makes API-key approval a proposal requiring a signed-in person, rejects stale targets without changing the flow, retains correlated results, includes MAP in exact-revision flow test emails and extracts designated MAP descriptions from inbound messages without executing them.
+- Nitrosend app pull request [#240](https://github.com/nitrosend/app/pull/240) merged as `e8a855bbe9b5a86b445f44e8c706b726633cd932` after the API deployment. All 2,241 app unit tests, lint and the production build passed locally; the [Vercel production deployment](https://vercel.com/nitrosend/nitrosend-app/ECyqzxLkn8xZhHtZz8iG8DUxbSLR) completed and the application plus deep review route return the production shell.
+- These checks establish deployed first-party mechanics. No authenticated MAP-bearing provider send, preserved received-MIME artifact, independently configured client execution or external implementation has been recorded, so the Content Review Registry record still has no implementation declaration.
 - Sourcey continues to render the specification from committed MailSchema sources. It is not an action service and no stateful Sourcey boundary is planned without a real product workflow that owns the relevant revision and review state.
 
 ## Internet-Draft
@@ -50,4 +53,4 @@
 
 ## Release boundary
 
-The protected release pull request merged at `5025b1cfdbcb1d1db3f033f6beefee6dfda331d5`; its Cloudflare deployment completed in [run 35862753362](https://github.com/mailschema/mailschema/actions/runs/35862753362). Public readback covered the homepage, profile reader, MAP schema, profile record, JSON-LD context, complete email fixture, Tools page, Registry exports, social metadata, sitemap and `www` redirect.
+The canonical contract repair merged at `e2f2cc6983173e5aba1da27f1f8bff37336efd77`; its Cloudflare deployment completed in [run 35964885603](https://github.com/mailschema/mailschema/actions/runs/35964885603). Public readback covered the homepage, profile reader, MAP and Content Review schemas, the canonical Content Review type contract, JSON-LD context, complete email fixture, Tools page, Registry exports, social metadata, sitemap and `www` redirect.
