@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://mailschema.org/tools/"
+Homepage = "https://mailschema.org/tools"
 Repository = "https://github.com/mailschema/python"
 Issues = "https://github.com/mailschema/python/issues"
 

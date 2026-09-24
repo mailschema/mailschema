@@ -228,7 +228,7 @@ test('CLI previews without writing, imports once and refuses conflicting identif
 test('website checks all contribution kinds, previews attribution and invalidates edited downloads', async ({
   page,
 }) => {
-  await page.goto('/contribute/');
+  await page.goto('/contribute');
   const editor = page.getByLabel('Contribution JSON', { exact: true });
   const check = page.getByRole('button', { name: 'Check and preview' });
   const download = page.locator('[data-download]');
@@ -306,14 +306,14 @@ test('vendor contributions produce real Registry pages, history and version-boun
     });
     expect(result.status, result.stdout + result.stderr).toBe(0);
     const page = readFileSync(
-      resolve(directory, 'dist/registry/document-receipt/index.html'),
+      resolve(directory, 'dist/registry/document-receipt.html'),
       'utf8',
     );
     expect(page).toContain('Document Receipt');
     expect(page).toContain('Example Document Service');
     expect(page).toContain('/registry/contributions/example-document-receipt.json');
     const review = readFileSync(
-      resolve(directory, 'dist/registry/content-review/index.html'),
+      resolve(directory, 'dist/registry/content-review.html'),
       'utf8',
     );
     expect(review).toContain('Amendment by Example Document Service');
@@ -347,7 +347,7 @@ test('vendor contributions produce real Registry pages, history and version-boun
 test('website preview renders contributor text safely and fails when reference data is unavailable', async ({
   page,
 }) => {
-  await page.goto('/contribute/');
+  await page.goto('/contribute');
   const payload = example('new-type');
   payload.contributor.name = '<img src=x onerror="window.injected=true">';
   await page.getByLabel('Contribution JSON', { exact: true }).fill(JSON.stringify(payload));

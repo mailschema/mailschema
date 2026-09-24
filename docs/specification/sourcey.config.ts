@@ -7,7 +7,7 @@ const sections = [...new Set(specNavigation.map((page) => page.section))];
 export default defineConfig({
   name: 'MailSchema',
   titleSeparator: ' · ',
-  prettyUrls: 'slash',
+  prettyUrls: 'strip',
   baseUrl: '/specification/',
   logo: { light: '../../public/mailschema-mark.svg', href: '/' },
   favicon: '../../public/favicon.svg',
@@ -27,13 +27,13 @@ export default defineConfig({
         badge: 'Draft',
         updated: '23 September 2026',
       },
-      searchHref: '/search/',
+      searchHref: '/search',
       sidebar: {
         links: [
-          { label: 'Try the example', href: '/examples/', icon: 'code' },
-          { label: 'Type registry', href: '/registry/', icon: 'layers' },
-          { label: 'Registry tools', href: '/tools/', icon: 'code' },
-          { label: 'Contribute a type', href: '/contribute/', icon: 'layers' },
+          { label: 'Try the example', href: '/examples', icon: 'code' },
+          { label: 'Type registry', href: '/registry', icon: 'layers' },
+          { label: 'Registry tools', href: '/tools', icon: 'code' },
+          { label: 'Contribute a type', href: '/contribute', icon: 'layers' },
         ],
         note: 'For agents and services\nworking through email.',
       },
@@ -42,7 +42,7 @@ export default defineConfig({
           {
             label: 'Try Content Review',
             description: 'Review a draft\nfrom the inbox.',
-            href: '/examples/',
+            href: '/examples',
             icon: 'code',
           },
         ],
@@ -51,17 +51,17 @@ export default defineConfig({
         before: {
           label: 'Try Content Review',
           description: 'Explore the workflow',
-          href: '/examples/',
+          href: '/examples',
         },
         after: {
           label: 'Contribute a type',
           description: 'Prepare a proposal →',
-          href: '/contribute/',
+          href: '/contribute',
         },
       },
       footer: {
         text: 'MailSchema · MAP 0.1',
-        links: [{ label: 'Improve this specification', href: '/contribute/' }],
+        links: [{ label: 'Improve this specification', href: '/contribute' }],
       },
     },
   },
@@ -81,6 +81,6 @@ export default defineConfig({
   },
   navbar: {
     links: mainNavigation.map((link) => ({ type: 'link' as const, ...link })),
-    primary: { type: 'button', label: 'Read MAP', href: '/specification/' },
+    primary: { type: 'button', label: 'Read MAP', href: '/specification' },
   },
 });

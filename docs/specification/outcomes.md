@@ -4,7 +4,7 @@ description: Reporting operation state and recovering from an interrupted exchan
 navTitle: Results and retries
 ---
 
-A response tells the client what the service recorded for a request. Successful HTTP delivery alone does not establish that the operation completed. The [MAP 0.1 outcome table](/specification/profile/#outcomes) defines every result state, problem code and HTTP mapping.
+A response tells the client what the service recorded for a request. Successful HTTP delivery alone does not establish that the operation completed. The [MAP 0.1 outcome table](/specification/profile#outcomes) defines every result state, problem code and HTTP mapping.
 
 ## Request and target references
 

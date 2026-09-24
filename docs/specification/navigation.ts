@@ -48,4 +48,4 @@ export const specNavigation = [
     description: 'Reusing existing standards and testing an interaction across services.',
   },
 ];
-export const specHref = (slug: string) => `/specification/${slug ? slug + '/' : ''}`;
+export const specHref = (slug: string) => (slug ? `/specification/${slug}` : '/specification');

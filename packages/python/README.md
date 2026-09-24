@@ -5,7 +5,7 @@
 
 Validate Mail Action Protocol documents and MailSchema Registry contributions with Draft 2020-12 JSON Schema checks.
 
-[Specification](https://mailschema.org/specification/) · [Registry](https://mailschema.org/registry/) · [Tools](https://mailschema.org/tools/) · [Source](https://github.com/mailschema/python)
+[Specification](https://mailschema.org/specification) · [Registry](https://mailschema.org/registry) · [Tools](https://mailschema.org/tools) · [Source](https://github.com/mailschema/python)
 
 ## Install
 

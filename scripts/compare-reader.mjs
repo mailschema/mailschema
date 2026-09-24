@@ -27,7 +27,7 @@ try {
     await page.setViewportSize({ width, height });
     for (const chapter of chapters) {
       const name = `${chapter || 'overview'}-${size}`;
-      await page.goto(`${base}/specification/${chapter ? chapter + '/' : ''}`);
+      await page.goto(`${base}/specification${chapter ? `/${chapter}` : ''}`);
       await page.evaluate(() => document.fonts.ready);
       const actualBytes = await page.screenshot({ path: `${output}/${name}.png`, fullPage: true });
       const actual = PNG.sync.read(actualBytes);

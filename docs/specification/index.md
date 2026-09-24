@@ -14,7 +14,7 @@ The service remains responsible for the operation and its permissions. People ca
 
 MAP 0.1 is a working draft. It defines the interaction model, a JSON-LD description carried by Structured Email, an authenticated HTTPS execution profile and the first type, Content Review. The published schemas and fixtures are implementable, but the draft may still change. This document is not an IETF specification.
 
-The initial execution profile delivers action descriptions by email and submits requests over authenticated HTTPS. [MAP 0.1 profile](/specification/profile/) defines its fields, status behavior, trust checks and recovery rules.
+The initial execution profile delivers action descriptions by email and submits requests over authenticated HTTPS. [MAP 0.1 profile](/specification/profile) defines its fields, status behavior, trust checks and recovery rules.
 
 ## Participants
 
@@ -41,7 +41,7 @@ An email service sends a test message for revision 3 of a campaign. A reviewer r
 
 The approval applies to revision 4. A request to approve the old revision is refused. The campaign is sent only through the service's separate sending operation and permission checks.
 
-[Try the review example →](/examples/)
+[Try the review example →](/examples)
 
 ## Types and the Registry
 
@@ -53,4 +53,4 @@ Registering a type does not demonstrate that a product implements it correctly. 
 
 This draft covers action descriptions, requests, permission checks and results. It also requires a usable route for people to complete the interaction.
 
-MAP uses existing email infrastructure and service authentication. New identity systems, global service discovery and a general policy engine are outside this profile. Related specifications and vocabularies are considered in [Interoperability](/specification/interoperability/).
+MAP uses existing email infrastructure and service authentication. New identity systems, global service discovery and a general policy engine are outside this profile. Related specifications and vocabularies are considered in [Interoperability](/specification/interoperability).

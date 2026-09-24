@@ -18,12 +18,12 @@ const path = Astro.url.pathname;
       ))}
     </nav>
     <div class="header-actions">
-      <a class="search-link" href="/search/" aria-label="Search documentation">
+      <a class="search-link" href="/search" aria-label="Search documentation">
         <Icon name="search" size={17} />
         <span>Search</span>
         <kbd>/</kbd>
       </a>
-      <a class="header-cta" href="/specification/">
+      <a class="header-cta" href="/specification">
         Read MAP <Icon size={15} />
       </a>
       <button
@@ -43,7 +43,7 @@ const path = Astro.url.pathname;
         <Icon />
       </a>
     ))}
-    <a href="/search/">
+    <a href="/search">
       Search documentation
       <Icon name="search" />
     </a>
@@ -53,7 +53,7 @@ const path = Astro.url.pathname;
       {links.map((link) => (
         <a href={link.href}>{link.label}</a>
       ))}
-      <a href="/search/">Search</a>
+      <a href="/search">Search</a>
     </nav>
     <style>
       .site-header {
@@ -112,7 +112,7 @@ const path = Astro.url.pathname;
       )
     ) {
       event.preventDefault();
-      window.location.href = '/search/';
+      window.location.href = '/search';
     }
   });
   matchMedia('(min-width: 901px)').addEventListener('change', ({ matches }) => {

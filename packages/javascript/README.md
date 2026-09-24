@@ -5,7 +5,7 @@
 
 Validate Mail Action Protocol documents and MailSchema Registry contributions without making a network request.
 
-[Specification](https://mailschema.org/specification/) · [Registry](https://mailschema.org/registry/) · [Tools](https://mailschema.org/tools/) · [Source](https://github.com/mailschema/javascript)
+[Specification](https://mailschema.org/specification) · [Registry](https://mailschema.org/registry) · [Tools](https://mailschema.org/tools) · [Source](https://github.com/mailschema/javascript)
 
 ## Install
 
