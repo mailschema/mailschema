@@ -9,25 +9,12 @@ import {
   type PackageRelease,
   type PackageSetSelection,
 } from '../src/lib/package-release';
+import { packageArtifactNames, packageContractBytes } from '../src/lib/package-artifacts';
 import { tooling, localCheckCommands, recordCheckCommands } from '../src/data/tooling';
 import { typeRecords } from '../src/data/types';
 import { assertTypeRecord } from '../src/registry/validation';
 
-const contributionSchema = readFileSync('public/schemas/contribution.schema.json', 'utf8');
-const contribution = JSON.parse(contributionSchema);
-const contracts: PackageContracts = {
-  contribution: contributionSchema,
-  'map-0.1': readFileSync('public/schemas/map-0.1.schema.json', 'utf8'),
-  'content-review-0.1': readFileSync('public/schemas/content-review-0.1.schema.json', 'utf8'),
-  'content-review-0.1-contract': readFileSync('public/contracts/content-review-0.1.json', 'utf8'),
-  'content-review-0.2': readFileSync('public/schemas/content-review-0.2.schema.json', 'utf8'),
-  'content-review-0.2-contract': readFileSync('public/contracts/content-review-0.2.json', 'utf8'),
-  record: `${JSON.stringify(
-    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
-    null,
-    2,
-  )}\n`,
-};
+const contracts = packageContractBytes() as PackageContracts;
 const releases = new Map<string, PackageRelease>(
   current.channels.map(({ evidence }) => [
     evidence,
@@ -69,14 +56,7 @@ test('full-contract release evidence binds every distributed protocol schema', (
     format: 'mailschema-package-release/2',
     version: '1.0.0',
     schemaSha256: hash(contracts.contribution),
-    contracts: [
-      'contribution',
-      'map-0.1',
-      'content-review-0.1',
-      'content-review-0.1-contract',
-      'content-review-0.2',
-      'content-review-0.2-contract',
-    ].map((name) => ({
+    contracts: packageArtifactNames('npm').map((name) => ({
       name,
       sha256: hash(contracts[name as keyof PackageContracts]),
     })),

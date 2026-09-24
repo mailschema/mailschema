@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mailschema.org/schemas/type-contract-0.1.schema.json",
+  "title": "MailSchema executable type contract",
+  "description": "A versioned interaction contract implemented through a MAP execution profile.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "const": "MapTypeContract" },
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://mailschema\\.org/types/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "maxLength": 2048
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[a-zA-Z0-9.-]+)?$",
+      "maxLength": 80
+    },
+    "profile": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "maxLength": 2048
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12000,
+      "pattern": "\\S"
+    },
+    "requestSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://mailschema\\.org/schemas/[a-z0-9.-]+\\.json$",
+          "maxLength": 2048
+        },
+        "canonicalDigest": {
+          "type": "string",
+          "pattern": "^sha-256:[a-f0-9]{64}$"
+        }
+      },
+      "required": ["url", "canonicalDigest"]
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "maxLength": 100
+          },
+          "effect": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000,
+            "pattern": "\\S"
+          },
+          "results": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                  "maxLength": 100
+                },
+                "outputSchema": {
+                  "anyOf": [{ "type": "object" }, { "type": "boolean" }]
+                }
+              },
+              "required": ["state", "outputSchema"]
+            }
+          }
+        },
+        "required": ["id", "effect", "results"]
+      }
+    }
+  },
+  "required": ["kind", "id", "version", "profile", "target", "requestSchema", "operations"]
+}

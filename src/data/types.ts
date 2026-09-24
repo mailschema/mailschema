@@ -1,8 +1,11 @@
 import { loadRegistry } from '../registry/catalog';
+import { assertContractCoverage, loadTypeContractCatalog } from '../registry/contracts';
 import { typeStages, type TypeRecord } from '../registry/model';
 export type { TypeRecord } from '../registry/model';
 
 export const registry = loadRegistry();
+export const typeContracts = loadTypeContractCatalog();
+assertContractCoverage(registry.types, typeContracts);
 export const typeRecords = registry.types;
 
 export const typeHref = (slug: string) => `/registry/${slug}/`;

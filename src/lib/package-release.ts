@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { packageArtifactNames, type PackageRegistry } from './package-artifacts';
 
 export interface PackageRelease {
   format?: string;
@@ -8,15 +9,7 @@ export interface PackageRelease {
   channels: PackageReleaseChannel[];
 }
 
-export interface PackageContracts {
-  contribution: string;
-  'map-0.1': string;
-  'content-review-0.1': string;
-  'content-review-0.1-contract': string;
-  'content-review-0.2': string;
-  'content-review-0.2-contract': string;
-  record: string;
-}
+export type PackageContracts = Record<string, string> & { contribution: string };
 
 export interface PackageReleaseChannel {
   registry: string;
@@ -80,19 +73,12 @@ export function assertPackageRelease(
     if (!contracts)
       throw new Error('Full-contract release evidence needs canonical contract bytes.');
     const registry = release.channels[0]?.registry;
-    const expectedNames = [
-      'contribution',
-      'map-0.1',
-      'content-review-0.1',
-      'content-review-0.1-contract',
-      'content-review-0.2',
-      'content-review-0.2-contract',
-      ...(registry === 'crates.io' ? ['record'] : []),
-    ];
+    if (!registryRequirements[registry]) throw new Error(`Unknown package registry ${registry}.`);
+    const expectedNames = packageArtifactNames(registry as PackageRegistry);
     const found = new Map(release.contracts?.map((entry) => [entry.name, entry.sha256]));
     assertExactMembers(found, expectedNames, 'release contract');
     for (const name of expectedNames)
-      if (found.get(name) !== schemaDigest(contracts[name as keyof PackageContracts]))
+      if (found.get(name) !== schemaDigest(contracts[name]))
         throw new Error(`The ${name} contract differs from the advertised package release.`);
   } else if (release.format) {
     throw new Error(`Unknown package release evidence format ${release.format}.`);

@@ -2,7 +2,13 @@
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import PartyList from '../../components/PartyList.astro';
-import { registry, typeRecords, typeStatusLabel, type TypeRecord } from '../../data/types';
+import {
+  registry,
+  typeContracts,
+  typeRecords,
+  typeStatusLabel,
+  type TypeRecord,
+} from '../../data/types';
 import { recordDigest } from '../../registry/catalog';
 import '../../styles/catalog.css';
 import '../../styles/prose.css';
@@ -16,6 +22,7 @@ interface Props {
 const { record } = Astro.props;
 const proposed = record.status !== 'Draft';
 const implementations = registry.implementations.filter((item) => item.type === record.slug);
+const contracts = typeContracts.filter((item) => item.type === record.slug).toReversed();
 const digest = recordDigest(record);
 ---
 
@@ -123,10 +130,31 @@ const digest = recordDigest(record);
         <p>
           <strong>Human participation.</strong> {record.humanRoute}
         </p>
-        <p>
-          The behaviour is described here. A machine-readable representation has not yet been
-          selected.
-        </p>
+        {contracts.length ? (
+          <Fragment>
+            <h3>Executable contracts</h3>
+            <ul class="type-references">
+              {contracts.map((contract) => (
+                <li>
+                  <a href={contract.contract.url}>Version {contract.version} contract</a>
+                  <p>
+                    <a href={contract.requestSchema.url}>Request schema</a>
+                    {' · '}contract SHA-256 {contract.contract.sha256}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p>
+              These immutable versions are also indexed in the{' '}
+              <a href="/registry/catalog.json">Registry catalogue</a> with their exact digests.
+            </p>
+          </Fragment>
+        ) : (
+          <p>
+            The behaviour is described here. A machine-readable representation has not yet been
+            selected.
+          </p>
+        )}
         <h2 id="example">{record.example.title}</h2>
         <ol>
           {record.example.steps.map((step) => (

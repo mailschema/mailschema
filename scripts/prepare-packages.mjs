@@ -3,6 +3,11 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import {
+  materializePackageArtifacts,
+  packageArtifactNames,
+  packageRegistries,
+} from '../src/lib/package-artifacts.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const output = resolve(root, '.release/packages');
@@ -14,18 +19,17 @@ async function put(path, value) {
   await writeFile(destination, value);
 }
 
-const schemaBytes = await read('public/schemas/contribution.schema.json');
-const schema = JSON.parse(schemaBytes);
-const mapSchemaBytes = await read('public/schemas/map-0.1.schema.json');
-const contentReview01SchemaBytes = await read('public/schemas/content-review-0.1.schema.json');
-const contentReview01ContractBytes = await read('public/contracts/content-review-0.1.json');
-const contentReview02SchemaBytes = await read('public/schemas/content-review-0.2.schema.json');
-const contentReview02ContractBytes = await read('public/contracts/content-review-0.2.json');
+const artifacts = materializePackageArtifacts(root);
+const artifact = (name) => {
+  const found = artifacts.find((item) => item.name === name);
+  if (!found) throw new Error(`Missing package artifact ${name}.`);
+  return found;
+};
+const schemaBytes = artifact('contribution').bytes;
 const versions = JSON.parse(await read('packages/versions.json'));
 for (const registry of ['npm', 'PyPI', 'crates.io', 'Go'])
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
     throw new Error(`Invalid ${registry} package version.`);
-const recordSchema = json({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/record' });
 const license = await read('packages/LICENSE');
 const validation = (await read('src/registry/validation.ts'))
   .replace('../../public/schemas/contribution.schema.json', './contribution.schema.json')
@@ -50,16 +54,13 @@ await put(
     repository: { type: 'git', url: 'git+https://github.com/mailschema/javascript.git' },
     bugs: { url: 'https://github.com/mailschema/javascript/issues' },
     engines: { node: '>=22' },
-    exports: {
-      '.': { types: './dist/index.d.ts', import: './dist/index.js' },
-      './contribution.schema.json': './dist/contribution.schema.json',
-      './map-0.1.schema.json': './dist/map-0.1.schema.json',
-      './content-review-0.1.schema.json': './dist/content-review-0.1.schema.json',
-      './content-review-0.1.contract.json': './dist/content-review-0.1.contract.json',
-      './content-review-0.2.schema.json': './dist/content-review-0.2.schema.json',
-      './content-review-0.2.contract.json': './dist/content-review-0.2.contract.json',
-      './package.json': './package.json',
-    },
+    exports: Object.fromEntries([
+      ['.', { types: './dist/index.d.ts', import: './dist/index.js' }],
+      ...artifacts
+        .filter((item) => item.paths.npm)
+        .map((item) => [`./${item.paths.npm.split('/').at(-1)}`, `./${item.paths.npm}`]),
+      ['./package.json', './package.json'],
+    ]),
     types: './dist/index.d.ts',
     bin: { mailschema: './bin/mailschema.js' },
     files: ['dist', 'bin', 'README.md', 'LICENSE'],
@@ -77,12 +78,12 @@ await put('npm/src/model.ts', await read('src/registry/model.ts'));
 await put('npm/src/validation.ts', validation);
 await put('npm/src/index.ts', await read('packages/javascript/index.ts'));
 await put('npm/src/map.ts', await read('packages/javascript/map.ts'));
-await put('npm/src/contribution.schema.json', schemaBytes);
-await put('npm/src/map-0.1.schema.json', mapSchemaBytes);
-await put('npm/src/content-review-0.1.schema.json', contentReview01SchemaBytes);
-await put('npm/src/content-review-0.1.contract.json', contentReview01ContractBytes);
-await put('npm/src/content-review-0.2.schema.json', contentReview02SchemaBytes);
-await put('npm/src/content-review-0.2.contract.json', contentReview02ContractBytes);
+for (const item of artifacts.filter((entry) => entry.paths.npm))
+  await put(`npm/src/${item.paths.npm.split('/').at(-1)}`, item.bytes);
+await put(
+  'npm/artifacts.json',
+  json(artifacts.filter((item) => item.paths.npm).map((item) => item.paths.npm.split('/').at(-1))),
+);
 await put('npm/bin/mailschema.js', await read('packages/javascript/cli.mjs'));
 await put('npm/build.mjs', await read('packages/javascript/build.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
@@ -118,13 +119,9 @@ execFileSync(
   { cwd: root, stdio: 'inherit' },
 );
 await chmod(resolve(output, 'npm/bin/mailschema.js'), 0o755);
-// Preserve the canonical schema bytes, rather than the compiler's JSON formatting.
-await put('npm/dist/contribution.schema.json', schemaBytes);
-await put('npm/dist/map-0.1.schema.json', mapSchemaBytes);
-await put('npm/dist/content-review-0.1.schema.json', contentReview01SchemaBytes);
-await put('npm/dist/content-review-0.1.contract.json', contentReview01ContractBytes);
-await put('npm/dist/content-review-0.2.schema.json', contentReview02SchemaBytes);
-await put('npm/dist/content-review-0.2.contract.json', contentReview02ContractBytes);
+// Preserve canonical artifact bytes, rather than the compiler's JSON formatting.
+for (const item of artifacts.filter((entry) => entry.paths.npm))
+  await put(`npm/${item.paths.npm}`, item.bytes);
 
 for (const language of ['python', 'rust']) {
   await mkdir(resolve(output, language), { recursive: true });
@@ -134,12 +131,8 @@ for (const language of ['python', 'rust']) {
   });
   await put(`${language}/LICENSE`, license);
 }
-await put('python/src/mailschema/contribution.schema.json', schemaBytes);
-await put('python/src/mailschema/map-0.1.schema.json', mapSchemaBytes);
-await put('python/src/mailschema/content-review-0.1.schema.json', contentReview01SchemaBytes);
-await put('python/src/mailschema/content-review-0.1.contract.json', contentReview01ContractBytes);
-await put('python/src/mailschema/content-review-0.2.schema.json', contentReview02SchemaBytes);
-await put('python/src/mailschema/content-review-0.2.contract.json', contentReview02ContractBytes);
+for (const item of artifacts.filter((entry) => entry.paths.PyPI))
+  await put(`python/src/mailschema/${item.paths.PyPI}`, item.bytes);
 await put('python/tests/new-type.json', await read('registry/examples/new-type.json'));
 await put('python/tests/content-review.json', await read('registry/types/content-review.json'));
 await put(
@@ -151,13 +144,8 @@ await put(
   'python/tests/map-result.json',
   await read('public/fixtures/map-0.1/result-completed.json'),
 );
-await put('rust/schemas/contribution.schema.json', schemaBytes);
-await put('rust/schemas/record.schema.json', recordSchema);
-await put('rust/schemas/map-0.1.schema.json', mapSchemaBytes);
-await put('rust/schemas/content-review-0.1.schema.json', contentReview01SchemaBytes);
-await put('rust/contracts/content-review-0.1.json', contentReview01ContractBytes);
-await put('rust/schemas/content-review-0.2.schema.json', contentReview02SchemaBytes);
-await put('rust/contracts/content-review-0.2.json', contentReview02ContractBytes);
+for (const item of artifacts.filter((entry) => entry.paths['crates.io']))
+  await put(`rust/${item.paths['crates.io']}`, item.bytes);
 
 // Check each source distribution against its own declared release version.
 const python = await read('packages/python/pyproject.toml');
@@ -176,78 +164,16 @@ await put(
     format: 'mailschema-package-build/2',
     versions,
     schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
-    contracts: [
-      ['contribution', schemaBytes],
-      ['map-0.1', mapSchemaBytes],
-      ['content-review-0.1', contentReview01SchemaBytes],
-      ['content-review-0.1-contract', contentReview01ContractBytes],
-      ['content-review-0.2', contentReview02SchemaBytes],
-      ['content-review-0.2-contract', contentReview02ContractBytes],
-      ['record', recordSchema],
-    ].map(([name, bytes]) => ({
-      name,
-      sha256: createHash('sha256').update(bytes).digest('hex'),
+    contracts: artifacts.map((item) => ({
+      name: item.name,
+      sha256: createHash('sha256').update(item.bytes).digest('hex'),
     })),
-    channels: [
-      {
-        registry: 'npm',
-        version: versions.npm,
-        contracts: [
-          'contribution',
-          'map-0.1',
-          'content-review-0.1',
-          'content-review-0.1-contract',
-          'content-review-0.2',
-          'content-review-0.2-contract',
-        ],
-      },
-      {
-        registry: 'PyPI',
-        version: versions.PyPI,
-        contracts: [
-          'contribution',
-          'map-0.1',
-          'content-review-0.1',
-          'content-review-0.1-contract',
-          'content-review-0.2',
-          'content-review-0.2-contract',
-        ],
-      },
-      {
-        registry: 'crates.io',
-        version: versions['crates.io'],
-        contracts: [
-          'contribution',
-          'map-0.1',
-          'content-review-0.1',
-          'content-review-0.1-contract',
-          'content-review-0.2',
-          'content-review-0.2-contract',
-          'record',
-        ],
-      },
-      {
-        registry: 'Go',
-        version: versions.Go,
-        contracts: [
-          'contribution',
-          'map-0.1',
-          'content-review-0.1',
-          'content-review-0.1-contract',
-          'content-review-0.2',
-          'content-review-0.2-contract',
-        ],
-      },
-    ],
-    sources: {
-      contribution: 'public/schemas/contribution.schema.json',
-      'map-0.1': 'public/schemas/map-0.1.schema.json',
-      'content-review-0.1': 'public/schemas/content-review-0.1.schema.json',
-      'content-review-0.1-contract': 'public/contracts/content-review-0.1.json',
-      'content-review-0.2': 'public/schemas/content-review-0.2.schema.json',
-      'content-review-0.2-contract': 'public/contracts/content-review-0.2.json',
-      record: 'derived from contribution.schema.json#/$defs/record',
-    },
+    channels: packageRegistries.map((registry) => ({
+      registry,
+      version: versions[registry],
+      contracts: packageArtifactNames(registry),
+    })),
+    sources: Object.fromEntries(artifacts.map((item) => [item.name, item.source])),
     status: 'prepared',
   }),
 );

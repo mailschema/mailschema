@@ -13,7 +13,10 @@ import {
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import canonicalize from 'canonicalize';
 import { compileRegistry, loadRegistry, recordDigest } from '../src/registry/catalog';
+import { assertContractCoverage, loadTypeContractCatalog } from '../src/registry/contracts';
 import { assertContribution } from '../src/registry/validation';
 import { contributionExamples } from '../src/registry/examples';
 import type { Contribution } from '../src/registry/model';
@@ -24,6 +27,98 @@ function example<K extends Contribution['kind']>(kind: K): Extract<Contribution,
     contributionExamples(baseline).find(({ input }) => input.kind === kind)!.input,
   ) as Extract<Contribution, { kind: K }>;
 }
+
+test('executable contracts are discovered from canonical files and fail closed on drift', () => {
+  const catalog = loadTypeContractCatalog();
+  expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).toEqual([
+    'content-review@0.1',
+    'content-review@0.2',
+  ]);
+  expect(() => assertContractCoverage(baseline.types, catalog)).not.toThrow();
+
+  const root = mkdtempSync(resolve(tmpdir(), 'mailschema-contracts-'));
+  try {
+    cpSync(resolve('public'), resolve(root, 'public'), { recursive: true });
+    const schemaPath = resolve(root, 'public/schemas/content-review-0.2.schema.json');
+    const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+    schema.title = 'Drifted title';
+    writeFileSync(schemaPath, JSON.stringify(schema));
+    expect(() => loadTypeContractCatalog(root)).toThrow(/canonical digest does not match/);
+
+    cpSync(resolve('public/schemas/content-review-0.2.schema.json'), schemaPath);
+    const secondSchema = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $id: 'https://mailschema.org/schemas/delivery-receipt-0.1.schema.json',
+      type: 'object',
+      properties: {
+        type: {
+          type: 'object',
+          properties: {
+            id: { const: 'https://mailschema.org/types/delivery-receipt' },
+            version: { const: '0.1' },
+          },
+        },
+        operation: { const: 'acknowledge' },
+      },
+    };
+    const secondSchemaPath = resolve(root, 'public/schemas/delivery-receipt-0.1.schema.json');
+    writeFileSync(secondSchemaPath, `${JSON.stringify(secondSchema, null, 2)}\n`);
+    const secondContractPath = resolve(root, 'public/contracts/delivery-receipt-0.1.json');
+    writeFileSync(
+      secondContractPath,
+      `${JSON.stringify(
+        {
+          kind: 'MapTypeContract',
+          id: 'https://mailschema.org/types/delivery-receipt',
+          version: '0.1',
+          profile: 'https://mailschema.org/profiles/map/0.1',
+          target: 'A delivery event identified by the service.',
+          requestSchema: {
+            url: secondSchema.$id,
+            canonicalDigest: `sha-256:${createHash('sha256').update(canonicalize(secondSchema)!).digest('hex')}`,
+          },
+          operations: [
+            {
+              id: 'acknowledge',
+              effect: 'Record acknowledgement of the delivery event.',
+              results: [{ state: 'completed', outputSchema: { type: 'object' } }],
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    const extendedCatalog = loadTypeContractCatalog(root);
+    expect(extendedCatalog.map((entry) => `${entry.type}@${entry.version}`)).toContain(
+      'delivery-receipt@0.1',
+    );
+    const secondRecord = {
+      ...structuredClone(baseline.types.find((record) => record.slug === 'content-review')!),
+      slug: 'delivery-receipt',
+      name: 'Delivery Receipt',
+      version: '0.1',
+      operations: [
+        {
+          id: 'acknowledge',
+          name: 'Acknowledge',
+          description: 'Record acknowledgement of the delivery event.',
+        },
+      ],
+    };
+    expect(() =>
+      assertContractCoverage([...baseline.types, secondRecord], extendedCatalog),
+    ).not.toThrow();
+    rmSync(secondSchemaPath);
+    rmSync(secondContractPath);
+    rmSync(resolve(root, 'public/contracts/content-review-0.2.json'));
+    expect(() => assertContractCoverage(baseline.types, loadTypeContractCatalog(root))).toThrow(
+      /expected one current executable contract/,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test('vendor type contributions retain authorship and maintainers without changing other records', () => {
   const submission = example('new-type');
@@ -186,6 +281,7 @@ test('vendor contributions produce real Registry pages, history and version-boun
     for (const path of [
       'src',
       'public',
+      'packages',
       'registry',
       'docs/specification',
       'docs/releases',

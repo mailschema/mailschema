@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import selection from '../../docs/releases/current.json' with { type: 'json' };
+import { packageContractBytes } from '../lib/package-artifacts';
 import {
   assertPackageSet,
   type PackageContracts,
@@ -8,33 +9,7 @@ import {
   type PackageSetSelection,
 } from '../lib/package-release';
 
-const contributionSchema = readFileSync(resolve('public/schemas/contribution.schema.json'), 'utf8');
-const contribution = JSON.parse(contributionSchema);
-const contracts: PackageContracts = {
-  contribution: contributionSchema,
-  'map-0.1': readFileSync(resolve('public/schemas/map-0.1.schema.json'), 'utf8'),
-  'content-review-0.1': readFileSync(
-    resolve('public/schemas/content-review-0.1.schema.json'),
-    'utf8',
-  ),
-  'content-review-0.1-contract': readFileSync(
-    resolve('public/contracts/content-review-0.1.json'),
-    'utf8',
-  ),
-  'content-review-0.2': readFileSync(
-    resolve('public/schemas/content-review-0.2.schema.json'),
-    'utf8',
-  ),
-  'content-review-0.2-contract': readFileSync(
-    resolve('public/contracts/content-review-0.2.json'),
-    'utf8',
-  ),
-  record: `${JSON.stringify(
-    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
-    null,
-    2,
-  )}\n`,
-};
+const contracts = packageContractBytes() as PackageContracts;
 
 const evidence = new Map<string, PackageRelease>();
 for (const reference of new Set(selection.channels.map((entry) => entry.evidence)))

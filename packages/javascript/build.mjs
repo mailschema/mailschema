@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { copyFile } from 'node:fs/promises';
+import { copyFile, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,13 +10,9 @@ execFileSync(process.execPath, [resolve(root, 'node_modules/typescript/bin/tsc')
   stdio: 'inherit',
 });
 
-for (const name of [
-  'contribution.schema.json',
-  'map-0.1.schema.json',
-  'content-review-0.1.schema.json',
-  'content-review-0.1.contract.json',
-  'content-review-0.2.schema.json',
-  'content-review-0.2.contract.json',
-]) {
+const artifacts = JSON.parse(await readFile(resolve(root, 'artifacts.json'), 'utf8'));
+if (!Array.isArray(artifacts) || artifacts.some((name) => typeof name !== 'string'))
+  throw new Error('Invalid generated package artifact list.');
+for (const name of artifacts) {
   await copyFile(resolve(root, 'src', name), resolve(root, 'dist', name));
 }
