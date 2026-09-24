@@ -1,6 +1,6 @@
 # MailSchema packages
 
-MailSchema package sources are generated from the exact MAP 0.1, Content Review 0.1 and 0.2, and Registry schemas for use at implementation boundaries. The packages validate or expose the contract; they do not establish endpoint trust, grant authority or send email.
+MailSchema packages provide MAP 0.1 and Registry tooling. The current releases retain Content Review compatibility helpers and exact reference artifacts. They validate or expose contracts; they do not establish endpoint trust, grant authority or send email.
 
 | Distribution                                                      | Contents                                                                                                        |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -9,13 +9,15 @@ MailSchema package sources are generated from the exact MAP 0.1, Content Review 
 | [crates.io `mailschema`](https://github.com/mailschema/rust)      | MAP, Content Review and Registry schemas embedded without runtime dependencies                                  |
 | [Go `github.com/mailschema/go`](https://github.com/mailschema/go) | Typed MAP documents, strict decoding, core reference validation and the canonical schemas                       |
 
-The selected releases are JavaScript `0.1.3`, Python and Rust `0.1.2`, and Go `0.1.0`. Their existing evidence verifies the Registry contract shipped in those artifacts; the revised MAP and Content Review contract remains source-only until changed packages pass full-contract public readback. Package versions are independent of the MAP profile version and advance separately when a language-specific change requires it. Distribution code and included schema assets use the MIT license in this directory. This file does not assign a license to unrelated website assets or other project documents.
+[`docs/releases/current.json`](../docs/releases/current.json) is the only selected package set. Public artifact evidence verifies every bundled contract in each selected release. Package versions are independent of the MAP profile and Registry type versions, and advance only when that package's code, API or bundled assets change. Distribution code and included schema assets use the MIT license in this directory. This file does not assign a license to unrelated website assets or other project documents.
 
 ## One source
 
 The files under `public/schemas/` and `public/contracts/` are canonical. JavaScript model and validation code come from the same sources used by the website. Python delegates JSON Schema interpretation to the established `jsonschema` library. Rust embeds schema documents for applications to use with their chosen validator. The Go module is maintained in [`mailschema/go`](https://github.com/mailschema/go) and embeds byte-identical schema files.
 
-`packages/versions.json` declares the source version for every ecosystem. `npm run packages:prepare` creates npm, Python and Rust release sources in `.release/packages/` and checks each package against its declared version. A tested copy of each release source is committed to its language repository, where CI, tags and registry publication are owned. The generated schema and shared validation files remain canonical here rather than being edited independently in multiple repositories. The Go implementation is maintained and released from its own repository. No vendor credentials or private operational data are included.
+The Registry and the packages have separate release lifecycles. A new or amended type is published as versioned Registry data and immutable contract/schema artifacts. Implementations select the exact type versions they support and vendor those bytes by URI, version and digest. They do not need a live Registry lookup at execution time. A Registry contribution does not trigger four language releases; a package release is needed only when that package itself changes. Content Review remains in the current packages for compatibility with their first public APIs. Future Registry types do not enter packages automatically.
+
+`packages/artifacts.json` is the one list of files deliberately distributed by each ecosystem. Package preparation, archive readback, website release checks and tests all consume that manifest. `packages/versions.json` declares the source version for every ecosystem. `npm run packages:prepare` creates npm, Python and Rust release sources in `.release/packages/` and checks each package against its declared version. A tested copy of each release source is committed to its language repository, where CI, tags and registry publication are owned. The generated schema and shared validation files remain canonical here rather than being edited independently in multiple repositories. The Go implementation is maintained and released from its own repository. No vendor credentials or private operational data are included.
 
 ## Prepare and check
 

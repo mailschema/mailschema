@@ -1,0 +1,86 @@
+{
+  "format": "mailschema-package-artifacts/1",
+  "artifacts": [
+    {
+      "name": "contribution",
+      "role": "core",
+      "kind": "schema",
+      "source": "public/schemas/contribution.schema.json",
+      "paths": {
+        "npm": "dist/contribution.schema.json",
+        "PyPI": "contribution.schema.json",
+        "crates.io": "schemas/contribution.schema.json",
+        "Go": "schemas/contribution.schema.json"
+      }
+    },
+    {
+      "name": "record",
+      "role": "core",
+      "kind": "schema",
+      "source": "derived:contribution#/$defs/record",
+      "paths": {
+        "crates.io": "schemas/record.schema.json"
+      }
+    },
+    {
+      "name": "map-0.1",
+      "role": "core",
+      "kind": "schema",
+      "source": "public/schemas/map-0.1.schema.json",
+      "paths": {
+        "npm": "dist/map-0.1.schema.json",
+        "PyPI": "map-0.1.schema.json",
+        "crates.io": "schemas/map-0.1.schema.json",
+        "Go": "schemas/map-0.1.schema.json"
+      }
+    },
+    {
+      "name": "content-review-0.1",
+      "role": "compatibility",
+      "kind": "schema",
+      "source": "public/schemas/content-review-0.1.schema.json",
+      "paths": {
+        "npm": "dist/content-review-0.1.schema.json",
+        "PyPI": "content-review-0.1.schema.json",
+        "crates.io": "schemas/content-review-0.1.schema.json",
+        "Go": "schemas/content-review-0.1.schema.json"
+      }
+    },
+    {
+      "name": "content-review-0.1-contract",
+      "role": "compatibility",
+      "kind": "contract",
+      "source": "public/contracts/content-review-0.1.json",
+      "paths": {
+        "npm": "dist/content-review-0.1.contract.json",
+        "PyPI": "content-review-0.1.contract.json",
+        "crates.io": "contracts/content-review-0.1.json",
+        "Go": "contracts/content-review-0.1.json"
+      }
+    },
+    {
+      "name": "content-review-0.2",
+      "role": "compatibility",
+      "kind": "schema",
+      "source": "public/schemas/content-review-0.2.schema.json",
+      "paths": {
+        "npm": "dist/content-review-0.2.schema.json",
+        "PyPI": "content-review-0.2.schema.json",
+        "crates.io": "schemas/content-review-0.2.schema.json",
+        "Go": "schemas/content-review-0.2.schema.json"
+      }
+    },
+    {
+      "name": "content-review-0.2-contract",
+      "role": "compatibility",
+      "kind": "contract",
+      "source": "public/contracts/content-review-0.2.json",
+      "paths": {
+        "npm": "dist/content-review-0.2.contract.json",
+        "PyPI": "content-review-0.2.contract.json",
+        "crates.io": "contracts/content-review-0.2.json",
+        "Go": "contracts/content-review-0.2.json"
+      }
+    }
+  ]
+}

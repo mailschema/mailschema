@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { materializePackageArtifacts, packageArtifactNames } from '../src/lib/package-artifacts.ts';
 import {
   getContributionSchema,
   getRecordSchema,
@@ -28,6 +29,7 @@ const record = JSON.parse(
 );
 const versions = JSON.parse(readFileSync('packages/versions.json', 'utf8'));
 const prepared = JSON.parse(readFileSync('.release/packages/prepared.json', 'utf8'));
+const canonicalArtifacts = materializePackageArtifacts();
 
 test('each distribution uses its independently declared package version', () => {
   assert.equal(prepared.format, 'mailschema-package-build/2');
@@ -48,32 +50,14 @@ test('each distribution uses its independently declared package version', () => 
 
 test('the preparation manifest binds each distributed contract', () => {
   const expected = new Map(
-    [
-      ['contribution', 'public/schemas/contribution.schema.json'],
-      ['map-0.1', 'public/schemas/map-0.1.schema.json'],
-      ['content-review-0.1', 'public/schemas/content-review-0.1.schema.json'],
-      ['content-review-0.1-contract', 'public/contracts/content-review-0.1.json'],
-      ['content-review-0.2', 'public/schemas/content-review-0.2.schema.json'],
-      ['content-review-0.2-contract', 'public/contracts/content-review-0.2.json'],
-    ].map(([name, path]) => [name, createHash('sha256').update(readFileSync(path)).digest('hex')]),
+    canonicalArtifacts.map(({ name, bytes }) => [
+      name,
+      createHash('sha256').update(bytes).digest('hex'),
+    ]),
   );
-  const contribution = JSON.parse(readFileSync('public/schemas/contribution.schema.json'));
-  const record = `${JSON.stringify(
-    { $schema: contribution.$schema, $defs: contribution.$defs, $ref: '#/$defs/record' },
-    null,
-    2,
-  )}\n`;
-  expected.set('record', createHash('sha256').update(record).digest('hex'));
   assert.deepEqual(new Map(prepared.contracts.map(({ name, sha256 }) => [name, sha256])), expected);
-  assert.deepEqual(prepared.channels.find(({ registry }) => registry === 'crates.io').contracts, [
-    'contribution',
-    'map-0.1',
-    'content-review-0.1',
-    'content-review-0.1-contract',
-    'content-review-0.2',
-    'content-review-0.2-contract',
-    'record',
-  ]);
+  for (const channel of prepared.channels)
+    assert.deepEqual(channel.contracts, packageArtifactNames(channel.registry));
 });
 
 test('distribution metadata and READMEs point to maintained language repositories', () => {
@@ -111,35 +95,20 @@ test('package preparation removes artifacts from earlier builds', () => {
     assert.equal(existsSync(path), false, `${path} must not survive package preparation`);
 });
 
-test('published schema bytes agree across all three distributions', () => {
-  const canonical = readFileSync('public/schemas/contribution.schema.json', 'utf8');
-  for (const file of [
-    'npm/dist/contribution.schema.json',
-    'python/src/mailschema/contribution.schema.json',
-    'rust/schemas/contribution.schema.json',
-  ])
-    assert.equal(readFileSync(`.release/packages/${file}`, 'utf8'), canonical);
+test('prepared distributions contain exactly the artifacts selected by the manifest', () => {
+  const roots = { npm: 'npm', PyPI: 'python/src/mailschema', 'crates.io': 'rust' };
+  for (const artifact of canonicalArtifacts)
+    for (const [registry, root] of Object.entries(roots)) {
+      const path = artifact.paths[registry];
+      if (!path) continue;
+      assert.equal(readFileSync(`.release/packages/${root}/${path}`, 'utf8'), artifact.bytes);
+    }
+  const canonical = canonicalArtifacts.find(({ name }) => name === 'contribution').bytes;
   assert.deepEqual(getContributionSchema(), JSON.parse(canonical));
   assert.equal(getRecordSchema().$ref, '#/$defs/record');
   const edited = getContributionSchema();
   edited.title = 'mutated';
   assert.notEqual(getContributionSchema().title, 'mutated');
-});
-
-test('all distributions include the MAP schema, Content Review schema and type contract', () => {
-  for (const [name, canonical] of [
-    ['map-0.1.schema.json', 'public/schemas/map-0.1.schema.json'],
-    ['content-review-0.1.schema.json', 'public/schemas/content-review-0.1.schema.json'],
-    ['content-review-0.2.schema.json', 'public/schemas/content-review-0.2.schema.json'],
-  ]) {
-    const expected = readFileSync(canonical, 'utf8');
-    for (const path of [
-      `npm/dist/${name}`,
-      `python/src/mailschema/${name}`,
-      `rust/schemas/${name}`,
-    ])
-      assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), expected);
-  }
   assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.1.schema.json');
   assert.equal(
     getContentReviewSchema().$id,

@@ -61,11 +61,13 @@ A contribution file is proposed in a pull request. Contributors can start that p
 
 Review checks the interaction's scope, existing standards, contributor and maintainer attribution, requested maturity, exact changes and evidence claims. Schema validation is not editorial acceptance. A requested Draft status requires a version and maintained specification link; the cross-page tests check that the linked definition exists and agrees with the record's shared metadata and operation headings.
 
-After review and merge, a publication process can build the collection from the accepted files. In a pull-request preview, records show the proposed change. Inclusion alone does not make a proposal a stable standard or prove a product's compatibility.
+After review and merge, the normal site build publishes the collection from the accepted files. In a pull-request preview, records show the proposed change. Inclusion alone does not make a proposal a stable standard or prove a product's compatibility.
+
+Registry publication is independent of language-package publication. Adding a type does not require npm, PyPI, crates.io or Go releases. Implementations consume the exact versioned schema and contract artifacts for the types they support and can vendor them for offline use. A package release is appropriate only when that package's code, API or deliberately bundled reference contracts change.
 
 ## Consumer exports
 
-- `/registry/catalog.json`: current records, digests, snapshots and implementation declarations.
+- `/registry/catalog.json`: current records, snapshots, implementation declarations and every executable contract version with exact digests.
 - `/registry/records/<type>.json`: a current record and digest.
 - `/registry/records/<type>.record.json`: the raw current record, without an envelope, for validation and downloads.
 - `/registry/snapshots/<digest>.json`: the exact historical record referenced by a declaration.

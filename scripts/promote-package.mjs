@@ -4,6 +4,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { materializePackageArtifacts } from '../src/lib/package-artifacts.ts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const packageName = 'mailschema';
@@ -51,55 +52,6 @@ function verifyIntegrity(bytes, integrity) {
     return createHash(algorithm).update(bytes).digest('base64') === expected;
   });
   if (!matched) throw new Error('Downloaded npm artifact does not match its published integrity.');
-}
-
-async function canonicalContracts(registry) {
-  const contribution = await readFile(resolve(root, 'public/schemas/contribution.schema.json'));
-  const contracts = [
-    ['contribution', contribution],
-    ['map-0.1', await readFile(resolve(root, 'public/schemas/map-0.1.schema.json'))],
-    [
-      'content-review-0.1',
-      await readFile(resolve(root, 'public/schemas/content-review-0.1.schema.json')),
-    ],
-    [
-      'content-review-0.1-contract',
-      await readFile(resolve(root, 'public/contracts/content-review-0.1.json')),
-    ],
-    [
-      'content-review-0.2',
-      await readFile(resolve(root, 'public/schemas/content-review-0.2.schema.json')),
-    ],
-    [
-      'content-review-0.2-contract',
-      await readFile(resolve(root, 'public/contracts/content-review-0.2.json')),
-    ],
-  ];
-  if (registry === 'crates.io') {
-    const schema = JSON.parse(contribution.toString('utf8'));
-    contracts.push([
-      'record',
-      Buffer.from(
-        `${JSON.stringify({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/record' }, null, 2)}\n`,
-      ),
-    ]);
-  }
-  return contracts;
-}
-
-function contractSuffixes(registry) {
-  const prefix = registry === 'npm' ? '/dist/' : registry === 'PyPI' ? '/' : '/schemas/';
-  const separatedContracts = registry === 'crates.io' || registry === 'Go';
-  const contractPrefix = separatedContracts ? '/contracts/' : prefix;
-  return {
-    contribution: `${prefix}contribution.schema.json`,
-    'map-0.1': `${prefix}map-0.1.schema.json`,
-    'content-review-0.1': `${prefix}content-review-0.1.schema.json`,
-    'content-review-0.1-contract': `${contractPrefix}content-review-0.1${separatedContracts ? '' : '.contract'}.json`,
-    'content-review-0.2': `${prefix}content-review-0.2.schema.json`,
-    'content-review-0.2-contract': `${contractPrefix}content-review-0.2${separatedContracts ? '' : '.contract'}.json`,
-    ...(registry === 'crates.io' ? { record: `${prefix}record.schema.json` } : {}),
-  };
 }
 
 async function getJson(url) {
@@ -203,8 +155,11 @@ async function registryArtifact(registry, version) {
 }
 
 async function verify(registry, version) {
-  const contracts = await canonicalContracts(registry);
-  const schema = contracts.find(([name]) => name === 'contribution')[1];
+  const contracts = materializePackageArtifacts(root, registry).map((artifact) => ({
+    ...artifact,
+    bytes: Buffer.from(artifact.bytes),
+  }));
+  const schema = contracts.find((artifact) => artifact.name === 'contribution').bytes;
   const schemaSha256 = sha256(schema);
   const artifact = await registryArtifact(registry, version);
   const bytes = await download(artifact.downloadUrl);
@@ -217,15 +172,13 @@ async function verify(registry, version) {
   const archive = resolve(temporary, artifact.name);
   try {
     await writeFile(archive, bytes);
-    const suffixes = contractSuffixes(registry);
-    for (const [name, expected] of contracts) {
+    for (const contract of contracts) {
+      const suffix = `/${contract.paths[registry]}`;
       const packaged =
-        artifact.archive === 'zip'
-          ? zipEntry(archive, suffixes[name])
-          : tarEntry(archive, suffixes[name]);
-      if (!packaged.equals(expected))
+        artifact.archive === 'zip' ? zipEntry(archive, suffix) : tarEntry(archive, suffix);
+      if (!packaged.equals(contract.bytes))
         throw new Error(
-          `${registry} ${version} does not contain the canonical ${name} contract bytes.`,
+          `${registry} ${version} does not contain the canonical ${contract.name} contract bytes.`,
         );
     }
   } finally {
@@ -237,7 +190,7 @@ async function verify(registry, version) {
     checkedAt: new Date().toISOString(),
     version,
     schemaSha256,
-    contracts: contracts.map(([name, bytes]) => ({ name, sha256: sha256(bytes) })),
+    contracts: contracts.map(({ name, bytes }) => ({ name, sha256: sha256(bytes) })),
     verification:
       'Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.',
     channels: [

@@ -29,15 +29,11 @@ test('validates MAP and Content Review fixtures', async () => {
   assert.equal(result.type.id, 'https://mailschema.org/types/content-review');
 });
 
-test('preserves canonical schema bytes during the build', async () => {
-  for (const name of [
-    'contribution.schema.json',
-    'map-0.1.schema.json',
-    'content-review-0.1.schema.json',
-    'content-review-0.1.contract.json',
-    'content-review-0.2.schema.json',
-    'content-review-0.2.contract.json',
-  ]) {
+test('preserves canonical artifact bytes during the build', async () => {
+  const artifacts = JSON.parse(
+    await readFile(new URL('../artifacts.json', import.meta.url), 'utf8'),
+  );
+  for (const name of artifacts) {
     const source = await readFile(new URL(`../src/${name}`, import.meta.url));
     const built = await readFile(new URL(`../dist/${name}`, import.meta.url));
     assert.deepEqual(built, source);

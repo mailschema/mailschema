@@ -196,12 +196,16 @@ import '../styles/tools.css';
       </a>
     </aside>
     <p class="tools-scope">
-      These packages include MAP 0.1 and Registry validators. The selected public releases have
-      Registry-schema readback evidence; full-contract readback will replace that label with the
-      next changed package releases. They validate documents; they do not establish endpoint trust,
-      grant authorization or send email. Read the{' '}
-      <a href="/specification/profile/">MAP 0.1 execution profile</a> before acting on a message.
-      Package and specification versions are independent.
+      These packages include MAP 0.1 and Registry tooling plus the Content Review reference
+      contracts.{' '}
+      {packageContractCoverage
+        ? 'Public artifact readback verifies every contract bundled in the selected releases.'
+        : 'The selected releases retain their recorded verification scope.'}{' '}
+      Registry types are published independently; adding a type does not require releases in every
+      language. Implementations select and vendor the exact type versions they support. The packages
+      validate documents; they do not establish endpoint trust, grant authorization or send email.
+      Read the <a href="/specification/profile/">MAP 0.1 execution profile</a> before acting on a
+      message. Package and specification versions are independent.
     </p>
   </main>
 </Base>

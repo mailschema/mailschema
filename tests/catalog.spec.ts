@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { typeRecords, typeHref, typeStatusLabel } from '../src/data/types';
+import { typeContracts, typeRecords, typeHref, typeStatusLabel } from '../src/data/types';
 
 test('type collection stays consistent across Types, Registry, detail pages, About and search', async ({
   page,
@@ -58,6 +58,42 @@ test('type collection stays consistent across Types, Registry, detail pages, Abo
     );
     await expect(page.locator('#example')).toHaveText(type.example.title);
     await expect(page.locator('#example + ol li')).toHaveText(type.example.steps);
+    const contracts = typeContracts.filter((contract) => contract.type === type.slug);
+    if (contracts.length) {
+      await expect(page.getByRole('heading', { name: 'Executable contracts' })).toBeVisible();
+      await expect(page.locator('a[href="/registry/catalog.json"]')).toBeVisible();
+      for (const contract of contracts)
+        await expect(
+          page.getByRole('link', { name: `Version ${contract.version} contract`, exact: true }),
+        ).toHaveAttribute('href', contract.contract.url);
+    } else {
+      await expect(page.locator('article')).toContainText(
+        'A machine-readable representation has not yet been selected.',
+      );
+    }
+  }
+});
+
+test('Registry catalogue indexes every executable contract without a mutable latest alias', async ({
+  request,
+}) => {
+  const response = await request.get('/registry/catalog.json');
+  expect(response.ok()).toBe(true);
+  const catalog = await response.json();
+  expect(catalog.contracts).toEqual(typeContracts);
+  expect(catalog.contracts).toHaveLength(2);
+  expect(
+    catalog.contracts.map(
+      (entry: { type: string; version: string }) => `${entry.type}@${entry.version}`,
+    ),
+  ).toEqual(['content-review@0.1', 'content-review@0.2']);
+  for (const entry of catalog.contracts as Record<string, any>[]) {
+    expect(entry.contract.url).toMatch(/^https:\/\/mailschema\.org\/contracts\//);
+    expect(entry.contract.canonicalDigest).toMatch(/^sha-256:[a-f0-9]{64}$/);
+    expect(entry.contract.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(entry.requestSchema.canonicalDigest).toMatch(/^sha-256:[a-f0-9]{64}$/);
+    expect(entry.requestSchema.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(entry).not.toHaveProperty('latest');
   }
 });
 
