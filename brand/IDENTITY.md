@@ -1,6 +1,6 @@
 # MailSchema / MAP identity
 
-Founder-selected direction: **03**, the second image displayed. The founder called it “the second one with yellow and blue”. Selection recorded 22 September 2026.
+Selected direction: **03**. Selection recorded 22 September 2026.
 
 ## Names
 
@@ -10,12 +10,12 @@ Project: MailSchema. Specification: Mail Action Protocol (MAP). Shared definitio
 
 Charcoal foundation; acid yellow-lime for action; blue-violet for structure; mist-light specification reader. Plus Jakarta Sans wordmark and type family from the selected board. A three-panel symbol connects the identity with the describe/request/resolve model.
 
-[Selected original board](direction-03-selected.png). Alternatives are preserved in the strategy archive. These are original generated files, preserved without overwriting old A-Mail assets.
+[Selected original board](direction-03-selected.png). Alternatives are preserved in the strategy archive. The selected assets remain separate from earlier A-Mail explorations.
 
-Generated using built-in imagegen from the [fresh prompt set](prompts.json), with no old images as references. Two supplementary retry jobs have no verified returned asset and are not represented as completed deliverables.
+The [prompt set](prompts.json) records the identity brief. Earlier A-Mail images were not used as references.
 
 ## Website
 
-The user requested a simple Astro site and a refined complete specification experience. Owning project: `/Users/kam/dev/mailschema`. Its PRODUCT.md and DESIGN.md preserve product and visual context. Implemented public surfaces include the homepage, MAP reader, Types, Registry, contribution guide, local search and interactive Content Review simulation.
+The project uses Astro for a focused specification experience. `PRODUCT.md` and `DESIGN.md` preserve product and visual context. Implemented public surfaces include the homepage, MAP reader, Types, Registry, contribution guide, local search and interactive Content Review simulation.
 
 The selected board is a visual reference, not a claim that product compatibility or the wire specification exists. The site labels draft and planned work accurately.
