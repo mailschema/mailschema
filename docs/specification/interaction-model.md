@@ -20,7 +20,7 @@ The service includes enough information for a client to identify the interaction
 | Execution route        | The service endpoint that accepts requests.                                          |
 | Human route            | A normal service interface through which a person can complete the interaction.      |
 
-The [MAP 0.1 profile](/specification/profile/) assigns these concepts exact JSON fields and binds descriptions to a versioned profile, type record and target revision.
+The [MAP 0.1 profile](/specification/profile/) assigns these concepts exact JSON fields and binds descriptions to a versioned profile, canonical type contract and target revision.
 
 ## Request
 

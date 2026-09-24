@@ -69,7 +69,7 @@
     },
     {
       "path": "src/map/reference.ts",
-      "sha256": "4d72d9824a357c3894735a166f9865eb247bf25a0f212b578a9ebe4fbee386a8"
+      "sha256": "d557436b24dc0fe7ce9d7e215fc3e8d7998ba09f3d828c99431ec93552fd7677"
     },
     {
       "path": "conformance/map-0.1/cases.mjs",

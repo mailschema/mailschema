@@ -30,7 +30,7 @@ For proposed types, the Registry record should identify existing definitions and
 
 The public fixture kit exercises description, request, result, retry and refusal behaviour without a product account. Its reference tests cover completion, feedback, retry, recovery, conflict, refusal, stale targets, expiry, type contracts, approval, pending work, MIME structure, JSON-LD expansion and endpoint trust. Persistent concurrency, crash recovery and deployed provider delivery remain separate implementation evidence.
 
-The first product compatibility test will apply Content Review to two independently configured action services using the same client review logic. It will exercise feedback, editing through the service's own workflow, approval, stale revisions, permission failures and recovery after a lost response. Sending a description to one action service is an integration test; cross-service compatibility requires a second execution service. The recorded product runs remain outstanding.
+The first product run will carry a Content Review description through Nitrosend, execute an authenticated operation against the exact revision and retain the result. It will also record a permission or stale-target refusal. This establishes deployed first-party behaviour. A later cross-service test will run the same client logic against a second execution service; only that can support a cross-service interoperability claim.
 
 Two implementations under common ownership can provide useful compatibility evidence. They do not establish independent adoption.
 
@@ -44,4 +44,4 @@ Registry inclusion does not grant execution permission. Clients need not consult
 
 ## Current interoperability status
 
-MAP 0.1 publishes a working draft, a canonical Content Review contract and a local reference suite. The next evidence threshold is a reproducible exchange through deployed services, including provider delivery, durable concurrent request claiming, recovery after interruption and the human approval path. An implementation outside the initial common-ownership group remains a separate adoption milestone.
+MAP 0.1 publishes a working draft, a canonical Content Review contract and a local reference suite. The next product evidence is one reproducible provider-delivered Content Review exchange through Nitrosend. Cross-service interoperability and an implementation outside the initial common-ownership group remain separate milestones.

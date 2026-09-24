@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "status": "selected",
-  "date": "2026-09-22",
+  "date": "2026-09-24",
   "timezone": "Australia/Sydney",
   "project": {
     "name": "MailSchema",
@@ -22,7 +22,8 @@
     "core": "Common requirements remain inside the first MAP specification."
   },
   "implementation": {
-    "proof": "Content Review across independently configured services",
+    "first_product_proof": "One reproducible Content Review exchange through Nitrosend",
+    "independent_adoption_gate": "A separately operated implementation reproduces a core Content Review case",
     "requires_vendor_account_for_compatibility": false
   },
   "selected_expansion": "Mail Action Protocol",
