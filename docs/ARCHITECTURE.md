@@ -91,9 +91,9 @@ Full specification prose remains authored Markdown rendered by Sourcey. Linked t
 
 ## Vendor intake
 
-The selected first implementation combines a website checker with Git-based review. One contribution format covers new types, amendments and implementation declarations. Contributors and maintainers are record data; declarations belong to the exact type version, profile and record digest. The website, CLI, page renderer and JSON exports share the validation and projection pipeline. See [CONTRIBUTIONS.md](CONTRIBUTIONS.md) for the channel tradeoffs and operating process.
+The selected implementation combines browser intake with Git-based review. One contribution format covers new types, amendments and implementation declarations. Contributors and maintainers are record data; declarations belong to the exact type version, profile and record digest. The website, CLI, page renderer and JSON exports share the validation and projection pipeline. See [CONTRIBUTIONS.md](CONTRIBUTIONS.md) for the operating process.
 
-Local ingestion, previews, public repository setup and contribution terms are implemented. A website-to-pull-request connection remains optional future work. There are no real vendor submissions in the current collection; examples stay separate from it.
+The browser checks a contribution against the current Registry, previews it and opens the exact checked JSON in GitHub's new-file flow. GitHub handles sign-in, a fork or branch and the pull request. Accepted Registry state still comes only from reviewed files merged into this repository. No GitHub App, submission database, private account system or second moderation queue is required. There are no real vendor submissions in the current collection; examples stay separate from it.
 
 ## Package documentation
 

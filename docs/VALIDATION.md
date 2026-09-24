@@ -28,7 +28,7 @@
 - Astro diagnostics reported zero errors, warnings and hints across 63 files.
 - The static build completed and Sourcey generated seven specification pages, including the MAP 0.1 profile.
 - The complete `.eml` and JSON fixtures are emitted directly from their canonical files under `/fixtures/map-0.1/`.
-- All 27 Playwright checks passed. They cover every public route and internal destination, Registry compilation and ingestion, contribution previews, full-contract package evidence, four language tabs, clipboard fallbacks, mobile layout, no-JavaScript reading, search, exact review behavior and automated WCAG AA checks.
+- All 27 Playwright checks passed. They cover every public route and internal destination, Registry compilation and ingestion, contribution previews, the browser-to-GitHub handoff and its large-file fallback, full-contract package evidence, four language tabs, clipboard fallbacks, mobile layout, no-JavaScript reading, search, exact review behavior and automated WCAG AA checks.
 - The browser-local example still sends no email and makes no product-conformance claim.
 - MailSchema's existing project and MAP social cards remain the share previews for Astro and Sourcey pages.
 - Public readback returned 200 for the homepage, specification reader, Tools page, Registry pages, schemas, profile and context; canonical content types were preserved for JSON, JSON-LD and the complete email fixture.

@@ -4,7 +4,10 @@ import type { Contribution } from '../registry/model';
 const form = document.querySelector<HTMLFormElement>('#contribution-form')!;
 const editor = document.querySelector<HTMLTextAreaElement>('#contribution-json')!;
 const fileInput = document.querySelector<HTMLInputElement>('#contribution-file')!;
-const download = form.querySelector<HTMLButtonElement>('[data-download]')!;
+const download = document.querySelector<HTMLButtonElement>('[data-download]')!;
+const submit = document.querySelector<HTMLAnchorElement>('[data-submit]')!;
+const submitLabel = submit.querySelector<HTMLElement>('[data-submit-label]')!;
+const submitNote = document.querySelector<HTMLElement>('[data-submit-note]')!;
 const status = form.querySelector<HTMLElement>('[data-check-status]')!;
 const errors = form.querySelector<HTMLElement>('.contribution-errors')!;
 const preview = document.querySelector<HTMLElement>('[data-preview]')!;
@@ -15,8 +18,28 @@ function reset() {
   generation++;
   checked = undefined;
   download.disabled = true;
+  submit.removeAttribute('href');
+  submit.setAttribute('aria-disabled', 'true');
+  submit.tabIndex = -1;
   preview.hidden = errors.hidden = true;
   status.textContent = '';
+}
+
+function githubSubmission(input: Contribution) {
+  const filename = `${input.id}.json`;
+  const value = JSON.stringify(input, null, 2) + '\n';
+  const prefilledUrl = `https://github.com/mailschema/mailschema/new/main/registry/contributions?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(value)}`;
+  return prefilledUrl.length <= 7000
+    ? {
+        url: prefilledUrl,
+        label: 'Continue in GitHub',
+        note: 'The checked JSON will be prefilled in GitHub.',
+      }
+    : {
+        url: 'https://github.com/mailschema/mailschema/upload/main/registry/contributions',
+        label: 'Upload in GitHub',
+        note: 'This contribution is too large to prefill. Download the checked JSON, then upload it in GitHub.',
+      };
 }
 function showErrors(messages: string[]) {
   errors.querySelector('ul')!.replaceChildren(
@@ -132,6 +155,12 @@ form.addEventListener('submit', async (event) => {
     preview.querySelector('[data-preview-facts]')!.replaceChildren(...facts);
     preview.hidden = false;
     download.disabled = false;
+    const submission = githubSubmission(input);
+    submit.href = submission.url;
+    submitLabel.textContent = submission.label;
+    submitNote.textContent = submission.note;
+    submit.removeAttribute('aria-disabled');
+    submit.tabIndex = 0;
     status.textContent = 'File checks passed.';
   } catch (error) {
     if (generation === ticket)
