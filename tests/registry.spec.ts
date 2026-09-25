@@ -325,8 +325,12 @@ test('vendor contributions produce real Registry pages, history and version-boun
       readFileSync(resolve(directory, 'dist/registry/catalog.json'), 'utf8'),
     );
     expect(catalog.types).toHaveLength(baseline.types.length + 1);
-    expect(catalog.contributions).toHaveLength(3);
-    expect(catalog.implementations[0].typeDigest).toBe(example('implementation').typeDigest);
+    expect(catalog.contributions).toHaveLength(baseline.contributions.length + 3);
+    const implementation = example('implementation');
+    expect(
+      catalog.implementations.find((entry: { id: string }) => entry.id === implementation.id)
+        .typeDigest,
+    ).toBe(implementation.typeDigest);
     // A standalone production build must reject packages advertised against a different schema.
     const schemaFile = resolve(directory, 'public/schemas/contribution.schema.json');
     writeFileSync(schemaFile, readFileSync(schemaFile, 'utf8') + '\n');

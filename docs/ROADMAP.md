@@ -2,7 +2,7 @@
 
 Status date: 24 September 2026. This is the canonical dependency-ordered plan for publishing, proving and advancing MailSchema and Mail Action Protocol (MAP).
 
-The [scope and readiness audit](SCOPE-AUDIT.md) reopened milestones 2–4. The protocol repairs now pass their reference and conformance gates, and the first-party Content Review boundary is deployed. A live provider-delivered run, changed package releases and independent adoption remain separate evidence gates. Its findings F1–F11 and acceptance criteria continue to govern those claims.
+The [scope and readiness audit](SCOPE-AUDIT.md) reopened milestones 2–4. The protocol repairs now pass their reference and conformance gates, and the first-party Content Review boundary is deployed. A first-party provider-delivered run has passed ([validation](VALIDATION.md#provider-delivered-run)); changed package releases and independent adoption remain separate evidence gates. Its findings F1–F11 and acceptance criteria continue to govern those claims.
 
 ## Objective
 
