@@ -1,0 +1,296 @@
+{
+  "schema": "nitrosend.map_content_review.production_dogfood.v1",
+  "run_id": "map-content-review-2026-09-25T00-33-55-634Z",
+  "started_at": "2026-09-25T00:33:55.635Z",
+  "finished_at": "2026-09-25T00:35:00.564Z",
+  "duration_ms": 64929,
+  "status": "passed",
+  "deployed_revision": "5b8ac80aaf2314a43fc28e645bdd24bd7920a730",
+  "content_review": {
+    "status": "passed",
+    "account_id": 1,
+    "brand_id": 1,
+    "flow_id": 14572,
+    "inbox_id": 14,
+    "artifacts": {
+      "profile": "sha-256:81041622121c5e65aa8a069b51e37a80cffa0bbc2030b4373e087e1df5d791b7",
+      "context": "sha-256:feacf153c7ab0908dfff2c0509c5042a1c05a4ccb1cd6f47553feb24a999b46c",
+      "map_schema": "sha-256:c39befeecf8643e8beda1f53a8d1411482b68ddf14974f3806cfa95776103f85",
+      "content_review_schema": "sha-256:d2286ffe410cceae56f9caa145634fd9613f5ce51e11ba089cad67b9f62259b7",
+      "content_review_contract": "sha-256:6ee5b086138799f70f2489e851e1db6e11ff91cd1141bd36fe202a47d8c1e637"
+    },
+    "service": {
+      "resource": "https://api.nitrosend.com/v1/my/map",
+      "id": "https://api.nitrosend.com/services/content-review",
+      "executionUrl": "https://api.nitrosend.com/v1/my/map/actions",
+      "resultUrlTemplate": "https://api.nitrosend.com/v1/my/map/results/{requestId}"
+    },
+    "revisions": {
+      "reviewed": 1739,
+      "approved": 1740,
+      "blocked": 1741
+    },
+    "messages": {
+      "review_to_inbox": 4211554,
+      "review_to_mailbox": 4211555,
+      "approval_to_mailbox": 4211556
+    },
+    "deliveries": {
+      "review_mailbox": {
+        "message_id": "010001a0d5fbc936-003a31fc-aff5-45bd-afb1-023c77c867aa-000000@email.amazonses.com",
+        "raw_sha256": "sha-256:90ef93dae57acf930c7b35f0044158fecb5221caf257f3b1f0500e6921a59d4b",
+        "raw_bytes": 6940,
+        "representation": "multipart/related",
+        "readable_html": true,
+        "structured_part": {
+          "transfer_encoding": "quoted-printable",
+          "payload_sha256": "sha-256:15672bf794a8bf76af786cfcc8f74e131f6891c57dc3be225aa78ff1be279acc",
+          "payload_bytes": 1561
+        },
+        "interaction_id": "urn:uuid:ef75f7b0-28dc-5b92-bfe1-515277db23a6",
+        "expanded_type": "https://mailschema.org/ns/map#MailAction",
+        "authentication": {
+          "from_domain": "sourcey.com",
+          "receiver": {
+            "authserv_id": "mx.zohomail.eu",
+            "dmarc": "pass",
+            "dkim": "pass",
+            "spf": "pass"
+          },
+          "verified_dkim": [
+            {
+              "domain": "amazonses.com",
+              "selector": "224i4yxa5dv7c2xz3womw6peuasteono",
+              "aligned": false
+            },
+            {
+              "domain": "sourcey.com",
+              "selector": "ns1",
+              "aligned": true
+            }
+          ]
+        }
+      },
+      "review_inbox": {
+        "conversation_id": 60917,
+        "conversation_message_id": 61018,
+        "extraction": "valid",
+        "payload_sha256": "sha-256:15672bf794a8bf76af786cfcc8f74e131f6891c57dc3be225aa78ff1be279acc",
+        "receiver_verdicts": {
+          "spf": "pass",
+          "dkim": "pass",
+          "dmarc": "pass"
+        }
+      },
+      "approval_mailbox": {
+        "message_id": "010001a0d5fc446e-4169f4f4-7e93-434c-abd7-9602ca96dea0-000000@email.amazonses.com",
+        "raw_sha256": "sha-256:733d061ac02a26b8bf7f3ed467226cfd3050b3937e319793c50cdc0f796313eb",
+        "raw_bytes": 6934,
+        "representation": "multipart/related",
+        "readable_html": true,
+        "structured_part": {
+          "transfer_encoding": "quoted-printable",
+          "payload_sha256": "sha-256:41f323230f8e8dff95c3a78ee748e167d6c097f6df9a26e87b5cf9c7b1ac2e0e",
+          "payload_bytes": 1561
+        },
+        "interaction_id": "urn:uuid:3fc7a95d-56a9-5a07-889b-b652f4e01e22",
+        "expanded_type": "https://mailschema.org/ns/map#MailAction",
+        "authentication": {
+          "from_domain": "sourcey.com",
+          "receiver": {
+            "authserv_id": "mx.zohomail.eu",
+            "dmarc": "pass",
+            "dkim": "pass",
+            "spf": "pass"
+          },
+          "verified_dkim": [
+            {
+              "domain": "amazonses.com",
+              "selector": "224i4yxa5dv7c2xz3womw6peuasteono",
+              "aligned": false
+            },
+            {
+              "domain": "sourcey.com",
+              "selector": "ns1",
+              "aligned": true
+            }
+          ]
+        }
+      }
+    },
+    "exchanges": [
+      {
+        "step": "request changes",
+        "operation": "request-changes",
+        "request_id": "urn:uuid:719d235d-48a5-45bd-a0b3-e3fc969f7c60",
+        "status": 200,
+        "outcome": "accepted",
+        "response_sha256": "sha-256:40b67428bfcc16d962c15cdf9c4ab7691132dcbb85302b9457d9b681736fb47c"
+      },
+      {
+        "step": "duplicate delivery",
+        "operation": "request-changes",
+        "request_id": "urn:uuid:719d235d-48a5-45bd-a0b3-e3fc969f7c60",
+        "status": 200,
+        "outcome": "accepted",
+        "response_sha256": "sha-256:1764a0857ed6745fcd54526fbcb040389c9a738eb86f31445b460105d004b57a"
+      },
+      {
+        "step": "changed input under a used identifier",
+        "operation": "request-changes",
+        "request_id": "urn:uuid:719d235d-48a5-45bd-a0b3-e3fc969f7c60",
+        "status": 409,
+        "outcome": "idempotency-conflict",
+        "response_sha256": "sha-256:d04393c430f752dd7868e2f15ca60d5097eb1ff24d2830c3b6c26b985e965f51"
+      },
+      {
+        "step": "recovery after a lost response",
+        "operation": "request-changes",
+        "request_id": "urn:uuid:2e9120a1-14ec-42f5-acc1-ec9534607222",
+        "status": 200,
+        "outcome": "accepted",
+        "response_sha256": "sha-256:9f79cd8c1ebec6325a9bf574b2293be2150823045d2f70767b336d2c5db9ca8c"
+      },
+      {
+        "step": "retry after a lost response",
+        "operation": "request-changes",
+        "request_id": "urn:uuid:2e9120a1-14ec-42f5-acc1-ec9534607222",
+        "status": 200,
+        "outcome": "accepted",
+        "response_sha256": "sha-256:9f79cd8c1ebec6325a9bf574b2293be2150823045d2f70767b336d2c5db9ca8c"
+      },
+      {
+        "step": "approval of a superseded revision",
+        "operation": "approve",
+        "request_id": "urn:uuid:4f5a494f-4859-4d2f-9438-5ec0e28e1d84",
+        "status": 409,
+        "outcome": "stale-target",
+        "response_sha256": "sha-256:ce36070640738c7d0f7980c0defb6024b7a41efe7dd3e72a796eb941b8113947"
+      },
+      {
+        "step": "approval proposed for a person to decide",
+        "operation": "approve",
+        "request_id": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+        "status": 202,
+        "outcome": "approval-required",
+        "response_sha256": "sha-256:61d88e112cb512a7878cf29a9548ddfe9f046ae4c0a95b9d9463d1ba0bf11a8c"
+      },
+      {
+        "step": "recovery after the person approved",
+        "operation": "approve",
+        "request_id": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+        "status": 200,
+        "outcome": "completed",
+        "response_sha256": "sha-256:c56d814597c95f0f17c04ad0f2ca3dbdc2ce3a4919c717b1b6b472b13a826406"
+      },
+      {
+        "step": "retry after the person approved",
+        "operation": "approve",
+        "request_id": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+        "status": 200,
+        "outcome": "completed",
+        "response_sha256": "sha-256:c56d814597c95f0f17c04ad0f2ca3dbdc2ce3a4919c717b1b6b472b13a826406"
+      },
+      {
+        "step": "approval proposed for content the rules block",
+        "operation": "approve",
+        "request_id": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8",
+        "status": 202,
+        "outcome": "approval-required",
+        "response_sha256": "sha-256:6f274c5372d6e7ac8e56e97c47a5bf88e93caadf98ecec4d96c212388ff19133"
+      },
+      {
+        "step": "recovery after a refused decision",
+        "operation": "approve",
+        "request_id": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8",
+        "status": 202,
+        "outcome": "approval-required",
+        "response_sha256": "sha-256:15258e2351def060efb4d499c01438918067858a2405be9dcc8b4a37866c6926"
+      },
+      {
+        "step": "recovery after the person declined",
+        "operation": "approve",
+        "request_id": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8",
+        "status": 200,
+        "outcome": "failed",
+        "reason": "declined",
+        "response_sha256": "sha-256:43d572d63467d07ebec5d591b3a381f4a5acb54532d57f25344dbe50e54d7feb"
+      }
+    ],
+    "decisions": [
+      {
+        "step": "the agent tries to decide its own proposal",
+        "actor": "agent",
+        "decision": "approve",
+        "request_id": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+        "status": 403,
+        "outcome": "refused"
+      },
+      {
+        "step": "the person approves the proposal",
+        "actor": "reviewer",
+        "decision": "approve",
+        "request_id": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+        "status": 200,
+        "outcome": "completed"
+      },
+      {
+        "step": "the sending rules refuse the person's approval",
+        "actor": "reviewer",
+        "decision": "approve",
+        "request_id": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8",
+        "status": 403,
+        "outcome": "approval_refused"
+      },
+      {
+        "step": "the person declines the blocked proposal",
+        "actor": "reviewer",
+        "decision": "decline",
+        "request_id": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8",
+        "status": 200,
+        "outcome": "failed",
+        "reason": "declined"
+      }
+    ],
+    "effects": {
+      "feedback_recorded": 2,
+      "approval": {
+        "revision": 1740,
+        "before": "pending_review",
+        "after": "approved"
+      }
+    }
+  },
+  "audit": {
+    "schema": "nitrosend.map_content_review.production_audit.v1",
+    "run_id": "map-content-review-2026-09-25T00-33-55-634Z",
+    "status": "passed",
+    "principal": "user:1",
+    "actors": {
+      "agent": "APIKey:10459",
+      "reviewer": "User:1"
+    },
+    "execution_records": 5,
+    "decisions": {
+      "approved": "urn:uuid:3673155d-61cd-43d1-b2e3-8c7b36f10bfe",
+      "declined": "urn:uuid:80f5e32a-129a-40f8-8b40-2f5a87245ec8"
+    },
+    "revision_states": {
+      "reviewed": "pending_review",
+      "approved": "approved",
+      "blocked": "pending_review"
+    },
+    "approved_by": "map:user:1",
+    "messages_sent": 3,
+    "deliveries_bound": 3,
+    "cleanup": {
+      "product_configuration_created": false,
+      "flow_published": false
+    }
+  },
+  "security_evidence": {
+    "secret_matches": 0,
+    "bearer_matches": 0,
+    "jwt_matches": 0
+  }
+}

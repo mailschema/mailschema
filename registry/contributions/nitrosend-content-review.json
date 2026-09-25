@@ -1,0 +1,29 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "nitrosend-content-review",
+  "kind": "implementation",
+  "contributor": {
+    "name": "Nitrosend",
+    "url": "https://nitrosend.com"
+  },
+  "source": "https://api.nitrosend.com/.well-known/oauth-protected-resource/v1/my/map",
+  "summary": "First-party test report: Nitrosend is operated by the MailSchema maintainers, so this is not independent evidence of interoperability. Nitrosend's production API offers Content Review 0.2 under the MAP 0.1 profile for email flow revisions. An agent holding an API key can request changes or propose approval; a signed-in person decides every approval; the sending rules can refuse an approval without ending the proposal. The service publishes its MAP configuration as RFC 9728 protected resource metadata.",
+  "type": "content-review",
+  "typeVersion": "0.2",
+  "typeDigest": "bfb8a22e8637dc719fc0666c8e77d492d14d64f4a6675f1ba58f2d11f1772b01",
+  "profile": "https://mailschema.org/profiles/map/0.1",
+  "product": {
+    "name": "Nitrosend",
+    "url": "https://nitrosend.com"
+  },
+  "operations": [
+    "request-changes",
+    "approve"
+  ],
+  "evidence": {
+    "kind": "test-report",
+    "url": "https://github.com/mailschema/mailschema/blob/main/docs/evidence/nitrosend-map-content-review-2026-09-25.json",
+    "reproduction": "Nitrosend's production dogfood harness (dogfood/map-content-review in the Nitrosend repository) ran against deployed revision 5b8ac80aaf2314a43fc28e645bdd24bd7920a730. It needs Nitrosend operator credentials, so it cannot be rerun outside Nitrosend. The agent was configured only with the MAP protected resource; it fetched and pinned the canonical MAP 0.1 profile, context, schema and Content Review 0.2 contract by digest, and refused any description that did not match the service's published configuration. Nitrosend sent a real review email to an independent mailbox, whose raw copy was preserved; the harness extracted the designated JSON-LD part, checked it against the issued description and schemas, and verified the sender's aligned DKIM signature over the received bytes. It then ran every exchange below, and a read-only production audit checked the recorded requests, principal, actors, revision states and the Message-ID binding of each received copy.",
+    "results": "Passed, run map-content-review-2026-09-25T00-33-55-634Z; receipt sha-256:3425f109e69555807d6815369d6be936cf2a85adfeb642b47c840f8ce03c9d26. request-changes: 200 accepted; duplicate delivery replayed without a second effect; changed input under a used identifier: 409 idempotency-conflict; lost response recovered from the result resource and retried: 200. approve of a superseded revision: 409 stale-target. approve proposed by the agent: 202 approval-required; the agent deciding its own proposal: 403 refused; the person approving: 200 completed, recovered by the agent. approve of content the sending rules block: 202 approval-required; the person's approval refused by the rules: 403, proposal unchanged; the person declining: failed (declined). Receiver verdicts DMARC, DKIM and SPF pass; sourcey.com DKIM verified and aligned. Production audit passed."
+  }
+}
