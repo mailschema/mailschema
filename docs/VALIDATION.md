@@ -12,9 +12,9 @@
 
 ## Packages
 
-- `docs/releases/current.json` selects npm `0.1.4`, PyPI and crates.io `0.1.3`, and Go `v0.1.1`: the Content Review 0.2 releases, on MAP 0.1. Their immutable evidence binds every contract each ships and was verified by public readback at promotion. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched contract digest.
+- `docs/releases/current.json` selects RubyGems `0.2.0` on MAP 0.2, and npm `0.1.4`, PyPI and crates.io `0.1.3`, and Go `v0.1.1`: the Content Review 0.2 releases, on MAP 0.1. Their immutable evidence binds every contract each ships and was verified by public readback at promotion. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched contract digest.
 - Eight local distribution checks passed: declared versions, the preparation manifest, maintained repository metadata, removal of earlier build output, exact artifact bytes for every registry, compiled validation, Registry reference checks and CLI behavior.
-- The Ruby gem `0.2.0` passed its 53 tests and 13,204 assertions, RuboCop and `rbs validate` on Ruby 3.3, 3.4 and 4.0, and built. It will publish from `mailschema/ruby`, created with the release, and joins the selected set after public readback. MAP 0.2 releases of the other packages follow the cutover.
+- The Ruby gem `0.2.0` passed its 53 tests and 13,204 assertions, RuboCop and `rbs validate` on Ruby 3.3, 3.4 and 4.0, and built. It was published from [`mailschema/ruby`](https://github.com/mailschema/ruby) through RubyGems trusted publishing, with no stored key, and joined the selected set after public readback. MAP 0.2 releases of the other packages follow the cutover.
 
 ## Site
 
@@ -26,7 +26,7 @@
 - All 34 Playwright checks passed. They cover every public route and internal destination, Registry compilation, ingestion and archived snapshots, the catalogue's contract formats, contribution previews, the browser-to-GitHub handoff and its large-file fallback, full-contract package evidence, four language tabs, clipboard fallbacks, mobile layout, no-JavaScript reading, search, exact review behavior and automated WCAG AA checks.
 - The browser-local example still sends no email and makes no product-conformance claim.
 - MailSchema's existing project and MAP social cards remain the share previews for Astro and Sourcey pages.
-- Public readback of the deployment before this cutover returned 200 for the homepage, specification reader, Tools page, Registry pages, schemas, profile and context; canonical content types were preserved for JSON, JSON-LD and the complete email fixture. It is repeated after the MAP 0.2 deployment.
+- Public readback of the deployment before this cutover returned 200 for the homepage, specification reader, Tools page, Registry pages, schemas, profile and context; canonical content types were preserved for JSON, JSON-LD and the complete email fixture. After the MAP 0.2 deployment, the same readback returned 200 with the same content types, and the served core schema, context and profile record matched their pinned SHA-256 digests.
 - `www.mailschema.org` redirects permanently to the apex while preserving the path and query string.
 
 ## Product integration

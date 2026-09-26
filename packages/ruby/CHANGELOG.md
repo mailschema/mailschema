@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-09-25
+## [0.2.0] - 2026-09-26
 
 - First release, for Mail Action Protocol 0.2.
 - Parse MAP documents as I-JSON within the core limits, and canonicalize and digest them with RFC 8785.
