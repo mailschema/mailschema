@@ -1,0 +1,96 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "mailschema-event-response-0-1",
+  "kind": "amendment",
+  "contributor": {
+    "name": "MailSchema"
+  },
+  "summary": "0.1 · Working draft. Executable on MAP 0.2. Identity and revision stay iTIP’s; the carried iCalendar part is bound by the target digest, and replies can be changed.",
+  "baseDigest": "faeaf9c3d744f6ce6acb0b639429b59430b797c83c91ce93cf1a47896969e800",
+  "record": {
+    "slug": "event-response",
+    "name": "Event Response",
+    "summary": "Tell an organizer whether an invitee expects to attend.",
+    "category": "Calendar",
+    "status": "Draft",
+    "version": "0.1",
+    "profile": "https://mailschema.org/profiles/map/0.2",
+    "overview": "An invitation asks whether the recipient will attend an event or one occurrence of it. iCalendar and iTIP already define the invitation and the reply. This binding carries the iTIP invitation in the same message and lets a client reply through the organizer’s service with a recorded result, rather than by an unsigned email reply. The event identity, revision rules and response values stay iTIP’s own.",
+    "target": "The event, or one occurrence, identified in the details by its iCalendar UID and optional RECURRENCE-ID, with the attendee’s calendar address. The target revision is the invitation’s SEQUENCE, and the target digest is the SHA-256 of the iCalendar part the message carries, which the client checks.",
+    "operations": [
+      {
+        "id": "accept",
+        "name": "Accept",
+        "description": "Record participation status ACCEPTED for the attendee."
+      },
+      {
+        "id": "decline",
+        "name": "Decline",
+        "description": "Record participation status DECLINED for the attendee."
+      },
+      {
+        "id": "respond-tentatively",
+        "name": "Respond tentatively",
+        "description": "Record participation status TENTATIVE for the attendee."
+      }
+    ],
+    "inputs": "An optional comment for the organizer. A reply concerns the one attendee the details name.",
+    "results": "The participation status recorded for the event or occurrence. A reply can be changed until the invitation expires, and the latest stands, as in iTIP. A reply to an outdated SEQUENCE is refused as stale, so the client reads the update first.",
+    "permissions": "Credential or possession authority. Accepting commits the invitee’s time, so under possession a client needs a prior relationship with the organizer or its principal’s decision; declining needs neither. A client that replies this way does not also send an iTIP reply.",
+    "humanRoute": "The invitation’s normal response in a calendar, or the organizer’s event page.",
+    "example": {
+      "title": "Respond to a workshop invitation",
+      "steps": [
+        "An invitation for a workshop arrives at revision 2 of the event.",
+        "The recipient asks their agent to respond tentatively.",
+        "The organizer’s service records a tentative response for revision 2."
+      ],
+      "exception": "If the organizer has moved the workshop to revision 3, a response to revision 2 is refused as stale. The agent reads the update and answers for the new time. It does not also send an email reply for the same response."
+    },
+    "references": [
+      {
+        "title": "iCalendar · RFC 5545",
+        "href": "https://www.rfc-editor.org/rfc/rfc5545#section-3.2.12",
+        "description": "Defines the participation status values and the UID, RECURRENCE-ID and SEQUENCE properties this binding uses."
+      },
+      {
+        "title": "iTIP · RFC 5546",
+        "href": "https://www.rfc-editor.org/rfc/rfc5546#section-2.1.4",
+        "description": "Defines invitation replies. iTIP leaves rejecting a reply to an outdated revision optional; this binding refuses it as stale."
+      },
+      {
+        "title": "iMIP · RFC 6047",
+        "href": "https://www.rfc-editor.org/rfc/rfc6047#section-2.2",
+        "description": "Carries iTIP in email. Replies are trusted only when signed with S/MIME, which the binding replaces with the service’s own authentication."
+      },
+      {
+        "title": "JSCalendar · RFC 8984",
+        "href": "https://www.rfc-editor.org/rfc/rfc8984",
+        "description": "The JSON form of calendar data, with lowercase participation status values and a web reply method."
+      },
+      {
+        "title": "JSCalendar 2.0 · draft-ietf-calext-jscalendarbis",
+        "href": "https://datatracker.ietf.org/doc/draft-ietf-calext-jscalendarbis/",
+        "description": "Reserves the reply method property pending further IETF work on replies. Internet-Draft; it may change."
+      },
+      {
+        "title": "Schema.org RsvpAction",
+        "href": "https://schema.org/RsvpAction",
+        "description": "Related vocabulary for attendance responses. Its yes, no and maybe values correspond to the three operations."
+      }
+    ],
+    "openQuestions": [
+      "Delegation, the DELEGATED participation status, and replies for more than one attendee.",
+      "Whether this binding could serve as the web reply method that JSCalendar 2.0 leaves to further work."
+    ],
+    "definition": {
+      "label": "Read the Event Response definition",
+      "href": "/specification/event-response/"
+    },
+    "maintainers": [
+      {
+        "name": "MailSchema"
+      }
+    ]
+  }
+}

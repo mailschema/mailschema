@@ -1,0 +1,88 @@
+{
+  "slug": "payment-request",
+  "name": "Payment Request",
+  "summary": "Accept or decline a request to pay, such as an emailed invoice.",
+  "category": "Payments",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema binding proposal",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "overview": "A payee asks a payer to pay a stated amount by a due date, usually with an invoice. The description states the payee, account, amount and due date as data; accepting records the payer’s commitment to pay, and the money moves through the payer’s own payment route. Request-to-pay schemes define the same accept and refuse exchange between banks; this type carries it by email to the payer’s agent.",
+  "target": "The request to pay at the revision the description names. The details state the creditor’s name and account, an optional creditor identifier, the instructed amount as a currency and a decimal string, the due date, remittance text and the invoice. A change to the account or amount is a new revision.",
+  "operations": [
+    {
+      "id": "accept",
+      "name": "Accept",
+      "description": "Commit to pay the requested amount on a stated date."
+    },
+    {
+      "id": "decline",
+      "name": "Decline",
+      "description": "Refuse the request, with a reason."
+    }
+  ],
+  "inputs": "For acceptance, the payment date; the service may refuse a date after the due date. A decline may carry a reason.",
+  "results": "Acceptance completed with the payment date, or a decline completed. The first decides the request.",
+  "permissions": "Credential authority only. Accepting commits the payer’s money, so a client needs its principal’s approval under the payer’s own rules; the payer’s platform can ask for it with Action Approval, using the same amount and account. A client never accepts a request whose account differs from the one on record for the payee until a person has checked it.",
+  "humanRoute": "The payee’s invoice page, or the payer’s banking or accounts-payable interface.",
+  "example": {
+    "title": "Pay a supplier invoice",
+    "steps": [
+      "A supplier emails an invoice for €1,250, due in 30 days.",
+      "The payer’s agent matches it to a purchase order and asks the finance lead to approve the payment through the payer’s own platform.",
+      "After approval, the agent accepts the request with a payment date, and the payer’s bank makes the transfer."
+    ],
+    "exception": "If the invoice’s bank details differ from those on record for the supplier, the agent does not accept it and asks a person to check the change with a known contact. A changed invoice is a new request."
+  },
+  "references": [
+    {
+      "title": "SEPA Request-to-Pay Scheme Rulebook",
+      "href": "https://www.europeanpaymentscouncil.eu/sites/default/files/kb/file/2024-11/EPC014-20%20v4.0%20SEPA%20RTP%20Scheme%20Rulebook.pdf",
+      "description": "The payer’s accept and refuse responses, expiry, cancellation and status updates, built on the ISO 20022 pain.013 and pain.014 messages."
+    },
+    {
+      "title": "Schema.org Invoice",
+      "href": "https://schema.org/Invoice",
+      "description": "Invoice vocabulary, including the total payment due, due date and payment status."
+    },
+    {
+      "title": "Peppol BIS Billing 3.0",
+      "href": "https://docs.peppol.eu/poacc/billing/3.0/bis/",
+      "description": "Structured e-invoices that implement the EN 16931 semantic model in UBL."
+    },
+    {
+      "title": "Payment Request API",
+      "href": "https://www.w3.org/TR/payment-request/",
+      "description": "Browser checkout for a payer on the payee’s site. It does not respond to a request that arrives by email."
+    },
+    {
+      "title": "MailSchema Action Approval",
+      "href": "https://mailschema.org/registry/action-approval",
+      "description": "The payer’s own decision to pay, with the exact amount and payee as its terms."
+    }
+  ],
+  "openQuestions": [
+    "Partial payment, instalments and disputes.",
+    "Whether payee account verification services should be referenced from the details."
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "Executable on MAP 0.2. The details reuse RFC 9396’s payment member names, and the operations mirror the request-to-pay responses."
+    }
+  ],
+  "definition": {
+    "label": "Read the Payment Request definition",
+    "href": "/specification/payment-request/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

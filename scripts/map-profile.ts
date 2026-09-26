@@ -1,178 +1,121 @@
+// Validates the MAP 0.2 profile record, every contract against its Registry
+// record, and every published fixture document against the core and its contract.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
-import canonicalize from 'canonicalize';
-import jsonld from 'jsonld';
-import type { Options as JsonLdOptions } from 'jsonld';
-import { simpleParser } from 'mailparser';
+import { MAP_PROFILE, MapArtifacts, sha256 } from '../src/map/artifacts.ts';
+import { ReferenceMapClient } from '../src/map/reference.ts';
+import { loadRegistry } from '../src/registry/catalog.ts';
 
 const root = process.cwd();
-const readJson = (path: string) => JSON.parse(readFileSync(resolve(root, path), 'utf8'));
-const mapSchema = readJson('public/schemas/map-0.1.schema.json');
-const contentReviewSchema = readJson('public/schemas/content-review-0.2.schema.json');
-const contentReviewContract = readJson('public/contracts/content-review-0.2.json');
-const contentReviewRecord = readJson('registry/types/content-review.json');
-const profile = readJson('public/profiles/map/0.1.json');
-const sha256 = (path: string) =>
-  createHash('sha256')
-    .update(readFileSync(resolve(root, path)))
-    .digest('hex');
-const canonicalDigest = (value: unknown) => {
-  const bytes = canonicalize(value);
-  assert.notEqual(bytes, undefined, 'Canonical artifacts must contain JSON values.');
-  return `sha-256:${createHash('sha256').update(bytes!).digest('hex')}`;
-};
-assert.equal(profile.artifacts.context.sha256, sha256('public/contexts/map-0.1.jsonld'));
-assert.equal(profile.artifacts.schema.sha256, sha256('public/schemas/map-0.1.schema.json'));
-assert.equal(contentReviewContract.id, `https://mailschema.org/types/${contentReviewRecord.slug}`);
-assert.equal(contentReviewContract.version, contentReviewRecord.version);
-assert.equal(contentReviewContract.profile, contentReviewRecord.profile);
-assert.equal(
-  contentReviewContract.requestSchema.canonicalDigest,
-  canonicalDigest(contentReviewSchema),
-  'The Content Review contract must bind its request schema by canonical digest.',
-);
-assert.deepEqual(
-  contentReviewContract.operations.map((operation: { id: string }) => operation.id),
-  contentReviewRecord.operations.map((operation: { id: string }) => operation.id),
-  'The contract and Registry record must name the same operations in the same order.',
-);
-const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
-addFormats(ajv);
-const validateMap = ajv.compile(mapSchema);
-const validateContentReview = ajv.compile(contentReviewSchema);
-
-const validMapFixtures = [
-  'public/fixtures/map-0.1/content-review-description.json',
-  'public/fixtures/map-0.1/request-changes.json',
-  'public/fixtures/map-0.1/approve.json',
-  'public/fixtures/map-0.1/result-completed.json',
-  'public/fixtures/map-0.1/result-approval-required.json',
-  'public/fixtures/map-0.1/result-failed.json',
-  'public/fixtures/map-0.1/problem-stale-target.json',
-];
-for (const path of validMapFixtures) {
-  const value = readJson(path);
-  assert(validateMap(value), `${path}: ${ajv.errorsText(validateMap.errors)}`);
-}
-for (const path of [
-  'public/fixtures/map-0.1/request-changes.json',
-  'public/fixtures/map-0.1/approve.json',
-]) {
-  const value = readJson(path);
-  assert(validateContentReview(value), `${path}: ${ajv.errorsText(validateContentReview.errors)}`);
-}
-
-const description = readJson('public/fixtures/map-0.1/content-review-description.json');
-assert.equal(description.type.contractDigest, canonicalDigest(contentReviewContract));
-assert(new Date(description.expiresAt) > new Date(description.describedAt));
-assert.equal(
-  new Set(description.operations.map((operation: { id: string }) => operation.id)).size,
-  description.operations.length,
-);
-
-assert(
-  !validateContentReview(readJson('public/fixtures/map-0.1/invalid/unknown-operation.json')),
-  'Unknown Content Review operations must be rejected.',
-);
-assert(
-  !validateMap(readJson('public/fixtures/map-0.1/invalid/inline-credential.json')),
-  'Credentials in a MAP description must be rejected.',
-);
-
-const email = await simpleParser(
-  readFileSync(resolve(root, 'public/fixtures/map-0.1/content-review.eml')),
-);
-assert(email.text?.includes('September product update'), 'The email needs a readable text route.');
-assert(
-  typeof email.html === 'string' && email.html.includes('September product update'),
-  'The email needs a readable HTML route.',
-);
-const structuredParts = email.attachments.filter(
-  (attachment) => attachment.contentType === 'application/ld+json',
-);
-assert.equal(
-  structuredParts.length,
-  1,
-  'The email must contain one application/ld+json MIME part.',
-);
-const structuredPart = structuredParts[0];
-const outerContentType = email.headers.get('content-type') as
-  string | { value?: string } | undefined;
-const outerMediaType =
-  typeof outerContentType === 'string'
-    ? outerContentType.split(';', 1)[0]
-    : outerContentType?.value;
-assert.equal(
-  structuredPart.headers.get('content-purpose'),
-  'Machine-readable',
-  'The structured MIME part must carry Content-Purpose: Machine-readable.',
-);
-assert.equal(
-  outerMediaType,
-  'multipart/related',
-  'A MAP action description is a partial representation and must use multipart/related.',
-);
-assert.match(
-  String(structuredPart.headers.get('content-transfer-encoding')),
-  /^(?:base64|quoted-printable)$/i,
-  'The structured MIME part must use a transfer encoding safe for arbitrary JSON bytes.',
-);
-assert.deepEqual(JSON.parse(structuredPart.content.toString('utf8')), description);
-
-for (const path of [
-  'public/fixtures/map-0.1/result-completed.json',
-  'public/fixtures/map-0.1/result-approval-required.json',
-  'public/fixtures/map-0.1/result-failed.json',
-]) {
-  const result = readJson(path);
-  const operation = contentReviewContract.operations.find(
-    (candidate: { id: string }) => candidate.id === result.operation,
+const read = (path: string) => readFileSync(resolve(root, path));
+const profile = JSON.parse(read('public/profiles/map/0.2.json').toString('utf8'));
+assert.equal(profile.id, MAP_PROFILE);
+for (const [name, path] of [
+  ['context', 'public/contexts/map-0.2.jsonld'],
+  ['schema', 'public/schemas/map-0.2.schema.json'],
+  ['contractFormat', 'public/schemas/type-contract-0.2.schema.json'],
+] as const)
+  assert.equal(
+    profile.artifacts[name].sha256,
+    sha256(read(path)),
+    `The profile record binds stale ${name} bytes.`,
   );
-  const declared = operation?.results.find(
-    (candidate: { state: string }) => candidate.state === result.state,
+
+// The Internet-Draft names every artifact the profile record binds, with its digest.
+const draft = read('ietf/draft-mailschema-mail-action-protocol-00.xml').toString('utf8');
+for (const [name, bound] of Object.entries(profile.artifacts) as [
+  string,
+  { url: string; sha256?: string },
+][])
+  if (bound.sha256)
+    assert(
+      draft.includes(bound.url) && draft.includes(bound.sha256),
+      `The Internet-Draft does not bind the current ${name}.`,
+    );
+
+const artifacts = new MapArtifacts(root);
+const current = artifacts.contracts.filter((entry) => entry.contract.profile === MAP_PROFILE);
+const registry = loadRegistry();
+for (const entry of current) {
+  const record = registry.types.find((type) => type.slug === entry.slug);
+  assert(record, `${entry.slug}: no Registry record`);
+  if (record.version !== entry.contract.version) continue;
+  assert.equal(record.profile, MAP_PROFILE, `${entry.slug}: the record names another profile`);
+  assert.deepEqual(
+    entry.contract.operations.map((operation) => operation.id),
+    record.operations.map((operation) => operation.id),
+    `${entry.slug}: the contract and record must name the same operations in the same order`,
   );
-  assert(declared, `${path}: the operation contract must declare this result state.`);
-  const validateOutput = ajv.compile(declared.outputSchema);
-  assert(validateOutput(result.output), `${path}: ${ajv.errorsText(validateOutput.errors)}`);
+  // The chapter's authority table restates the contract; it must never drift from it.
+  const chapter = read(`docs/specification/${entry.slug}.md`).toString('utf8');
+  const table = chapter.split('## Authority and consequences')[1]?.split('\n\n')[1] ?? '';
+  const rows = new Map(
+    table
+      .split('\n')
+      .slice(2)
+      .map((line) =>
+        line
+          .split('|')
+          .slice(1, -1)
+          .map((cell) => cell.trim()),
+      )
+      .map((cells): [string, { authority: string; consequences: string; kind: string }] => [
+        cells[0],
+        { authority: cells[1], consequences: cells[2], kind: cells[3] },
+      ]),
+  );
+  const list = (cell = '') => cell.toLowerCase().split(', ');
+  for (const operation of entry.contract.operations) {
+    const name: string = record.operations.find((candidate) => candidate.id === operation.id)!.name;
+    const row = rows.get(name);
+    assert(row, `${entry.slug}: the chapter has no authority row for ${name}`);
+    assert.deepEqual(
+      list(row.authority),
+      operation.authority,
+      `${entry.slug} ${name}: authority differs from the contract`,
+    );
+    assert.deepEqual(
+      list(row.consequences),
+      operation.consequences,
+      `${entry.slug} ${name}: consequences differ from the contract`,
+    );
+    assert.equal(
+      row.kind,
+      operation.repeatable ? 'Repeatable' : 'Decision',
+      `${entry.slug} ${name}: kind differs from the contract`,
+    );
+  }
 }
 
-const contextUrl = description['@context'];
-const context = readJson('public/contexts/map-0.1.jsonld');
-const documentLoader = async (url: string, _callback: unknown) => {
-  assert.equal(url, contextUrl, `Unexpected remote JSON-LD context: ${url}`);
-  return { documentUrl: url, document: context };
-};
-const expanded = await Promise.all(
-  ['https://one.example/email', 'https://two.example/email'].map(async (base) =>
-    jsonld.expand(description, { base, documentLoader }),
-  ),
+const documents = (directory: string): string[] =>
+  readdirSync(resolve(root, directory)).flatMap((name) => {
+    const path = `${directory}/${name}`;
+    if (statSync(resolve(root, path)).isDirectory())
+      return name === 'emails' ? [] : documents(path);
+    return path.endsWith('.json') &&
+      ![
+        'dns.json',
+        'jcs-vectors.json',
+        'ijson-vectors.json',
+        'lexical-vectors.json',
+        'media-type-vectors.json',
+      ].includes(name)
+      ? [path]
+      : [];
+  });
+const client = new ReferenceMapClient(
+  () => 'urn:uuid:00000000-0000-7000-8000-000000000000',
+  artifacts,
 );
-assert.deepEqual(
-  expanded[0],
-  expanded[1],
-  'JSON-LD expansion must not depend on a message base IRI.',
-);
-assert.deepEqual(expanded[0][0]['@type'], ['https://mailschema.org/ns/map#MailAction']);
-const expandedOperations = expanded[0][0]['https://schema.org/potentialAction'] as Array<
-  Record<string, { '@value': string }[]>
->;
-assert.deepEqual(
-  expandedOperations.map(
-    (operation: Record<string, { '@value': string }[]>) =>
-      operation['https://mailschema.org/ns/map#operationId'][0]['@value'],
-  ),
-  ['request-changes', 'approve'],
-);
-await jsonld.toRDF(description, {
-  documentLoader,
-  // Supported by jsonld 9; the DefinitelyTyped options currently omit it.
-  safe: true,
-} as JsonLdOptions.ToRdf);
+let count = 0;
+for (const path of documents('public/fixtures/map-0.2')) {
+  const value = JSON.parse(read(path).toString('utf8'));
+  assert.deepEqual(artifacts.documentErrors(value), [], path);
+  if (path.endsWith('/description.json')) client.verify(value, new Date(value.describedAt));
+  count += 1;
+}
 
 console.log(
-  `MAP 0.1 valid: one canonical type contract, ${validMapFixtures.length} documents, 2 rejected fixtures, 1 parsed email and base-independent JSON-LD.`,
+  `MAP 0.2 valid: ${current.length} type contracts, ${count} fixture documents and a profile record bound to its schema, context and contract format.`,
 );

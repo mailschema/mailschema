@@ -9,8 +9,8 @@ import { materializePackageArtifacts } from '../src/lib/package-artifacts.ts';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const packageName = 'mailschema';
 const userAgent = 'MailSchema release verifier (https://mailschema.org)';
-const order = ['npm', 'PyPI', 'crates.io', 'Go'];
-const slugs = { npm: 'npm', PyPI: 'pypi', 'crates.io': 'crates', Go: 'go' };
+const order = ['npm', 'PyPI', 'crates.io', 'Go', 'RubyGems'];
+const slugs = { npm: 'npm', PyPI: 'pypi', 'crates.io': 'crates', Go: 'go', RubyGems: 'rubygems' };
 
 function parseArguments(argv) {
   const args = { promote: false };
@@ -29,7 +29,7 @@ function usage() {
   return `Verify a published MailSchema package against the canonical schema.
 
 Usage:
-  node scripts/promote-package.mjs --registry <npm|PyPI|crates.io|Go> --version <x.y.z>
+  node scripts/promote-package.mjs --registry <npm|PyPI|crates.io|Go|RubyGems> --version <x.y.z>
   node scripts/promote-package.mjs --registry <registry> --version <x.y.z> --promote
 
 Without --promote, the command performs public registry readback without changing files.
@@ -68,8 +68,8 @@ async function download(url) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-function command(command, args) {
-  return execFileSync(command, args, { encoding: 'buffer', maxBuffer: 20 * 1024 * 1024 });
+function command(command, args, input) {
+  return execFileSync(command, args, { encoding: 'buffer', maxBuffer: 20 * 1024 * 1024, input });
 }
 
 function tarEntry(archive, suffix) {
@@ -151,7 +151,32 @@ async function registryArtifact(registry, version) {
     };
   }
 
+  if (registry === 'RubyGems') {
+    const metadata = await getJson(
+      `https://rubygems.org/api/v2/rubygems/${packageName}/versions/${version}.json`,
+    );
+    if (metadata.name !== packageName || metadata.version !== version || !metadata.sha)
+      throw new Error('RubyGems returned unexpected package metadata.');
+    return {
+      name: `${packageName}-${version}.gem`,
+      downloadUrl: `https://rubygems.org/gems/${packageName}-${version}.gem`,
+      publicUrl: `https://rubygems.org/gems/${packageName}/versions/${version}`,
+      metadataSha256: metadata.sha,
+      integrity: null,
+      archive: 'gem',
+    };
+  }
+
   throw new Error(`Unsupported registry: ${registry}`);
+}
+
+// A gem is an uncompressed tar whose files sit in data.tar.gz at their gem paths.
+function gemEntry(archive, path) {
+  const data = command('tar', ['-xOf', archive, 'data.tar.gz']);
+  const entries = command('tar', ['-tzf', '-'], data);
+  if (!entries.toString('utf8').split('\n').includes(path))
+    throw new Error(`Expected ${path} in ${basename(archive)}.`);
+  return command('tar', ['-xOzf', '-', path], data);
 }
 
 async function verify(registry, version) {
@@ -175,7 +200,11 @@ async function verify(registry, version) {
     for (const contract of contracts) {
       const suffix = `/${contract.paths[registry]}`;
       const packaged =
-        artifact.archive === 'zip' ? zipEntry(archive, suffix) : tarEntry(archive, suffix);
+        artifact.archive === 'gem'
+          ? gemEntry(archive, contract.paths[registry])
+          : artifact.archive === 'zip'
+            ? zipEntry(archive, suffix)
+            : tarEntry(archive, suffix);
       if (!packaged.equals(contract.bytes))
         throw new Error(
           `${registry} ${version} does not contain the canonical ${contract.name} contract bytes.`,
@@ -254,7 +283,7 @@ if (args.help) {
 if (!args.registry || !args.version)
   throw new Error(`${usage()}\n\nRegistry and version are required.`);
 if (!Object.hasOwn(slugs, args.registry))
-  throw new Error('Registry must be npm, PyPI, crates.io or Go.');
+  throw new Error('Registry must be npm, PyPI, crates.io, Go or RubyGems.');
 if (!/^\d+\.\d+\.\d+$/.test(args.version)) throw new Error('Version must use x.y.z format.');
 
 const evidence = await verify(args.registry, args.version);

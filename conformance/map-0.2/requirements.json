@@ -1,0 +1,336 @@
+{
+  "format": "mailschema-requirements/1",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "requirements": [
+    {
+      "id": "MAP-REP-001",
+      "actor": "sender",
+      "requirement": "Carry the one MAP description in a part labelled with the profile parameter, with Content-Purpose: Machine-readable and a transfer encoding safe for arbitrary JSON, in a multipart/related entity beside the readable content and outside any attached message.",
+      "cases": ["structured-email-designation", "structured-email-selection"]
+    },
+    {
+      "id": "MAP-REP-002",
+      "actor": "client",
+      "requirement": "Parse every MAP document as I-JSON within the core limits: valid UTF-8 with no byte order mark, refused rather than repaired, at most 64 KiB, arrays and objects nested at most 32 deep, no lone surrogate, noncharacter or U+0000 in any string or member name, and every number, read as the nearest IEEE 754 double, within ±(2^53−1). If JSON-LD expansion is used, use the bundled context without remote loads; details expand as a JSON literal.",
+      "cases": ["i-json", "jsonld-identity", "utf8-strict"]
+    },
+    {
+      "id": "MAP-REP-003",
+      "actor": "client and service",
+      "requirement": "Decide every lexical form, such as date-times, URIs and email addresses, by the core schema's patterns and never by a format checker, so every implementation reaches the same verdict.",
+      "cases": ["lexical-forms", "contract-rules"]
+    },
+    {
+      "id": "MAP-REP-004",
+      "actor": "client",
+      "requirement": "Process only the one designated part labelled with the implemented profile, outside any attached message and in a multipart/related entity with readable content; ignore every other structured part, and refuse a message with two parts so labelled.",
+      "cases": ["structured-email-selection", "possession-refusals"]
+    },
+    {
+      "id": "MAP-DESC-001",
+      "actor": "client and service",
+      "requirement": "Issue and act on only descriptions whose expiry follows their creation and whose offered operations appear once each and permit the authority mode.",
+      "cases": [
+        "description-rules",
+        "content-review-authority",
+        "action-approval-authority",
+        "information-request-authority",
+        "event-response-authority",
+        "meeting-scheduling-authority",
+        "subscription-preferences-authority",
+        "task-assignment-authority",
+        "payment-request-authority",
+        "email-confirmation-authority",
+        "account-activity-authority"
+      ]
+    },
+    {
+      "id": "MAP-DIG-001",
+      "actor": "client and service",
+      "requirement": "Bind every request to the exact description by its RFC 8785 digest. A request whose digest differs from the issued description is refused without being claimed.",
+      "cases": [
+        "approve-completed",
+        "forged-description",
+        "unknown-interaction",
+        "content-review-operations",
+        "action-approval-operations",
+        "information-request-operations",
+        "event-response-operations",
+        "meeting-scheduling-operations",
+        "subscription-preferences-operations",
+        "task-assignment-operations",
+        "payment-request-operations",
+        "email-confirmation-operations",
+        "account-activity-operations"
+      ]
+    },
+    {
+      "id": "MAP-DIG-002",
+      "actor": "client and service",
+      "requirement": "Compute canonical digests exactly as RFC 8785 specifies.",
+      "cases": ["description-digest"]
+    },
+    {
+      "id": "MAP-DET-001",
+      "actor": "client and service",
+      "requirement": "Include details exactly when the contract defines them, valid against its schema, with integer numbers and ASCII member names.",
+      "cases": [
+        "content-review-description",
+        "action-approval-description",
+        "information-request-description",
+        "event-response-description",
+        "meeting-scheduling-description",
+        "subscription-preferences-description",
+        "task-assignment-description",
+        "payment-request-description",
+        "email-confirmation-description",
+        "account-activity-description",
+        "details-integers",
+        "secret-fields-refused"
+      ]
+    },
+    {
+      "id": "MAP-TYPE-001",
+      "actor": "client and service",
+      "requirement": "Match the type URI, version and RFC 8785 digest of the type contract exactly. Registry record metadata does not change wire compatibility.",
+      "cases": [
+        "feedback-accepted",
+        "contract-identity",
+        "unsupported-type",
+        "content-review-description",
+        "action-approval-description",
+        "information-request-description",
+        "event-response-description",
+        "meeting-scheduling-description",
+        "subscription-preferences-description",
+        "task-assignment-description",
+        "payment-request-description",
+        "email-confirmation-description",
+        "account-activity-description"
+      ]
+    },
+    {
+      "id": "MAP-CON-001",
+      "actor": "Registry",
+      "requirement": "Accept only contracts that pin every schema they depend on, use only portable patterns and integer multipleOf divisors, and satisfy the core rules for success states, failure reasons, approvals, consequences and field bindings.",
+      "cases": ["contract-rules"]
+    },
+    {
+      "id": "MAP-CON-002",
+      "actor": "client and service",
+      "requirement": "Validate input against the operation request schema and the fields the interaction defined, including required fields and formats. A client prepares only operations the description offers.",
+      "cases": ["field-bindings", "client-prepare"]
+    },
+    {
+      "id": "MAP-REQ-001",
+      "actor": "service",
+      "requirement": "Resolve the interaction and validate the core and type-specific request before any effect. Malformed, unknown-interaction and unknown-description requests are not claimed.",
+      "cases": [
+        "unknown-interaction",
+        "malformed-unclaimed",
+        "invalid-type-input",
+        "unsupported-type",
+        "unsupported-operation"
+      ]
+    },
+    {
+      "id": "MAP-AUTH-001",
+      "actor": "service",
+      "requirement": "Establish the principal outside the request body, authorize execution against current service state, isolate request identifiers between principals and refuse stale or expired interactions.",
+      "cases": [
+        "authentication-context",
+        "permission-refusal",
+        "principal-isolation",
+        "stale-revision",
+        "expired-interaction"
+      ]
+    },
+    {
+      "id": "MAP-AUTH-002",
+      "actor": "service",
+      "requirement": "Recheck current access before disclosing a saved response through retry or recovery, and answer a refused access without correlation, leaving the request unchanged.",
+      "cases": ["retry-current-authorization", "recovery-current-authorization"]
+    },
+    {
+      "id": "MAP-AUTH-003",
+      "actor": "service",
+      "requirement": "Authorize each human approval decision in the current tenant and policy context. An unauthorized or rule-refused attempt leaves the proposal unchanged.",
+      "cases": ["approval-team-decision", "approval-unauthorized-decision", "approval-rule-refusal"]
+    },
+    {
+      "id": "MAP-AUTH-004",
+      "actor": "service",
+      "requirement": "Record the actor of each claimed request and human decision separately from the principal. A result that names an actor names the requesting actor on every transition.",
+      "cases": ["actor-attribution"]
+    },
+    {
+      "id": "MAP-TRUST-001",
+      "actor": "client",
+      "requirement": "In credential mode, match the service, execution URL, result template and resource against independent configuration, and keep the human route within the resource organization.",
+      "cases": ["untrusted-endpoints"]
+    },
+    {
+      "id": "MAP-TRUST-004",
+      "actor": "client",
+      "requirement": "In credential mode, present the service, or the party in service.onBehalfOf, as the party asking, and key the principal's policy to the service identifier and the party id together, never to a name.",
+      "manual": "Check that the client shows the party asking and keys its policy to identifiers, with a description naming a party and one naming none."
+    },
+    {
+      "id": "MAP-TRUST-002",
+      "actor": "client",
+      "requirement": "Reapply endpoint and resource checks to every redirect before sending a credential.",
+      "manual": "Record the redirect chain and configured destination for each credential-bearing request in the deployed client."
+    },
+    {
+      "id": "MAP-TRUST-003",
+      "actor": "client",
+      "requirement": "Accept service configuration from RFC 9728 protected resource metadata only for a configured resource identifier and only on its HTTPS origin.",
+      "cases": ["metadata-configuration"]
+    },
+    {
+      "id": "MAP-POSS-001",
+      "actor": "service",
+      "requirement": "Issue one capability per interaction and recipient, of at least 128 bits written as at least 22 base64url characters without padding, as the last path segment of the execution URL as written, with no dot segments; begin the result template with the execution URL and /, and scope request identifiers and results to the capability; answer an unknown capability with a plain 404, and one that has lapsed, once the interaction has expired, its retention interval has passed and no result of a request claimed before expiry is still retained, with a plain 410; refusals recorded after expiry never extend the capability.",
+      "cases": ["capability-scope"]
+    },
+    {
+      "id": "MAP-POSS-002",
+      "actor": "client",
+      "requirement": "Act on a possession description only with a DKIM signature verified on the raw message: currently valid, aligned under the DMARC policy of the From domain or its organizational domain, rsa-sha256 with a key of at least 2048 bits or ed25519-sha256 matching the published key, no l= tag, and covering From, To, Date, Message-ID, MIME-Version and Content-Type, and Cc, List-Id and OTP-Token when present. Header fields are read as the DKIM verifier reads them, and a malformed field is refused. Each signed header, and Subject, appears at most once, From names exactly one mailbox, and Date is a valid RFC 5322 section 3.3 date-time with a numeric zone, a year from 1900 and none of the obsolete forms.",
+      "cases": ["possession-trust", "possession-refusals", "message-date"]
+    },
+    {
+      "id": "MAP-POSS-003",
+      "actor": "client",
+      "requirement": "Keep every endpoint, the human route and the service identifier within the From domain organizational domain as the RFC 9989 tree walk determines it, refusing on a DNS failure other than a definite absence or a top-level organizational domain.",
+      "cases": ["possession-refusals", "organizational-domain", "lookalike-domain"]
+    },
+    {
+      "id": "MAP-POSS-004",
+      "actor": "client",
+      "requirement": "Act only when the capability was issued to an address the principal controls and the message was delivered to it, comparing addresses with ASCII letters in lowercase, every other character exactly and domains as A-labels.",
+      "cases": ["possession-trust", "possession-refusals"]
+    },
+    {
+      "id": "MAP-POSS-005",
+      "actor": "client",
+      "requirement": "Send no cookies, HTTP authentication or other credentials with a possession request, and treat a redirect as a failure.",
+      "manual": "Inspect the deployed client HTTP stack for possession requests.",
+      "cases": ["http-binding"]
+    },
+    {
+      "id": "MAP-POSS-006",
+      "actor": "client",
+      "requirement": "Under possession authority, obtain a prior relationship or the principal decision for operations beyond refusal, protection and record; without the type rule, treat assertion as needing the principal decision.",
+      "cases": ["consequence-policy"]
+    },
+    {
+      "id": "MAP-IDEM-001",
+      "actor": "service",
+      "requirement": "Bind a claimed request identifier, within the service tenant, to one principal and complete request value; return the latest saved response for an exact retry, refuse changed reuse, and refuse another principal in the tenant without disclosing the response.",
+      "cases": [
+        "exact-retry",
+        "changed-request",
+        "principal-isolation",
+        "content-review-operations",
+        "action-approval-operations",
+        "information-request-operations",
+        "event-response-operations",
+        "meeting-scheduling-operations",
+        "subscription-preferences-operations",
+        "task-assignment-operations",
+        "payment-request-operations",
+        "email-confirmation-operations",
+        "account-activity-operations"
+      ]
+    },
+    {
+      "id": "MAP-IDEM-002",
+      "actor": "client",
+      "requirement": "Reuse the persisted request when the same instruction is carried out again, as when the description is delivered again, and prepare a new request for a later instruction on the same interaction.",
+      "cases": ["stable-redelivery"]
+    },
+    {
+      "id": "MAP-DEC-001",
+      "actor": "service",
+      "requirement": "The first decision whose result reaches its success state, accepted or completed, decides the interaction, and a pending decision holds it until it ends; a decision request while it is decided or held is refused as already-decided, and decisions awaiting approval end as superseded once it is decided.",
+      "cases": ["decisions-once", "decision-states", "superseded-proposal"]
+    },
+    {
+      "id": "MAP-DEC-002",
+      "actor": "service",
+      "requirement": "Repeatable operations, and approvals of them, remain available until the interaction expires; a decision never ends them.",
+      "cases": ["repeatable-operations", "decision-states"]
+    },
+    {
+      "id": "MAP-LIFE-001",
+      "actor": "service",
+      "requirement": "Expose the latest recoverable state; an approval-required result ends only in its operation's success state or as failed with a declared reason, and an undecided approval fails as expired at the deadline.",
+      "cases": [
+        "approval-gate",
+        "approval-declined",
+        "approval-stale-target",
+        "approval-expired",
+        "approval-withdrawn",
+        "lost-response-recovery"
+      ]
+    },
+    {
+      "id": "MAP-LIFE-002",
+      "actor": "service",
+      "requirement": "Retain results and duplicate suppression from the latest recorded state through the specified boundaries, unless the interaction is deleted with its target.",
+      "cases": ["retention-expiry", "retention-latest-state"]
+    },
+    {
+      "id": "MAP-ERR-001",
+      "actor": "service",
+      "requirement": "Keep Problem Details type, status and MAP code correlated; approval links and failure reasons appear exactly with their states; input errors carry RFC 6901 JSON Pointers into the input, escaped.",
+      "cases": [
+        "problem-correlation",
+        "result-shape",
+        "invalid-type-input",
+        "permission-refusal",
+        "stale-revision",
+        "changed-request",
+        "unknown-result"
+      ]
+    },
+    {
+      "id": "MAP-TYPE-002",
+      "actor": "service",
+      "requirement": "Apply each type rule the contract cannot express: unique slots that each end after they start and are booked only as offered, payment dates, and the iCalendar SEQUENCE as the target revision.",
+      "cases": ["slot-rules", "payment-date", "calendar-sequence"]
+    },
+    {
+      "id": "MAP-TYPE-003",
+      "actor": "client",
+      "requirement": "Apply each type client rule: confirm only an unambiguous recorded request or activity, pay only a payee account already on record, never approve terms of an unknown kind automatically, and act on a calendar type only when the one calendar part the message carries matches the target digest, component, SEQUENCE and attendee.",
+      "cases": [
+        "email-confirmation-rule",
+        "account-activity-rule",
+        "action-approval-rule",
+        "lookalike-domain",
+        "payment-account-rule",
+        "calendar-binding"
+      ]
+    },
+    {
+      "id": "MAP-STORE-001",
+      "actor": "service",
+      "requirement": "Make request claiming, effect initiation and recoverable state atomic, or reconcile an interrupted effect without repeating it.",
+      "manual": "Run simultaneous duplicate, process restart and failure-after-effect tests against the deployed store."
+    },
+    {
+      "id": "MAP-HTTP-001",
+      "actor": "service",
+      "requirement": "Keep a GET on the human route and the approval route side-effect free, show the proposal's input and the bound terms on the approval route, and require a person's deliberate action, protected from cross-site requests, for any change made there.",
+      "manual": "Exercise link previews, scanners and cross-site requests against the deployed routes."
+    },
+    {
+      "id": "MAP-HTTP-002",
+      "actor": "service",
+      "requirement": "Accept execution only as POST, answering another method with 405 and Allow: POST; answer 415 unless the media type is application/json, compared case-insensitively, with no parameter other than charset=utf-8 and empty parameter slots ignored; take a credential only from the Authorization header, answering its absence with an uncorrelated authentication-required problem; and return the result URL, the template with each colon of the request identifier written as %3A, in Location.",
+      "cases": ["http-binding"]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import {
   type TypeRecord,
 } from '../../data/types';
 import { recordDigest } from '../../registry/catalog';
+import { WITHDRAWN_PROFILES } from '../../map/artifacts';
 import '../../styles/catalog.css';
 import '../../styles/prose.css';
 import '../../styles/registry.css';
@@ -138,6 +139,8 @@ const digest = recordDigest(record);
               {contracts.map((contract) => (
                 <li>
                   <a href={contract.contract.url}>Version {contract.version} contract</a>
+                  {WITHDRAWN_PROFILES.has(contract.profile) &&
+                    ` · withdrawn with MAP ${contract.profile.split('/').at(-1)}`}
                   <p>
                     <a href={contract.requestSchema.url}>Request schema</a>
                     {' · '}contract SHA-256 {contract.contract.sha256}
@@ -281,9 +284,7 @@ const digest = recordDigest(record);
           record.
         </p>
         <p>
-          <a href="/contribute#implementation-evidence">
-            How to provide implementation evidence →
-          </a>
+          <a href="/contribute#implementation-evidence">How to provide implementation evidence →</a>
         </p>
       </article>
     </div>

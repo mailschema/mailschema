@@ -149,9 +149,9 @@ The acceptance packet for the first product proof must identify source commits, 
 
 ## Verification and limitations
 
-- `npm run check`: passes Registry, profile, 29-case MAP, 13-probe readiness, 16-requirement conformance and Astro diagnostics.
-- `npm run packages:prepare && npm run packages:test`: nine checks pass for locally prepared artifacts and bind all distributed contracts. These are unreleased build candidates at the existing version declarations and must not be published without an explicit version decision.
-- [`scripts/audit-map-readiness.mjs`](../scripts/audit-map-readiness.mjs): all 13 focused probes pass. [`audits/2026-09-24-readiness.json`](audits/2026-09-24-readiness.json) records the observations and source hashes. This is a local diagnostic, not a deployed conformance certificate.
+- `npm run check`, at [`e2f2cc6`](https://github.com/mailschema/mailschema/tree/e2f2cc6983173e5aba1da27f1f8bff37336efd77), where this audit was last updated: passed Registry, profile, 29-case MAP, 13-probe readiness, 16-requirement conformance and Astro diagnostics.
+- `npm run packages:prepare && npm run packages:test`, at the same revision: nine checks passed for locally prepared artifacts and bind all distributed contracts. These are unreleased build candidates at the existing version declarations and must not be published without an explicit version decision.
+- [`scripts/audit-map-readiness.mjs`](https://github.com/mailschema/mailschema/blob/c5f66fc7a30d16005116c363448c5d602c31a405/scripts/audit-map-readiness.mjs), retired with MAP 0.1,: all 13 focused probes pass. [`audits/2026-09-24-readiness.json`](audits/2026-09-24-readiness.json) records the observations and source hashes. This is a local diagnostic, not a deployed conformance certificate.
 - JSON-LD and MIME checks use the pinned project dependencies and offline context loader. The Internet-Draft renders with `xml2rfc` 3.34.1 without warnings.
 
 This audit changes planning and readiness claims. It does not silently revise the published wire contract, upgrade package versions, publish releases or certify an implementation. Repairs must close the recorded findings, preserve useful existing work and avoid another round of speculative scope expansion.

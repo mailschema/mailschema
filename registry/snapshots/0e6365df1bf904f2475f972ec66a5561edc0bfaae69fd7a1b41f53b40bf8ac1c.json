@@ -1,0 +1,74 @@
+{
+  "slug": "content-review",
+  "name": "Content Review",
+  "summary": "Request changes or approve a specific revision of content.",
+  "category": "Review",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema draft",
+  "profile": "https://mailschema.org/profiles/map/0.1",
+  "overview": "A service sends content for review. The recipient can submit feedback or record approval of the revision they received. Editing the draft and sending or publishing it remain separate service operations.",
+  "target": "Service-owned content identified by its exact revision.",
+  "operations": [
+    {
+      "id": "request-changes",
+      "name": "Request changes",
+      "description": "Record feedback on the identified revision."
+    },
+    {
+      "id": "approve",
+      "name": "Approve",
+      "description": "Record approval of that revision."
+    }
+  ],
+  "inputs": "The target revision and, for a change request, review feedback.",
+  "results": "Feedback recorded or approval recorded, with the revision identified. Requests without permission or against stale revisions leave the current review decision unchanged.",
+  "permissions": "The service checks the caller’s review permission. Editing and any later sending or publication require their own permissions.",
+  "humanRoute": "A review page showing the same content and revision.",
+  "example": {
+    "title": "Review a campaign draft",
+    "steps": [
+      "The service emails a review request for revision 3 of a campaign.",
+      "A reviewer asks for a timezone to be added to the opening paragraph.",
+      "The service records the feedback. An editor prepares revision 4.",
+      "The reviewer approves revision 4 and the service records that decision."
+    ],
+    "exception": "An approval request for revision 3 is refused once that revision is stale. Approval of revision 4 does not send the campaign."
+  },
+  "references": [
+    {
+      "title": "Schema.org Actions",
+      "href": "https://schema.org/docs/actions.html",
+      "description": "Candidate vocabulary for describing available operations and their routes."
+    },
+    {
+      "title": "Schema.org ReviewAction",
+      "href": "https://schema.org/ReviewAction",
+      "description": "Describes an opinion about an object. It is not equivalent to the revision approval in Content Review."
+    }
+  ],
+  "openQuestions": [
+    "Which independent services and clients can reproduce the 0.1 conformance cases?",
+    "Which content digest representations need bindings beyond SHA-256?"
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "The MAP 0.1 profile defines review feedback, revision approval, exact target binding, retries and recovery."
+    }
+  ],
+  "definition": {
+    "label": "Read the Content Review definition",
+    "href": "/specification/content-review/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

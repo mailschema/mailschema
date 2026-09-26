@@ -30,6 +30,7 @@ const registryRequirements: Record<string, { host: string; name: string }> = {
   PyPI: { host: 'pypi.org', name: 'mailschema' },
   'crates.io': { host: 'crates.io', name: 'mailschema' },
   Go: { host: 'pkg.go.dev', name: 'github.com/mailschema/go' },
+  RubyGems: { host: 'rubygems.org', name: 'mailschema' },
 };
 
 function schemaDigest(schema: string): string {

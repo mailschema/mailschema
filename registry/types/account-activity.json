@@ -1,0 +1,83 @@
+{
+  "slug": "account-activity",
+  "name": "Account Activity",
+  "summary": "Confirm or report account activity that a service attributes to you.",
+  "category": "Account",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema editorial proposal",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "overview": "A service reports activity on an account, such as a sign-in from a new device, a changed password or recovery address, or a new API key, and asks whether the account holder recognizes it. A report protects the account at once and works by mailbox access, for someone who is locked out. Confirming needs the account’s own login, because clearing a warning is what an attacker wants.",
+  "target": "The activity identified in the details: a summary, when it occurred, the masked account, and optionally a Shared Signals event type and where it was observed from, as an IP address, user agent and location.",
+  "operations": [
+    {
+      "id": "confirm",
+      "name": "Confirm",
+      "description": "Record that the account holder or their agent performed the activity."
+    },
+    {
+      "id": "report-unrecognized",
+      "name": "Report unrecognized",
+      "description": "Report that the activity is not recognized. The service takes its protective steps."
+    }
+  ],
+  "inputs": "Nothing to confirm. A report may carry a short note.",
+  "results": "Recognition completed, or the report accepted while the service ends sessions, revokes keys or requires a new password. The first decides the notice.",
+  "permissions": "Confirming needs credential authority and, to be automatic, exactly one activity the client recorded that matches the event type, time and address. Reporting works with either authority, is sent only on the principal’s statement, and can only start protective steps: it never grants access or changes recovery details.",
+  "humanRoute": "The account’s security page, showing the same activity.",
+  "example": {
+    "title": "Report a sign-in you did not make",
+    "steps": [
+      "A service emails that the account signed in from a new device in another country.",
+      "The agent finds no matching sign-in in its record and asks its principal, who does not recognize it.",
+      "The agent reports the sign-in. The service ends that session and requires a new password."
+    ],
+    "exception": "The agent does not confirm activity it cannot match to its record, even when the email says that confirming will stop further warnings."
+  },
+  "references": [
+    {
+      "title": "Security Event Token · RFC 8417",
+      "href": "https://www.rfc-editor.org/rfc/rfc8417",
+      "description": "A signed statement of fact about a security event concerning a subject. A candidate representation for the reported activity."
+    },
+    {
+      "title": "OpenID Continuous Access Evaluation Profile 1.0",
+      "href": "https://openid.net/specs/openid-caep-1_0-final.html",
+      "description": "Event types such as session-established and credential-change, exchanged between services that have set up a Shared Signals stream."
+    },
+    {
+      "title": "OpenID RISC Profile 1.0",
+      "href": "https://openid.net/specs/openid-risc-1_0-final.html",
+      "description": "Account event types such as identifier-changed, recovery-information-changed and credential-compromise."
+    },
+    {
+      "title": "NIST SP 800-63B-4",
+      "href": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+      "description": "Requires account notifications to tell the recipient how to repudiate the event. This type makes that repudiation a structured operation."
+    }
+  ],
+  "openQuestions": [
+    "Whether the email should also carry the activity as a Security Event Token.",
+    "Abuse: someone who controls only the mailbox could use reports to lock the account holder out."
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "Executable on MAP 0.2. Reporting uses possession authority, and confirming needs the account’s credential."
+    }
+  ],
+  "definition": {
+    "label": "Read the Account Activity definition",
+    "href": "/specification/account-activity/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "mailschema-information-request-0-1",
+  "kind": "amendment",
+  "contributor": {
+    "name": "MailSchema"
+  },
+  "summary": "0.1 · Working draft. Executable on MAP 0.2. Fields travel in the description as the shared form block, and field bindings check the response against them. A decline is recorded.",
+  "baseDigest": "bc6c9edaf8cdf6a183a01b321c4fea2690eb916b6c803c23c66397ed57d48c67",
+  "record": {
+    "slug": "information-request",
+    "name": "Information Request",
+    "summary": "Supply specified information in response to a service’s request.",
+    "category": "Information",
+    "status": "Draft",
+    "version": "0.1",
+    "profile": "https://mailschema.org/profiles/map/0.2",
+    "overview": "A service asks for a defined set of information, such as a company’s support address, a delivery instruction or the answers to a short questionnaire. The fields travel in the description, and each can name the kind of information it holds, so a client can apply its principal’s disclosure rules field by field. The recipient supplies the values or declines, and the service reports what it recorded.",
+    "target": "The request at the revision the description names. Its details state the purpose and the fields in the MailSchema form block: a closed, flat subset of JSON Schema based on Model Context Protocol elicitation, where each field may carry an HTML autofill field name. Field names for passwords, one-time codes and payment card data are not allowed.",
+    "operations": [
+      {
+        "id": "submit-response",
+        "name": "Submit response",
+        "description": "Supply values for the requested fields."
+      },
+      {
+        "id": "decline",
+        "name": "Decline",
+        "description": "Decline to provide the information. The service records that no response will follow."
+      }
+    ],
+    "inputs": "Values that contain only the fields the interaction defined and satisfy them, including required fields and formats. Each value that fails is reported with a JSON Pointer to it. A client never supplies a password, code, token or card number through a form, whatever the field is called.",
+    "results": "The response recorded; a decline completed; or an invalid request naming each value that failed. The first response or decline decides the request. Supplying information does not approve a separate business operation.",
+    "permissions": "Credential or possession authority. Submitting discloses the principal’s information, so under possession a client needs a prior relationship with the sending organization or its principal’s decision; declining needs neither. The service checks that the caller may respond for the intended recipient.",
+    "humanRoute": "A form with the same fields and validation rules.",
+    "example": {
+      "title": "Confirm a company’s contact details",
+      "steps": [
+        "A directory asks for the company’s support address and website, declared as email and url fields.",
+        "The company’s agent supplies both from the details it is allowed to share.",
+        "The directory validates the values and records the response."
+      ],
+      "exception": "If the request has expired, the service reports that nothing was recorded. Supplying contact details does not prove that the company controls the listing."
+    },
+    "references": [
+      {
+        "title": "Model Context Protocol elicitation",
+        "href": "https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation",
+        "description": "Defines the restricted field schema and the accept, decline and cancel responses reused here. It also forbids requesting passwords, access tokens and payment credentials through a form."
+      },
+      {
+        "title": "HTML autofill field names",
+        "href": "https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill",
+        "description": "Names the kind of information a field holds, such as organization, email, tel or cc-number. It has no names for government, tax or bank account identifiers."
+      },
+      {
+        "title": "JSON Schema 2020-12",
+        "href": "https://json-schema.org/draft/2020-12",
+        "description": "The schema language of the field definitions. Formats are annotations unless a validator is told to assert them, so the service states that it checks them."
+      },
+      {
+        "title": "OpenID for Verifiable Presentations 1.0",
+        "href": "https://openid.net/specs/openid-4-verifiable-presentations-1_0.html",
+        "description": "Requests verifiable proof of claims, such as age or identity. Information Request collects supplied values and proves nothing about them."
+      },
+      {
+        "title": "Schema.org AskAction",
+        "href": "https://schema.org/AskAction",
+        "description": "Related vocabulary for posing a question, with ReplyAction for the response. Neither describes fields, validation or disclosure."
+      }
+    ],
+    "openQuestions": [
+      "Names for kinds of information that HTML autofill lacks, such as government, tax and bank account identifiers.",
+      "Attachments and replacement of an earlier response."
+    ],
+    "definition": {
+      "label": "Read the Information Request definition",
+      "href": "/specification/information-request/"
+    },
+    "maintainers": [
+      {
+        "name": "MailSchema"
+      }
+    ]
+  }
+}

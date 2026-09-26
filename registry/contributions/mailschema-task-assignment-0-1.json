@@ -1,0 +1,91 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "mailschema-task-assignment-0-1",
+  "kind": "amendment",
+  "contributor": {
+    "name": "MailSchema"
+  },
+  "summary": "0.1 · Working draft. Executable on MAP 0.2 as a binding of iTIP to-do assignment. Moved from reuse assessment.",
+  "baseDigest": "9b0af5f399b381f0b1672a659ea51b7481c4e9ad6aa33220ac9da18060b60e03",
+  "record": {
+    "slug": "task-assignment",
+    "name": "Task Assignment",
+    "summary": "Accept assigned work and report its progress or completion.",
+    "category": "Tasks",
+    "status": "Draft",
+    "version": "0.1",
+    "profile": "https://mailschema.org/profiles/map/0.2",
+    "overview": "A service assigns work to a person or agent, who accepts or declines it and reports progress and completion. The assignment is an iCalendar to-do carried in the same message, as iTIP assigns it. This binding lets the assignee answer and report through the service with recorded results.",
+    "target": "The to-do identified in the details by its UID, with a summary, an optional due time and what completion requires. The target revision is its SEQUENCE, and the target digest is the SHA-256 of the iCalendar part the message carries.",
+    "operations": [
+      {
+        "id": "accept",
+        "name": "Accept",
+        "description": "Commit to the assigned work."
+      },
+      {
+        "id": "decline",
+        "name": "Decline",
+        "description": "Decline the assignment."
+      },
+      {
+        "id": "report-progress",
+        "name": "Report progress",
+        "description": "Report the task’s percent complete."
+      },
+      {
+        "id": "report-completion",
+        "name": "Report completion",
+        "description": "Report that the work is complete, for the service to verify."
+      }
+    ],
+    "inputs": "For progress, a percent complete from 0 to 100, as iCalendar’s PERCENT-COMPLETE, and an optional note; for completion, a report and up to 20 HTTPS links to evidence. Accepting may carry a comment and declining a reason.",
+    "results": "Acceptance or decline completed; progress and completion reports accepted. Reports can be sent again, and the service decides whether a completion is verified. An update to a changed or cancelled assignment is refused as stale.",
+    "permissions": "Credential authority only. Accepting commits work, and a completion report is an assertion the service may pay or credit on, so a client sends it only for work actually done. Accepting grants no access to the resources the work needs.",
+    "humanRoute": "The service’s task interface.",
+    "example": {
+      "title": "Check links in a documentation release",
+      "steps": [
+        "A service assigns an agent to check links in a specified documentation release.",
+        "The agent accepts the assignment and performs the permitted checks.",
+        "It submits a report and the service records the update."
+      ],
+      "exception": "A cancelled or changed assignment needs to be reconciled before a completion report is accepted. Acceptance does not permit editing or publishing the release."
+    },
+    "references": [
+      {
+        "title": "iCalendar · RFC 5545",
+        "href": "https://www.rfc-editor.org/rfc/rfc5545#section-3.8.1.11",
+        "description": "Defines to-dos, with status, participation status including COMPLETED and IN-PROCESS, and percent complete."
+      },
+      {
+        "title": "iTIP · RFC 5546, section 3.4",
+        "href": "https://www.rfc-editor.org/rfc/rfc5546#section-3.4",
+        "description": "Assigns to-dos with REQUEST and lets an assignee or delegate report progress and completion with REPLY."
+      },
+      {
+        "title": "A2A Protocol",
+        "href": "https://a2a-protocol.org/latest/specification/",
+        "description": "Task states for work between agents, including input-required, rejected and canceled. It defines no email binding."
+      },
+      {
+        "title": "Model Context Protocol tasks",
+        "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/utilities/tasks",
+        "description": "Long-running request states, now an official extension: working, input_required, completed, failed and cancelled."
+      }
+    ],
+    "openQuestions": [
+      "How task states correspond across iCalendar, A2A and MCP without MAP defining another set.",
+      "Cancellation and changes to an accepted assignment."
+    ],
+    "definition": {
+      "label": "Read the Task Assignment definition",
+      "href": "/specification/task-assignment/"
+    },
+    "maintainers": [
+      {
+        "name": "MailSchema"
+      }
+    ]
+  }
+}

@@ -46,6 +46,10 @@ test('each distribution uses its independently declared package version', () => 
     readFileSync('.release/packages/rust/Cargo.toml', 'utf8'),
     new RegExp(`^version = "${versions['crates.io'].replaceAll('.', '\\.')}"$`, 'm'),
   );
+  assert.match(
+    readFileSync('.release/packages/ruby/lib/mailschema/version.rb', 'utf8'),
+    new RegExp(`VERSION = "${versions.RubyGems.replaceAll('.', '\\.')}"$`, 'm'),
+  );
 });
 
 test('the preparation manifest binds each distributed contract', () => {
@@ -84,6 +88,19 @@ test('distribution metadata and READMEs point to maintained language repositorie
     assert.match(readme, new RegExp(`https://github\\.com/mailschema/${repository}`));
     assert.doesNotMatch(readme, /(?:version|mailschema\s*=\s*)[ `"]*0\.2(?:\.0)?\b/i);
   }
+
+  const gemspec = readFileSync('.release/packages/ruby/mailschema.gemspec', 'utf8');
+  for (const [key, value] of [
+    ['allowed_push_host', 'https://rubygems.org'],
+    ['source_code_uri', 'https://github.com/mailschema/ruby'],
+    ['changelog_uri', 'https://github.com/mailschema/ruby/blob/main/CHANGELOG.md'],
+    ['bug_tracker_uri', 'https://github.com/mailschema/ruby/issues'],
+    ['rubygems_mfa_required', 'true'],
+  ])
+    assert.ok(gemspec.includes(`spec.metadata["${key}"] = "${value}"`), key);
+  const rubyReadme = readFileSync('.release/packages/ruby/README.md', 'utf8');
+  assert.match(rubyReadme, /Mail Action Protocol 0\.2/);
+  assert.match(rubyReadme, /https:\/\/github\.com\/mailschema\/ruby/);
 });
 
 test('package preparation removes artifacts from earlier builds', () => {
@@ -91,12 +108,23 @@ test('package preparation removes artifacts from earlier builds', () => {
     '.release/packages/python/dist',
     '.release/packages/python/tests/__pycache__',
     '.release/packages/rust/target',
+    '.release/packages/ruby/.bundle',
+    '.release/packages/ruby/pkg',
   ])
     assert.equal(existsSync(path), false, `${path} must not survive package preparation`);
+  assert.equal(
+    readFileSync('.release/packages/ruby/Gemfile.lock', 'utf8'),
+    readFileSync('packages/ruby/Gemfile.lock', 'utf8'),
+  );
 });
 
 test('prepared distributions contain exactly the artifacts selected by the manifest', () => {
-  const roots = { npm: 'npm', PyPI: 'python/src/mailschema', 'crates.io': 'rust' };
+  const roots = {
+    npm: 'npm',
+    PyPI: 'python/src/mailschema',
+    'crates.io': 'rust',
+    RubyGems: 'ruby',
+  };
   for (const artifact of canonicalArtifacts)
     for (const [registry, root] of Object.entries(roots)) {
       const path = artifact.paths[registry];

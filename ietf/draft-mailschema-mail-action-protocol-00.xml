@@ -16,7 +16,7 @@
         <uri>https://mailschema.org/</uri>
       </address>
     </author>
-    <date year="2026" month="September" day="24"/>
+    <date year="2026" month="September" day="25"/>
     <area>Applications and Real-Time</area>
     <workgroup>Individual Submission</workgroup>
     <keyword>email</keyword>
@@ -24,30 +24,32 @@
     <keyword>structured email</keyword>
     <abstract>
       <t>The Mail Action Protocol (MAP) defines how a service describes an
-      action in email, how an authorized client requests that action over
-      HTTPS, and how the service reports and retains the result. MAP reuses the
-      JSON-LD representation and MIME structure defined by the Structured
-      Email work. It adds exact interaction-type, target, operation,
-      authorization, idempotency, and recovery semantics. It does not replace
-      email transport, grant service authority, or define a new agent identity
-      system.</t>
+      action in email, how a client requests that action over HTTPS, and how
+      the service reports and retains the result. A request is bound to the
+      exact description by its digest. A request is authorized either by the
+      client's existing service credential or, for operations whose contract
+      permits it, by a capability the message itself carries. MAP reuses the
+      JSON-LD representation and MIME structure of the Structured Email work.
+      Interaction types are defined by digest-bound contracts, so adding a type
+      does not change this protocol. MAP does not replace email transport or
+      define an agent identity system.</t>
     </abstract>
   </front>
 
   <middle>
     <section anchor="introduction" numbered="true">
       <name>Introduction</name>
-      <t>Email routinely asks a recipient to act in another service: review a
-      revision, supply information, respond to an event, or change a
-      preference. A person can interpret the message and follow a link. An
-      automated client needs a stable description of the operation, the exact
-      object on which it acts, the service endpoint, and the possible
+      <t>Email routinely asks a recipient to act in another service: approve
+      terms, supply information, respond to an event, confirm an address or
+      change a preference. A person can interpret the message and follow a
+      link. An automated client needs more: a stable description of the
+      operation, the exact object and terms on which it acts, the authority the
+      action rests on, what completing it gives away, and the possible
       outcomes.</t>
       <t>MAP defines that interaction without moving business authority into
       email. The service remains authoritative for identity, permission,
-      target state, additional approvals, and the operation's effect. The
-      readable email and normal service interface remain available to a
-      person.</t>
+      target state, approvals and the operation's effect. The readable email
+      and normal service interface remain available to a person.</t>
       <t>The key words <bcp14>MUST</bcp14>, <bcp14>MUST NOT</bcp14>,
       <bcp14>SHOULD</bcp14>, and <bcp14>MAY</bcp14> in this document are to be
       interpreted as described in BCP 14 <xref target="RFC2119"/> <xref
@@ -59,37 +61,14 @@
       <t>MAP descriptions are JSON-LD documents carried in an
       <tt>application/ld+json</tt> MIME part designated by Structured Email
       <xref target="I-D.ietf-sml-structured-email"/>. SMTP, Internet Message
-      Format, MIME, mailbox access, and provider APIs continue to perform their
+      Format, MIME, mailbox access and provider APIs continue to perform their
       existing roles <xref target="RFC5322"/> <xref target="RFC2046"/>.</t>
-      <t>MAP 0.1 uses existing HTTPS and service authentication. It defines no
-      custom DNS discovery, new media type, global identity provider,
-      mandatory online registry lookup, or general permission-policy
-      language. A later specification can define a different execution profile
-      without changing email transport.</t>
-    </section>
-
-    <section anchor="representation" numbered="true">
-      <name>Structured Email Representation</name>
-      <t>A MAP message <bcp14>MUST</bcp14> contain readable content and exactly
-      one <tt>application/ld+json</tt> part containing the MAP description. The
-      structured part <bcp14>MUST</bcp14> carry
-      <tt>Content-Purpose: Machine-readable</tt>. A receiver
-      <bcp14>MUST NOT</bcp14> infer a MAP description from an undesignated JSON
-      attachment.</t>
-      <t>A MAP action description represents part of a message. The sender
-      <bcp14>MUST</bcp14> use <tt>multipart/related</tt>. The readable text and
-      HTML variants, when both are present, remain a nested
-      <tt>multipart/alternative</tt> part. The structured part
-      <bcp14>MUST</bcp14> use <tt>base64</tt> or
-      <tt>quoted-printable</tt> content-transfer encoding.</t>
-      <t>A receiving system <bcp14>MAY</bcp14> extract and validate the
-      description before it knows whether it will offer execution. Extraction
-      and schema validation <bcp14>MUST NOT</bcp14> execute an operation or
-      grant authority.</t>
-      <t>The structured value is ordinary JSON. JSON-LD expansion is optional.
-      An implementation that expands the document <bcp14>MUST</bcp14> use the
-      bundled profile context and <bcp14>MUST NOT</bcp14> retrieve a context
-      named by an untrusted message.</t>
+      <t>MAP 0.2 uses HTTPS, the service's existing authentication, and
+      existing email authentication <xref target="RFC6376"/> <xref
+      target="RFC9989"/>. It defines no custom DNS record, new media type,
+      global identity provider, mandatory online registry lookup or general
+      permission-policy language. Its authority for message-carried actions
+      follows the pattern of one-click unsubscribe <xref target="RFC8058"/>.</t>
     </section>
 
     <section anchor="terms" numbered="true">
@@ -97,258 +76,564 @@
       <dl>
         <dt>Service</dt>
         <dd>The authority that owns an operation, checks permission, performs
-        the effect, and records its result.</dd>
+        the effect and records its result.</dd>
         <dt>Client</dt>
-        <dd>An agent, inbox, or application that reads a description and may
-        submit an authorized request.</dd>
+        <dd>An agent, inbox or application that reads a description and may
+        submit a request on behalf of a principal.</dd>
         <dt>Interaction Type</dt>
-        <dd>A versioned definition of the target, operations, inputs, results,
-        and permission boundaries for a class of interaction.</dd>
-        <dt>Profile</dt>
-        <dd>The representation and execution rules used by one MAP exchange.</dd>
+        <dd>A versioned contract defining the details, operations, inputs,
+        results, authority and consequences of a class of interaction.</dd>
+        <dt>Details</dt>
+        <dd>Type-defined data in a description, such as terms to approve,
+        fields to complete or times on offer.</dd>
+        <dt>Description Digest</dt>
+        <dd>The SHA-256 digest of the canonical form of a description, which
+        binds a request to it.</dd>
+        <dt>Capability</dt>
+        <dd>An unguessable value in a service URL that authorizes the
+        operations one message offers, for one recipient.</dd>
+        <dt>Consequence</dt>
+        <dd>What completing an operation gives away: refusal, protection,
+        record, disclosure, commitment, authorization or assertion.</dd>
         <dt>Human Route</dt>
         <dd>A service interface through which a person can inspect and complete
         the interaction.</dd>
       </dl>
     </section>
 
-    <section anchor="model" numbered="true">
-      <name>Interaction Model</name>
-      <t>An interaction has three documents:</t>
-      <ol>
-        <li>A description identifies the profile, interaction type, service,
-        exact target revision, offered operations, execution endpoint, result
-        route, expiry, and human route.</li>
-        <li>A request repeats the exact interaction, type, operation, and target
-        references and supplies type-specific input.</li>
-        <li>A result reports the authoritative state. A Problem Details
-        document reports a request that was not applied.</li>
-      </ol>
-      <t>The service <bcp14>MUST</bcp14> recheck authentication, authorization,
-      target state, expiry, revocation, and any additional approval at execution
-      time. Receiving or forwarding an email does not transfer permission.</t>
+    <section anchor="representation" numbered="true">
+      <name>Structured Email Representation</name>
+      <t>A description is a Structured Email partial representation
+      <xref target="I-D.ietf-sml-structured-email"/>. The service
+      <bcp14>MUST</bcp14> carry it in an <tt>application/ld+json</tt> part
+      labelled with the profile through the media type's <tt>profile</tt>
+      parameter <xref target="JSON-LD11"/>, as
+      <tt>application/ld+json; profile="https://mailschema.org/profiles/map/0.2"</tt>.
+      The part <bcp14>MUST</bcp14> carry
+      <tt>Content-Purpose: Machine-readable</tt>, use <tt>base64</tt> or
+      <tt>quoted-printable</tt> content-transfer encoding, and sit in a
+      <tt>multipart/related</tt> entity <xref target="RFC2387"/> beside the
+      readable content. That entity is the message body or one of its parts,
+      as when the message also carries attachments. Other structured parts,
+      including descriptions labelled with other profiles, may sit beside
+      it.</t>
+      <t>A client <bcp14>MUST</bcp14> consider only parts outside any
+      attached message. It processes the one designated part whose
+      <tt>profile</tt> parameter lists the profile it implements, ignores
+      every other structured part, and refuses the message when more than one
+      part carries that label or the part is not in a
+      <tt>multipart/related</tt> entity with readable content. It never
+      infers a description from an undesignated attachment.</t>
+      <t>Every MAP document is I-JSON <xref target="RFC7493"/>: valid UTF-8
+      without a byte order mark, no duplicate member names, no lone
+      surrogates or noncharacters (U+FDD0 to U+FDEF, and the last two code
+      points of every plane), and every number, read as the nearest IEEE 754
+      double, within plus or minus 2^53-1.
+      No string or member name contains U+0000 either, which many stores
+      refuse or truncate. Every MAP document is at most 64 KiB, and its arrays
+      and objects nest at most 32 deep, the outermost counting as one.</t>
+      <t>Lexical forms are the core schema's patterns: date-times, dates,
+      URIs, HTTPS URLs and origins, the result template and email addresses.
+      A validator <bcp14>MUST NOT</bcp14> assert the JSON Schema
+      <tt>format</tt> keyword, since format checkers differ between
+      implementations. Every pattern is printable ASCII in a subset that
+      ECMA-262 with the <tt>u</tt> flag and other regular expression engines
+      read alike. Any other code point is written as <tt>\uXXXX</tt>, and the
+      only escapes are an escaped syntax character, <tt>\t</tt>,
+      <tt>\n</tt>, <tt>\f</tt>, <tt>\r</tt>, <tt>\uXXXX</tt> outside the
+      surrogates and, within a class, <tt>\-</tt>. A pattern uses only
+      literal and escaped characters; non-empty character classes, with a
+      hyphen only in a range or at either end and no bracket or
+      <tt>&amp;&amp;</tt>; <tt>(?:</tt> groups; alternation; <tt>^</tt> and
+      <tt>$</tt>; and one <tt>*</tt>, <tt>+</tt>, <tt>?</tt>, <tt>{n}</tt>,
+      <tt>{n,}</tt> or <tt>{n,m}</tt> quantifier after an atom, with bounds of
+      at most four digits and n no greater than m. <tt>^</tt> and <tt>$</tt>
+      anchor the start and end of the whole value, as in ECMA-262; an engine
+      whose <tt>$</tt> also matches before a final newline, or whose anchors
+      match at line breaks, <bcp14>MUST</bcp14> read them as absolute anchors.
+      Every <tt>multipleOf</tt> is an integer.</t>
+      <t>Implementations bundle the exact artifacts the profile record binds,
+      and <bcp14>MUST NOT</bcp14> resolve a schema or context named by a
+      message. JSON-LD expansion is optional; an implementation that expands a
+      description uses the bundled profile context. Extraction and validation
+      <bcp14>MUST NOT</bcp14> execute an operation or grant authority.</t>
     </section>
 
     <section anchor="description" numbered="true">
       <name>Description</name>
-      <t>The MAP 0.1 profile URI is
-      <tt>https://mailschema.org/profiles/map/0.1</tt>. A client
-      <bcp14>MUST</bcp14> match this value exactly.</t>
-      <t>The field contract is the JSON Schema at
-      <tt>https://mailschema.org/schemas/map-0.1.schema.json</tt>. A conforming
-      profile release binds the exact schema and JSON-LD context bytes by
-      SHA-256 digest; an implementation <bcp14>MUST NOT</bcp14> treat mutable
-      content later retrieved from those URLs as the contract for an already
-      supported profile. The principal members use the JSON data model
-      <xref target="RFC8259"/>:</t>
+      <t>The MAP 0.2 profile URI is
+      <tt>https://mailschema.org/profiles/map/0.2</tt>, and a client
+      <bcp14>MUST</bcp14> match it exactly. The profile record, published at
+      <tt>https://mailschema.org/profiles/map/0.2.json</tt>, binds three
+      artifacts by the SHA-256 digest of their exact bytes, which
+      implementations bundle:</t>
       <dl>
-        <dt>@id</dt><dd>A UUID URN identifying the interaction.</dd>
-        <dt>type</dt><dd>The interaction type URI, version, and exact canonical
-        contract digest.</dd>
-        <dt>service</dt><dd>The service identity, HTTPS execution and result
-        routes, human route, retention interval, and informational
-        authentication metadata.</dd>
-        <dt>target</dt><dd>The service object, revision, and SHA-256 digest to
-        which the operations apply.</dd>
-        <dt>operations</dt><dd>Stable operation identifiers, readable labels,
-        and type-specific input-schema references.</dd>
+        <dt>Core schema</dt><dd><tt>https://mailschema.org/schemas/map-0.2.schema.json</tt>,
+        SHA-256 <tt>732d60fcb758d945dc15c57d885c9d1c0c76423a7439096d9755e8ec9830836a</tt>.</dd>
+        <dt>JSON-LD context</dt><dd><tt>https://mailschema.org/contexts/map-0.2.jsonld</tt>,
+        SHA-256 <tt>dfed0189524d7d16d31ed3d8af97e9a0c458200c4c034b413f9d14fa35b60257</tt>.</dd>
+        <dt>Contract format</dt><dd><tt>https://mailschema.org/schemas/type-contract-0.2.schema.json</tt>,
+        SHA-256 <tt>e030007cc034662c9d9d448a8a035aff3106cfb96fb60e6aa9f92b99b25df0b9</tt>.</dd>
       </dl>
-      <t>The description <bcp14>MUST NOT</bcp14> contain an access token,
-      session credential, or new authorization grant. Its authentication
-      metadata only names schemes that a configured client may already use.
-      Its audience, when present, is the protected resource identifier of the
-      service's MAP API <xref target="RFC9728"/>, used as a resource indicator
-      <xref target="RFC8707"/>.</t>
-      <t>A service <bcp14>MUST</bcp14> preserve the same interaction identifier
-      when it redelivers the same underlying interaction. A changed type
-      contract, target revision, or set of offered operations is a new
-      interaction.</t>
+      <t>The principal members of a description, in the JSON data model
+      <xref target="RFC8259"/>, are:</t>
+      <dl>
+        <dt>@id</dt><dd>A UUID URN <xref target="RFC9562"/> identifying the
+        interaction.</dd>
+        <dt>type</dt><dd>The interaction type URI, version and contract
+        digest.</dd>
+        <dt>describedAt, expiresAt</dt><dd>When the interaction was described
+        and when it expires, which is later.</dd>
+        <dt>service</dt><dd>The service identity, its authority mode, the
+        protected resource identifier <xref target="RFC9728"/> for credential
+        authority, the HTTPS execution URL without a fragment, a result URL
+        template containing
+        <tt>{requestId}</tt> once and outside any fragment, a result retention
+        interval from 300 seconds to one year, and the human route. Under
+        credential authority it may name, as <tt>onBehalfOf</tt>, the party
+        the service asks for when that is not the service itself: an
+        <tt>id</tt> URI that identifies the party at the service, the same in
+        all its interactions, and the <tt>name</tt> the service shows.</dd>
+        <dt>recipient</dt><dd>For possession authority, the address the
+        capability was issued to. Its local part may be internationalized
+        <xref target="RFC6531"/>, without spaces or invisible and
+        bidirectional format characters; its domain is written as
+        A-labels.</dd>
+        <dt>target</dt><dd>The service object, its revision and a
+        service-issued SHA-256 digest. The revision and digest cover only terms
+        the service controls, never responses to the interaction.</dd>
+        <dt>details</dt><dd>Present exactly when the type contract defines
+        them. Numbers are integers, and member names are ASCII identifiers: a
+        letter, then at most 63 letters, digits or underscores.</dd>
+        <dt>operations</dt><dd>Offered operation identifiers with readable
+        labels, each offered at most once.</dd>
+      </dl>
+      <t>Before acting, a client <bcp14>MUST</bcp14> validate the description
+      against the core schema, match its profile, select the bundled contract
+      its type names and compare the contract digest, validate the details
+      against that contract, check that each offered operation permits the
+      authority mode, and refuse a description whose expiry has passed. It
+      prepares one request for each instruction of its principal, validates
+      its input against the request schema and every field binding, and
+      reuses that request, with its identifier, when the same instruction is
+      carried out again, as on redelivery.</t>
+      <t>A description is immutable. A changed contract, target revision,
+      details or operation set is a new interaction with a new identifier, and
+      a service that delivers the same interaction again
+      <bcp14>MUST</bcp14> send the same description. The
+      description <bcp14>MUST NOT</bcp14> contain an access token, session
+      credential or grant, other than a possession capability in its execution
+      route.</t>
     </section>
 
-    <section anchor="trust" numbered="true">
-      <name>Endpoint Trust</name>
-      <t>A description and every value derived from it are untrusted input.
-      Before credential use, a client <bcp14>MUST</bcp14> match the service
-      identity, exact HTTPS execution URL, result URL template, and credential
-      audience against configuration obtained independently of the email.
-      Matching only the origin is insufficient. Message authentication alone
-      is also insufficient.</t>
-      <t>A client <bcp14>MUST</bcp14> apply the same checks to every redirect
-      before sending a credential. A client
-      <bcp14>MUST NOT</bcp14> automatically fetch or interpret an unknown
-      schema, URL, or instruction named by the message. These rules align with
-      the Structured Email trust model <xref target="I-D.ietf-sml-trust"/>.</t>
-      <t>A client <bcp14>MAY</bcp14> obtain that configuration from OAuth 2.0
-      Protected Resource Metadata <xref target="RFC9728"/> for a protected
-      resource identifier it already trusts, applying that specification's
-      validation, including that the document names the configured resource.
-      The <tt>map_services</tt> metadata parameter lists the MAP services at
-      the resource. Each entry has an <tt>id</tt> matching the description's
-      service identity, the implemented <tt>profiles</tt>, an exact
-      <tt>execution_url</tt>, and an exact <tt>result_url_template</tt>. Both
-      URLs <bcp14>MUST</bcp14> use HTTPS on the resource identifier's origin;
-      metadata cannot extend trust to another origin, and nothing in an email
-      selects the resource.</t>
+    <section anchor="digest" numbered="true">
+      <name>Description Digest</name>
+      <t>The description digest is the lowercase hexadecimal SHA-256 digest of
+      the description serialized with the JSON Canonicalization Scheme
+      <xref target="RFC8785"/>, exactly as parsed from the message, prefixed
+      with <tt>sha-256:</tt>. The service computes it over the description it
+      serializes into the message, which a client parses back to the same
+      canonical form.
+      It stores the digest with the interaction, or rebuilds the identical
+      description from the interaction identifier and state that cannot change;
+      a rebuilt description whose content would differ is a different
+      interaction. Every request carries the digest. The service
+      <bcp14>MUST</bcp14> refuse a request whose digest differs from that of
+      the description it issued, without claiming its request identifier.</t>
+      <t>The digest binds everything a client was shown, including terms,
+      wording and links. A forged message that reuses a genuine interaction
+      identifier cannot produce an accepted request.</t>
+    </section>
+
+    <section anchor="authority" numbered="true">
+      <name>Authority</name>
+      <t>Each operation in a type contract declares the authority it permits.
+      An interaction has one mode, and every operation it offers
+      <bcp14>MUST</bcp14> permit that mode.</t>
+      <section anchor="credential" numbered="true">
+        <name>Credential Authority</name>
+        <t>The client holds an existing credential for the service, sent only
+        in the <tt>Authorization</tt> header. Before using it, the client
+        <bcp14>MUST</bcp14> match the service identity, exact HTTPS execution
+        URL, result URL template and resource against configuration obtained
+        independently of the email, and <bcp14>MUST</bcp14> apply the same
+        checks to every redirect. The human route <bcp14>MUST</bcp14> sit
+        under the resource's organizational domain. Message authentication
+        alone is insufficient.</t>
+        <t>A client <bcp14>MAY</bcp14> obtain that configuration from OAuth 2.0
+        Protected Resource Metadata <xref target="RFC9728"/> for a resource
+        identifier it already trusts. The <tt>map_services</tt> metadata
+        parameter lists the MAP services at the resource: each entry has an
+        <tt>id</tt>, the implemented <tt>profiles</tt>, an exact
+        <tt>execution_url</tt> and an exact <tt>result_url_template</tt>, both
+        of which <bcp14>MUST</bcp14> use HTTPS on the resource identifier's
+        origin. Nothing in an email selects
+        the resource.</t>
+        <t>Authentication establishes the principal, on whose behalf a request
+        is made, and the actor that sent it, such as an OAuth client, the actor
+        of a delegated token <xref target="RFC8693"/>, an API key, or a client
+        authenticated with HTTP Message Signatures <xref target="RFC9421"/>.
+        The service <bcp14>MUST</bcp14> record the actor of each claimed
+        request and human decision separately from the principal.</t>
+        <t>The party asking is the service, or the party it names in
+        <tt>onBehalfOf</tt>, for which it vouches. The client
+        <bcp14>MUST</bcp14> present that party with the service and key its
+        principal's policy to the service identifier and the party's
+        <tt>id</tt> together, never to a name.</t>
+      </section>
+      <section anchor="possession" numbered="true">
+        <name>Possession Authority</name>
+        <t>The message is the authority for the operations it offers on its
+        target. The service <bcp14>MUST</bcp14>:</t>
+        <ul>
+          <li>issue one capability per interaction and recipient: at least 128
+          bits from a cryptographically secure generator, written as at least
+          22 base64url characters without padding <xref target="RFC4648"/>, as
+          the last segment of the execution URL path;</li>
+          <li>begin the result URL template with the execution URL followed by
+          <tt>/</tt>, so every result sits under the capability, and scope
+          request identifiers, retries and results to the capability;</li>
+          <li>use HTTPS, never redirect, and never require cookies or HTTP
+          authentication;</li>
+          <li>send <tt>Referrer-Policy: no-referrer</tt> from pages that carry
+          the capability, and keep the capability out of the human route and
+          out of its logs;</li>
+          <li>read the capability from the path exactly as written, never
+          decoded or normalized, and use no dot segments in capability
+          URLs;</li>
+          <li>answer an unknown capability with a plain 404 and a lapsed one
+          with 410. A capability lapses once the interaction has expired, its
+          retention interval has passed, measured from its expiry, and no
+          result of a request claimed before expiry is still retained. A
+          refusal recorded after expiry never extends it. Once lapsed, the
+          plain 410 replaces every MAP answer under the capability;</li>
+          <li>sign the message with a DKIM signature <xref target="RFC6376"/>
+          aligned with the From domain, using <tt>rsa-sha256</tt> with a key of
+          at least 2048 bits or <tt>ed25519-sha256</tt> <xref target="RFC8463"/>,
+          without an <tt>l=</tt> tag, and covering From, To, Date, Message-ID,
+          MIME-Version and Content-Type, and Cc, List-Id and OTP-Token whenever
+          the message carries them;</li>
+          <li>when sending for customers, send only under the customer's own
+          verified, aligned domain.</li>
+        </ul>
+        <t>Before any possession request, the client <bcp14>MUST</bcp14>
+        establish all of the following:</t>
+        <ul>
+          <li>The message carries such a signature, which the client verified
+          on the raw message. The signature is currently valid, its algorithm
+          matches the published key, and it is aligned under the DMARC policy
+          <xref target="RFC9989"/> of the From domain or its organizational
+          domain. The client reads header fields as its DKIM verifier reads
+          them and refuses a malformed field. The message carries each signed
+          header, and Subject, at most once, its From header names exactly one
+          mailbox, and its Date is a valid section 3.3 date-time <xref
+          target="RFC5322"/> with a numeric zone, a year from 1900 and none of
+          the obsolete forms. An
+          SPF-only DMARC pass, a pass obtained through ARC or a local override,
+          and authentication results from any system other than the client's
+          own receiving system <xref target="RFC8601"/> do not count.</li>
+          <li>The execution URL, result template, human route and service
+          identifier sit under the From domain's organizational domain, as the
+          RFC 9989 DNS tree walk determines it, compared as A-labels
+          <xref target="RFC5890"/>. A DNS
+          failure other than a definite absence, or an organizational domain
+          that is a top-level domain, refuses the message.</li>
+          <li>The recipient is an address the principal controls, and the
+          message was sent to it. Addresses are compared with their ASCII
+          letters in lowercase, every other character exactly, and their
+          domains as A-labels.</li>
+        </ul>
+        <t>The client <bcp14>MUST</bcp14> send no credentials and
+        <bcp14>MUST</bcp14> treat a redirect as a failure.
+        Anyone who receives a forwarded copy holds the same authority, so a
+        contract permits possession only where that is acceptable. Under
+        possession authority the capability is the principal, results never
+        name an actor, and the client presents the From organizational domain,
+        not the service name, as the party asking.</t>
+      </section>
+    </section>
+
+    <section anchor="consequences" numbered="true">
+      <name>Consequences</name>
+      <t>Every operation declares one or more consequences, so a client can
+      apply its principal's policy to a type it has not implemented. Refusal
+      and protection stand alone. Under possession authority, a client
+      <bcp14>MUST NOT</bcp14> complete an operation whose consequences go
+      beyond refusal, protection and record without a prior relationship
+      between the principal and the sending organization, or the principal's
+      decision. A client without a type's own rule treats an assertion as
+      needing the principal's decision. A disclosure sends the principal's
+      information to the service and through it to any party it asks for.
+      When it asks a person to decide, the client shows the party asking, the
+      details and the target, not the readable body.</t>
     </section>
 
     <section anchor="execution" numbered="true">
-      <name>HTTPS Execution Profile</name>
-      <t>The client sends an authenticated <tt>POST</tt> using HTTP semantics
-      <xref target="RFC9110"/> with
-      <tt>Content-Type: application/json</tt> to the execution URL. The JSON
-      body conforms to the request definition in the MAP schema. Service
-      authentication and OAuth security follow the service's established
-      configuration and applicable guidance such as <xref target="RFC9700"/>.</t>
-      <t>Authentication establishes two identities outside the request body.
-      The principal is the subject on whose behalf the request is made. The
-      actor is the client or agent that sent it, such as an OAuth client, the
-      actor of a delegated token <xref target="RFC8693"/>, or a service API key.
-      Request identifiers, authorization, and result access belong to the
-      principal. A service <bcp14>SHOULD</bcp14> record the actor of each
-      claimed request and human decision separately from the principal. MAP
-      defines no identity scheme; a service can take the actor from any
-      authentication it accepts, including HTTP Message Signatures
-      <xref target="RFC9421"/>.</t>
-      <t>A successful response uses <tt>application/json</tt>. The service
-      returns status 200 for the terminal <tt>accepted</tt>,
-      <tt>completed</tt>, or <tt>failed</tt> states, and status 202 for the
-      non-terminal <tt>pending</tt> or <tt>approval-required</tt> states. A
-      <tt>failed</tt> result reports work that the service previously accepted
-      but could not complete; a request rejected before acceptance uses a
-      Problem Details response. Every response carries a <tt>Location</tt>
-      header for the request's result resource and repeats the exact type and
-      target references.</t>
-      <t>Errors use <tt>application/problem+json</tt> <xref target="RFC9457"/>.
-      MAP 0.1 defines <tt>invalid-request</tt>,
-      <tt>authentication-required</tt>, <tt>refused</tt>,
-      <tt>result-not-found</tt>,
-      <tt>stale-target</tt>, <tt>expired-interaction</tt>,
-      <tt>unsupported-profile</tt>, <tt>unsupported-type</tt>,
-      <tt>unsupported-operation</tt>, <tt>idempotency-conflict</tt>, and
-      <tt>request-in-progress</tt>. A service <bcp14>MUST NOT</bcp14> apply the
-      requested effect when returning one of these problems.</t>
+      <name>Requests and Results</name>
+      <t>The client sends a <tt>POST</tt> using HTTP semantics
+      <xref target="RFC9110"/> with <tt>Content-Type: application/json</tt> to
+      the execution URL. The request carries the profile, a client-generated
+      <tt>requestId</tt>, the interaction identifier, the description digest,
+      the type reference, the operation and its input, and
+      <bcp14>MUST</bcp14> validate against the core schema and the contract's
+      request schema. The service <bcp14>MUST</bcp14> answer another method on the execution URL with 405
+      and <tt>Allow: POST</tt>, and <bcp14>MUST</bcp14> answer 415 unless the
+      media type is <tt>application/json</tt>, compared case-insensitively,
+      with no parameter other than <tt>charset=utf-8</tt>; empty parameter
+      slots, which HTTP permits, are ignored.</t>
+      <t>A service answers in three stages, and nothing answered in the first
+      two is claimed. First the HTTP binding, before the body is read, in any
+      order: another method with 405, another media type with 415, a URL that
+      names no result resource with a plain 404, a missing credential with
+      <tt>authentication-required</tt>, and under possession authority an
+      unknown capability with a plain 404 and a lapsed one with a plain 410.
+      Then, with an uncorrelated <tt>invalid-request</tt>, a malformed
+      request, an unknown interaction and a request whose digest differs from
+      the description it issued. Then, in any order that applies no effect for
+      a problem and reveals no protected state, the principal's current
+      permission, the profile, type, operation and authority, expiry, a decided
+      interaction, staleness against its own state, and the input, field
+      bindings and type rules.</t>
+      <t>Results use <tt>application/json</tt>. The state is
+      <tt>accepted</tt>, <tt>completed</tt> or <tt>failed</tt> with status
+      200, or <tt>pending</tt> or <tt>approval-required</tt> with status 202
+      and a <tt>Retry-After</tt> header. A <tt>failed</tt> result carries a
+      reason. An <tt>approval-required</tt> result carries an approval URL,
+      which shows the proposal's input and the terms the description digest
+      binds. A <tt>GET</tt> on the approval URL or the human route
+      <bcp14>MUST</bcp14> be side-effect free, since link scanners follow
+      links in mail, and any change a person makes there
+      <bcp14>MUST</bcp14> take their deliberate action, protected from
+      cross-site requests. Under credential authority, a
+      result may name the requesting actor with an opaque reference, which
+      stays the same across transitions and is never an identity claim.</t>
+      <t>Every operation is a decision unless its contract marks it
+      repeatable. The first decision whose result reaches its operation's
+      success state, <tt>accepted</tt> or <tt>completed</tt>, decides the
+      interaction. A decision whose result is <tt>pending</tt> holds the
+      interaction while the service carries it out: it decides the
+      interaction if it succeeds and leaves it undecided if it fails. A
+      decision request made while the interaction is decided or held is
+      refused as <tt>already-decided</tt>, and any decision still awaiting
+      approval when the interaction is decided ends as failed with reason
+      <tt>superseded</tt>.
+      Repeatable operations, and approvals of them, remain available until
+      the interaction expires. The
+      service authorizes a human decision independently of the proposal. An
+      unauthorized decision attempt, or one the service's rules refuse at that
+      moment, is answered with <tt>refused</tt> and leaves the proposal
+      unchanged. An operation that can require approval
+      <bcp14>MUST</bcp14> declare the failure reasons <tt>declined</tt>,
+      <tt>stale-target</tt> and <tt>expired</tt>, and a decision also
+      <tt>superseded</tt>. An undecided approval fails with reason
+      <tt>expired</tt> at the interaction's expiry.</t>
+      <t>Problems use <tt>application/problem+json</tt> <xref
+      target="RFC9457"/>. A problem's type is
+      <tt>https://mailschema.org/problems/</tt> followed by its code, and its
+      type, HTTP status and <tt>code</tt> member <bcp14>MUST</bcp14> agree as
+      the following table gives. A problem is correlated, carrying the
+      profile, the request identifier, the interaction identifier when the
+      service knows it, the code, and the result URL as its instance, only
+      when it states what happened to a request: a claimed request's
+      recorded response, or an <tt>idempotency-conflict</tt>,
+      <tt>request-in-progress</tt>, <tt>result-not-found</tt> or
+      <tt>expired-interaction</tt> for its identifier. A refusal of the
+      caller's access to a claimed request, on a retry, a read or a decision,
+      says nothing about the request, so it is not correlated and changes
+      nothing. Neither is a problem for an unclaimed request, nor an
+      <tt>authentication-required</tt> problem. Only
+      <tt>invalid-request</tt>, <tt>refused</tt> and
+      <tt>authentication-required</tt> are ever uncorrelated.</t>
+      <table anchor="problems">
+        <name>Problem Codes</name>
+        <thead>
+          <tr><th>Code</th><th>Status</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>invalid-request</td><td>400</td><td>Correct the request.
+          Malformed, unknown-interaction and unknown-description requests are
+          not claimed.</td></tr>
+          <tr><td>authentication-required</td><td>401</td><td>Establish
+          acceptable credentials.</td></tr>
+          <tr><td>refused</td><td>403</td><td>The caller may not perform the
+          operation or read the result.</td></tr>
+          <tr><td>result-not-found</td><td>404</td><td>No retained result
+          exists for the caller.</td></tr>
+          <tr><td>stale-target</td><td>409</td><td>The target changed; the
+          problem carries the current target.</td></tr>
+          <tr><td>idempotency-conflict</td><td>409</td><td>The identifier
+          belongs to another request value.</td></tr>
+          <tr><td>request-in-progress</td><td>409</td><td>The identifier is
+          claimed without a result yet.</td></tr>
+          <tr><td>already-decided</td><td>409</td><td>Another request decided
+          the interaction, or holds it while its decision is carried
+          out.</td></tr>
+          <tr><td>expired-interaction</td><td>410</td><td>The interaction, or
+          its retained result, has expired.</td></tr>
+          <tr><td>unsupported-type</td><td>422</td><td>The exact type is not
+          implemented.</td></tr>
+          <tr><td>unsupported-operation</td><td>422</td><td>The operation was
+          not offered or implemented.</td></tr>
+        </tbody>
+      </table>
+      <t>The service answers input that fails the operation's request schema,
+      a field binding or a type rule with a claimed
+      <tt>invalid-request</tt>. Its errors are JSON Pointers <xref
+      target="RFC6901"/> into the input; implementations may list different
+      errors for the same input, but agree on the verdict. A service
+      <bcp14>MUST NOT</bcp14> apply the requested effect when returning a
+      problem.</t>
     </section>
 
     <section anchor="idempotency" numbered="true">
       <name>Idempotency and Recovery</name>
-      <t>A client generates a UUID URN as <tt>requestId</tt>. The service
-      establishes the tenant and principal from its authenticated transport
-      context, not from request fields. Within that scope, the first use binds
-      the identifier to the complete JSON request value. Repeating the
-      identifier with the same JSON values is an exact retry. The service
-      <bcp14>MUST</bcp14> recheck current authorization, then return the latest
-      recorded response without applying the effect again. Object member order
-      is insignificant; array order and member values are significant. An
-      implementation can use the JSON Canonicalization Scheme
-      <xref target="RFC8785"/> when deriving a request digest. The request
-      identifier serves the purpose of the HTTP Idempotency-Key header
-      <xref target="I-D.ietf-httpapi-idempotency-key-header"/> but travels in
-      the body, where it binds the complete request value and names a
-      recoverable result. For the same reason, the target digest acts as an
-      entity tag for a conditional request sent to the execution resource
-      rather than to the target.</t>
-      <t>When the same interaction is redelivered and a client has already
-      prepared the same operation and input, the client <bcp14>MUST</bcp14>
-      reuse its complete persisted request, including its
-      <tt>requestId</tt>.</t>
-      <t>Reuse with a changed value produces an
-      <tt>idempotency-conflict</tt>. The changed request <bcp14>MUST NOT</bcp14>
-      be applied.</t>
-      <t>Request claiming, effect initiation, and recoverable state
-      <bcp14>MUST</bcp14> be atomic, or the service <bcp14>MUST</bcp14> reconcile
-      an interrupted operation without repeating the business effect. A
-      non-terminal result can advance to one terminal result; a terminal result
-      <bcp14>MUST NOT</bcp14> advance.</t>
-      <t>A malformed request or request for an unknown interaction
-      <bcp14>MUST NOT</bcp14> claim its identifier. A syntactically valid
-      request for a recognized interaction and authenticated principal is
-      claimed before type-specific input validation. Its type-validation
-      failure is recoverable, and a corrected body uses a new identifier. For
-      every claimed request, the service <bcp14>MUST</bcp14> isolate an
-      existing identifier to its original principal and check current
-      authorization before disclosing saved state. A new identifier is claimed
-      before an effect begins, and its first recoverable outcome, including a
-      permission refusal or type-validation failure, is recorded with that claim. This specification does
-      not require a total precedence among independent validation failures.</t>
-      <t>An authenticated <tt>GET</tt> to the result resource rechecks current
-      authorization and returns the latest recorded result or problem. After a timeout, a client
-      <bcp14>SHOULD</bcp14> retrieve that resource before issuing a request that
-      might repeat the effect. An uncertain outcome is local client state; it
-      is not a MAP result value.</t>
-      <t>The advertised retention interval begins when the first response is
-      recorded. A service <bcp14>MUST</bcp14> preserve enough duplicate
-      suppression state after result disclosure ends to prevent the same
-      scoped request identifier from applying the effect again.</t>
-      <t>A <tt>result-not-found</tt> problem identifies the requested
-      <tt>requestId</tt>. When the service has no known interaction for that
-      identifier, it <bcp14>MUST NOT</bcp14> invent an
-      <tt>interactionId</tt>.</t>
+      <t>A claimed <tt>requestId</tt> identifies one complete request value
+      within the service's tenant: under credential authority, the account
+      the service scopes the principal to; under possession authority, the
+      capability. Each tenant has its own identifiers. An exact retry by the
+      principal that claimed the identifier returns the latest recorded
+      response without applying the effect again, after current authorization
+      is rechecked. Reuse with a changed value is an
+      <tt>idempotency-conflict</tt>. Use of the identifier by another
+      principal in the tenant is refused without disclosing the saved
+      response. A client <bcp14>SHOULD</bcp14> make request identifiers
+      unpredictable, as random UUIDv4 and UUIDv7 values are
+      <xref target="RFC9562"/>, since another principal in the tenant who
+      predicts one could claim it first. The identifier travels in the body
+      rather than in an Idempotency-Key header
+      <xref target="I-D.ietf-httpapi-idempotency-key-header"/>, because it also
+      names the result resource.</t>
+      <t>Malformed requests, and requests for an unknown interaction or
+      description, <bcp14>MUST NOT</bcp14> claim their identifier, so the
+      service refuses them before any check that could claim it. For every
+      other request, claiming the identifier, applying or durably initiating
+      the effect, and recording recoverable state <bcp14>MUST</bcp14> be
+      atomic, or the service <bcp14>MUST</bcp14> reconcile an interrupted
+      operation without repeating it.</t>
+      <t>The result URL is the result URL template with
+      <tt>{requestId}</tt> replaced by the request identifier, each
+      <tt>:</tt> written as <tt>%3A</tt>. The service returns it in a
+      <tt>Location</tt> header. A side-effect-free <tt>GET</tt> there by the
+      principal that made the request returns the latest recorded result or
+      problem, after current permission is rechecked. A URL whose place for
+      the identifier holds anything but a request identifier is not a result
+      resource, and the service answers it with a plain 404, whatever
+      credential comes with it; a request target that is not well-formed may
+      instead get HTTP's own 400. After a timeout,
+      a client <bcp14>SHOULD</bcp14> read the result before any request that
+      might repeat the effect. Results remain available until the later of the
+      interaction's expiry and the retention interval measured from the latest
+      recorded state. Duplicate suppression outlives them.</t>
+      <t>A service <bcp14>MAY</bcp14> delete an interaction with its target,
+      as when the target's owner deletes it. It then answers a request for the
+      interaction as for an unknown interaction, and a read of any of its
+      results as <tt>result-not-found</tt>; nothing is applied again, because
+      the target is gone.</t>
     </section>
 
     <section anchor="types" numbered="true">
       <name>Interaction Types</name>
-      <t>MAP separates the execution profile from interaction semantics. A type
-      contract defines the target semantics, stable operations, required
-      inputs, and normal results. A description binds the type URI, version,
-      and SHA-256 digest of that complete contract serialized with the JSON
-      Canonicalization Scheme <xref target="RFC8785"/>. Implementations do not
-      guess compatibility.</t>
-      <t>A Registry record can add discovery metadata, maintainers, examples,
-      evidence, and history without changing the wire contract. Registry
-      lookup is not required during an interaction.</t>
-      <t>The initial Content Review 0.2 type offers
-      <tt>request-changes</tt> and <tt>approve</tt> for an exact content
-      revision. Approval records a review decision; it does not send or publish
-      the content. A proposed approval can complete as approved or fail as
-      declined, stale, or expired. A service authorizes the human decision
-      separately from the proposing request; a different authorized principal
-      in the same tenant can make that decision. If the service's content or
-      sending rules do not permit the approval when the decision is made, the
-      service refuses that attempt and the proposal remains pending until it
-      is declined or expires.</t>
+      <t>A type contract defines its target, details, and each operation's
+      authority, consequences, repeatability, inputs, results and failure
+      reasons. Each operation declares exactly one success state,
+      <tt>accepted</tt> or <tt>completed</tt>. An operation that permits
+      possession never declares <tt>approval-required</tt>, and one that
+      declares <tt>pending</tt> declares how it fails. Only an operation that
+      declares <tt>approval-required</tt> uses the reserved reasons
+      <tt>declined</tt>, <tt>stale-target</tt> and <tt>expired</tt>. A
+      decision among them also declares <tt>superseded</tt>, and only such a
+      decision uses it. The
+      request schema
+      extends the core request, binds the type identifier and version, and has
+      one branch for each operation of the contract and no other. A field
+      binding ties an input to a form fields block in the details: the input
+      then carries only the fields the details define, and satisfies each,
+      including required fields and each field's lexical form; where the
+      details define no fields block for a binding, its input is absent.</t>
+      <t>The Registry compiles every contract schema strictly. Every keyword
+      belongs to a JSON Schema 2020-12 vocabulary; the one annotation beyond
+      them, <tt>autocomplete</tt>, belongs to the form fields block. A
+      <tt>type</tt> names one type. A keyword that constrains one JSON type has
+      that type declared in the same schema or in an enclosing one that
+      applies to the same value through <tt>allOf</tt>, <tt>anyOf</tt>,
+      <tt>oneOf</tt>, <tt>not</tt>, <tt>if</tt>, <tt>then</tt>,
+      <tt>else</tt> or <tt>dependentSchemas</tt>. No keyword is left without
+      effect: <tt>if</tt> has <tt>then</tt> or <tt>else</tt>,
+      <tt>then</tt> and <tt>else</tt> have <tt>if</tt>, and
+      <tt>minContains</tt> and <tt>maxContains</tt> have <tt>contains</tt>.
+      <tt>prefixItems</tt> with n schemas sets <tt>minItems</tt> to n, and
+      <tt>items</tt> to false or <tt>maxItems</tt> to n. Every
+      <tt>$ref</tt> is a pinned URL with an empty fragment or a plain JSON
+      Pointer to a schema, and only the request schema's root declares
+      <tt>$id</tt> and <tt>$schema</tt>, which is JSON Schema 2020-12.
+      Contract schemas never use an anchor or a dynamic reference. A contract pins, by digest, every schema it depends on. A description
+      binds the type URI, version and SHA-256 digest of the contract serialized
+      with the JSON Canonicalization Scheme <xref target="RFC8785"/>.
+      Implementations do not guess compatibility. Adding a type does not change
+      this protocol.</t>
+      <t>A Registry record adds discovery metadata, maintainers, examples,
+      evidence and history without changing the wire contract. Registry lookup
+      is not required during an interaction.</t>
+      <t>Ten types are published with MAP 0.2:</t>
+      <ul>
+        <li>Content Review;</li>
+        <li>Action Approval, whose terms follow the authorization details of
+        <xref target="RFC9396"/>;</li>
+        <li>Information Request;</li>
+        <li>Event Response, a binding of iTIP replies;</li>
+        <li>Meeting Scheduling;</li>
+        <li>Subscription Preferences, which leaves unsubscribing to
+        <xref target="RFC8058"/>;</li>
+        <li>Task Assignment;</li>
+        <li>Payment Request;</li>
+        <li>Email Confirmation;</li>
+        <li>Account Activity.</li>
+      </ul>
     </section>
 
     <section anchor="security" numbered="true">
       <name>Security Considerations</name>
-      <t>Implementations must treat structured content as attacker-controlled.
-      The endpoint trust checks in <xref target="trust"/> prevent an email from
-      redirecting a service credential. Schema validation does not establish
-      trust or permission.</t>
-      <t>Services must protect result resources with current authorization
-      equivalent to the underlying operation, including on exact retry. Error detail should disclose no token,
-      private target content, or permission information beyond what the caller
-      is allowed to know.</t>
-      <t>A target revision and digest prevent an approval from silently moving
-      to changed content. Services must compare the request with current target
-      state before applying an effect.</t>
-      <t>Clients should present the operation, target, scope, and consequence
-      before obtaining human approval. A changed target or materially changed
-      action requires a new decision according to service policy.</t>
-      <t>A service can grant a caller no approval authority, proposal authority
-      that produces <tt>approval-required</tt>, or delegated authority that can
-      produce <tt>completed</tt>. The protocol does not infer authority from
-      whether the caller is a person or an automated client.</t>
-      <t>The service must authorize a human approval decision against current
-      tenant, role, target, and expiry state. An unauthorized or rule-refused
-      decision attempt does not change the saved non-terminal result.</t>
+      <t>Implementations treat structured content as attacker-controlled. The
+      credential checks in <xref target="credential"/> prevent an email from
+      redirecting a service credential. The description digest prevents a
+      forged or altered description from being acted on. Schema validation
+      establishes neither trust nor permission.</t>
+      <t>Possession authority transfers with every copy of a message. The
+      rules in <xref target="possession"/> limit it as follows:</t>
+      <ul>
+        <li>recipient binding stops replay to other recipients;</li>
+        <li>strict DKIM verification stops forgery and appended content;</li>
+        <li>the organizational domain rule stops redirection to another
+        organization;</li>
+        <li>consequences, and type rules such as confirming only a request the
+        client recorded, stop assertions a principal did not make.</li>
+      </ul>
+      <t>A lookalike domain can pass authentication; it cannot satisfy a
+      recorded-request rule. The rules in <xref target="possession"/> keep
+      capabilities out of logs, referrers and human routes.</t>
+      <t>Services protect result resources with current authorization and
+      disclose no token, private content or permission information beyond what
+      the caller may know. A service can grant a caller no authority, proposal
+      authority that produces <tt>approval-required</tt>, or delegated
+      authority that can produce <tt>completed</tt>. MAP does not infer
+      authority from whether the caller is automated.</t>
     </section>
 
     <section anchor="privacy" numbered="true">
       <name>Privacy Considerations</name>
-      <t>Descriptions are carried through email systems and may be retained or
-      forwarded. They should contain the minimum target metadata needed to
-      understand the action. Sensitive source material should remain behind an
-      authorized service route rather than being copied into the description.</t>
-      <t>Result retention is advertised in seconds. A service must retain the
-      result for at least that interval and should not retain it longer than its
-      stated service purpose requires.</t>
+      <t>Descriptions travel through email systems and may be retained or
+      forwarded. They should carry the minimum details needed to act, and
+      sensitive material should stay behind an authorized service route. Form
+      fields cannot request passwords, one-time codes or payment card data.
+      Results should not be retained longer than the service's stated purpose
+      requires.</t>
     </section>
 
     <section anchor="iana" numbered="true">
       <name>IANA Considerations</name>
-      <t>MAP 0.1 uses existing media types, HTTPS, and the existing OAuth
-      protected resource metadata document. It requests no new media type or
-      well-known URI.</t>
+      <t>MAP uses existing media types, HTTPS and the existing OAuth protected
+      resource metadata document. It requests no new media type or well-known
+      URI.</t>
       <t>IANA is requested to register the following parameter in the "OAuth
       Protected Resource Metadata" registry established by
       <xref target="RFC9728"/>:</t>
@@ -358,8 +643,8 @@
         protected resource, with their profiles and exact execution and result
         URLs</dd>
         <dt>Change Controller:</dt><dd>IETF</dd>
-        <dt>Specification Document(s):</dt><dd><xref target="trust"/> of this
-        document</dd>
+        <dt>Specification Document(s):</dt><dd><xref target="credential"/> of
+        this document</dd>
       </dl>
     </section>
 
@@ -367,19 +652,17 @@
       <name>Implementation Status</name>
       <t>This section follows <xref target="RFC7942"/> and may be removed before
       publication as an RFC.</t>
-      <t>The MailSchema repository contains digest-bound JSON Schemas, valid and invalid
-      fixtures, a complete MIME message, a deterministic client/service
-      harness, a requirement matrix, and conformance cases for completion, refusal, stale targets,
-      approval, exact retry, conflict, recovery, expiry, unsupported contracts,
-      and untrusted endpoints. JavaScript, Python, Rust, and Go packages expose
-      the schemas. The materials are available at
-      <eref target="https://github.com/mailschema/mailschema"/>.</t>
-      <t>Nitrosend has an implementation of partial-representation MIME
-      generation and inbound description extraction. An authenticated Content
-      Review service implementation, durable retry and recovery storage, and
-      its OpenAPI contract are under test. No deployed end-to-end conformance
-      result or independent implementation is claimed. MailSchema and
-      Nitrosend share ownership.</t>
+      <t>The MailSchema repository at
+      <eref target="https://github.com/mailschema/mailschema"/> publishes MAP
+      0.2's digest-bound schemas and ten type contracts. It also publishes a
+      contract-driven reference service and client, and a conformance suite of
+      99 cases mapped to 38 requirements. The suite includes DKIM-signed
+      genuine and forged messages and shared RFC 8785, I-JSON, lexical and
+      media type vectors, which a Ruby implementation also passes.</t>
+      <t>Nitrosend completed a provider-delivered Content Review exchange on
+      MAP 0.1, the withdrawn predecessor of this document. No independent
+      implementation is claimed, and MailSchema and Nitrosend share
+      ownership.</t>
     </section>
   </middle>
 
@@ -388,28 +671,39 @@
       <name>Normative References</name>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2387.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4648.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5322.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5890.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6376.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6531.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7493.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8463.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9110.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9700.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9562.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9989.xml"/>
+      <reference anchor="JSON-LD11" target="https://www.w3.org/TR/2020/REC-json-ld11-20200716/">
+        <front><title>JSON-LD 1.1</title><author fullname="W3C JSON-LD Working Group"/><date year="2020" month="July" day="16"/></front>
+        <seriesInfo name="W3C Recommendation" value="REC-json-ld11-20200716"/>
+      </reference>
       <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/">
         <front><title>Structured Email</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
         <seriesInfo name="Internet-Draft" value="draft-ietf-sml-structured-email-06"/>
-      </reference>
-      <reference anchor="I-D.ietf-sml-trust" target="https://datatracker.ietf.org/doc/draft-ietf-sml-trust/">
-        <front><title>Structured Email: Trust and Security Considerations</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
-        <seriesInfo name="Internet-Draft" value="draft-ietf-sml-trust-01"/>
       </reference>
     </references>
     <references>
       <name>Informative References</name>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8058.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8707.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8601.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8693.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9396.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9421.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-httpapi-idempotency-key-header.xml"/>
     </references>

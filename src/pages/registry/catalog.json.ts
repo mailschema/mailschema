@@ -2,8 +2,7 @@ import { registry, typeContracts, typeHref } from '../../data/types';
 import { recordDigest } from '../../registry/catalog';
 export function GET() {
   return Response.json({
-    format: 'mailschema-registry/1',
-    contractSchema: '/schemas/type-contract-0.1.schema.json',
+    format: 'mailschema-registry/2',
     types: registry.types.map((record) => ({
       record,
       digest: recordDigest(record),

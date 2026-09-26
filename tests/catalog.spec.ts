@@ -86,13 +86,25 @@ test('Registry catalogue indexes every executable contract without a mutable lat
   const response = await request.get('/registry/catalog.json');
   expect(response.ok()).toBe(true);
   const catalog = await response.json();
+  expect(catalog.format).toBe('mailschema-registry/2');
   expect(catalog.contracts).toEqual(typeContracts);
-  expect(catalog.contracts).toHaveLength(2);
+  for (const entry of catalog.contracts)
+    expect(entry.contractFormat).toBe(
+      entry.profile === 'https://mailschema.org/profiles/map/0.2'
+        ? 'https://mailschema.org/schemas/type-contract-0.2.schema.json'
+        : 'https://mailschema.org/schemas/type-contract-0.1.schema.json',
+    );
   expect(
     catalog.contracts.map(
       (entry: { type: string; version: string }) => `${entry.type}@${entry.version}`,
     ),
-  ).toEqual(['content-review@0.1', 'content-review@0.2']);
+  ).toEqual(
+    expect.arrayContaining([
+      'content-review@0.1',
+      'content-review@0.2',
+      ...typeRecords.map((type) => `${type.slug}@${type.version}`),
+    ]),
+  );
   for (const entry of catalog.contracts as Record<string, any>[]) {
     expect(entry.contract.url).toMatch(/^https:\/\/mailschema\.org\/contracts\//);
     expect(entry.contract.canonicalDigest).toMatch(/^sha-256:[a-f0-9]{64}$/);

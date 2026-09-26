@@ -1,0 +1,93 @@
+{
+  "slug": "email-confirmation",
+  "name": "Email Confirmation",
+  "summary": "Confirm that you control an address to complete something you started, or report that you did not start it.",
+  "category": "Account",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema editorial proposal",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "overview": "A service needs proof that the recipient controls an address before it creates an account, completes a sign-in, changes an account’s address or adds the address to a list. The message itself is the authority, as in one-click unsubscribe, so a client confirms only a request it can match to one it made, and can report a request it did not make.",
+  "target": "The pending request identified in the details: the origin that made it, the address, what confirmation completes (account creation, sign-in, address change or subscription) and when it was requested.",
+  "operations": [
+    {
+      "id": "confirm",
+      "name": "Confirm",
+      "description": "Confirm the pending request, which completes it."
+    },
+    {
+      "id": "report-unrecognized",
+      "name": "Report unrecognized",
+      "description": "Report that the recipient did not make the request. The service cancels it."
+    }
+  ],
+  "inputs": "Nothing to confirm. A report may carry a short note. A code, where the service uses one, travels in the OTP-Token header, never in the description, and a message offers either a code or confirmation, not both.",
+  "results": "Confirmation completed, or the request cancelled after a report. A report never reveals whether an account exists.",
+  "permissions": "Possession authority only, after the client verifies the message’s aligned DKIM signature, that every link sits under the sender’s organizational domain and that it was sent to its principal’s address. A client confirms automatically only on exactly one matching request it recorded before the message was sent, whose origin is under the sender’s organizational domain; for a sign-in or address change the address must also be unique to that request. Anything else goes to its principal.",
+  "humanRoute": "The confirmation link or code in the readable email, with a separate link to report that the request was not made.",
+  "example": {
+    "title": "Verify a new account",
+    "steps": [
+      "An agent signs up for a developer service with its principal’s work address and records the pending sign-up.",
+      "The service emails a confirmation for that address, valid for 30 minutes.",
+      "The agent matches the email to its record and confirms. The service activates the account."
+    ],
+    "exception": "A confirmation for a sign-up the agent never started is not confirmed, whatever the email urges. The agent reports it as unrecognized, and the service cancels the pending account."
+  },
+  "references": [
+    {
+      "title": "One-click unsubscribe · RFC 8058",
+      "href": "https://www.rfc-editor.org/rfc/rfc8058#section-3.1",
+      "description": "The existing pattern for an action authorized by the message alone: a hard-to-forge HTTPS URI, a fixed POST body, no cookies or HTTP authentication, no redirect and DKIM coverage of the headers."
+    },
+    {
+      "title": "OTP-Token header · draft-goto-otp-token",
+      "href": "https://datatracker.ietf.org/doc/draft-goto-otp-token/",
+      "description": "Carries a one-time code in an email header, bound to the origin it is for. Individual Internet-Draft; it may change and does not match the code to a request the recipient made."
+    },
+    {
+      "title": "Wrong-recipient reporting · draft-ietf-mailmaint-wrong-recipient",
+      "href": "https://datatracker.ietf.org/doc/draft-ietf-mailmaint-wrong-recipient/",
+      "description": "Reuses the RFC 8058 pattern for a one-click report that the message reached the wrong person. The draft has expired; it is the closest precedent for reporting an unrecognized request."
+    },
+    {
+      "title": "Email Verification Protocol · draft-hardt-email-verification",
+      "href": "https://datatracker.ietf.org/doc/draft-hardt-email-verification/",
+      "description": "Verifies control of an address through the browser and the mail provider, without sending an email. Where it is available, no confirmation email is needed. Individual Internet-Draft."
+    },
+    {
+      "title": "NIST SP 800-63B-4",
+      "href": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+      "description": "Email must not be used for out-of-band authentication, and a code typed by hand is not phishing-resistant. Codes that validate an address are outside that prohibition."
+    },
+    {
+      "title": "M3AAWG Sender Best Common Practices",
+      "href": "https://www.m3aawg.org/sites/default/files/doc_files/m3aawg-sender-best-common-practices-aug-27-2026.pdf",
+      "description": "Recommends confirmed opt-in for list subscriptions and changed addresses, and describes list bombing through mass sign-ups."
+    }
+  ],
+  "openQuestions": [
+    "Whether services should echo a value the client supplied when it started, where a per-request address is unavailable.",
+    "Sign-in links that deliver a session to whoever follows them."
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "Executable on MAP 0.2 with possession authority. Automatic confirmation needs exactly one prior recorded request; codes use the OTP-Token header."
+    }
+  ],
+  "definition": {
+    "label": "Read the Email Confirmation definition",
+    "href": "/specification/email-confirmation/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

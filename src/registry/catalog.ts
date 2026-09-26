@@ -59,6 +59,13 @@ export interface Registry {
   snapshots: Map<string, TypeRecord>;
 }
 
+/**
+ * Records published before amendments existed and later edited in place, kept exactly
+ * as published so their snapshots are still served. Some predate the current record
+ * format, so they are served but never compiled or bound by a declaration.
+ */
+export type SnapshotArchive = Map<string, { slug: string }>;
+
 export function compileRegistry(seeds: TypeRecord[], submissions: Contribution[]): Registry {
   const records = new Map<string, TypeRecord>();
   const snapshots = new Map<string, TypeRecord>();
@@ -124,13 +131,14 @@ export function compileRegistry(seeds: TypeRecord[], submissions: Contribution[]
         ...submission.record,
         origin: previous.origin,
         contributors: uniqueParties([...previous.contributors, submission.contributor]),
+        // History reads newest first, as base records are written.
         history: [
-          ...previous.history,
           {
             label: `Amendment by ${submission.contributor.name}`,
             description: submission.summary,
             contributionId: submission.id,
           },
+          ...previous.history,
         ],
       });
     }
@@ -160,7 +168,10 @@ export function compileRegistry(seeds: TypeRecord[], submissions: Contribution[]
   };
 }
 
-export function loadRegistry(root = registryRoot, extra: Contribution[] = []): Registry {
+export function loadRegistry(
+  root = registryRoot,
+  extra: Contribution[] = [],
+): Registry & { archive: SnapshotArchive } {
   const seeds = readDirectory(resolve(root, 'types')).map(({ file, value }) => {
     assertTypeRecord(value);
     if (basename(file, '.json') !== value.slug)
@@ -174,5 +185,16 @@ export function loadRegistry(root = registryRoot, extra: Contribution[] = []): R
       throw new Error(`${file}: filename must match the contribution identifier`);
     return value;
   });
-  return compileRegistry(seeds, [...submissions, ...extra]);
+  const registry = compileRegistry(seeds, [...submissions, ...extra]);
+  const archive: SnapshotArchive = new Map();
+  for (const { file, value } of readDirectory(resolve(root, 'snapshots'))) {
+    const digest = basename(file, '.json');
+    if (recordDigest(value) !== digest)
+      throw new Error(`${file}: filename must be the record digest`);
+    const slug = (value as { slug?: unknown }).slug;
+    if (typeof slug !== 'string' || !registry.types.some((type) => type.slug === slug))
+      throw new Error(`${file}: an archived snapshot belongs to a current type`);
+    archive.set(digest, value as { slug: string });
+  }
+  return { ...registry, archive };
 }

@@ -315,12 +315,19 @@
     flex-wrap: wrap;
     gap: 0;
   }
+  /* The strip scrolls sideways rather than widen the page, however many tabs it holds. */
   .tool-tabs {
     width: 100%;
     justify-content: space-between;
     gap: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tool-tabs::-webkit-scrollbar {
+    display: none;
   }
   .tool-tabs a {
+    flex: none;
     flex-direction: column;
     gap: 3px;
     padding-block: 16px;

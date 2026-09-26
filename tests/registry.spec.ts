@@ -30,10 +30,13 @@ function example<K extends Contribution['kind']>(kind: K): Extract<Contribution,
 
 test('executable contracts are discovered from canonical files and fail closed on drift', () => {
   const catalog = loadTypeContractCatalog();
-  expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).toEqual([
-    'content-review@0.1',
-    'content-review@0.2',
-  ]);
+  expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).toEqual(
+    expect.arrayContaining([
+      'content-review@0.1',
+      'content-review@0.2',
+      ...baseline.types.map((type) => `${type.slug}@${type.version}`),
+    ]),
+  );
   expect(() => assertContractCoverage(baseline.types, catalog)).not.toThrow();
 
   const root = mkdtempSync(resolve(tmpdir(), 'mailschema-contracts-'));
@@ -98,6 +101,7 @@ test('executable contracts are discovered from canonical files and fail closed o
       slug: 'delivery-receipt',
       name: 'Delivery Receipt',
       version: '0.1',
+      profile: 'https://mailschema.org/profiles/map/0.1',
       operations: [
         {
           id: 'acknowledge',
@@ -111,7 +115,7 @@ test('executable contracts are discovered from canonical files and fail closed o
     ).not.toThrow();
     rmSync(secondSchemaPath);
     rmSync(secondContractPath);
-    rmSync(resolve(root, 'public/contracts/content-review-0.2.json'));
+    rmSync(resolve(root, 'public/contracts/content-review-0.3.json'));
     expect(() => assertContractCoverage(baseline.types, loadTypeContractCatalog(root))).toThrow(
       /expected one current executable contract/,
     );
@@ -146,7 +150,10 @@ test('amendments follow their exact bases, retain history and reject stale or co
   next.record.openQuestions.push('An additional question after the first amendment.');
   const result = compileRegistry(baseline.types, [next, first]);
   const updated = result.types.find((record) => record.slug === first.record.slug)!;
-  expect(updated.history.slice(-2).map((item) => item.contributionId)).toEqual([first.id, next.id]);
+  expect(updated.history.slice(0, 2).map((item) => item.contributionId)).toEqual([
+    next.id,
+    first.id,
+  ]);
   expect(updated.contributors.map((party) => party.name)).toContain(first.contributor.name);
   expect(result.snapshots.has(first.baseDigest)).toBe(true);
   expect(() => compileRegistry(baseline.types, [{ ...first, baseDigest: '0'.repeat(64) }])).toThrow(
@@ -178,6 +185,45 @@ test('implementation evidence stays bound to its version, profile, operations an
   expect(() => assertContribution({ ...declaration, evidence: { kind: 'test-report' } })).toThrow(
     /reproduction/,
   );
+});
+
+// Every record digest a deployed build of main has served, from the launch onwards.
+const PUBLISHED_RECORD_DIGESTS = [
+  '0386907ea6240c57d635de1d78eeb5b0c14336c1ba54932510ab399f12ad0eb9',
+  '0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c',
+  '502d0af939a17d7127707ed8ee56a10bd3779447ee5d47d5963f29c52e8c9948',
+  '51b2530801aae0005bf79af410be87f59b7d780930a11d4fc41dc60c1e8ee78a',
+  '6966ef25e4870decb534cb773caa11f3d2134dbcc628232146269d24e7d015a8',
+  '9b0af5f399b381f0b1672a659ea51b7481c4e9ad6aa33220ac9da18060b60e03',
+  'a48411f3372e87f3a5fc74725a9ad85f86dee0cea0b747a96338084c4f1fdd04',
+  'a5ba7255b7fd8caac6e803639891e9025a26f6a95c32477a8e0d4bb27ebb9bbb',
+  'bc6c9edaf8cdf6a183a01b321c4fea2690eb916b6c803c23c66397ed57d48c67',
+  'bfb8a22e8637dc719fc0666c8e77d492d14d64f4a6675f1ba58f2d11f1772b01',
+  'ec03b129b099fee9bd558714a29148c67902a374afe0cd96a78dc5d140d1fccc',
+  'faeaf9c3d744f6ce6acb0b639429b59430b797c83c91ce93cf1a47896969e800',
+];
+
+test('every record digest ever published stays served, exactly as published', () => {
+  for (const digest of PUBLISHED_RECORD_DIGESTS) {
+    const record = baseline.snapshots.get(digest) ?? baseline.archive.get(digest);
+    expect(recordDigest(record), digest).toBe(digest);
+  }
+  const root = mkdtempSync(resolve(tmpdir(), 'mailschema-snapshots-'));
+  try {
+    cpSync(resolve('registry'), root, { recursive: true });
+    const misnamed = resolve(root, 'snapshots', `${'0'.repeat(64)}.json`);
+    writeFileSync(misnamed, JSON.stringify(baseline.types[0]));
+    expect(() => loadRegistry(root)).toThrow(/record digest/);
+    rmSync(misnamed);
+    const orphan = { ...baseline.types[0], slug: 'retired-type', name: 'Retired type' };
+    writeFileSync(
+      resolve(root, 'snapshots', `${recordDigest(orphan)}.json`),
+      JSON.stringify(orphan),
+    );
+    expect(() => loadRegistry(root)).toThrow(/current type/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('ingestion refuses unsafe links, traversal identifiers, missing fields and unversioned drafts', () => {
@@ -305,17 +351,11 @@ test('vendor contributions produce real Registry pages, history and version-boun
       timeout: 45000,
     });
     expect(result.status, result.stdout + result.stderr).toBe(0);
-    const page = readFileSync(
-      resolve(directory, 'dist/registry/document-receipt.html'),
-      'utf8',
-    );
+    const page = readFileSync(resolve(directory, 'dist/registry/document-receipt.html'), 'utf8');
     expect(page).toContain('Document Receipt');
     expect(page).toContain('Example Document Service');
     expect(page).toContain('/registry/contributions/example-document-receipt.json');
-    const review = readFileSync(
-      resolve(directory, 'dist/registry/content-review.html'),
-      'utf8',
-    );
+    const review = readFileSync(resolve(directory, 'dist/registry/content-review.html'), 'utf8');
     expect(review).toContain('Amendment by Example Document Service');
     expect(review).toContain('Example Reviewer');
     expect(review).toContain('Support declaration');

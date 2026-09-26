@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import selection from '../../docs/releases/current.json' with { type: 'json' };
+import { WITHDRAWN_PROFILES, mapProfileUri } from '../map/artifacts';
 import { packageContractBytes } from '../lib/package-artifacts';
 import {
   assertPackageSet,
   type PackageContracts,
   type PackageRelease,
+  type PackageReleaseChannel,
   type PackageSetSelection,
 } from '../lib/package-release';
 
@@ -27,6 +29,18 @@ const npmRelease = channel('npm');
 const pythonRelease = channel('PyPI');
 const rustRelease = channel('crates.io');
 const goRelease = channel('Go');
+const rubyRelease = selectedChannels.get('RubyGems');
+
+/** The MAP version a selected release implements: the one core schema its evidence binds. */
+function mapVersion(registry: string) {
+  const selected = selection.channels.find((entry) => entry.registry === registry)!;
+  const versions = (evidence.get(selected.evidence)!.contracts ?? []).flatMap(
+    (contract) => /^map-(\d+\.\d+)$/.exec(contract.name)?.[1] ?? [],
+  );
+  if (versions.length !== 1)
+    throw new Error(`The ${registry} release must bind exactly one MAP core schema.`);
+  return versions[0];
+}
 const versions = new Set(selectedChannels.values().map((entry) => entry.version));
 const sharedVersion = [...versions][0];
 export const packageSetLabel =
@@ -35,6 +49,52 @@ export const packageContractCoverage = [...evidence.values()].every(
   (release) => release.format === 'mailschema-package-release/2',
 );
 
+/** The Ruby tab, shown once a RubyGems release is selected and verified. */
+export const rubyTool = (release: PackageReleaseChannel, map: string) => ({
+  id: 'ruby',
+  name: 'Ruby',
+  registry: 'RubyGems',
+  release,
+  runtime: 'Ruby 3.3+',
+  map,
+  withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(map)),
+  note: undefined,
+  title: 'Run the MAP 0.2 lifecycle in Ruby.',
+  description:
+    'Parse and digest MAP documents, verify the contracts you vendor, and build results and problems the core accepts.',
+  install: `gem install mailschema -v ${release.version}`,
+  command: null,
+  installLanguage: 'bash' as const,
+  language: 'ruby' as const,
+  filename: 'check_description.rb',
+  example: `require "mailschema"
+
+description = Mailschema.parse(File.read("description.json"))
+errors = Mailschema.description_errors(description)
+raise errors.join("\\n") if errors.any?`,
+  exampleNote:
+    'Parses the file as I-JSON within the MAP limits, or raises. Lists every error when the description breaks the MAP 0.2 core.',
+  api: [
+    {
+      name: 'Mailschema.parse(json) / Mailschema.digest(value)',
+      description: 'Read a MAP document as I-JSON and compute its RFC 8785 digest.',
+    },
+    {
+      name: 'Mailschema::Contract.new(contract, schema, digest:)',
+      description: 'Verify a vendored type contract against the digest you pinned.',
+    },
+    {
+      name: 'contract.description_errors / request_problem / input_errors',
+      description: 'Check descriptions, requests and inputs against the contract.',
+    },
+    {
+      name: 'Mailschema.result / Mailschema.problem',
+      description: 'Build results and problems the core accepts.',
+    },
+  ],
+  exports: 'MAP 0.2 parsing, RFC 8785 digests, contract verification, validation and documents.',
+});
+
 export const tooling = [
   {
     id: 'javascript',
@@ -42,6 +102,8 @@ export const tooling = [
     registry: 'npm',
     release: npmRelease,
     runtime: 'Node.js 22+',
+    map: mapVersion('npm'),
+    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('npm'))),
     title: 'Validate MAP at the boundary.',
     description:
       'Check MAP descriptions, requests, results and problems before your application trusts their fields.',
@@ -67,7 +129,7 @@ assertMapDocument(description);`,
       },
       {
         name: 'assertContentReviewRequest(value)',
-        description: 'Apply the current Content Review 0.2 request binding.',
+        description: 'Apply the withdrawn Content Review 0.2 request binding, on MAP 0.1.',
       },
       {
         name: 'getMapSchema() / getContentReviewSchema()',
@@ -91,6 +153,8 @@ assertMapDocument(description);`,
     registry: 'PyPI',
     release: pythonRelease,
     runtime: 'Python 3.10+',
+    map: mapVersion('PyPI'),
+    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('PyPI'))),
     title: 'Use the same contract in Python.',
     description:
       'Validate MAP 0.1 and Content Review documents locally with Draft 2020-12 format checking.',
@@ -117,7 +181,7 @@ validate_map_document(description)`,
       },
       {
         name: 'validate_content_review_request(value)',
-        description: 'Apply the current Content Review 0.2 request binding.',
+        description: 'Apply the withdrawn Content Review 0.2 request binding, on MAP 0.1.',
       },
       {
         name: 'get_map_schema() / get_content_review_schema()',
@@ -136,6 +200,9 @@ validate_map_document(description)`,
     registry: 'crates.io',
     release: rustRelease,
     runtime: 'Rust 1.70+',
+    map: mapVersion('crates.io'),
+    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('crates.io'))),
+    note: 'Enable format checking in your validator to check URI fields.',
     title: 'Bundle exact schema bytes.',
     description:
       'Embed the MAP, Content Review and Registry schemas without a runtime dependency or network lookup.',
@@ -178,6 +245,9 @@ fn main() -> std::io::Result<()> {
     registry: 'Go',
     release: goRelease,
     runtime: 'Go 1.22+',
+    map: mapVersion('Go'),
+    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('Go'))),
+    note: 'Enable format checking in your validator to check URI fields.',
     title: 'Decode into protocol types.',
     description:
       'Use typed MAP documents, strict JSON decoding and core reference checks in a Go service or agent.',
@@ -221,6 +291,7 @@ func main() {
     exports:
       'Typed descriptions, requests, results and problems, plus the MAP, Content Review and Registry schemas.',
   },
+  ...(rubyRelease ? [rubyTool(rubyRelease, mapVersion('RubyGems'))] : []),
 ];
 
 export const localCheckCommands = {

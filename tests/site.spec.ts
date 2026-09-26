@@ -7,7 +7,7 @@ const routes = [
   '/specification',
   '/specification/profile',
   '/specification/interaction-model',
-  '/specification/content-review',
+  ...typeRecords.filter((type) => type.definition).map((type) => `/specification/${type.slug}`),
   '/specification/authorization',
   '/specification/outcomes',
   '/specification/interoperability',
@@ -104,6 +104,9 @@ test('review decisions bind the exact revision and permission', async ({ page })
   await expect(page.locator('[data-state-description]')).toContainText(
     'content has not changed yet',
   );
+  // Both operations stay available after feedback: it is repeatable.
+  await expect(page.getByRole('button', { name: 'Approve revision 3' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Request changes', exact: true })).toBeVisible();
   await expect(quote).toHaveText(original!);
   await page.getByRole('button', { name: 'Create revision 4' }).click();
   await expect(result).toContainText('No edit was made');
@@ -124,6 +127,14 @@ test('review decisions bind the exact revision and permission', async ({ page })
   await expect(result).toContainText('Sending the campaign requires separate permission');
   await expect(page.locator('[data-state-title]')).toHaveText('Revision 4 approved.');
   await expect(page.getByRole('button', { name: 'Approve revision 4' })).toBeDisabled();
+  // Feedback is repeatable: it stays available after the decision, which stands.
+  await page.getByRole('button', { name: 'Request changes', exact: true }).click();
+  await page.getByLabel('What needs to change?').fill('Name the webinar host.');
+  await page.getByRole('button', { name: 'Submit feedback' }).click();
+  await expect(page.locator('[data-state-description]')).toContainText('Its approval stands.');
+  await expect(page.locator('[data-action-footnote]')).toContainText(
+    'The approval of this revision stands.',
+  );
   await page.getByRole('button', { name: 'Reset example' }).click();
   await expect(page.getByRole('button', { name: 'Approve revision 3' })).toBeEnabled();
   await expect(quote).toHaveText(original!);
@@ -177,17 +188,15 @@ test('type registry combines filters, restores query URLs and clears empty resul
   page,
 }) => {
   const records = page.locator('[data-type-record]:visible');
-  await page.goto('/registry?status=Reuse%20assessment');
-  await expect(records).toHaveCount(
-    typeRecords.filter((type) => type.status === 'Reuse assessment').length,
-  );
-  await expect(page.getByLabel('Status', { exact: true })).toHaveValue('Reuse assessment');
-  await page.getByLabel('Category', { exact: true }).selectOption('Calendar');
+  await page.goto('/registry?status=Draft');
+  await expect(records).toHaveCount(typeRecords.filter((type) => type.status === 'Draft').length);
+  await expect(page.getByLabel('Status', { exact: true })).toHaveValue('Draft');
+  await page.getByLabel('Category', { exact: true }).selectOption('Payments');
   await expect(records).toHaveCount(1);
-  await expect(records).toContainText('Event Response');
+  await expect(records).toContainText('Payment Request');
   await page.reload();
   await expect(records).toHaveCount(1);
-  await expect(page.getByLabel('Category', { exact: true })).toHaveValue('Calendar');
+  await expect(page.getByLabel('Category', { exact: true })).toHaveValue('Payments');
   await page.getByLabel('Find a type', { exact: true }).fill('information');
   await expect(records).toHaveCount(0);
   await expect(page.getByText('No types match these filters.')).toBeVisible();
@@ -296,7 +305,7 @@ test('reading works without JavaScript and the example is honest', async ({ brow
   await expect(page.locator('[data-type-record]:visible')).toHaveCount(typeRecords.length);
   await expect(page.locator('#registry-filters')).toBeHidden();
   await page.locator('[data-type-record]').getByRole('link').first().click();
-  await expect(page.getByRole('heading', { name: 'Content Review', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: typeRecords[0].name, level: 1 })).toBeVisible();
   await context.close();
 });
 
@@ -321,9 +330,7 @@ test('Sourcey owns the reader and publishes its specification indexes', async ({
   await expect(attribution.getByRole('link', { name: 'Sourcey' }).locator('svg')).toHaveCount(1);
   const index = await (await request.get('/specification/search-index.json')).json();
   const pages = [...new Set(index.map((entry: { url: string }) => entry.url.split('#')[0]))];
-  expect(pages.sort()).toEqual(
-    routes.filter((route) => route.startsWith('/specification')).sort(),
-  );
+  expect(pages.sort()).toEqual(routes.filter((route) => route.startsWith('/specification')).sort());
   const machineText = await request.get('/specification/llms-full.txt');
   expect(machineText.status()).toBe(200);
   expect(await machineText.text()).toContain('Mail Action Protocol');

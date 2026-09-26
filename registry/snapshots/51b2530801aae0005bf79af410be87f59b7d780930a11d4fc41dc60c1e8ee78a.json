@@ -1,0 +1,82 @@
+{
+  "slug": "event-response",
+  "name": "Event Response",
+  "summary": "Tell an organiser whether an invitee expects to attend.",
+  "category": "Calendar",
+  "status": "Reuse assessment",
+  "version": null,
+  "origin": "MailSchema binding proposal",
+  "profile": "Existing calendar standards under review",
+  "overview": "An invitation asks the recipient to respond for a specified event. This record examines how agents can use existing calendar protocols and whether a MAP binding would add useful behaviour.",
+  "target": "The event identifier, occurrence where applicable, and invitation update sequence.",
+  "operations": [
+    {
+      "name": "Accept",
+      "description": "Indicate that the invitee expects to attend."
+    },
+    {
+      "name": "Decline",
+      "description": "Indicate that the invitee does not expect to attend."
+    },
+    {
+      "name": "Respond tentatively",
+      "description": "Record a tentative attendance response."
+    }
+  ],
+  "inputs": "The invitation reference and response for the appropriate event or occurrence.",
+  "results": "An attendance response recorded for the identified invitation, with updates and cancellations handled by the applicable calendar protocol.",
+  "permissions": "The agent needs permission to respond for the invitee. Receiving an invitation alone does not grant that permission.",
+  "humanRoute": "The ordinary invitation response in a calendar or service interface.",
+  "example": {
+    "title": "Respond to a workshop invitation",
+    "steps": [
+      "An invitation identifies a workshop and its scheduled time.",
+      "The recipient asks their agent to respond tentatively.",
+      "The agent uses the supported calendar route and records the response."
+    ],
+    "exception": "If the invitation has changed, the client must reconcile the update before replying. It must avoid sending the same response through two different routes."
+  },
+  "references": [
+    {
+      "title": "iCalendar · RFC 5545",
+      "href": "https://www.rfc-editor.org/rfc/rfc5545",
+      "description": "The calendar object model."
+    },
+    {
+      "title": "iTIP · RFC 5546",
+      "href": "https://www.rfc-editor.org/rfc/rfc5546",
+      "description": "Scheduling exchanges and invitation responses."
+    },
+    {
+      "title": "iMIP · RFC 6047",
+      "href": "https://www.rfc-editor.org/rfc/rfc6047",
+      "description": "Calendar exchanges carried by email."
+    },
+    {
+      "title": "Schema.org RsvpAction",
+      "href": "https://schema.org/RsvpAction",
+      "description": "Related vocabulary for attendance responses."
+    }
+  ],
+  "openQuestions": [
+    "Whether a MAP binding adds a capability beyond existing calendar protocols.",
+    "Updates, recurrence and duplicate response handling.",
+    "Any new execution profile; iMIP is not the current MAP HTTPS profile."
+  ],
+  "history": [
+    {
+      "label": "Reuse assessment",
+      "description": "Existing calendar protocols are the starting point. A MAP binding has not been defined."
+    }
+  ],
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}
