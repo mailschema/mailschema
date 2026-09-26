@@ -21,6 +21,11 @@
       "registry": "Go",
       "evidence": "go-0.1.1-contracts",
       "version": "0.1.1"
+    },
+    {
+      "registry": "RubyGems",
+      "evidence": "rubygems-0.2.0-contracts",
+      "version": "0.2.0"
     }
   ]
 }

@@ -1,6 +1,6 @@
 # MAP core cutover plan
 
-Status: plan for approval, 25 September 2026, revision 3. Nothing in it has shipped.
+Status: released 26 September 2026, revision 3. MAP 0.2 and its ten types are published at mailschema.org, `mailschema` 0.2.0 is on RubyGems, and Nitrosend's Content Review 0.3 is deployed on it.
 
 - Revision 2 took in an adversarial review of revision 1; section 10 lists every finding and what happened to it.
 - Revision 3 adopts the simplest clean shape: MAP 0.2 as the one cutover, with 0.1 withdrawn and left untouched.
