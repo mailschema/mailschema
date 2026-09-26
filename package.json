@@ -16,9 +16,7 @@
     "deploy": "npm run verify && wrangler deploy",
     "deploy:dry-run": "npm run build && wrangler deploy --dry-run",
     "preview": "astro preview --host 127.0.0.1",
-    "social:generate": "node scripts/generate-social-card.mjs",
-    "test": "playwright test",
-    "test:visual": "node scripts/compare-reader.mjs",
+    "test": "vitest run",
     "packages:prepare": "node scripts/prepare-packages.mjs",
     "packages:promote": "node scripts/promote-package.mjs",
     "packages:test": "node --test tests/packages-check.mjs",
@@ -40,8 +38,6 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@astrojs/sitemap": "^3.7.4",
-    "@axe-core/playwright": "4.13.0",
-    "@playwright/test": "1.63.0",
     "@types/jsonld": "1.5.15",
     "@types/mailparser": "3.4.6",
     "@types/node": "24.13.6",
@@ -49,11 +45,10 @@
     "jsonld": "9.0.0",
     "mailauth": "5.0.3",
     "mailparser": "3.9.28",
-    "pixelmatch": "7.2.0",
-    "pngjs": "7.0.0",
     "prettier": "^3.9.9",
     "prettier-plugin-astro": "^1.0.1",
     "typescript": "5.9.3",
+    "vitest": "5.0.2",
     "wrangler": "^4.137.0"
   }
 }

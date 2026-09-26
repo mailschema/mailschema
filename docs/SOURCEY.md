@@ -20,7 +20,7 @@ Sourcey is maintained in [`sourcey/sourcey`](https://github.com/sourcey/sourcey)
 
 ## Verification
 
-Six chapters, the overview, interaction model, Content Review, authorization, outcomes and interoperability, are the renderer's regression references, compared at 1440 × 1000 and 390 × 844 in `tests/visual-reference/`. The current baseline includes Sourcey's shared responsive frame and the complete “Docs by Sourcey” attribution as one link. The preceding references and comparison report are retained in `tests/visual-reference/pre-language-pass/`. Refreshing the content baseline is not a new claim of renderer migration parity. `npm run test:visual` checks full-page dimensions and requires zero raw RGBA pixel differences in the recorded Chromium environment. Pixelmatch additionally produces human-readable diff images; its threshold does not relax the raw-pixel acceptance condition.
+Rendering regressions are Sourcey's to test, in its own suite. MailSchema checks that the site builds with the pinned release; its earlier pixel references are in the repository history.
 
 Sourcey's existing default, minimal and API-first layouts were compared against a clean checkout of their prior source, on Markdown and OpenAPI pages at desktop and mobile sizes. All 12 comparisons had zero visible differences. Sourcey's full test suite, type checking and lint passed. The artifact also contains a test proving every registered theme's compiled assets are packaged.
 

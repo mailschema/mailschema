@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from 'vitest';
 import worker from '../worker.js';
 
 const assets = {
