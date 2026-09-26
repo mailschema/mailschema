@@ -11,13 +11,17 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
   const role = get<HTMLSelectElement>('[data-role]');
   let revision = 3;
   let status: Status = 'waiting';
+  // Approval decides the revision; feedback is repeatable, so it stays available.
+  let decided = false;
   function result(text: string) {
     get('[data-result]').textContent = text;
   }
   function showPermissionHint() {
     get('[data-action-footnote]').textContent =
       status === 'feedback'
-        ? 'Switch to the editor to create the example’s next revision using a predetermined edit.'
+        ? decided
+          ? 'The approval of this revision stands. You can send more feedback, or switch to the editor to create the next revision using a predetermined edit.'
+          : 'You can send more feedback or approve this revision, or switch to the editor to create the next revision using a predetermined edit.'
         : role.value === 'editor'
           ? 'Switch to the reviewer to record a review decision.'
           : 'Approval applies to this revision. Sending is a separate action.';
@@ -40,7 +44,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
         '↻',
         'Changes requested',
         'Feedback recorded.',
-        `The feedback applies to revision ${revision}. The content has not changed yet. An editor can now prepare the next revision.`,
+        `The feedback applies to revision ${revision}.${decided ? ' Its approval stands.' : ''} The content has not changed yet. An editor can now prepare the next revision.`,
       ],
       approved: [
         '✓',
@@ -55,9 +59,9 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
     root.dataset.status = status;
     revise.hidden = status !== 'feedback';
     get('[data-next-revision]').textContent = String(revision + 1);
-    actions.hidden = status === 'feedback';
-    approve.disabled = status === 'approved';
-    request.disabled = status === 'approved';
+    // Feedback is repeatable, so both operations stay available after it.
+    actions.hidden = false;
+    approve.disabled = decided;
     form.hidden = true;
     showPermissionHint();
   }
@@ -105,6 +109,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
     if (!permitted('edit')) return;
     revision += 1;
     status = 'waiting';
+    decided = false;
     render();
     result(`Revision ${revision} created in this example. It needs its own approval.`);
     approve.focus();
@@ -112,6 +117,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
   approve.addEventListener('click', () => {
     if (!permitted()) return;
     status = 'approved';
+    decided = true;
     render();
     result(
       `Recorded approval of revision ${revision}. Sending the campaign requires separate permission.`,
@@ -127,6 +133,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
   get<HTMLButtonElement>('[data-reset]').addEventListener('click', () => {
     revision = 3;
     status = 'waiting';
+    decided = false;
     role.value = 'reviewer';
     form.reset();
     get<HTMLTextAreaElement>('#review-feedback').setCustomValidity('');

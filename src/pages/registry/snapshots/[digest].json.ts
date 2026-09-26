@@ -1,7 +1,8 @@
 import { registry } from '../../../data/types';
 import type { APIContext } from 'astro';
+// Every record digest the Registry has published: compiled snapshots and the archive.
 export function getStaticPaths() {
-  return [...registry.snapshots].map(([digest, record]) => ({
+  return [...registry.snapshots, ...registry.archive].map(([digest, record]) => ({
     params: { digest },
     props: { digest, record },
   }));

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
-    "check": "npm run registry:validate && npm run profile:validate && npm run map:test && npm run readiness:audit && npm run conformance:check && astro check",
+    "check": "npm run registry:validate && npm run profile:validate && npm run fixtures:check && npm run map:test && npm run conformance:check && astro check",
     "registry:validate": "node scripts/registry.ts validate",
     "registry:ingest": "node scripts/registry.ts ingest",
     "verify": "npm run check && npm run build && npm test",
@@ -22,17 +22,20 @@
     "packages:prepare": "node scripts/prepare-packages.mjs",
     "packages:promote": "node scripts/promote-package.mjs",
     "packages:test": "node --test tests/packages-check.mjs",
+    "packages:ruby-upstream": "node scripts/ruby-upstream.mjs",
     "profile:validate": "node scripts/map-profile.ts",
-    "map:test": "node --test tests/map-profile.test.mjs",
-    "readiness:audit": "node scripts/audit-map-readiness.mjs",
-    "conformance:check": "node scripts/conformance.ts"
+    "map:test": "node --test tests/map-conformance.test.mjs",
+    "fixtures": "node scripts/map-fixtures.mjs",
+    "fixtures:check": "node scripts/map-fixtures.mjs --check",
+    "conformance:check": "node scripts/conformance.ts",
+    "conformance:write": "node scripts/conformance.ts --write"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "5.3.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "astro": "7.3.5",
-    "sourcey": "3.6.9"
+    "sourcey": "3.6.10"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
@@ -44,6 +47,7 @@
     "@types/node": "24.13.6",
     "canonicalize": "5.1.0",
     "jsonld": "9.0.0",
+    "mailauth": "5.0.3",
     "mailparser": "3.9.28",
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",

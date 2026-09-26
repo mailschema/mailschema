@@ -1,6 +1,14 @@
 import { typeRecords } from '../../src/data/types';
 
-const contentReview = typeRecords.find((type) => type.slug === 'content-review')!;
+// Every type with a maintained definition has a chapter; the Registry record supplies its title.
+const typeChapters = typeRecords
+  .filter((type) => type.definition)
+  .map((type) => ({
+    slug: type.slug,
+    label: type.name,
+    section: 'Types',
+    description: type.summary,
+  }));
 
 export const specNavigation = [
   {
@@ -18,29 +26,25 @@ export const specNavigation = [
   },
   {
     slug: 'profile',
-    label: 'MAP 0.1 profile',
+    label: 'MAP 0.2 profile',
     section: 'The protocol',
-    description: 'The JSON-LD, MIME and authenticated HTTPS wire contract.',
-  },
-  {
-    slug: 'content-review',
-    label: contentReview.name,
-    section: 'The protocol',
-    description: contentReview.summary,
+    description: 'The core: descriptions, requests, results, authority modes and type contracts.',
   },
   {
     slug: 'authorization',
     label: 'Authorization',
     section: 'The protocol',
-    description: 'Existing service identity, permissions, human approvals and trust boundaries.',
+    description:
+      'Credential and possession authority, consequences, human approvals and trust boundaries.',
   },
   {
     slug: 'outcomes',
     label: 'Results and retries',
     section: 'The protocol',
     description:
-      'Distinguish accepted, completed, refused, stale and uncertain outcomes. Retry without duplicate effects.',
+      'Distinguish accepted, completed, failed, refused, stale and decided outcomes. Retry without duplicate effects.',
   },
+  ...typeChapters,
   {
     slug: 'interoperability',
     label: 'Interoperability',

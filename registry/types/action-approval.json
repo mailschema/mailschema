@@ -1,0 +1,89 @@
+{
+  "slug": "action-approval",
+  "name": "Action Approval",
+  "summary": "Approve or decline a proposed action on the exact terms shown.",
+  "category": "Approval",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema editorial proposal",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "overview": "A service holds an action that needs a decision before it runs: a purchase, a payment, a refund, an access grant or a deployment. The description carries the exact terms as data, and the request that decides them carries the digest of that description, so an approval can only apply to the terms the decider saw. An agent may propose approval for a person to decide; a person or an agent with the authority approves or declines. A changed amount, recipient or scope is a new proposal. A revision of content uses Content Review instead.",
+  "target": "The proposed action at the revision the description names. Its details state the terms: a summary, the requester and one to twenty authorization details in the OAuth 2.0 Rich Authorization Requests structure, each with a type and the actions, locations, identifiers, privileges and type-specific fields that define exactly what approval permits.",
+  "operations": [
+    {
+      "id": "approve",
+      "name": "Approve",
+      "description": "Approve the proposal on its stated terms, or propose approval for a person to decide."
+    },
+    {
+      "id": "decline",
+      "name": "Decline",
+      "description": "Decline the proposal. The service records the decision and does not run the action."
+    }
+  ],
+  "inputs": "Approval takes no input: the terms are part of the bound description, so any change to them is a different proposal. A decline may carry a short reason for the requester.",
+  "results": "Approval completed; approval required, with the service’s approval link; a decline completed; or a proposal that ended as declined, stale, expired, superseded or withdrawn by its requester. Recording an approval does not report the action’s own outcome, which the service reports through its normal records.",
+  "permissions": "Credential authority only. The service applies its own rules, such as spending limits, separation of duties and who may grant access, when the request arrives and again when a person decides. Approval’s consequences are authorization, commitment and disclosure, so an agent approves only within limits its principal set, and never automatically when any term is of a kind it does not understand. An approval grants no standing permission.",
+  "humanRoute": "An approval page showing the same terms and proposal revision.",
+  "example": {
+    "title": "Approve a software purchase",
+    "steps": [
+      "A purchasing service asks a budget holder to approve a 12-month licence for 20 seats at €4,800 from a named supplier.",
+      "The budget holder’s agent checks the terms against the spending rules it was given and proposes approval.",
+      "The service returns approval required, with its approval link.",
+      "The budget holder approves on that page, and the agent retrieves the recorded approval."
+    ],
+    "exception": "If the supplier’s price changes before the decision, the proposal ends as stale and the new price needs its own approval. An agent that may only propose cannot turn its proposal into an approval by retrying."
+  },
+  "references": [
+    {
+      "title": "OAuth 2.0 Rich Authorization Requests · RFC 9396",
+      "href": "https://www.rfc-editor.org/rfc/rfc9396",
+      "description": "Describes exactly what an authorization permits. The terms reuse its authorization details structure; MAP carries them in the description’s details, bound by the description digest."
+    },
+    {
+      "title": "OpenID Connect CIBA Core 1.0",
+      "href": "https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html",
+      "description": "A decision made on a separate device, with a binding message shown in both places. A service that runs an OAuth server can use it for the human decision."
+    },
+    {
+      "title": "AI Identity Management System · draft-ietf-wimse-aims",
+      "href": "https://datatracker.ietf.org/doc/draft-ietf-wimse-aims/",
+      "description": "Its human-in-the-loop section requires confirmation to be bound to an authorization grant and notes that a decision raised in the middle of a task is not yet covered. Working-group Internet-Draft; it may change."
+    },
+    {
+      "title": "Agent Payments Protocol",
+      "href": "https://ap2-protocol.org/",
+      "description": "Binds a person’s approval to a hash of the exact checkout. Pre-1.0 and being standardized in FIDO Alliance working groups."
+    },
+    {
+      "title": "Schema.org AcceptAction",
+      "href": "https://schema.org/AcceptAction",
+      "description": "Vocabulary for committing to an object, with RejectAction as its opposite. Schema.org action states have no pending, stale or expired values, so results keep MAP’s own states."
+    }
+  ],
+  "openQuestions": [
+    "How shared authorization detail types, such as payment and access, are named and maintained when RFC 9396 leaves types to each deployment.",
+    "How a service can publish the limits within which an agent may approve, without MAP defining a policy language."
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "Executable on MAP 0.2. The terms travel as RFC 9396 authorization details in the description, bound by its digest. The core owns the approval lifecycle, including supersession; the type adds withdrawal by the requester as a declared reason."
+    }
+  ],
+  "definition": {
+    "label": "Read the Action Approval definition",
+    "href": "/specification/action-approval/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

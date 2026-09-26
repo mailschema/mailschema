@@ -9,12 +9,22 @@ import {
   recordCheckCommands,
 } from '../data/tooling';
 import '../styles/tools.css';
+
+const names = (list: { name: string }[]) =>
+  list.length > 1
+    ? `${list
+        .slice(0, -1)
+        .map((tool) => tool.name)
+        .join(', ')} and ${list.at(-1)!.name}`
+    : (list[0]?.name ?? '');
+const withdrawn = tooling.filter((tool) => tool.withdrawn);
+const current = tooling.filter((tool) => !tool.withdrawn);
 ---
 
 <Base
   title="MailSchema tools"
   theme="light"
-  description="Install MailSchema for JavaScript, Python, Rust or Go. Validate MAP documents, bundle the exact schemas and prepare Registry contributions."
+  description={`Install MailSchema for ${names(tooling).replace(/ and ([^,]+)$/, ' or $1')}. Validate MAP documents, bundle the exact schemas and prepare Registry contributions.`}
 >
   <main id="main" class="container tools-page">
     <header class="page-hero tools-hero">
@@ -33,10 +43,12 @@ import '../styles/tools.css';
             ? 'The complete contract bytes,'
             : 'Registry schema bytes verified;'}
           <br />
-          {packageContractCoverage ? 'verified in four ecosystems.' : 'MAP patch releases pending.'}
+          {packageContractCoverage
+            ? 'verified in every selected release.'
+            : 'MAP patch releases pending.'}
         </p>
         <a href="/specification/profile" class="text-link">
-          Read the MAP 0.1 profile <Icon size={16} />
+          Read the MAP 0.2 profile <Icon size={16} />
         </a>
       </div>
     </header>
@@ -60,7 +72,10 @@ import '../styles/tools.css';
         <div class="tool-start">
           <div class="tool-setup">
             <div class="tool-runtime">
-              <span>{tool.runtime}</span>
+              <span>
+                {tool.runtime} · MAP {tool.map}
+                {tool.withdrawn && ' · withdrawn'}
+              </span>
               <a href={tool.release.url}>
                 {tool.registry} · {tool.release.version}
                 <Icon name="northeast" size={13} />
@@ -73,7 +88,9 @@ import '../styles/tools.css';
               code={tool.install}
               lang={tool.installLanguage}
             />
-            {tool.command && <CodeBlock label="Check a file" code={tool.command} />}
+            {tool.command && (
+              <CodeBlock label={`Check a MAP ${tool.map} file`} code={tool.command} />
+            )}
             {tool.command ? (
               <a
                 class="text-link"
@@ -83,9 +100,7 @@ import '../styles/tools.css';
                 Download an example <Icon name="file" size={15} />
               </a>
             ) : (
-              <p class="tool-small">
-                Enable format checking in your validator to check URI fields.
-              </p>
+              tool.note && <p class="tool-small">{tool.note}</p>
             )}
           </div>
           <div class="tool-example">
@@ -196,16 +211,18 @@ import '../styles/tools.css';
       </a>
     </aside>
     <p class="tools-scope">
-      These packages include MAP 0.1 and Registry tooling plus the Content Review reference
-      contracts.{' '}
+      {withdrawn.length > 0 &&
+        `The ${names(withdrawn)} packages include the withdrawn MAP 0.1 and Registry tooling plus the Content Review reference contracts; their MAP 0.2 releases follow. `}
+      {current.length > 0 &&
+        `The ${names(current)} ${current.length > 1 ? 'packages implement' : 'package implements'} the MAP 0.2 core with generic contract validation. `}
       {packageContractCoverage
         ? 'Public artifact readback verifies every contract bundled in the selected releases.'
         : 'The selected releases retain their recorded verification scope.'}{' '}
       Registry types are published independently; adding a type does not require releases in every
       language. Implementations select and vendor the exact type versions they support. The packages
       validate documents; they do not establish endpoint trust, grant authorization or send email.
-      Read the <a href="/specification/profile">MAP 0.1 execution profile</a> before acting on a
-      message. Package and specification versions are independent.
+      Read the <a href="/specification/profile">MAP 0.2 profile</a> before acting on a message.
+      Package and specification versions are independent.
     </p>
   </main>
 </Base>

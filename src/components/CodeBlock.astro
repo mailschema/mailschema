@@ -4,7 +4,7 @@ import Icon from './Icon.astro';
 interface Props {
   code: string;
   label: string;
-  lang?: 'bash' | 'go' | 'javascript' | 'python' | 'rust' | 'toml';
+  lang?: 'bash' | 'go' | 'javascript' | 'python' | 'ruby' | 'rust' | 'toml';
 }
 const { code, label, lang = 'bash' } = Astro.props;
 ---

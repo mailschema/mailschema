@@ -1,0 +1,89 @@
+{
+  "slug": "meeting-scheduling",
+  "name": "Meeting Scheduling",
+  "summary": "Book one of the meeting times a service offers.",
+  "category": "Calendar",
+  "status": "Draft",
+  "version": "0.1",
+  "origin": "MailSchema editorial proposal",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "overview": "An organizer’s service offers specific times for a meeting, such as interview slots or a call with an account manager. The recipient books one of them or declines them all, and the service creates the event and sends the usual calendar invitation. Someone else can take an offered time first, so a booking names the time and the service either books it or reports it unavailable.",
+  "target": "The offer at the revision the description names. The details list up to 100 times, each with a stable identifier, a start and an end, and may define attendee fields in the MailSchema form block. Whether a time is still free is service state outside the revision.",
+  "operations": [
+    {
+      "id": "book",
+      "name": "Book",
+      "description": "Book one of the offered times."
+    },
+    {
+      "id": "decline",
+      "name": "Decline",
+      "description": "Decline all of the offered times. The service records that no booking will follow."
+    }
+  ],
+  "inputs": "For a booking, the identifier of an offered time and values for the attendee fields the offer defines. A decline may carry a short reason.",
+  "results": "A booking completed, naming the created event’s UID and time; a time that is no longer free, failed as unavailable with nothing booked; or a decline completed. The first completed booking or decline decides the offer, and a retry returns the same result.",
+  "permissions": "Credential or possession authority. Booking commits the principal’s time and discloses the attendee details, so under possession a client needs a prior relationship with the organizer or its principal’s decision. The service checks that the caller may book this offer and applies its own limits.",
+  "humanRoute": "The service’s booking page, showing the same times.",
+  "example": {
+    "title": "Book an interview",
+    "steps": [
+      "A recruiting service offers three interview times on Tuesday and Wednesday.",
+      "The candidate’s agent checks the candidate’s calendar and books Wednesday at 10:00.",
+      "The service records the booking and sends a calendar invitation for that time."
+    ],
+    "exception": "If another candidate has just taken Wednesday at 10:00, the service reports that time as unavailable and books nothing. The agent chooses again from the current offer."
+  },
+  "references": [
+    {
+      "title": "Consensus scheduling · draft-ietf-calext-vpoll",
+      "href": "https://datatracker.ietf.org/doc/draft-ietf-calext-vpoll/",
+      "description": "Models a closed set of candidate times, each with a stable item identifier. The draft expired in 2025 and is not a standard; booking, holding a time and conflicts are outside it."
+    },
+    {
+      "title": "Calendar availability · RFC 7953",
+      "href": "https://www.rfc-editor.org/rfc/rfc7953",
+      "description": "Publishes when someone is available. It defines no booking operation."
+    },
+    {
+      "title": "iTIP · RFC 5546",
+      "href": "https://www.rfc-editor.org/rfc/rfc5546",
+      "description": "The invitation that follows a booking, and COUNTER for proposing a different time."
+    },
+    {
+      "title": "JSCalendar · RFC 8984",
+      "href": "https://www.rfc-editor.org/rfc/rfc8984",
+      "description": "A JSON representation for the offered times and the booked event."
+    },
+    {
+      "title": "Schema.org ChooseAction",
+      "href": "https://schema.org/ChooseAction",
+      "description": "Related vocabulary for choosing among options, with ScheduleAction for scheduling. Neither covers availability or booking conflicts."
+    }
+  ],
+  "openQuestions": [
+    "Whether a recipient may propose other times, as an iTIP COUNTER does, and what that reveals about their calendar.",
+    "Holding a time while a person decides on a booking an agent proposed.",
+    "Offers that let the recipient choose a meeting length or time zone."
+  ],
+  "history": [
+    {
+      "label": "0.1 · Working draft",
+      "description": "Executable on MAP 0.2. The offered times and attendee fields travel in the description; unavailability is a declared failure, and a booking decides the offer."
+    }
+  ],
+  "definition": {
+    "label": "Read the Meeting Scheduling definition",
+    "href": "/specification/meeting-scheduling/"
+  },
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

@@ -22,7 +22,9 @@ Identify related MailSchema types and existing standards. Explain the additional
 ## Definition
 
 - Target and applicable revision rules:
+- Details the description carries, and any existing structure they reuse:
 - Available operations:
+- For each operation: credential or possession authority, its consequences (refusal, protection, record, disclosure, commitment, authorization or assertion), and whether it is a decision or repeatable:
 - Required inputs and validation:
 - Permission checks:
 - Human participation:

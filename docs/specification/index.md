@@ -6,51 +6,54 @@ navTitle: Overview
 
 Mail Action Protocol (MAP) defines how a service describes an action in an email, how a client requests that action and how the service reports the result. A client may be an agent, an inbox or another application.
 
-A shared interaction type defines what the action means. For example, a Content Review request identifies a draft and the operations available to its reviewer. A client that understands that type can use the same review logic with other services that support it.
+A shared interaction type defines what the action means. An Action Approval states exact terms to approve; an Email Confirmation names the pending request it would complete. A client that understands a type can apply the same logic to every service that offers it. It can also apply its principal's policy to types it has never seen, because every operation declares what completing it gives away.
 
 The service remains responsible for the operation and its permissions. People can read the email and use the service's normal interface to take part.
 
 ## Document status
 
-MAP 0.1 is a working draft. It defines the interaction model, a JSON-LD description carried by Structured Email, an authenticated HTTPS execution profile and the first type, Content Review. The published schemas and fixtures are implementable, but the draft may still change. This document is not an IETF specification.
+MAP 0.2 is a working draft. It is a type-agnostic core:
 
-The initial execution profile delivers action descriptions by email and submits requests over authenticated HTTPS. [MAP 0.1 profile](/specification/profile) defines its fields, status behavior, trust checks and recovery rules.
+- a JSON-LD description carried by Structured Email;
+- a request bound to that exact description by its digest;
+- execution over HTTPS with credential or possession authority;
+- recoverable results.
+
+Types are defined by digest-bound contracts, and adding one never changes the core. The [MAP 0.2 profile](/specification/profile) defines the fields and processing rules. MAP 0.1 is withdrawn, and its artifacts remain published unchanged. This document is not an IETF specification.
 
 ## Participants
 
-| Participant | Responsibility                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------- |
-| Service     | Describes available actions, checks permission, performs operations and reports results.       |
-| Client      | Recognises supported interaction types, presents or selects an action and submits the request. |
+| Participant | Responsibility                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Service     | Describes available actions, checks permission, performs operations and reports results.                                        |
+| Client      | Recognises supported types, verifies the description and its authority, applies its principal's policy and submits the request. |
 
-Services still require integration and configuration. Supporting a type allows a client to reuse its interpretation of the interaction; it does not give the client access to every service that publishes the type.
+Supporting a type lets a client reuse its interpretation of the interaction. It does not give the client access to every service that publishes the type.
 
 ## An interaction
 
-| Stage       | Information exchanged                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------- |
-| Description | The type and version, originating service, target, available operations and routes for clients and people. |
-| Request     | The selected operation, target, required inputs and information needed to identify the request.            |
-| Result      | The state of the operation, the target affected and any reference needed to inspect the result.            |
+| Stage       | Information exchanged                                                                                                                           |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Description | The type, the service and its authority, the target and its revision, the details the type defines, the offered operations and the human route. |
+| Request     | The operation and its input, bound to the exact description by its digest, with an identifier that makes retries safe.                          |
+| Result      | The recorded state, the target as the service holds it, and a resource for recovering the latest state.                                         |
 
-The type determines whether the target needs a revision. Content Review requires an exact content revision. Other proposed types must state their own target and versioning requirements.
+## Types
 
-## Content Review example
+Ten types are published as drafts. Each has its own chapter under Types:
 
-An email service sends a test message for revision 3 of a campaign. A reviewer requests a change to the opening paragraph. The service records that feedback. An editor creates revision 4, which an authorised reviewer then approves.
+- Content Review and Action Approval, which are decisions;
+- Information Request, which collects values;
+- Event Response and Meeting Scheduling, for calendars;
+- Subscription Preferences, for email settings;
+- Task Assignment, for assigned work;
+- Payment Request, for invoices;
+- Email Confirmation and Account Activity, for accounts.
 
-The approval applies to revision 4. A request to approve the old revision is refused. The campaign is sent only through the service's separate sending operation and permission checks.
-
-[Try the review example →](/examples)
-
-## Types and the Registry
-
-A type contract defines a particular interaction's target, operations, inputs and results. The MailSchema Registry supplies discovery, review status, maintainers, examples and implementation evidence for those contracts.
-
-Registering a type does not demonstrate that a product implements it correctly. Type status and implementation evidence are recorded separately. A wire message binds the canonical contract rather than the editable Registry record, and clients can support a type without making a Registry lookup during an interaction.
+The [Registry](/registry) holds their records, versions and evidence.
 
 ## Scope
 
-This draft covers action descriptions, requests, permission checks and results. It also requires a usable route for people to complete the interaction.
+MAP uses existing email infrastructure, email authentication and service authentication. It introduces no identity provider, custom DNS record or central runtime lookup. Related specifications are considered in [Interoperability](/specification/interoperability).
 
-MAP uses existing email infrastructure and service authentication. New identity systems, global service discovery and a general policy engine are outside this profile. Related specifications and vocabularies are considered in [Interoperability](/specification/interoperability).
+[Try the review example →](/examples)

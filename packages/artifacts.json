@@ -10,7 +10,8 @@
         "npm": "dist/contribution.schema.json",
         "PyPI": "contribution.schema.json",
         "crates.io": "schemas/contribution.schema.json",
-        "Go": "schemas/contribution.schema.json"
+        "Go": "schemas/contribution.schema.json",
+        "RubyGems": "schemas/contribution.schema.json"
       }
     },
     {
@@ -20,6 +21,42 @@
       "source": "derived:contribution#/$defs/record",
       "paths": {
         "crates.io": "schemas/record.schema.json"
+      }
+    },
+    {
+      "name": "map-0.2",
+      "role": "core",
+      "kind": "schema",
+      "source": "public/schemas/map-0.2.schema.json",
+      "paths": {
+        "RubyGems": "schemas/map-0.2.schema.json"
+      }
+    },
+    {
+      "name": "map-0.2-context",
+      "role": "core",
+      "kind": "context",
+      "source": "public/contexts/map-0.2.jsonld",
+      "paths": {
+        "RubyGems": "contexts/map-0.2.jsonld"
+      }
+    },
+    {
+      "name": "type-contract-0.2",
+      "role": "core",
+      "kind": "schema",
+      "source": "public/schemas/type-contract-0.2.schema.json",
+      "paths": {
+        "RubyGems": "schemas/type-contract-0.2.schema.json"
+      }
+    },
+    {
+      "name": "forms-0.1",
+      "role": "core",
+      "kind": "schema",
+      "source": "public/schemas/forms-0.1.schema.json",
+      "paths": {
+        "RubyGems": "schemas/forms-0.1.schema.json"
       }
     },
     {

@@ -2,7 +2,7 @@
 
 Initial availability check: 23 September 2026 (Australia/Sydney). The observations below predate publication. The user subsequently authorized publishing with existing credentials; release evidence is maintained in `docs/releases/` and package instructions in `packages/README.md`.
 
-`mailschema` version `0.1.3` is published on npm; version `0.1.2` is published on PyPI and crates.io. `github.com/mailschema/go` version `v0.1.0` is published through the Go module proxy. Public artifacts are promoted to the website only after byte-for-byte schema readback. JSR, RubyGems and NuGet remain pending account setup; no empty packages are published merely to reserve names.
+`mailschema` is published on npm, PyPI and crates.io, and `github.com/mailschema/go` through the Go module proxy. [`docs/releases/current.json`](releases/current.json) records each promoted version. Public artifacts are promoted to the website only after byte-for-byte schema readback. The RubyGems package is prepared from `packages/ruby` and unpublished. JSR and NuGet remain pending account setup; no empty packages are published merely to reserve names.
 
 ## Observed names
 
@@ -22,9 +22,9 @@ Public API absence is a candidate-availability signal, not proof that registrati
 
 ## Expansion rule
 
-Add another ecosystem when it serves a real implementation or contribution workflow. A new package must expose useful schema or validation behavior, preserve the canonical bytes and join the same public readback gate. JSR, RubyGems, NuGet and Packagist remain candidates, not launch requirements.
+Add another ecosystem when it serves a real implementation or contribution workflow. A new package must expose useful schema or validation behavior, preserve the canonical bytes and join the same public readback gate. RubyGems joins for Nitrosend's MAP 0.2 implementation. JSR, NuGet and Packagist remain candidates, not launch requirements.
 
-The packages cover MAP 0.1 and Registry contributions. They do not imply runtime authorization, product conformance or IETF adoption. A package release number is separate from a specification version.
+The published packages cover MAP 0.1 and Registry contributions; the prepared Ruby package covers MAP 0.2. They do not imply runtime authorization, product conformance or IETF adoption. A package release number is separate from a specification version.
 
 Owning the npm organization does not claim the bare `mailschema` package. It controls the `@mailschema/*` family. Avoid creating numerous empty packages merely to hold names.
 
@@ -35,4 +35,4 @@ Owning the npm organization does not claim the bare `mailschema` package. It con
 - [JSR scopes](https://jsr.io/docs/scopes) can be created independently of publishing a version. All JSR packages are scoped.
 - [PyPI name retention](https://docs.pypi.org/project-management/name-retention/) treats empty or nonfunctional name-squatting projects as invalid.
 
-Publishing credentials remain in existing local or hosted credential stores. No credentials are printed, committed or added to package artifacts. JSR, RubyGems and NuGet credentials are not configured yet.
+Publishing credentials remain in existing local or hosted credential stores. No credentials are printed, committed or added to package artifacts. RubyGems publishes through trusted publishing and stores no credential. JSR and NuGet credentials are not configured yet.

@@ -1,0 +1,73 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "mailschema-subscription-preferences-0-1",
+  "kind": "amendment",
+  "contributor": {
+    "name": "MailSchema"
+  },
+  "summary": "0.1 · Working draft. Executable on MAP 0.2. The offered settings travel in the description as choice fields, and changes can repeat.",
+  "baseDigest": "ec03b129b099fee9bd558714a29148c67902a374afe0cd96a78dc5d140d1fccc",
+  "record": {
+    "slug": "subscription-preferences",
+    "name": "Subscription Preferences",
+    "summary": "Choose which emails a service sends and how often.",
+    "category": "Email",
+    "status": "Draft",
+    "version": "0.1",
+    "profile": "https://mailschema.org/profiles/map/0.2",
+    "overview": "A recipient changes the email a service sends: which topics, how often, or a pause. Leaving the list stays with one-click unsubscribe from the message headers; this type covers the choices between staying and leaving. It concerns email preferences, not paid subscriptions.",
+    "target": "The recipient’s subscription at the revision the description names. The details carry the list’s List-Id value, equal to the message’s List-Id header, and the offered settings as choice fields in the MailSchema form block, with the current settings as defaults.",
+    "operations": [
+      {
+        "id": "update-preferences",
+        "name": "Update preferences",
+        "description": "Set the offered topic, frequency and pause settings."
+      }
+    ],
+    "inputs": "Values for offered settings only. Omitted settings stay as they are, and an option that is not offered is reported as invalid rather than replaced.",
+    "results": "The settings recorded, with the time they take effect. Settings can be changed again until the interaction expires.",
+    "permissions": "Credential or possession authority. A change records the recipient’s own choices and discloses nothing beyond them. The service checks that the change comes from the subscriber. Unsubscribing stays with RFC 8058.",
+    "humanRoute": "The service’s email preference page, with its unsubscribe option available.",
+    "example": {
+      "title": "Switch to a weekly digest",
+      "steps": [
+        "A service offers immediate product announcements or a weekly digest.",
+        "The recipient selects the weekly digest.",
+        "The service records that preference and reports when it applies."
+      ],
+      "exception": "If the selected frequency is no longer offered, the service reports the problem without silently selecting another option."
+    },
+    "references": [
+      {
+        "title": "One-click unsubscribe · RFC 8058",
+        "href": "https://www.rfc-editor.org/rfc/rfc8058",
+        "description": "Preserve the existing unsubscribe mechanism. Its POST excludes cookies and HTTP authorization and requires recipient consent."
+      },
+      {
+        "title": "List header fields · RFC 2369",
+        "href": "https://www.rfc-editor.org/rfc/rfc2369",
+        "description": "Header fields that point to a list’s subscribe, unsubscribe, help and archive addresses. A preference route complements them."
+      },
+      {
+        "title": "List-Id · RFC 2919",
+        "href": "https://www.rfc-editor.org/rfc/rfc2919",
+        "description": "Identifies the list. The details repeat its value so a client can match the description to the message."
+      },
+      {
+        "title": "M3AAWG Sender Best Common Practices",
+        "href": "https://www.m3aawg.org/sites/default/files/doc_files/m3aawg-sender-best-common-practices-aug-27-2026.pdf",
+        "description": "Industry practice for confirmed opt-in, which a change that adds email should follow."
+      }
+    ],
+    "openQuestions": ["Whether a pause should end by itself after a stated time."],
+    "definition": {
+      "label": "Read the Subscription Preferences definition",
+      "href": "/specification/subscription-preferences/"
+    },
+    "maintainers": [
+      {
+        "name": "MailSchema"
+      }
+    ]
+  }
+}

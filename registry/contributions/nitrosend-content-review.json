@@ -7,7 +7,7 @@
     "url": "https://nitrosend.com"
   },
   "source": "https://api.nitrosend.com/.well-known/oauth-protected-resource/v1/my/map",
-  "summary": "First-party test report: Nitrosend is operated by the MailSchema maintainers, so this is not independent evidence of interoperability. Nitrosend's production API offers Content Review 0.2 under the MAP 0.1 profile for email flow revisions. An agent holding an API key can request changes or propose approval; a signed-in person decides every approval; the sending rules can refuse an approval without ending the proposal. The service publishes its MAP configuration as RFC 9728 protected resource metadata.",
+  "summary": "First-party test report: Nitrosend is operated by the MailSchema maintainers, so this is not independent evidence of interoperability. When this report was made, Nitrosend's production API offered Content Review 0.2 under the MAP 0.1 profile for email flow revisions. An agent holding an API key could request changes or propose approval; a signed-in person decided every approval; the sending rules could refuse an approval without ending the proposal. The service published its MAP configuration as RFC 9728 protected resource metadata.",
   "type": "content-review",
   "typeVersion": "0.2",
   "typeDigest": "bfb8a22e8637dc719fc0666c8e77d492d14d64f4a6675f1ba58f2d11f1772b01",

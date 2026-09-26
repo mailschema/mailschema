@@ -22,10 +22,10 @@ export default defineConfig({
       document: {
         label: 'MAP',
         title: 'Mail Action\nProtocol',
-        version: '0.1',
+        version: '0.2',
         status: 'Working draft',
         badge: 'Draft',
-        updated: '23 September 2026',
+        updated: '25 September 2026',
       },
       searchHref: '/search',
       sidebar: {
@@ -60,7 +60,7 @@ export default defineConfig({
         },
       },
       footer: {
-        text: 'MailSchema · MAP 0.1',
+        text: 'MailSchema · MAP 0.2',
         links: [{ label: 'Improve this specification', href: '/contribute' }],
       },
     },

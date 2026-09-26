@@ -5,3 +5,23 @@ dist/
 brand/
 package-lock.json
 docs/screenshots/
+public/fixtures/map-0.2/
+conformance/map-0.2/keys/
+# Released MAP 0.1-era artifacts stay byte-identical to what was published.
+public/schemas/map-0.1.schema.json
+public/schemas/type-contract-0.1.schema.json
+public/schemas/content-review-0.1.schema.json
+public/schemas/content-review-0.2.schema.json
+public/contracts/content-review-0.1.json
+public/contracts/content-review-0.2.json
+public/contexts/map-0.1.jsonld
+public/profiles/map/0.1.json
+public/fixtures/map-0.1/
+conformance/map-0.1/
+# Recorded evidence and archived records are kept exactly as written.
+docs/releases/
+docs/evidence/
+registry/snapshots/
+tests/visual-reference/
+docs/reader-comparison.json
+registry/contributions/

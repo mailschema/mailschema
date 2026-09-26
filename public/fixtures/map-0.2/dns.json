@@ -1,0 +1,37 @@
+{
+  "_dmarc.examp1e.com": [
+    [
+      "v=DMARC1; p=reject; rua=mailto:dmarc@examp1e.com"
+    ]
+  ],
+  "_dmarc.example.com": [
+    [
+      "v=DMARC1; p=reject; rua=mailto:dmarc@example.com"
+    ]
+  ],
+  "_dmarc.example.net": [
+    [
+      "v=DMARC1; p=reject; rua=mailto:dmarc@example.net"
+    ]
+  ],
+  "map2026._domainkey.examp1e.com": [
+    [
+      "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqqsiEH19XJC65cKhrjTnhOOsyojjzRn3oSNcfqVZliXpzY+wiQMnEf75qkeA33L0iNTOhSfA9qOSXCxr8c35CeRDMN5vX25xOjsbbHenVhZnsXdMY4s+XgnpBuSS70ep8Ao+n+H+/OuBa1L/W1zARjppBdEoQ0/6RJwRp/UPkLr2mc1VXdvUUckLiKZopdx+7t6CW0pcH6yVXCz5K1+O8i7N7vp3wqunucZt16WhekgdBTNCLkB4Kjl/qkIq5asFikvy1UgI+Rm1ys96ry2aQEVK4PNBvTKzVqsVJIVC9lolSlryQVbSp/gFeD76J61NjCOGK84lCOip2gFkedn56QIDAQAB"
+    ]
+  ],
+  "map2026._domainkey.example.com": [
+    [
+      "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5dRmVspW/g/UhafTvEQBzzZeSJ7lPzk29sammhUVDXI/QztnnS07td+CjXRAEDes7dcSqBjZQIp8pbkM2iJKuP9+YQ7zJwevpk0DWgUIZDNyoQO7x98hjZRgQQyNIMHYWpx2L57oT7F3P2xElKPI37Wepuate4zPkPsZeuwv7LoOpUfEhxut0510sjsXMqwyoupmgeEbtH3KIwWvqIENkKzWVaW15RN63uUIW2o7Q3ChYSGgpevj0+GaQbviByNWK9SLBg6R2dRTGYK1OuZa0eZHpgJR17C7KaPXR3bA7xonWaQib+4Xg+HXkh5HtVZwoYDx67OhBI5IjiQQSdTDWwIDAQAB"
+    ]
+  ],
+  "map2026._domainkey.example.net": [
+    [
+      "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAshQ7mpjph9aK9xI8+kgTg2pH8vhdgEFajjnWkl41HbzHQrXdnTlU3nThFH3DxMK6E3GXIrMRwqOsK2zwiAku5TqxDr6qgcGHzEKqscs5ktyfFFvVtXQDXd7Z8B9ZiNs7g5nzYWKPMpXUhsKMAPRnzItF1pPwEFyBQ8bc4R4p42qoewXCKd20YM4FZWhngeL4i21EXt2J2JELkPN9k1HOaxUUIIBeuueb0VmGscq/cJ7io+4DVRpTOMreK2AGu/RyYsI6iduKNDQ1SaG1oXJrT0Z2tJwjdanVA+SCn2OIXOOiEvXyQCUJWJT0ZmkyUcu8SZLb7wRAWtbMI7gQeKvElwIDAQAB"
+    ]
+  ],
+  "weak2026._domainkey.example.com": [
+    [
+      "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChq2Auey83Px8kADr3GKn0w/8eppidKL1URz1S9Da+HA1Pu/BrpNt94xaI+Yf7irwoDcVP4ku6XfIVAIoI6HgieGXhwMaLnsG6QwaoaP5u7ejgCANBtDeFGM7WmsFYbIEaRQj/FF/oowFbx/8SVAzbOLThw9yBCaMh0mH1s3TznwIDAQAB"
+    ]
+  ]
+}

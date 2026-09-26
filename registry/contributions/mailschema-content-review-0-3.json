@@ -1,0 +1,76 @@
+{
+  "format": "mailschema-contribution/1",
+  "id": "mailschema-content-review-0-3",
+  "kind": "amendment",
+  "contributor": {
+    "name": "MailSchema"
+  },
+  "summary": "0.3 · Working draft. Executable on MAP 0.2: a revision can name the revision it supersedes and the feedback it addresses, recorded feedback gets a service-issued identifier, and the approval lifecycle is the core’s.",
+  "baseDigest": "bfb8a22e8637dc719fc0666c8e77d492d14d64f4a6675f1ba58f2d11f1772b01",
+  "record": {
+    "slug": "content-review",
+    "name": "Content Review",
+    "summary": "Request changes or decide approval for a specific revision of content.",
+    "category": "Review",
+    "status": "Draft",
+    "version": "0.3",
+    "profile": "https://mailschema.org/profiles/map/0.2",
+    "overview": "A service sends content for review. The recipient can submit feedback or decide whether to approve the revision they received. A proposed approval may require an authorized human decision and ends as approved, declined, stale, expired or superseded. Editing the draft and sending or publishing it remain separate service operations.",
+    "target": "Service-owned content at the exact revision the description names. The target digest identifies the reviewed representation, and the details can name the revision it supersedes and the feedback it addresses.",
+    "operations": [
+      {
+        "id": "request-changes",
+        "name": "Request changes",
+        "description": "Record feedback on the identified revision."
+      },
+      {
+        "id": "approve",
+        "name": "Approve",
+        "description": "Propose or record approval of that revision."
+      }
+    ],
+    "inputs": "For a change request, review feedback; an approval carries no input.",
+    "results": "Feedback recorded with a service-issued identifier; approval completed; approval required, with the service’s approval link; or a proposed approval that ended as declined, stale, expired or superseded. Every result names the request, the bound description and the revision.",
+    "permissions": "Credential authority only. The service checks permission when the request is proposed and again when a human decides it. An authorized teammate may decide for the same service tenant. An unauthorized attempt does not change the proposed request. Editing and any later sending or publication require their own permissions.",
+    "humanRoute": "A review page showing the same content and revision.",
+    "example": {
+      "title": "Review a campaign draft",
+      "steps": [
+        "The service emails a review request for revision 3 of a campaign.",
+        "A reviewer asks for a timezone to be added to the opening paragraph.",
+        "The service records the feedback. An editor prepares revision 4.",
+        "The reviewer approves revision 4 and the service records that decision."
+      ],
+      "exception": "An approval request for revision 3 is refused once that revision is stale. Approval of revision 4 does not send the campaign."
+    },
+    "references": [
+      {
+        "title": "Content Review 0.3 contract",
+        "href": "https://mailschema.org/contracts/content-review-0.3.json",
+        "description": "Normative canonical type contract used by MAP 0.2 wire messages."
+      },
+      {
+        "title": "Schema.org Actions",
+        "href": "https://schema.org/docs/actions.html",
+        "description": "Candidate vocabulary for describing available operations and their routes."
+      },
+      {
+        "title": "Schema.org ReviewAction",
+        "href": "https://schema.org/ReviewAction",
+        "description": "Describes an opinion about an object. It is not equivalent to the revision approval in Content Review."
+      }
+    ],
+    "openQuestions": [
+      "Which independent services and clients can reproduce the 0.3 conformance cases?"
+    ],
+    "definition": {
+      "label": "Read the Content Review definition",
+      "href": "/specification/content-review/"
+    },
+    "maintainers": [
+      {
+        "name": "MailSchema"
+      }
+    ]
+  }
+}

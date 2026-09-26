@@ -17,7 +17,7 @@ try {
   if (command === 'validate') {
     const result = loadRegistry(root);
     console.log(
-      `Registry valid: ${result.types.length} types, ${result.contributions.length} contributions, ${result.implementations.length} implementation declarations.`,
+      `Registry valid: ${result.types.length} types, ${result.contributions.length} contributions, ${result.implementations.length} implementation declarations, ${result.snapshots.size + result.archive.size} served snapshots.`,
     );
   } else if (command === 'ingest') {
     if (!file) throw new Error('Usage: npm run registry:ingest -- contribution.json [--write]');

@@ -1,0 +1,84 @@
+From: forwarder@example.org
+To: alex+devtools-7f3a@example.org
+Subject: Fwd: Confirm your new account
+Date: Fri, 25 Sep 2026 08:05:00 +0000
+Message-ID: <forward-1@example.org>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="map-forward"
+
+--map-forward
+Content-Type: text/plain; charset="utf-8"
+
+Forwarding this confirmation.
+--map-forward
+Content-Type: message/rfc822
+Content-Disposition: attachment; filename="confirmation.eml"
+
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com;
+ h=Content-Type: MIME-Version: Message-ID: Date: Subject: To: From;
+ q=dns/txt; s=map2026; t=1790323200;
+ bh=DsOsPnVcfsbAKiPZQtap1mlfbdja4s8BALcE44qKmKg=;
+ b=TteLtftNTMeVoN5H0rTyTvDd1UlLeBPlRuoY7ApyQn9p0MtVLj4eqwRc98kqURXK17+bIpQu5
+ Dm8U23LHqE8dBSP25BcijvWHRIGKA2EZCZa8gpjSCHx41l0RfqzYIxD4oOo3eyd7ldZVLROFdPi
+ bc6+gBSgVVlFdh6bmo1G9XfuiDo0NPHEBSOmIU+JOrmZkSqbq/y5ccaW1jd3iNk8w8oD8ppZgMn
+ SsLI8THusQkMxlMD6+RQyBnDNSSbFmfN4UFGy2+0oxsT776uUcQfKERMw55WPTdobs1pQbOcU90
+ CoTMqNsWnAcZce/DdRp8a3fKQ3HYfmTZWioJQjnRgpbA==
+From: no-reply@accounts.example.com
+To: alex+devtools-7f3a@example.org
+Subject: Confirm your new account
+Date: Fri, 25 Sep 2026 08:00:00 +0000
+Message-ID: <signup-5520@accounts.example.com>
+MIME-Version: 1.0
+Content-Type: multipart/related; boundary="map-related"; type="multipart/alternative"
+
+--map-related
+Content-Type: multipart/alternative; boundary="map-readable"
+
+--map-readable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+
+Q29uZmlybSB0aGlzIGFkZHJlc3MgdG8gZmluaXNoIGNyZWF0aW5nIHlvdXIgRXhhbXBsZSBEZXZl
+bG9wZXIgVG9vbHMgYWNjb3VudC4gSWYgeW91IGRpZCBub3Qgc2lnbiB1cCwgcmVwb3J0IGl0IGFu
+ZCB3ZSB3aWxsIGNhbmNlbCB0aGUgYWNjb3VudC4=
+--map-readable--
+--map-related
+Content-Type: application/ld+json; charset="utf-8"; profile="https://mailschema.org/profiles/map/0.2"
+Content-Purpose: Machine-readable
+Content-Disposition: inline
+Content-Transfer-Encoding: base64
+
+ewogICJAY29udGV4dCI6ICJodHRwczovL21haWxzY2hlbWEub3JnL2NvbnRleHRzL21hcC0wLjIu
+anNvbmxkIiwKICAiQHR5cGUiOiAiTWFpbEFjdGlvbiIsCiAgIkBpZCI6ICJ1cm46dXVpZDowMTky
+NmEwMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDkiLAogICJwcm9maWxlIjogImh0dHBzOi8v
+bWFpbHNjaGVtYS5vcmcvcHJvZmlsZXMvbWFwLzAuMiIsCiAgInR5cGUiOiB7CiAgICAiaWQiOiAi
+aHR0cHM6Ly9tYWlsc2NoZW1hLm9yZy90eXBlcy9lbWFpbC1jb25maXJtYXRpb24iLAogICAgInZl
+cnNpb24iOiAiMC4xIiwKICAgICJjb250cmFjdERpZ2VzdCI6ICJzaGEtMjU2OmY3YmEyMmU3ZDIw
+YWUwMDRkMjQ4NjU1ZTJjNzQ0ZWIxYTEzMWIzZDFiODhkZTc3NTI1NTUxY2U3MGFjMTMxZTMiCiAg
+fSwKICAiZGVzY3JpYmVkQXQiOiAiMjAyNi0wOS0yNVQwODowMDowMFoiLAogICJleHBpcmVzQXQi
+OiAiMjAyNi0xMC0wMlQwODowMDowMFoiLAogICJzZXJ2aWNlIjogewogICAgImlkIjogImh0dHBz
+Oi8vYWNjb3VudHMuZXhhbXBsZS5jb20vc2VydmljZSIsCiAgICAibmFtZSI6ICJFeGFtcGxlIERl
+dmVsb3BlciBUb29scyIsCiAgICAiYXV0aG9yaXR5IjogInBvc3Nlc3Npb24iLAogICAgImV4ZWN1
+dGlvbiI6IHsKICAgICAgInVybCI6ICJodHRwczovL2FjY291bnRzLmV4YW1wbGUuY29tL21hcC9j
+L0tjNG5WN3hQMm1SOXdMMXRCNWhROHNEM2ZaNnlKMGFHIiwKICAgICAgInJlc3VsdFVybFRlbXBs
+YXRlIjogImh0dHBzOi8vYWNjb3VudHMuZXhhbXBsZS5jb20vbWFwL2MvS2M0blY3eFAybVI5d0wx
+dEI1aFE4c0QzZlo2eUowYUcvcmVzdWx0cy97cmVxdWVzdElkfSIsCiAgICAgICJyZXN1bHRSZXRl
+bnRpb25TZWNvbmRzIjogNjA0ODAwCiAgICB9LAogICAgImh1bWFuVXJsIjogImh0dHBzOi8vYWNj
+b3VudHMuZXhhbXBsZS5jb20vc2lnbnVwL3BlbmRpbmciCiAgfSwKICAicmVjaXBpZW50IjogImFs
+ZXgrZGV2dG9vbHMtN2YzYUBleGFtcGxlLm9yZyIsCiAgInRhcmdldCI6IHsKICAgICJpZCI6ICJo
+dHRwczovL2FjY291bnRzLmV4YW1wbGUuY29tL3BlbmRpbmcvc2lnbnVwLTU1MjAiLAogICAgInJl
+dmlzaW9uIjogIjEiLAogICAgInRpdGxlIjogIkNvbmZpcm0geW91ciBuZXcgYWNjb3VudCIsCiAg
+ICAiZGlnZXN0IjogInNoYS0yNTY6OGZjYzg3Zjg2MTk5Y2JkNWM0MzE2ZDY1YmRjYTE4NWNmM2Ey
+MzJhYjFlZDQzNDU0ZWMwZGZhY2FhMmNmZDIxNiIKICB9LAogICJkZXRhaWxzIjogewogICAgIm9y
+aWdpbiI6ICJodHRwczovL2RldnRvb2xzLmV4YW1wbGUuY29tIiwKICAgICJhZGRyZXNzIjogImFs
+ZXgrZGV2dG9vbHMtN2YzYUBleGFtcGxlLm9yZyIsCiAgICAicHVycG9zZSI6ICJhY2NvdW50LWNy
+ZWF0aW9uIiwKICAgICJyZXF1ZXN0ZWRBdCI6ICIyMDI2LTA5LTI1VDA3OjU4OjAwWiIKICB9LAog
+ICJvcGVyYXRpb25zIjogWwogICAgewogICAgICAiaWQiOiAiY29uZmlybSIsCiAgICAgICJuYW1l
+IjogIkNvbmZpcm0iLAogICAgICAiZGVzY3JpcHRpb24iOiAiQ29uZmlybSB0aGlzIGFkZHJlc3Mg
+YW5kIGNyZWF0ZSB0aGUgYWNjb3VudC4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAicmVwb3J0
+LXVucmVjb2duaXplZCIsCiAgICAgICJuYW1lIjogIlJlcG9ydCB1bnJlY29nbml6ZWQiLAogICAg
+ICAiZGVzY3JpcHRpb24iOiAiUmVwb3J0IHRoYXQgeW91IGRpZCBub3Qgc2lnbiB1cC4iCiAgICB9
+CiAgXQp9Cg==
+--map-related--
+
+--map-forward--

@@ -1,0 +1,73 @@
+{
+  "slug": "information-request",
+  "name": "Information Request",
+  "summary": "Supply specified information in response to a service’s request.",
+  "category": "Information",
+  "status": "Proposal",
+  "version": null,
+  "origin": "MailSchema editorial proposal",
+  "profile": "Under consideration",
+  "overview": "A service asks for a defined set of information. The recipient supplies the requested values, and the service reports which response it recorded or which values need attention.",
+  "target": "A request identifier and the version of the requested fields.",
+  "operations": [
+    {
+      "name": "Submit response",
+      "description": "Supply values for the requested fields."
+    },
+    {
+      "name": "Decline",
+      "description": "Decline to provide the information. Whether this is recorded by the service or kept local remains open."
+    }
+  ],
+  "inputs": "Values for the requested fields. The definition must specify required fields, validation rules and any supported attachments.",
+  "results": "A recorded response, rejected values or a request that can no longer be answered. Supplying information does not approve a separate business operation.",
+  "permissions": "The client needs permission to disclose the requested information. The service checks that the caller may respond to the request.",
+  "humanRoute": "A form with the same questions and validation rules.",
+  "example": {
+    "title": "Confirm a company’s contact details",
+    "steps": [
+      "A directory asks for the company’s support address and website.",
+      "An authorised representative supplies the two requested fields.",
+      "The directory validates the values and records the response."
+    ],
+    "exception": "If the request has expired, the service reports that the response was not recorded. Providing contact details alone does not prove company ownership."
+  },
+  "references": [
+    {
+      "title": "Schema.org AskAction",
+      "href": "https://schema.org/AskAction",
+      "description": "Related vocabulary for posing a question."
+    },
+    {
+      "title": "Schema.org ReplyAction",
+      "href": "https://schema.org/ReplyAction",
+      "description": "Related vocabulary for a response."
+    },
+    {
+      "title": "JSON Schema 2020-12",
+      "href": "https://json-schema.org/draft/2020-12",
+      "description": "A candidate for describing and validating JSON inputs."
+    }
+  ],
+  "openQuestions": [
+    "Field representation, partial responses and replacement of an earlier response.",
+    "Attachments, deadlines and disclosure permissions.",
+    "Whether declining a request is a service operation."
+  ],
+  "history": [
+    {
+      "label": "Initial proposal",
+      "description": "MailSchema is assessing the response model and its relationship to existing vocabularies. No version has been assigned."
+    }
+  ],
+  "contributors": [
+    {
+      "name": "MailSchema"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "MailSchema"
+    }
+  ]
+}

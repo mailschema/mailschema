@@ -22,6 +22,7 @@ on:
           - PyPI
           - crates.io
           - Go
+          - RubyGems
       version:
         description: Exact published version, such as 0.1.1
         required: true
@@ -55,6 +56,14 @@ jobs:
           REGISTRY: ${{ inputs.registry }}
           VERSION: ${{ inputs.version }}
       - run: npm run packages:prepare && npm run packages:test
+      # The Ruby gem must agree with the reference on every shared vector and fixture.
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+          working-directory: .release/packages/ruby
+      - run: bundle exec rake
+        working-directory: .release/packages/ruby
       - run: npx playwright install --with-deps chromium
       - run: npm run verify
       - name: Open promotion pull request

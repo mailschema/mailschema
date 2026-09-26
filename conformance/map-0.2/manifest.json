@@ -1,0 +1,1091 @@
+{
+  "format": "mailschema-conformance/1",
+  "profile": "https://mailschema.org/profiles/map/0.2",
+  "types": [
+    {
+      "id": "https://mailschema.org/types/account-activity",
+      "version": "0.1",
+      "contractDigest": "sha-256:91270db59b40b9d3b0ffb5b0a0c863ebf30b7ecc4d3f784297279ea1c2a83491"
+    },
+    {
+      "id": "https://mailschema.org/types/action-approval",
+      "version": "0.1",
+      "contractDigest": "sha-256:c7829a31570c74cebcb87cdaf6627641b0fb23cb77446cce825d68c94edf4c31"
+    },
+    {
+      "id": "https://mailschema.org/types/content-review",
+      "version": "0.3",
+      "contractDigest": "sha-256:4d5eef369cd6fbeb219221ae3d1c1dd3eeb8e751fd1b634f1e131838558519b7"
+    },
+    {
+      "id": "https://mailschema.org/types/email-confirmation",
+      "version": "0.1",
+      "contractDigest": "sha-256:f7ba22e7d20ae004d248655e2c744eb1a131b3d1b88de77525551ce70ac131e3"
+    },
+    {
+      "id": "https://mailschema.org/types/event-response",
+      "version": "0.1",
+      "contractDigest": "sha-256:43ef4f683ae7f99b056c983439d84e2906aae25bbd6ccf0cefc199592fc8bdca"
+    },
+    {
+      "id": "https://mailschema.org/types/information-request",
+      "version": "0.1",
+      "contractDigest": "sha-256:66fbd4bc8b15264319ec9a843c8055399a734a412d23e8e2de1562aef8578ac9"
+    },
+    {
+      "id": "https://mailschema.org/types/meeting-scheduling",
+      "version": "0.1",
+      "contractDigest": "sha-256:e72f70f3b2c459802a61f2edb416a97f74763fc423eca3540d11f96068ed8f25"
+    },
+    {
+      "id": "https://mailschema.org/types/payment-request",
+      "version": "0.1",
+      "contractDigest": "sha-256:098ee27abc0eea1c577a0bba5182155f1810053625bfeaba14a26e917c22c9bc"
+    },
+    {
+      "id": "https://mailschema.org/types/subscription-preferences",
+      "version": "0.1",
+      "contractDigest": "sha-256:7d300b52892bb287d370ec20e3fc9c4ce9ee69cff7b25646e23cdc4b3e70569b"
+    },
+    {
+      "id": "https://mailschema.org/types/task-assignment",
+      "version": "0.1",
+      "contractDigest": "sha-256:1e30b1cb2fdeb63622a51a49b2782662a4103b47cbcc5e477ed4c25758498f45"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "public/profiles/map/0.2.json",
+      "sha256": "52b27c16b6b77fdcaed00246adc91249bf46902d242e52af8d4e7c470e25c191"
+    },
+    {
+      "path": "public/contexts/map-0.2.jsonld",
+      "sha256": "dfed0189524d7d16d31ed3d8af97e9a0c458200c4c034b413f9d14fa35b60257"
+    },
+    {
+      "path": "public/schemas/map-0.2.schema.json",
+      "sha256": "732d60fcb758d945dc15c57d885c9d1c0c76423a7439096d9755e8ec9830836a"
+    },
+    {
+      "path": "public/schemas/forms-0.1.schema.json",
+      "sha256": "3a976b93a057380e3630ca05e77e221a43a98559fb7fda8066299ec4bf2a8f9e"
+    },
+    {
+      "path": "public/schemas/type-contract-0.2.schema.json",
+      "sha256": "e030007cc034662c9d9d448a8a035aff3106cfb96fb60e6aa9f92b99b25df0b9"
+    },
+    {
+      "path": "public/contracts/account-activity-0.1.json",
+      "sha256": "9cac5e15c56428343fc756ad87372480e24c917ff85a528730f393178e685bdf"
+    },
+    {
+      "path": "public/schemas/account-activity-0.1.schema.json",
+      "sha256": "d9dab0af25f9c9acea90825cbe40d3dfbf03e5814cdffd19f07d8c61ade96cf2"
+    },
+    {
+      "path": "public/contracts/action-approval-0.1.json",
+      "sha256": "4531b6803f62ee1a16305756b1f3476369068a1a5b53a6e9cb92c235c7f880c8"
+    },
+    {
+      "path": "public/schemas/action-approval-0.1.schema.json",
+      "sha256": "3fdd447c5058da8769d41f3375bc4dc55bf7c3d2b89df54e999ec8c7c5548b3e"
+    },
+    {
+      "path": "public/contracts/content-review-0.3.json",
+      "sha256": "4667631072a0366fce7fdfde1459d35eec1d5f4f6df214030ad0a0930bd3b471"
+    },
+    {
+      "path": "public/schemas/content-review-0.3.schema.json",
+      "sha256": "5cc321da9f34f0a9024a008d1d3c2a3bb1555083a7d597eaa7606e1d66fe3eec"
+    },
+    {
+      "path": "public/contracts/email-confirmation-0.1.json",
+      "sha256": "8fed3fdf7eb61132bf7a342d4c3196892ce6ccfcf8298cfacbd8a9945d02d52c"
+    },
+    {
+      "path": "public/schemas/email-confirmation-0.1.schema.json",
+      "sha256": "7fab8d658af01adc0386cb12cc2013d782923f86ccdd73f1b69fcfbe91d89f78"
+    },
+    {
+      "path": "public/contracts/event-response-0.1.json",
+      "sha256": "a24bc987e3b06db7c57aa20cc02e095d80b311df4fb2c292cde9a0478043b2bb"
+    },
+    {
+      "path": "public/schemas/event-response-0.1.schema.json",
+      "sha256": "65fd22e865ebd073af3c702315e45a357e9defef6aa8f967517c2ad3986283ef"
+    },
+    {
+      "path": "public/contracts/information-request-0.1.json",
+      "sha256": "3a4645c43f6346eb5b5f6f4d31a7e26bbef5430b904a435397beeee3dcb8dfe1"
+    },
+    {
+      "path": "public/schemas/information-request-0.1.schema.json",
+      "sha256": "adb907fe73e204ff492d93e86d4d35329b416b098a296075dea2e5bce3163370"
+    },
+    {
+      "path": "public/contracts/meeting-scheduling-0.1.json",
+      "sha256": "a6a1414619882886f06a49224f6dd1b6c352020e525466e453c881d71bee3567"
+    },
+    {
+      "path": "public/schemas/meeting-scheduling-0.1.schema.json",
+      "sha256": "f3d86c28dca948c69bd9ecbcccd61420ae9641bdaacc0f075fc6b005838f4f83"
+    },
+    {
+      "path": "public/contracts/payment-request-0.1.json",
+      "sha256": "4baf495c22fc2a802dbaec0fc1c91ad21fb38d76bd049aa4dec5af72d50f9593"
+    },
+    {
+      "path": "public/schemas/payment-request-0.1.schema.json",
+      "sha256": "f3a5ba57ac444e0396ab932694559baf66f1688155067a67db47442a7fa5da4b"
+    },
+    {
+      "path": "public/contracts/subscription-preferences-0.1.json",
+      "sha256": "682e4a7b31df0bd3ce75b886bea249273010f3c20977dcef115aa5330bbf8565"
+    },
+    {
+      "path": "public/schemas/subscription-preferences-0.1.schema.json",
+      "sha256": "da2004ae3dd55a2744f892dce04b954d703df5d583c61fd5777dfb0d0df508dd"
+    },
+    {
+      "path": "public/contracts/task-assignment-0.1.json",
+      "sha256": "61cf48154ce36e072ed29a6f3674501d2e8ed4ab7587b1a0293029ee3cc5b47d"
+    },
+    {
+      "path": "public/schemas/task-assignment-0.1.schema.json",
+      "sha256": "cd3abf666e7f501d2665d4e1fbbcad731d68300c2926b183d046e467bf8d4b8e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/account-activity/confirm.request.json",
+      "sha256": "4b9a9f8c6cf318d51f1f85be7d8630787cd74758f96f46a3f840d36dc094bd6f"
+    },
+    {
+      "path": "public/fixtures/map-0.2/account-activity/confirm.result.json",
+      "sha256": "013dfc3b3bace22dddefd2b3c5b14bbd53c9dd1796316c64a2015faf0cea8597"
+    },
+    {
+      "path": "public/fixtures/map-0.2/account-activity/description.json",
+      "sha256": "b9b955c2dd36acfaeeb7a001b994316911e07477afa07d783bbcf6765f77c3b1"
+    },
+    {
+      "path": "public/fixtures/map-0.2/account-activity/report-unrecognized.request.json",
+      "sha256": "0db64ee76121627a6d26e8c1948c32bfa1a9482d8eba776ffde6a6840902b8b2"
+    },
+    {
+      "path": "public/fixtures/map-0.2/account-activity/report-unrecognized.result.json",
+      "sha256": "3f78a910f7cbe5f751fdf51d38c3504688adfd6087b9be35078f6d0f875e3e7d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/approve.approval-required.json",
+      "sha256": "c4aa23e6176b9eb3eb4aaf6910383b2d329a644ea30b51b059b3292fbfd67129"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/approve.declined.json",
+      "sha256": "38cb65b2b5bec43da56ba5a84725d87c42937e9a586288751bb479352c99eaca"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/approve.request.json",
+      "sha256": "36be3fe852eb7373302a24c87968bf634099b1485e7e6c9dcc9201b594a39fb8"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/approve.result.json",
+      "sha256": "932b34ccd1c196e43e01d6f291c6c84cc821dcda548ae095dd534d890b55beb8"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/decline.request.json",
+      "sha256": "af2b3edd312be2aa10fcf584930b072e3e3c1f064f554e0466438a27db93f1f4"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/decline.result.json",
+      "sha256": "742c18c9f59b46836ac494f666ee4386a01e4d45adf6a0168b035b90e480e148"
+    },
+    {
+      "path": "public/fixtures/map-0.2/action-approval/description.json",
+      "sha256": "a3fdb2ba76326ad66faa9e527b4dabefa95694ab5e03d11ff25830bb55a2280e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/approve.approval-required.json",
+      "sha256": "db54a35c830d52b8b3848345fe39d24503b07844b37f12cb868eedc715800749"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/approve.declined.json",
+      "sha256": "aa193059832590d37d7dac6408ee544447f4b52e5341b8cd099ffee2fdc9c3ba"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/approve.request.json",
+      "sha256": "4fa298431595a6c3544e173cbd215f4736f4ae82bf39f951d97eeb555d0d95e1"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/approve.result.json",
+      "sha256": "cc787111e779c9f30113ee626789e5569324761bdc0f216e86145fa659eec09e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/description.json",
+      "sha256": "b15ef92aa6d83df6fc6f50c4cbdc70a58ea2718d51971ccd01aee647d41a680e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/request-changes.request.json",
+      "sha256": "8bb95180217c61e0722b87db4938bd2fce6a0c0d755b8127303ab6dd67080cba"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/request-changes.result.json",
+      "sha256": "3d95243e18625e4705582fca02dab54563415ce40cba887d15ccb0d8fe927879"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/stale-target.problem.json",
+      "sha256": "d17420e224ef44f8c061de850326830368bf8d7cbe2e3b1ba8b80c6e66519c80"
+    },
+    {
+      "path": "public/fixtures/map-0.2/dns.json",
+      "sha256": "c080eb741569e4f0ab478f53f8af41bba2bd6c8f60bffb9541bc974f1be92f24"
+    },
+    {
+      "path": "public/fixtures/map-0.2/email-confirmation/confirm.request.json",
+      "sha256": "ca9073d1bbd0af2db9279f34e40cf0e166e9adf3e54d415614973f7fabf9257d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/email-confirmation/confirm.result.json",
+      "sha256": "4f80925c62c9201a95604286dc46a01b821c016b7e486e1c777193a717f4c155"
+    },
+    {
+      "path": "public/fixtures/map-0.2/email-confirmation/description.json",
+      "sha256": "8432c5c4b616bb4f97f9e32a9bc761bac9a4ef201791fb201e5c0c441b15fded"
+    },
+    {
+      "path": "public/fixtures/map-0.2/email-confirmation/report-unrecognized.request.json",
+      "sha256": "33d65e02be95a89a50e1ea64789a9cc1a9995eb8f0ac49dc07e55d5f870d8920"
+    },
+    {
+      "path": "public/fixtures/map-0.2/email-confirmation/report-unrecognized.result.json",
+      "sha256": "88b75998e5fa545d47fd5ab60e807c9c3a8c8d422727da8a2a9dd5bb8575dd55"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/content-review-mixed.eml",
+      "sha256": "7ee3666e54d6ef753e5fb5734a4d8190f8ead7b308e1da07f217b0911ab7730f"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/content-review.eml",
+      "sha256": "fb4919c4d520b8443ab93e5794be79e92e74eed79e393706ced28eefd6885206"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/email-confirmation.eml",
+      "sha256": "b86c7d677bb392f6c811e5c53d0ce336ef32ad0610b8b73974e0e5a83ab4f20d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/event-response.eml",
+      "sha256": "03e679f1d82bc034fa53fdeda2173d2a73261b3eadd978ae6be1944d507f4d59"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/international-recipient.eml",
+      "sha256": "c445828b1b62daa89b74feafd4918270107fc9d08d254c1a4fef93c626c0fd75"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/body-length-limit.eml",
+      "sha256": "f8b030c6ad688b9e4686a56a38fdeb976126469f0ad4cf512cea45e618f53205"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/duplicate-signed-header.eml",
+      "sha256": "13805c0241a28e39c19a6d60af0f4c370066990824fbc83cc4dcb238810a00f9"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/ed25519-over-rsa.eml",
+      "sha256": "0531344aa2e87d7916a7f24e242ef393c217180cb53a327f7ccc22d6dfa26975"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/embedded-message.eml",
+      "sha256": "432466c5ff414fed8c1a1795d2f32113396b8003bbedfa3069c21f42a27b11e4"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/folded-field-name.eml",
+      "sha256": "852feb4c66e43de93f76fa7455ddd198a58594e5666a91923b831cd4f1fef8b7"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/foreign-endpoint.eml",
+      "sha256": "ada7fbd4e84394521fe9848f17e96cd3c263623c70b5b0f16317f9b00766d6de"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/future-signature.eml",
+      "sha256": "e9f51d50b2f9c214980810f65d409a89b6d2290a7c6f807575b216d2eae19001"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/inline-attached-message.eml",
+      "sha256": "f1dbf06f9410c07db668a1f256c5552e632e90aef3c02c6a38d1fed4e58346d0"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/invalid-date.eml",
+      "sha256": "a135995f9522b368b5b0d7a96d6b48bfe1fd3a4d4dae95b463ffbdd3fd563cb4"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/lookalike-domain.eml",
+      "sha256": "2170982efd29fa19e7f07a84ffdf5cb6e9a9d441c31f7ae67879cf8dd2cc0d0f"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/obsolete-from.eml",
+      "sha256": "3bbc2a0bb9238daa658aaa5c6d4873c95f0286fc84e9a6fd53093a08950fadbc"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/other-recipient.eml",
+      "sha256": "e27d952d1bd0caa220f61451ee1c0d63035fe9385fbc0f02e003994fe063e4be"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/otp-and-confirm.eml",
+      "sha256": "2c0e5eb0c7b80413246f9b254e5db700ffc4568029d3e56879a98759fbcdec30"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/repeated-to.eml",
+      "sha256": "190fe6ec9538c6b99591913697f9d01a13425b9c2d89ddeef8d4c14c5726c995"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/rsa-sha1.eml",
+      "sha256": "4d6bb7d60489492c55f574bb0f7cac63bb2aa529fb284dbfad89b72a719cc54b"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/spf-only.eml",
+      "sha256": "a45be704ec295ba24b7582edeef25a7c2472e6d6c0ae509ffaa68fb966917ed0"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/spoofed-authentication-results.eml",
+      "sha256": "d5255907ad8214ce6d7e21e79448617e6b529bfa0a534b78cf39c6af784caabb"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/two-mailbox-from.eml",
+      "sha256": "a0e1063530b83364f6340861c5727a2c8f32162707b76e39d8d71c4015b661de"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/unsigned-cc.eml",
+      "sha256": "7d479d6a45dac1c2f74204cafc7871593e241c41bdbb5d337d73729b6846ccc9"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/unsigned-content-type.eml",
+      "sha256": "e2d4c275d6150d4df7e15faa092b728c59e0e2b83ba28d3a31575c9959337c28"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/unsigned-list-id.eml",
+      "sha256": "7d8b7135b20b571c85c23e5fbf18471376135cdf0b53c25889b5493461a3ea09"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/unsigned-recipient.eml",
+      "sha256": "db748d8880ece9c93dceaa2d30b312dbcda03d72647441624c1eed241cc5b617"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/unsigned.eml",
+      "sha256": "053f5690167867504ce9e323dfb21d1d4c7cf1f7cc0970aa27c4f3f6a6b2715b"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/negative/weak-key.eml",
+      "sha256": "ae2bc08c9a0387288bafd6b1a842e94a52eace56ba2af0e665b5c2d3ffe1bf0c"
+    },
+    {
+      "path": "public/fixtures/map-0.2/emails/subscription-preferences.eml",
+      "sha256": "378058be05446905a77bedb9e9692c187519fae42472c936db9b3e0bf8549f7e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/accept.request.json",
+      "sha256": "7ac42f43fcc907842c826a3c866faf48ce115e440c793e1dfe80a0b9acb6f3b4"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/accept.result.json",
+      "sha256": "8a58ac8f3c9b5b698e11cde820fbb4722a9c22cb4d9b7f2f10a3e38aca28ce79"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/decline.request.json",
+      "sha256": "4c23348a019fdcba46e2f1c95b8e6c05bcd77357ebc9e40555cfcbb18f86430b"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/decline.result.json",
+      "sha256": "b5a694e6a138a01f9654b9a8bc6a46ffade03b3bb68fb0e5a2916114aee4bb1d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/description.json",
+      "sha256": "a624a6eeb15974d2f54fd28afa47870fb0c1a4d6ece543c0b213bb88389e761d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/invitation.ics",
+      "sha256": "8f0e5f23721afc145bd03629c9353659080ffbc397119aeae6d52c19be471616"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/respond-tentatively.request.json",
+      "sha256": "9d720c09ee920e6a79c1afe568113dfb9a098c350d346ffba179b8284c3b676c"
+    },
+    {
+      "path": "public/fixtures/map-0.2/event-response/respond-tentatively.result.json",
+      "sha256": "03f2e7a41fbd0c052428dc1116749131a92e5493e8db15914345270b859ad70f"
+    },
+    {
+      "path": "public/fixtures/map-0.2/ijson-vectors.json",
+      "sha256": "556d92ec9e218614d869705641526831e4f753be4ff271486f99fdca39c3a3f9"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/decline.request.json",
+      "sha256": "188b07d35b20e3524d032ee38f578f102caf883d529037bd5bbe75b6e4f558a1"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/decline.result.json",
+      "sha256": "49796d2b0a67622f80194db84cb02cd4c581f09e6dd033d3c1e1d085e2d3c3ef"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/description.json",
+      "sha256": "a4622669b016a5352974f3bb661f1bf2fb5822d9d9f64b32091693f40d5c4845"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/invalid-request.problem.json",
+      "sha256": "4cd531a5d3da0bddf127932dc4a9c883c04c3ef21c4776f0ad081417185a85de"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/submit-response.request.json",
+      "sha256": "888d78355bd593b825ed2b8c11af9f410e80c03e2a35db81d81842858f81fda6"
+    },
+    {
+      "path": "public/fixtures/map-0.2/information-request/submit-response.result.json",
+      "sha256": "b96621c6b9b5e26687822776a2d2fe46fd6795f9d7118f527fd9f2031b9d3b34"
+    },
+    {
+      "path": "public/fixtures/map-0.2/jcs-vectors.json",
+      "sha256": "674b9e7473d23d518da8189bd36f247869c0d7e93a418dbf76e1f3185431e493"
+    },
+    {
+      "path": "public/fixtures/map-0.2/lexical-vectors.json",
+      "sha256": "4d261d5b1af25ba33969f1ab1489743084d92b26a992f24c073a445f8975dde4"
+    },
+    {
+      "path": "public/fixtures/map-0.2/media-type-vectors.json",
+      "sha256": "ad0e1390543e3dd5428f03fc6670dca5936f3377a068abd929f292c3a00ad891"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/already-decided.problem.json",
+      "sha256": "250173b42cbbe0e2761d365d4ef87e10982f7070bbdcf46d6fe35f2f46ac7a09"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/book.request.json",
+      "sha256": "621e3d299295e4bf755f9f3753fae60d6086c7e327b0e935e09c28cae68e8eae"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/book.result.json",
+      "sha256": "a297d8e356cb44a21c59c96f66acaa8390dafe8eccfc28ce1e0ed357597a3fd5"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/book.unavailable.json",
+      "sha256": "ecc3831f525962ce278002cabb439fa493d99c7ce088711504ee2eb6ac73c7a9"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/decline.request.json",
+      "sha256": "5ed59840f0f0ebc9cedfb0a5727178184105048362f371ef4a31753887fb7cfa"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/decline.result.json",
+      "sha256": "a2c7b57f7dbcc8f371da8692fbf84016544ba06f0d9f45139507925db9b0c345"
+    },
+    {
+      "path": "public/fixtures/map-0.2/meeting-scheduling/description.json",
+      "sha256": "5a6ba150984a46aff34abb17c5202f92fc72703ecc67da709e028af615a626fb"
+    },
+    {
+      "path": "public/fixtures/map-0.2/payment-request/accept.request.json",
+      "sha256": "2b427e1ea75c08f9a2fbd5f7c586d9e1505b6d2ed6c8e2630e9e36f722fb2bcc"
+    },
+    {
+      "path": "public/fixtures/map-0.2/payment-request/accept.result.json",
+      "sha256": "5ba8745942f39cc850ad21d7760349e35d64ab9e55fc133cbe2d00949fcf6231"
+    },
+    {
+      "path": "public/fixtures/map-0.2/payment-request/decline.request.json",
+      "sha256": "62aa63503b14d79c4a5c04d80a7fe4b7f363b5ff1ba087715edfe21565cc9c4e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/payment-request/decline.result.json",
+      "sha256": "5cfe83d64c12bd8daefd2f95021ecf63f1790eaf32a82f6666f93cecfbaf54a2"
+    },
+    {
+      "path": "public/fixtures/map-0.2/payment-request/description.json",
+      "sha256": "12ea12b478c03e308d39d8512f1e3f22b2bfe75aa26392d1bf09b3ee79558347"
+    },
+    {
+      "path": "public/fixtures/map-0.2/subscription-preferences/description.json",
+      "sha256": "77a92633062e4db9f5436f730738cc4c77d7214ba0f542e99ed55395fedbc8cd"
+    },
+    {
+      "path": "public/fixtures/map-0.2/subscription-preferences/update-preferences.request.json",
+      "sha256": "af1fb4bb4218a0f691bb2526f19849c76e1a512cb9b34885655f51f9229a877e"
+    },
+    {
+      "path": "public/fixtures/map-0.2/subscription-preferences/update-preferences.result.json",
+      "sha256": "f0c69aa5175e3a89bb62844c118a2c082880335a6057771ca6ade4bca2813d3c"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/accept.request.json",
+      "sha256": "09fe573ed746df1b5616caee6c8be21eb6957bedb9d11a68d5f279313d05bf1d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/accept.result.json",
+      "sha256": "5cb03ec40c6f030c80a469c903507926fdb8add9308c1e85c140fd812aef092a"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/assignment.ics",
+      "sha256": "8ca7d3f2097105660a0ed3abcafc91a844aaae316227b84295afa8d993112d45"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/decline.request.json",
+      "sha256": "077ec9f9c918226c14fab7a02f1de75e999d73991415179388d1e1fce6fdf5ff"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/decline.result.json",
+      "sha256": "866babf40fa6f6d8b8943f301c48631af9db839cf07492b5124ac46d29fc623d"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/description.json",
+      "sha256": "84b158d6473a7134c5b63f036a98b0268ce016ca4d659d5d97158093f792ff11"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/report-completion.request.json",
+      "sha256": "b92dfb1e33009744bc7fb917cb591ea53752e24880fa0d471e5c1ea7d9d41551"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/report-completion.result.json",
+      "sha256": "f8ec630f89ba93519700b55eb7d8326b6df22664ed9d9bfa7f234eb6f6425c12"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/report-progress.request.json",
+      "sha256": "060f2c162772e3b4e703cb92a5ce821557aad83a4ba942ab20e203972489263c"
+    },
+    {
+      "path": "public/fixtures/map-0.2/task-assignment/report-progress.result.json",
+      "sha256": "d1530e2a2572f82094d913558a11039129248b27d640ead143f51a29bb77e0ae"
+    },
+    {
+      "path": "src/map/artifacts.ts",
+      "sha256": "1221f2b9e35158a2a4bc27baf72282761d2b2fda6591afc8172acbe161763188"
+    },
+    {
+      "path": "src/map/reference.ts",
+      "sha256": "32eece57cb8505a8b08d85c2b0a884bc9f028e770b3b9363a7cc87ff9fbd4f6d"
+    },
+    {
+      "path": "src/map/behaviours.ts",
+      "sha256": "ae1513e1f102035ad9ce8239e1676921832b750fd8f5a852a76c354a472c49eb"
+    },
+    {
+      "path": "src/map/mail.ts",
+      "sha256": "f15b187421c801ca2d155bdaa623755aebef436adeeb5d9f84898089fbf700de"
+    },
+    {
+      "path": "conformance/map-0.2/examples.mjs",
+      "sha256": "2cf954a0566eb4b13b259e23e19b5266e791411ed03bef800c4bfb5d9c1a1fb5"
+    },
+    {
+      "path": "conformance/map-0.2/build.mjs",
+      "sha256": "a5e324c462e06e73f54bb352780d67c5eb1700ce5219a1dc210054ffcfe39f12"
+    },
+    {
+      "path": "conformance/map-0.2/cases.mjs",
+      "sha256": "ca43c6a5ae7780f07f451b78ff90dfcbc790319872f99f6410441d73324e2484"
+    },
+    {
+      "path": "conformance/map-0.2/requirements.json",
+      "sha256": "89a6eea3a1af42f4b59ac07cb17be0bddd09a5b07972e922b06b7b8711d5b022"
+    },
+    {
+      "path": "scripts/map-fixtures.mjs",
+      "sha256": "175d2aeb1916ad625699d7dbe2686a4e66f9be97cde4320737fb9ce4ff875c1e"
+    },
+    {
+      "path": "tests/map-conformance.test.mjs",
+      "sha256": "447a9aff3b2e0f6210bc873f063dfe96a5f022a1c480525a7635bb6a40acafab"
+    }
+  ],
+  "cases": [
+    {
+      "id": "approve-completed",
+      "title": "approval records one completed effect",
+      "expected": "200 completed"
+    },
+    {
+      "id": "feedback-accepted",
+      "title": "feedback is recorded with a service-issued identifier",
+      "expected": "200 accepted"
+    },
+    {
+      "id": "exact-retry",
+      "title": "an exact retry returns the saved result without another effect",
+      "expected": "saved response and one effect"
+    },
+    {
+      "id": "stable-redelivery",
+      "title": "redelivery reuses the request for an instruction, and a new instruction is a new request",
+      "expected": "same requestId and one effect on redelivery; accept, decline and accept again leave accepted"
+    },
+    {
+      "id": "lost-response-recovery",
+      "title": "an authorized caller retrieves a saved result",
+      "expected": "saved response from result resource"
+    },
+    {
+      "id": "retry-current-authorization",
+      "title": "a retry rechecks current access",
+      "expected": "an uncorrelated 403 while revoked, the recorded result once restored, and one effect"
+    },
+    {
+      "id": "recovery-current-authorization",
+      "title": "result recovery rechecks current access",
+      "expected": "403 after revocation"
+    },
+    {
+      "id": "principal-isolation",
+      "title": "request identifiers do not cross principals, and each tenant has its own",
+      "expected": "403 within the tenant, a separate request in another, and no duplicate effect"
+    },
+    {
+      "id": "actor-attribution",
+      "title": "the acting client is recorded apart from the principal and stays on every transition",
+      "expected": "first actor on the proposal and the decision"
+    },
+    {
+      "id": "changed-request",
+      "title": "changed reuse of a request ID conflicts",
+      "expected": "409 idempotency-conflict"
+    },
+    {
+      "id": "unknown-interaction",
+      "title": "a request cannot select another interaction",
+      "expected": "400 invalid-request, unclaimed"
+    },
+    {
+      "id": "malformed-unclaimed",
+      "title": "a malformed request does not claim its request identifier",
+      "expected": "400 problem and later 404 result-not-found"
+    },
+    {
+      "id": "invalid-type-input",
+      "title": "a type-invalid claimed request is recoverable, points at its input and cannot be replaced",
+      "expected": "saved 400 with escaped operation-specific pointers within the problem limits, then 409 idempotency-conflict"
+    },
+    {
+      "id": "permission-refusal",
+      "title": "a recognized unauthorized request records one terminal refusal",
+      "expected": "stable 403 refused and no effect"
+    },
+    {
+      "id": "authentication-context",
+      "title": "credential execution requires server-established principal and tenant",
+      "expected": "rejected before processing"
+    },
+    {
+      "id": "stale-revision",
+      "title": "staleness is reported from service state with the current target",
+      "expected": "409 stale-target"
+    },
+    {
+      "id": "expired-interaction",
+      "title": "expiry is exclusive at the stated instant",
+      "expected": "410 expired-interaction"
+    },
+    {
+      "id": "unsupported-type",
+      "title": "the type URI, version and contract digest must each match exactly",
+      "expected": "422 unsupported-type for any difference"
+    },
+    {
+      "id": "unsupported-operation",
+      "title": "only an operation offered by the interaction can run",
+      "expected": "422 unsupported-operation"
+    },
+    {
+      "id": "approval-gate",
+      "title": "additional service approval is a non-terminal result with a core approval link",
+      "expected": "202 approval-required"
+    },
+    {
+      "id": "approval-team-decision",
+      "title": "an authorized teammate can decide a proposed approval",
+      "expected": "200 completed and one effect"
+    },
+    {
+      "id": "approval-unauthorized-decision",
+      "title": "an unauthorized human cannot decide or end a proposed approval",
+      "expected": "403 and original approval-required result"
+    },
+    {
+      "id": "approval-rule-refusal",
+      "title": "service rules can refuse an approval without ending the proposal",
+      "expected": "403, unchanged proposal, then declined"
+    },
+    {
+      "id": "approval-declined",
+      "title": "an authorized human can decline a proposed approval",
+      "expected": "200 failed declined"
+    },
+    {
+      "id": "approval-stale-target",
+      "title": "an approval fails if the target changes before the decision",
+      "expected": "200 failed stale-target"
+    },
+    {
+      "id": "approval-expired",
+      "title": "an undecided approval ends as expired at the deadline without a decision attempt",
+      "expected": "recovery shows failed expired"
+    },
+    {
+      "id": "approval-withdrawn",
+      "title": "a service ends a pending proposal only for a reason its type declares",
+      "expected": "200 failed withdrawn; undeclared reasons refused"
+    },
+    {
+      "id": "retention-expiry",
+      "title": "expired retained results never cause another effect",
+      "expected": "410 retry, missing recovery, one effect"
+    },
+    {
+      "id": "unknown-result",
+      "title": "an unknown result does not invent an interaction identifier",
+      "expected": "404 result-not-found"
+    },
+    {
+      "id": "forged-description",
+      "title": "a request built from a changed copy of a genuine description is refused, for every type",
+      "expected": "unclaimed 400 and no effect for each change"
+    },
+    {
+      "id": "decisions-once",
+      "title": "the first decision decides the interaction",
+      "expected": "409 already-decided for later decisions"
+    },
+    {
+      "id": "superseded-proposal",
+      "title": "a decision ends other pending proposals as superseded",
+      "expected": "200 failed superseded"
+    },
+    {
+      "id": "decision-states",
+      "title": "a decision decides in either success state, and never ends repeatable work",
+      "expected": "409 already-decided after an accepted decision; an approval of repeatable work outlives it"
+    },
+    {
+      "id": "repeatable-operations",
+      "title": "repeatable operations stay available and the latest calendar reply stands",
+      "expected": "each reply completes"
+    },
+    {
+      "id": "content-review-description",
+      "title": "content-review: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "content-review-operations",
+      "title": "content-review: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "content-review-authority",
+      "title": "content-review: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "action-approval-description",
+      "title": "action-approval: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "action-approval-operations",
+      "title": "action-approval: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "action-approval-authority",
+      "title": "action-approval: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "information-request-description",
+      "title": "information-request: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "information-request-operations",
+      "title": "information-request: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "information-request-authority",
+      "title": "information-request: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "event-response-description",
+      "title": "event-response: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "event-response-operations",
+      "title": "event-response: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "event-response-authority",
+      "title": "event-response: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "meeting-scheduling-description",
+      "title": "meeting-scheduling: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "meeting-scheduling-operations",
+      "title": "meeting-scheduling: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "meeting-scheduling-authority",
+      "title": "meeting-scheduling: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "subscription-preferences-description",
+      "title": "subscription-preferences: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "subscription-preferences-operations",
+      "title": "subscription-preferences: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "subscription-preferences-authority",
+      "title": "subscription-preferences: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "task-assignment-description",
+      "title": "task-assignment: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "task-assignment-operations",
+      "title": "task-assignment: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "task-assignment-authority",
+      "title": "task-assignment: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "payment-request-description",
+      "title": "payment-request: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "payment-request-operations",
+      "title": "payment-request: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "payment-request-authority",
+      "title": "payment-request: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "email-confirmation-description",
+      "title": "email-confirmation: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "email-confirmation-operations",
+      "title": "email-confirmation: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "email-confirmation-authority",
+      "title": "email-confirmation: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "account-activity-description",
+      "title": "account-activity: the description satisfies the core and its contract",
+      "expected": "valid, verified and reproducible"
+    },
+    {
+      "id": "account-activity-operations",
+      "title": "account-activity: every operation reaches its declared state",
+      "expected": "fixture results reproduced"
+    },
+    {
+      "id": "account-activity-authority",
+      "title": "account-activity: an interaction offers only operations its authority permits",
+      "expected": "refused where the contract forbids the mode, accepted where it permits it"
+    },
+    {
+      "id": "field-bindings",
+      "title": "form values must match the fields the interaction defined, and are absent where it defines none",
+      "expected": "400 invalid-request with pointers; values without fields refused"
+    },
+    {
+      "id": "secret-fields-refused",
+      "title": "forms never label a field as a password, code or card detail, and their fields are consistent",
+      "expected": "details rejected"
+    },
+    {
+      "id": "slot-rules",
+      "title": "offered slots are distinct and in order, a booking names one, and a taken time books nothing",
+      "expected": "repeated or reversed slots refused by service and client; invalid-request, then failed unavailable"
+    },
+    {
+      "id": "payment-date",
+      "title": "a payment date after the due date is refused",
+      "expected": "invalid-request /paymentDate"
+    },
+    {
+      "id": "calendar-sequence",
+      "title": "calendar types use the iCalendar SEQUENCE as the revision",
+      "expected": "service refuses another revision form"
+    },
+    {
+      "id": "calendar-binding",
+      "title": "the target digest binds one iCalendar REQUEST naming the component, SEQUENCE and attendee",
+      "expected": "an event and a to-do bound; changed, cancelled, ranged, misaddressed or other-component parts refused"
+    },
+    {
+      "id": "email-confirmation-rule",
+      "title": "confirmation needs exactly one prior matching request and no code in the message",
+      "expected": "confirm only on an unambiguous recorded match"
+    },
+    {
+      "id": "account-activity-rule",
+      "title": "confirming needs one recorded match with an event type; reports come only from the principal",
+      "expected": "confirm a recorded sign-in; never report alone"
+    },
+    {
+      "id": "action-approval-rule",
+      "title": "an agent never approves terms of a kind it does not understand",
+      "expected": "unknown terms go to the principal"
+    },
+    {
+      "id": "payment-account-rule",
+      "title": "an agent accepts a payment request only for a payee account already on record",
+      "expected": "changed accounts go to a person"
+    },
+    {
+      "id": "description-rules",
+      "title": "service and client refuse descriptions that repeat an operation, expire before they begin, or name a party under possession",
+      "expected": "each refused"
+    },
+    {
+      "id": "client-prepare",
+      "title": "a client prepares only offered operations with input its contract accepts",
+      "expected": "invalid input and unoffered operations refused before sending"
+    },
+    {
+      "id": "http-binding",
+      "title": "the HTTP binding fixes methods, media type and where credentials travel",
+      "expected": "405 with Allow, 415 for every refused shared media type vector, a MAP 401 and the expanded result URL in Location; possession requests carry no credentials and refuse redirects"
+    },
+    {
+      "id": "utf8-strict",
+      "title": "a designated part that is not valid UTF-8, or starts with a byte order mark, is refused",
+      "expected": "refused before use, never repaired"
+    },
+    {
+      "id": "lexical-forms",
+      "title": "every lexical form is the core pattern, whichever validator reads it",
+      "expected": "every shared lexical vector decided by the core definition; unparseable dates refused"
+    },
+    {
+      "id": "message-date",
+      "title": "a message Date is an RFC 5322 section 3.3 date-time, read strictly",
+      "expected": "numeric zones and years from 1900 only; names in any case"
+    },
+    {
+      "id": "retention-latest-state",
+      "title": "retention runs from the latest recorded state",
+      "expected": "a result decided late stays retained for the full interval after its decision"
+    },
+    {
+      "id": "consequence-policy",
+      "title": "possession operations beyond refusal, protection and record need a relationship or the principal",
+      "expected": "policy follows consequences"
+    },
+    {
+      "id": "capability-scope",
+      "title": "a possession interaction issues a sound capability and answers only it",
+      "expected": "weak issuance refused; 404 plain; 410 plain at expiry plus retention, however often refusals are recorded after expiry"
+    },
+    {
+      "id": "possession-trust",
+      "title": "genuine possession messages are trusted for their organization, recipient and list",
+      "expected": "organizational domain returned, with addresses compared as A-labels"
+    },
+    {
+      "id": "possession-refusals",
+      "title": "weak, forged, restructured or misdirected possession messages are refused for the rule they break",
+      "expected": "every negative message refused with its reason"
+    },
+    {
+      "id": "lookalike-domain",
+      "title": "an authentic lookalike domain cannot satisfy the confirmation rule",
+      "expected": "trusted for examp1e.com, never confirmed"
+    },
+    {
+      "id": "organizational-domain",
+      "title": "the organizational domain follows the RFC 9989 tree walk and fails closed",
+      "expected": "published records decide; DNS failures and top-level domains refuse"
+    },
+    {
+      "id": "untrusted-endpoints",
+      "title": "every credential-bearing endpoint, resource and the human route are configured",
+      "expected": "client refusal before credential use"
+    },
+    {
+      "id": "metadata-configuration",
+      "title": "protected resource metadata configures a service without extending trust",
+      "expected": "configured resource anchors every endpoint"
+    },
+    {
+      "id": "jsonld-identity",
+      "title": "JSON-LD identity is stable without remote resolution for every type",
+      "expected": "base-independent IRIs; details a JSON literal"
+    },
+    {
+      "id": "structured-email-designation",
+      "title": "a real MIME parser finds the one designated structured part",
+      "expected": "one part labelled with the profile in a partial representation"
+    },
+    {
+      "id": "structured-email-selection",
+      "title": "a client processes the one part labelled with its profile, wherever the partial representation sits",
+      "expected": "other structured parts ignored; two labelled parts, none, or one outside a partial representation refused"
+    },
+    {
+      "id": "contract-identity",
+      "title": "wire compatibility is bound to the canonical contract, not the Registry record",
+      "expected": "editorial changes do not change contractDigest"
+    },
+    {
+      "id": "problem-correlation",
+      "title": "problem type, status and code agree",
+      "expected": "contradictory problems and misplaced errors rejected"
+    },
+    {
+      "id": "result-shape",
+      "title": "approval links and reasons appear exactly with their states",
+      "expected": "schema enforces the core members"
+    },
+    {
+      "id": "details-integers",
+      "title": "details carry integers only, with ASCII keys",
+      "expected": "fractions and non-ASCII keys rejected"
+    },
+    {
+      "id": "description-digest",
+      "title": "RFC 8785 vectors reproduce and bind the description",
+      "expected": "every vector matches"
+    },
+    {
+      "id": "i-json",
+      "title": "MAP documents are parsed as I-JSON within the core limits",
+      "expected": "every shared I-JSON vector decided at its boundary, and read to its RFC 8785 form"
+    },
+    {
+      "id": "contract-rules",
+      "title": "the Registry refuses contracts that break the core rules",
+      "expected": "the unchanged contract loads, and each mutation is refused by its own rule"
+    }
+  ]
+}

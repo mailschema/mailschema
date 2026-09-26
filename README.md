@@ -24,9 +24,9 @@ npm run verify
 ## Site structure
 
 - `/`: identity, protocol explanation and local review demonstration.
-- `/specification`: MAP 0.1 draft reader, including the exact MIME and authenticated HTTPS profile.
+- `/specification`: MAP 0.2 draft reader: the core profile, authorization, results and a chapter for each type.
 - `/types`: the complete interaction collection, with operations, examples, maturity labels and guidance on using or proposing a type.
-- `/registry`: five type records, searchable by name and description and filterable by category and status.
+- `/registry`: the type records, searchable by name and description and filterable by category and status.
 - `/registry/<type>`: definition brief, operations, example, existing standards, open questions and implementation evidence.
 - `/examples`: interactive local Content Review simulation.
 - `/tools`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
@@ -38,7 +38,7 @@ Specification content and Sourcey configuration live in `docs/specification/`. S
 
 ## Content and implementation boundaries
 
-MAP 0.1 defines the JSON-LD documents, Structured Email MIME part and authenticated HTTPS execution profile required for an implementation. Nitrosend exposes the first deployed Content Review boundary: an agent can propose approval of an exact flow revision, a signed-in person can decide it and both paths resolve through the same retained result. Nitrosend has also completed a provider-delivered round trip, recorded in the Registry as a first-party test report. An independently operated implementation remains outstanding, so the project does not claim interoperability or IETF adoption. Content Review is a draft; Information Request and Subscription Preferences are proposals; Task Assignment and Event Response are reuse assessments. The type records are MailSchema-authored; the only implementation declaration is Nitrosend's first-party test report.
+MAP 0.2 is a type-agnostic core: a JSON-LD description in Structured Email, a request bound to that exact description by its digest, credential or possession authority over HTTPS, and recoverable results. Types are defined by digest-bound contracts, and adding one never changes the core. MAP 0.1 is withdrawn; its artifacts stay published unchanged. Nitrosend exposes the first deployed Content Review boundary: an agent can propose approval of an exact flow revision, a signed-in person can decide it and both paths resolve through the same retained result. Nitrosend has also completed a provider-delivered round trip on MAP 0.1, recorded in the Registry as a first-party test report against Content Review 0.2. An independently operated implementation remains outstanding, so the project does not claim interoperability or IETF adoption. All ten types are executable drafts on MAP 0.2, and [the type collection record](docs/TYPE-COLLECTION.md) explains why each exists and which standards it reuses. The type records are MailSchema-authored; the only implementation declaration is Nitrosend's first-party test report.
 
 The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review` address redirects to its Registry record.
 
@@ -52,6 +52,7 @@ The contribution page validates and previews new types, amendments and implement
 | ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `registry/types/*.json`            | Base type definitions, contributors and maintainers               | Registry compiler                                                                     |
 | `registry/contributions/*.json`    | Vendor type proposals, amendments and implementation declarations | Registry compiler, history and evidence sections                                      |
+| `registry/snapshots/<digest>.json` | Records edited in place before amendments existed, kept verbatim  | Registry loader and snapshot routes                                                   |
 | `src/data/types.ts`                | Validated projection of the Registry files                        | Types, Registry, detail pages, site search, About and linked type navigation metadata |
 | `docs/specification/*.md`          | Authored protocol and type semantics                              | Sourcey's specification reader and specification indexes                              |
 | `docs/specification/navigation.ts` | Chapter order and grouping                                        | Sourcey navigation and site search                                                    |
@@ -79,9 +80,9 @@ The strategy history is maintained separately from this standalone project. No p
 
 ## Reader theme verification
 
-`npm run test:visual` compares all six Sourcey chapters against the saved current-content reader baseline at desktop and mobile sizes. It targets the production preview at `http://127.0.0.1:49328`; override `READER_BASE_URL` to use another origin. Results and diff images are written to ignored `test-results/reader-comparison/`. Earlier language-pass and pre-Tools references are retained separately; see `tests/visual-reference/README.md` for provenance.
+`npm run test:visual` compares six Sourcey chapters against the saved current-content reader baseline at desktop and mobile sizes. It targets the production preview at `http://127.0.0.1:49328`; override `READER_BASE_URL` to use another origin. Results and diff images are written to ignored `test-results/reader-comparison/`. Earlier language-pass and pre-Tools references are retained separately; see `tests/visual-reference/README.md` for provenance.
 
-The specification reader uses the exact public `sourcey@3.6.8` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
+The specification reader uses the exact public `sourcey@3.6.10` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
 
 ## Published packages
 
@@ -93,7 +94,7 @@ The Tools page reads each advertised channel from `docs/releases/current.json`. 
 
 Publishing to a registry does not change the website. After an artifact is published, independent readback records its evidence under `docs/releases/`; promotion updates `current.json`; the normal verified site deployment then publishes the new installation command. This two-phase release prevents a partial or compromised registry publication from silently becoming the recommended version. Package versions may move independently, while the shared schema digest identifies the contribution format they implement. Package versions and MAP specification versions are also independent.
 
-Run `npm run packages:promote -- --registry npm --version <version>` to verify a public artifact without changing the repository. Add `--promote` to write its immutable evidence and update the selected package set. npm, PyPI, crates.io and Go are supported. The reusable `Verify and promote a package` workflow can be dispatched manually or called by a publishing workflow. It performs public readback, runs the package and site verification suites and opens a pull request. Merging the promotion runs verification on `main` and deploys the exact verified build to Cloudflare. The site never reads a registry's mutable latest value at build time.
+Run `npm run packages:promote -- --registry npm --version <version>` to verify a public artifact without changing the repository. Add `--promote` to write its immutable evidence and update the selected package set. npm, PyPI, crates.io, Go and RubyGems are supported. The reusable `Verify and promote a package` workflow can be dispatched manually or called by a publishing workflow. It performs public readback, runs the package and site verification suites and opens a pull request. Merging the promotion runs verification on `main` and deploys the exact verified build to Cloudflare. The site never reads a registry's mutable latest value at build time.
 
 The master social cards are generated by `npm run social:generate` from the approved identity and stored under `public/og/`. Astro pages use the MailSchema card; Sourcey specification pages use the MAP card. Versioned filenames allow share-preview caches to be replaced deliberately when the artwork changes.
 

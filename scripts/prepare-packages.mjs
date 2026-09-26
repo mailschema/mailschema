@@ -1,5 +1,5 @@
-import { readFile, writeFile, mkdir, cp, chmod, rm } from 'node:fs/promises';
-import { resolve, dirname } from 'node:path';
+import { readFile, readdir, writeFile, mkdir, cp, chmod, rm } from 'node:fs/promises';
+import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -27,7 +27,7 @@ const artifact = (name) => {
 };
 const schemaBytes = artifact('contribution').bytes;
 const versions = JSON.parse(await read('packages/versions.json'));
-for (const registry of ['npm', 'PyPI', 'crates.io', 'Go'])
+for (const registry of packageRegistries)
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
     throw new Error(`Invalid ${registry} package version.`);
 const license = await read('packages/LICENSE');
@@ -147,14 +147,85 @@ await put(
 for (const item of artifacts.filter((entry) => entry.paths['crates.io']))
   await put(`rust/${item.paths['crates.io']}`, item.bytes);
 
+// Ruby: the gem source, its artifacts at their gem paths, and test fixtures taken
+// from the documents the specification publishes.
+const rubySource = resolve(root, 'packages/ruby');
+await cp(rubySource, resolve(output, 'ruby'), {
+  recursive: true,
+  // Leave local Bundler settings and built gems behind.
+  filter: (path) => !/^(?:\.bundle|pkg)(?:\/|$)|\.gem$/.test(relative(rubySource, path)),
+});
+await put('ruby/LICENSE', license);
+for (const item of artifacts.filter((entry) => entry.paths.RubyGems))
+  await put(`ruby/${item.paths.RubyGems}`, item.bytes);
+await cp(resolve(root, 'public/fixtures/map-0.2'), resolve(output, 'ruby/test/fixtures/map-0.2'), {
+  recursive: true,
+  filter: (path) => !/\/(?:emails|dns\.json)(?:\/|$)/.test(path),
+});
+for (const file of (await readdir(resolve(root, 'public/contracts'))).sort()) {
+  const contract = JSON.parse(await read(`public/contracts/${file}`));
+  if (contract.profile !== 'https://mailschema.org/profiles/map/0.2') continue;
+  const schema = contract.requestSchema.url.split('/').at(-1);
+  await put(`ruby/test/fixtures/contracts/${file}`, await read(`public/contracts/${file}`));
+  await put(`ruby/test/fixtures/schemas/${schema}`, await read(`public/schemas/${schema}`));
+}
+await put('ruby/test/fixtures/profile.json', await read('public/profiles/map/0.2.json'));
+await put('ruby/test/fixtures/numbers.json', json(ecmaScriptNumbers()));
+
+// ECMAScript's own formatting of doubles across the whole range, each carried as its
+// IEEE 754 bits so no parser stands between the value and the expected text.
+function ecmaScriptNumbers() {
+  let state = 0x2545f4914f6cdd1dn;
+  const next = () => {
+    state ^= (state << 13n) & 0xffffffffffffffffn;
+    state ^= state >> 7n;
+    state ^= (state << 17n) & 0xffffffffffffffffn;
+    return state;
+  };
+  const view = new DataView(new ArrayBuffer(8));
+  const bitsOf = (value) => {
+    view.setFloat64(0, value);
+    return view.getBigUint64(0).toString(16).padStart(16, '0');
+  };
+  const values = [
+    0,
+    -0,
+    0.1,
+    0.2,
+    0.1 + 0.2,
+    1e21,
+    1e21 - 65536,
+    1e-6,
+    1e-7,
+    9.999999999999999e-7,
+    5e-324,
+    Number.MAX_VALUE,
+    2.2250738585072014e-308,
+    2 ** 53,
+    -(2 ** 53),
+    123456789012345680000,
+  ];
+  for (let index = 0; index < 8000; index += 1) {
+    view.setBigUint64(0, next());
+    const value = view.getFloat64(0);
+    if (Number.isFinite(value)) values.push(value);
+  }
+  for (let index = 0; index < 3000; index += 1)
+    values.push(Number(next() % 1000000000n) / 10 ** Number(next() % 13n));
+  for (let index = 0; index < 1000; index += 1) values.push(Number(BigInt.asIntN(54, next())));
+  return values.map((value) => [bitsOf(value), JSON.stringify(value)]);
+}
+
 // Check each source distribution against its own declared release version.
 const python = await read('packages/python/pyproject.toml');
 const pythonModule = await read('packages/python/src/mailschema/__init__.py');
 const rust = await read('packages/rust/Cargo.toml');
+const ruby = await read('packages/ruby/lib/mailschema/version.rb');
 if (
   !python.includes(`version = "${versions.PyPI}"`) ||
   !pythonModule.includes(`__version__ = "${versions.PyPI}"`) ||
-  !rust.includes(`version = "${versions['crates.io']}"`)
+  !rust.includes(`version = "${versions['crates.io']}"`) ||
+  !ruby.includes(`VERSION = "${versions.RubyGems}"`)
 )
   throw new Error('A source distribution disagrees with packages/versions.json.');
 
@@ -178,5 +249,5 @@ await put(
   }),
 );
 console.log(
-  `Prepared MailSchema packages from the canonical contracts: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}, Go ${versions.Go}.`,
+  `Prepared MailSchema packages from the canonical contracts: npm ${versions.npm}, PyPI ${versions.PyPI}, crates.io ${versions['crates.io']}, Go ${versions.Go}, RubyGems ${versions.RubyGems}.`,
 );

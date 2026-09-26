@@ -2,13 +2,13 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import manifestValue from '../../packages/artifacts.json' with { type: 'json' };
 
-export const packageRegistries = ['npm', 'PyPI', 'crates.io', 'Go'] as const;
+export const packageRegistries = ['npm', 'PyPI', 'crates.io', 'Go', 'RubyGems'] as const;
 export type PackageRegistry = (typeof packageRegistries)[number];
 
 export interface PackageArtifact {
   name: string;
   role: 'core' | 'compatibility';
-  kind: 'schema' | 'contract';
+  kind: 'schema' | 'contract' | 'context';
   source: string;
   paths: Partial<Record<PackageRegistry, string>>;
 }
@@ -33,7 +33,7 @@ function validateManifest(value: unknown): PackageArtifactManifest {
       typeof artifact.name !== 'string' ||
       !/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/.test(artifact.name) ||
       !['core', 'compatibility'].includes(artifact.role) ||
-      !['schema', 'contract'].includes(artifact.kind) ||
+      !['schema', 'contract', 'context'].includes(artifact.kind) ||
       typeof artifact.source !== 'string' ||
       !artifact.paths ||
       typeof artifact.paths !== 'object'
@@ -43,13 +43,15 @@ function validateManifest(value: unknown): PackageArtifactManifest {
     names.add(artifact.name);
     if (
       artifact.source !== 'derived:contribution#/$defs/record' &&
-      !/^public\/(?:schemas|contracts)\/[a-z0-9.-]+\.json$/.test(artifact.source)
+      !/^public\/(?:(?:schemas|contracts)\/[a-z0-9.-]+\.json|contexts\/[a-z0-9.-]+\.jsonld)$/.test(
+        artifact.source,
+      )
     )
       throw new Error(`Unsafe package artifact source ${artifact.source}.`);
     for (const [registry, path] of Object.entries(artifact.paths)) {
       if (!packageRegistries.includes(registry as PackageRegistry) || !path)
         throw new Error(`Invalid package artifact registry ${registry}.`);
-      if (path.startsWith('/') || path.split('/').includes('..') || !path.endsWith('.json'))
+      if (path.startsWith('/') || path.split('/').includes('..') || !/\.json(?:ld)?$/.test(path))
         throw new Error(`Unsafe package artifact path ${path}.`);
       if (paths.get(registry as PackageRegistry)!.has(path))
         throw new Error(`Duplicate ${registry} package artifact path ${path}.`);

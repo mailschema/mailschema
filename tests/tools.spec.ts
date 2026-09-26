@@ -10,7 +10,7 @@ import {
   type PackageSetSelection,
 } from '../src/lib/package-release';
 import { packageArtifactNames, packageContractBytes } from '../src/lib/package-artifacts';
-import { tooling, localCheckCommands, recordCheckCommands } from '../src/data/tooling';
+import { tooling, localCheckCommands, recordCheckCommands, rubyTool } from '../src/data/tooling';
 import { typeRecords } from '../src/data/types';
 import { assertTypeRecord } from '../src/registry/validation';
 
@@ -24,10 +24,35 @@ const releases = new Map<string, PackageRelease>(
 const selected = assertPackageSet(current as PackageSetSelection, releases, contracts);
 const npmRelease = selected.get('npm')!;
 
+test('the Tools page offers exactly the selected releases, with Ruby once RubyGems is selected', () => {
+  expect(tooling.map((tool) => tool.registry).sort()).toEqual(
+    current.channels.map((channel) => channel.registry).sort(),
+  );
+  // Each tab's MAP version is the core schema its release evidence binds.
+  expect(tooling.map((tool) => tool.map)).toEqual(tooling.map(() => '0.1'));
+  const ruby = rubyTool(
+    {
+      registry: 'RubyGems',
+      name: 'mailschema',
+      version: '0.2.0',
+      url: 'https://rubygems.org/gems/mailschema/versions/0.2.0',
+      status: 'verified',
+    },
+    '0.2',
+  );
+  expect([ruby.id, ruby.map, ruby.install]).toEqual([
+    'ruby',
+    '0.2',
+    'gem install mailschema -v 0.2.0',
+  ]);
+});
+
 test('advertised tooling refuses schema drift and unverified or mixed releases', () => {
   for (const release of releases.values())
     expect(() => assertPackageRelease(release, contracts)).not.toThrow();
-  expect(assertPackageSet(current as PackageSetSelection, releases, contracts).size).toBe(4);
+  expect([...assertPackageSet(current as PackageSetSelection, releases, contracts).keys()]).toEqual(
+    current.channels.map((channel) => channel.registry),
+  );
   expect(() =>
     assertPackageRelease(releases.get(current.channels[0].evidence)!, {
       ...contracts,
@@ -118,6 +143,22 @@ test('language tabs restore deep links and support keyboard navigation and exact
   await expect.poll(() => page.evaluate(() => (window as any).copiedCode)).toBe(tooling[0].example);
   await page.reload();
   await expect(page.locator('#javascript')).toBeVisible();
+});
+
+test('the tab strip never widens a small screen, whatever the number of releases', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  await page.goto('/tools');
+  // A promotion adds a tab; the Ruby tab is the longest that can join the four.
+  await page.evaluate(() => {
+    const tabs = document.querySelector('[data-tool-tabs]')!;
+    const tab = tabs.lastElementChild!.cloneNode(true) as HTMLElement;
+    tab.querySelector('span')!.textContent = 'Ruby';
+    tab.querySelector('small')!.textContent = 'RubyGems';
+    tabs.append(tab);
+  });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test('clipboard failure leaves selectable code with feedback', async ({ page }) => {

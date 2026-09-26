@@ -28,11 +28,12 @@ Contributor names and website links are supplied attribution. They do not establ
 
 - `registry/types/*.json`: base definitions, including the initial MailSchema collection.
 - `registry/contributions/*.json`: submitted changes included in the checked-out branch.
+- `registry/snapshots/<digest>.json`: earlier records that were edited in place before amendments existed, kept exactly as published and named by their record digests, so the snapshots they published still resolve. Some predate the current record format, so they are served but never compiled or bound by an implementation declaration.
 - `public/schemas/contribution.schema.json`: the contribution and record contract, using [JSON Schema 2020-12](https://json-schema.org/draft/2020-12).
 - `src/registry/`: shared schema/reference validation, deterministic projection, digests and generated examples.
 - `src/data/types.ts`: the single consumer-facing projection used by page templates and search.
 
-The submission format is Registry metadata. MAP's message and execution representation are defined separately by the MAP 0.1 profile. Record digests identify the sorted-key JSON representation used by this repository; clients can read the published digest rather than implementing a new signing or identity protocol.
+The submission format is Registry metadata. MAP's message and execution representation are defined separately by the MAP 0.2 profile and each type's contract. Record digests identify the sorted-key JSON representation used by this repository; clients can read the published digest rather than implementing a new signing or identity protocol.
 
 Validation is shared between the website and CLI. Full repository validation additionally resolves amendment dependencies and checks conflicts across submissions. Checks cover required content, known statuses, identifiers, duplicate types and operations, HTTPS references, supported operations, matching profiles and exact version/digest bindings. JSON files are bounded to 256 KiB. Submitted text is rendered as text, and no submitted scripts or reproduction commands are executed.
 
@@ -67,10 +68,10 @@ Registry publication is independent of language-package publication. Adding a ty
 
 ## Consumer exports
 
-- `/registry/catalog.json`: current records, snapshots, implementation declarations and every executable contract version with exact digests.
+- `/registry/catalog.json`: current records, the snapshots an implementation declaration can bind, implementation declarations and every executable contract version with exact digests.
 - `/registry/records/<type>.json`: a current record and digest.
 - `/registry/records/<type>.record.json`: the raw current record, without an envelope, for validation and downloads.
-- `/registry/snapshots/<digest>.json`: the exact historical record referenced by a declaration.
+- `/registry/snapshots/<digest>.json`: the exact record behind every digest the Registry has published, including the archived records, which the catalogue does not list.
 - `/registry/contributions/<id>.json`: a submitted contribution retained with its history.
 
 All exports are generated from the same validated files as the HTML. There is no additional database to synchronise. Registry presence grants no authority to execute an email action.

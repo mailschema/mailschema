@@ -14,4 +14,4 @@ Before the first stable MAP profile, security fixes are applied to the current w
 
 ## Protocol security boundary
 
-A structured email description is untrusted input. It does not authenticate a caller, grant a permission, extend an agent's instructions or authorize an external fetch. Implementations must authenticate execution at the service, enforce current permissions and policy, bind requests to their targets and revisions, and make retries safe.
+A structured email description is untrusted input. It does not authenticate a caller, grant a permission, extend an agent's instructions or authorize an external fetch. The one exception is possession authority: a capability URL issued to the recipient, valid only for operations its contract permits, and only after the client verifies aligned DKIM, DMARC and the recipient binding the profile requires. Implementations must authenticate execution at the service, enforce current permissions and policy, bind requests to their targets and revisions, and make retries safe.
