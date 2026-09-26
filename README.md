@@ -19,7 +19,7 @@ Open http://127.0.0.1:4325. Astro 7 may start the development server in the back
 npm run verify
 ```
 
-`verify` runs type checking, the production build and all browser/content consistency tests. Browser tests serve the production build on a dedicated loopback port, 49327. They require Playwright Chromium (`npx playwright install chromium` if absent). When run separately, `npm test` assumes `npm run build` has completed.
+`verify` validates the Registry, the MAP 0.2 profile, fixtures and conformance manifest, runs the conformance suite, type-checks, builds the site, and runs the Registry, release-evidence and worker tests with Vitest.
 
 ## Site structure
 
@@ -77,10 +77,6 @@ Contribute data files rather than editing application TypeScript. `npm run regis
 - `docs/screenshots/`: browser captures of the built site.
 
 The strategy history is maintained separately from this standalone project. No portfolio application was modified to host the site.
-
-## Reader theme verification
-
-`npm run test:visual` compares six Sourcey chapters against the saved current-content reader baseline at desktop and mobile sizes. It targets the production preview at `http://127.0.0.1:49328`; override `READER_BASE_URL` to use another origin. Results and diff images are written to ignored `test-results/reader-comparison/`. Earlier language-pass and pre-Tools references are retained separately; see `tests/visual-reference/README.md` for provenance.
 
 The specification reader uses the exact public `sourcey@3.6.10` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
 

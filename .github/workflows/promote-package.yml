@@ -64,7 +64,6 @@ jobs:
           working-directory: .release/packages/ruby
       - run: bundle exec rake
         working-directory: .release/packages/ruby
-      - run: npx playwright install --with-deps chromium
       - run: npm run verify
       - name: Open promotion pull request
         env:
