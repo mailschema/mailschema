@@ -28,8 +28,13 @@ test('the Tools page offers exactly the selected releases, with Ruby once RubyGe
   expect(tooling.map((tool) => tool.registry).sort()).toEqual(
     current.channels.map((channel) => channel.registry).sort(),
   );
-  // Each tab's MAP version is the core schema its release evidence binds.
-  expect(tooling.map((tool) => tool.map)).toEqual(tooling.map(() => '0.1'));
+  // Each tab's MAP version is the core schema its release evidence binds: the gem
+  // ships MAP 0.2, and the other selected releases still ship MAP 0.1.
+  for (const tool of tooling)
+    expect([tool.registry, tool.map]).toEqual([
+      tool.registry,
+      tool.registry === 'RubyGems' ? '0.2' : '0.1',
+    ]);
   const ruby = rubyTool(
     {
       registry: 'RubyGems',
