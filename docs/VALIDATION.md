@@ -6,7 +6,7 @@
 
 - Registry validation passed with ten types on MAP 0.2, one implementation declaration, Nitrosend's first-party Content Review test report made against the MAP 0.1 snapshot, and 22 served snapshots, among them the seven records edited in place before amendments existed, so every record digest ever published resolves.
 - MAP 0.2 profile validation passed for ten type contracts, every published fixture document and a profile record bound to its schema, context and contract format.
-- The conformance manifest verified 134 digest-bound artifacts, 99 executable cases and mappings for 38 normative requirements.
+- The conformance manifest verified 134 digest-bound artifacts, 100 executable cases and mappings for 39 normative requirements.
 - The suite covers every operation of every type, description binding and forged descriptions, credential and possession authority, the DKIM-signed message kit, decisions and the approval lifecycle, recovery and retention, the HTTP binding, and the shared RFC 8785, I-JSON, lexical and media type vectors.
 - The Ruby package passed the same shared vectors and every published JSON fixture document, with its locked dependencies and at the floor of json 2.21 and json_schemer 2.5.0.
 

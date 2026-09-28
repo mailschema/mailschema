@@ -8,8 +8,6 @@ MAP 0.2 is a type-agnostic core. An email carries a description of an interactio
 
 The key words **MUST**, **MUST NOT**, **SHOULD** and **MAY** are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) when they appear in capitals.
 
-MAP 0.1 is withdrawn. Its artifacts remain published unchanged at their addresses, and its text is kept in the repository history.
-
 ## Published artifacts
 
 | Artifact           | Address                                                                                              |
@@ -30,9 +28,9 @@ A description represents part of a message, as a [Structured Email](https://data
 
 A client MUST consider only parts outside any attached message. It processes the one designated part whose `profile` parameter lists the profile it implements, ignores every other structured part, and refuses the message when more than one part carries that label or the part is not in a `multipart/related` entity with readable content. A description inside an attached message is never processed.
 
-Every MAP document is [I-JSON](https://www.rfc-editor.org/rfc/rfc7493): valid UTF-8 with no byte order mark, no duplicate member names, no lone surrogates or noncharacters (U+FDD0 to U+FDEF, and the last two code points of every plane), and every number, read as the nearest IEEE 754 double, within ±(2^53−1). No string or member name contains U+0000 either, which many stores refuse or truncate, and which a document bound by its digest cannot lose. Every MAP document is at most 64 KiB, and its arrays and objects nest at most 32 deep, the outermost counting as one. The [shared I-JSON vectors](/fixtures/map-0.2/ijson-vectors.json) pin each boundary.
+Every MAP document is [I-JSON](https://www.rfc-editor.org/rfc/rfc7493): valid UTF-8 with no byte order mark, no duplicate member names, no lone surrogates or noncharacters (U+FDD0 to U+FDEF, and the last two code points of every plane), and every number, read as the nearest IEEE 754 double, within ±(2^53−1). No string or member name contains U+0000. Every MAP document is at most 64 KiB, and its arrays and objects nest at most 32 deep, the outermost counting as one. The [shared I-JSON vectors](/fixtures/map-0.2/ijson-vectors.json) pin each boundary.
 
-Lexical forms are the core schema's patterns: date-times, dates, URIs, HTTPS URLs and origins, the result template and email addresses. A date-time has an uppercase `T` and `Z`, at most millisecond precision, a colon in any offset and no leap second. MAP schemas never rely on `format`, and a validator MUST NOT assert it, since format checkers differ between implementations. Every pattern in a MAP schema is printable ASCII in a subset that ECMA-262 with the `u` flag and other regular expression engines read alike, with any other code point written as `\uXXXX`. Its only escapes are an escaped syntax character, `\t`, `\n`, `\f`, `\r` and `\uXXXX` outside the surrogates, and within a class `\-`. It has literal and escaped characters, non-empty character classes with a hyphen only in a range or at either end, `(?:` groups, alternation, `^` and `$`, and one `*`, `+`, `?`, `{n}`, `{n,}` or `{n,m}` after an atom, with bounds of at most four digits and `n` no greater than `m`. It has no class escape such as `\s`, `\d` or `\w`, no unescaped dot, no bracket or `&&` inside a class, and no quantifier on a quantifier. `^` and `$` anchor the start and end of the whole value, as in ECMA-262; an engine whose `$` also matches before a final newline, or whose anchors match at line breaks, as Python's and Ruby's do, MUST read them as absolute anchors. Every `multipleOf` is an integer, since validators round fractional divisors differently. The [shared lexical vectors](/fixtures/map-0.2/lexical-vectors.json) pin each form.
+Lexical forms are the core schema's patterns: date-times, dates, URIs, HTTPS URLs and origins, the result template and email addresses. A date-time has an uppercase `T` and `Z`, at most millisecond precision, a colon in any offset and no leap second. MAP schemas never rely on `format`, and a validator MUST NOT assert it. Every pattern is written in a [portable subset](/specification/type-contracts#portable-patterns) that regular expression engines read alike. `^` and `$` anchor the start and end of the whole value, as in ECMA-262; an engine whose `$` also matches before a final newline, or whose anchors match at line breaks, as Python's and Ruby's do, MUST read them as absolute anchors. The [shared lexical vectors](/fixtures/map-0.2/lexical-vectors.json) pin each form.
 
 JSON-LD expansion is optional. When it is used, the bundled context maps `MailAction` to `https://mailschema.org/ns/map#MailAction` and `details` to a JSON literal, so expansion never depends on the message's base IRI. Extraction and validation MUST NOT execute an operation or grant authority.
 
@@ -50,7 +48,7 @@ JSON-LD expansion is optional. When it is used, the bundled context maps `MailAc
 | `service.humanUrl`         | A normal service page where a person can complete the interaction.                                                                                                                                                                                                                                       |
 | `recipient`                | Required with possession authority and absent with credential authority. It is the address the capability was issued to.                                                                                                                                                                                 |
 | `target`                   | `id`, `revision`, optional `title`, and `digest`. The revision and digest cover only terms the service controls, never responses to the interaction.                                                                                                                                                     |
-| `details`                  | Present exactly when the contract defines `detailsSchema`, and valid against it. Numbers are integers, and member names are ASCII identifiers at every depth (see [Type contracts](#type-contracts)).                                                                                                    |
+| `details`                  | Present exactly when the contract defines `detailsSchema`, and valid against it. Numbers are integers, and member names are ASCII identifiers at every depth (see [contract rules](/specification/type-contracts#contract-rules)).                                                                       |
 | `operations`               | `id`, `name` and `description` for each offered operation of the contract, each at most once.                                                                                                                                                                                                            |
 
 A `GET` on `service.humanUrl`, or on a result's `approvalUrl`, is side-effect free, since link scanners follow links in mail. Anything a person changes there takes their deliberate action, protected from cross-site requests.
@@ -195,8 +193,6 @@ A claimed `requestId` identifies one complete request value within the service's
 
 A client SHOULD make request identifiers unpredictable, as random UUIDv4 and UUIDv7 values are, since another principal in the tenant who predicts one could claim it first.
 
-`requestId` travels in the body rather than in an Idempotency-Key header, because it also names the result resource, including behind a capability.
-
 The result URL is the result template with `{requestId}` replaced by the request identifier, each `:` written as `%3A`. The service returns it in a `Location` header. A URL whose place for the identifier holds anything but a request identifier is not a result resource, and the service answers it with a plain 404, whatever credential comes with it; a request target that is not well-formed, such as one whose percent-encoding is not UTF-8, may instead get HTTP's own 400. A side-effect-free `GET` there by the principal that made the request returns the latest recorded result or problem, after rechecking current permission. After a timeout, a client SHOULD read the result before any retry.
 
 Results remain retrievable until the later of the interaction's expiry and the retention interval, measured from the latest recorded state. After that the service keeps enough to refuse the old request as `expired-interaction`.
@@ -246,16 +242,9 @@ A contract binds a type's meaning to exact bytes. Its canonical digest is the RF
 | `operations[].fieldBindings` | Inputs that must answer a form fields block in the details.                                        |
 | `operations[].results`       | Each permitted state with its output schema, and for `failed` its reasons.                         |
 
-Each operation declares exactly one success state, `accepted` or `completed`. Only `failed` carries reasons, and always at least one. An operation that declares `approval-required` never permits possession, and only such an operation uses the reserved reasons `declined`, `stale-target` and `expired`. A decision among them also declares `superseded`, and only such a decision uses it. An operation that declares `pending` declares how it fails. Each field binding names a form fields block in the details and a field values input. The request schema extends the core request, binds the type identifier and version, and has one branch for each operation of the contract and no other. Details member names are ASCII identifiers: a letter, then at most 63 letters, digits or underscores. The Registry refuses a contract that breaks these rules or refers to a schema it has not pinned. It compiles every schema strictly:
+Every contract meets the [contract rules](/specification/type-contracts#contract-rules), which the Registry checks before it publishes one.
 
-- every keyword belongs to a JSON Schema 2020-12 vocabulary, so earlier or vendor keywords such as `additionalItems`, `dependencies`, `definitions` and `nullable` are refused. The one annotation beyond them, `autocomplete`, belongs to the form fields block and never to a contract's own schemas;
-- `type` names one type, never a list;
-- a keyword that constrains one JSON type has that `type` declared in the same schema, or in an enclosing one that applies to the same value through `allOf`, `anyOf`, `oneOf`, `not`, `if`, `then`, `else` or `dependentSchemas`; the `type` of a referenced schema does not count;
-- no keyword is left without effect: `if` has `then` or `else`, `then` and `else` have `if`, and `minContains` and `maxContains` have `contains`;
-- `prefixItems` with n schemas sets `minItems` to n, and `items` to `false` or `maxItems` to n;
-- every `$ref` is a pinned URL with an empty fragment or a plain JSON Pointer to a schema, never a relative reference, an anchor or a dynamic reference, and no schema declares `$anchor`, `$dynamicAnchor`, a nested `$id` or a nested `$schema`; the request schema declares JSON Schema 2020-12.
-
-Shared blocks, such as [form fields](/schemas/forms-0.1.schema.json), are never edited in place; a changed block is a new file.
+A client acts only on a contract it trusts: one it bundles, or one it obtains from a Registry catalogue it has configured, such as [MailSchema's](/registry/catalog.json). Types added to the Registry are usable this way without a client release. The client looks the type up by its URI, version and contract digest, fetches the contract, its request schema and every schema the contract pins, and verifies each canonical digest before use. It MUST NOT fetch a contract, schema or catalogue from a location a message names, since the Registry's review is what makes a contract's consequences trustworthy.
 
 ## Service configuration
 
@@ -276,7 +265,7 @@ A client:
 
 1. finds the one designated part labelled with the profile, outside any attached message and in a `multipart/related` entity with readable content, and parses it as I-JSON within the limits;
 2. validates it against the core schema and matches the profile exactly;
-3. selects its bundled contract and compares `contractDigest`;
+3. selects the contract the type names, from its bundle or its configured catalogue, and compares `contractDigest`;
 4. validates the details, and checks any target digest the type binds to a part of the message;
 5. checks each offered operation against the contract and the authority mode;
 6. checks expiry and establishes trust for the mode;

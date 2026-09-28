@@ -19,7 +19,7 @@ MAP 0.2 is a working draft. It is a type-agnostic core:
 - execution over HTTPS with credential or possession authority;
 - recoverable results.
 
-Types are defined by digest-bound contracts, and adding one never changes the core. The [MAP 0.2 profile](/specification/profile) defines the fields and processing rules. MAP 0.1 is withdrawn, and its artifacts remain published unchanged. This document is not an IETF specification.
+Types are digest-bound contracts published through the Registry, and adding one never changes the core. The [MAP 0.2 profile](/specification/profile) defines the fields and processing rules, and [Type contracts](/specification/type-contracts) how a type is added. This document is not an IETF specification.
 
 ## Participants
 
@@ -40,17 +40,7 @@ Supporting a type lets a client reuse its interpretation of the interaction. It 
 
 ## Types
 
-Ten types are published as drafts. Each has its own chapter under Types:
-
-- Content Review and Action Approval, which are decisions;
-- Information Request, which collects values;
-- Event Response and Meeting Scheduling, for calendars;
-- Subscription Preferences, for email settings;
-- Task Assignment, for assigned work;
-- Payment Request, for invoices;
-- Email Confirmation and Account Activity, for accounts.
-
-The [Registry](/registry) holds their records, versions and evidence.
+Types are published through the [Registry](/registry), which holds their records, versions, contracts and evidence, and each has its own chapter under Types. A new type needs no change to the core or to clients; [Type contracts](/specification/type-contracts) explains how one is added.
 
 ## Scope
 

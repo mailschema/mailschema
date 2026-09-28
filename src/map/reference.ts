@@ -16,6 +16,7 @@ import {
   type JsonObject,
   type LoadedContract,
   type ResultState,
+  type TypeContract,
 } from './artifacts.ts';
 import { serviceBehaviour, type ServiceBehaviour } from './behaviours.ts';
 
@@ -887,6 +888,53 @@ export class ReferenceMapService {
       },
     };
   }
+}
+
+/** One executable contract as a Registry catalogue lists it. */
+export type CatalogueContract = {
+  id: string;
+  version: string;
+  contract: { url: string; canonicalDigest: string };
+  requestSchema: { url: string; canonicalDigest: string };
+};
+
+/**
+ * Obtain a contract the client has not bundled from a Registry catalogue it has configured.
+ * The catalogue must list the exact type, version and contract digest the description names,
+ * and the contract, its request schema and every schema it pins must match their digests.
+ * Returns the verified documents by URL, for the client's contract store. Nothing is fetched
+ * from a location a message names.
+ */
+export async function obtainContract(
+  catalogue: { contracts: CatalogueContract[] },
+  type: TypeReference,
+  fetchDocument: (url: string) => Promise<unknown>,
+): Promise<Map<string, JsonObject>> {
+  const entry = catalogue.contracts.find(
+    (candidate) =>
+      candidate.id === type.id &&
+      candidate.version === type.version &&
+      candidate.contract.canonicalDigest === type.contractDigest,
+  );
+  if (!entry)
+    throw new Error(`The catalogue does not list ${type.id} ${type.version} with that digest.`);
+  const documents = new Map<string, JsonObject>();
+  const verified = async (url: string, digest: string) => {
+    const value = (await fetchDocument(url)) as JsonObject;
+    if (canonicalDigest(value) !== digest) throw new Error(`${url} does not match its digest.`);
+    documents.set(url, value);
+    return value;
+  };
+  const contract = (await verified(
+    entry.contract.url,
+    entry.contract.canonicalDigest,
+  )) as unknown as TypeContract;
+  if (contract.requestSchema.canonicalDigest !== entry.requestSchema.canonicalDigest)
+    throw new Error('The contract pins another request schema than the catalogue lists.');
+  await verified(contract.requestSchema.url, contract.requestSchema.canonicalDigest);
+  for (const dependency of contract.dependencies ?? [])
+    await verified(dependency.url, dependency.canonicalDigest);
+  return documents;
 }
 
 /** Minimal deterministic client state for redelivery, retries and verification. */

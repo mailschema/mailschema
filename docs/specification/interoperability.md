@@ -45,4 +45,4 @@ Two implementations under common ownership can provide useful compatibility evid
 
 ## Current status
 
-MAP 0.2 publishes a working draft, ten type contracts and a reference suite. Nitrosend has recorded a first-party, provider-delivered Content Review exchange on the withdrawn MAP 0.1. Cross-service interoperability, and an implementation outside the initial common-ownership group, remain separate milestones.
+MAP 0.2 publishes a working draft, a Registry of executable types and a reference suite. Nitrosend runs Content Review 0.3 on MAP 0.2 in production, a first-party implementation. Cross-service interoperability, and an implementation outside the initial common-ownership group, remain separate milestones.

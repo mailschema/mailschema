@@ -4,7 +4,7 @@ description: Request changes or decide approval for a specific revision of conte
 navTitle: Content Review
 ---
 
-Content Review defines two operations on a revision of content: request changes and approve. The service owns the content and controls who can review it. Version 0.3 runs on MAP 0.2. Version 0.2, on the withdrawn MAP 0.1, remains in the Registry with the evidence recorded against it.
+Content Review defines two operations on a revision of content: request changes and approve. The service owns the content and controls who can review it. Version 0.3 runs on MAP 0.2.
 
 The first example is a campaign test email. The same review model applies to a documentation draft or a company listing, provided the service supports the same operations and results.
 

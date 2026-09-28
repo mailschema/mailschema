@@ -315,6 +315,12 @@
       ]
     },
     {
+      "id": "MAP-TYPE-004",
+      "actor": "client",
+      "requirement": "Act only on a bundled contract or one obtained from a configured Registry catalogue, verifying the contract, its request schema and every schema it pins by digest, and never fetch a contract, schema or catalogue from a location a message names.",
+      "cases": ["catalogue-contracts"]
+    },
+    {
       "id": "MAP-STORE-001",
       "actor": "service",
       "requirement": "Make request claiming, effect initiation and recoverable state atomic, or reconcile an interrupted effect without repeating it.",

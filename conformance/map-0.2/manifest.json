@@ -556,7 +556,7 @@
     },
     {
       "path": "src/map/reference.ts",
-      "sha256": "32eece57cb8505a8b08d85c2b0a884bc9f028e770b3b9363a7cc87ff9fbd4f6d"
+      "sha256": "e1bb43983ceb674a6f08cb3411ea139889e3dcc8735cf199c2e30e5af4c92493"
     },
     {
       "path": "src/map/behaviours.ts",
@@ -576,11 +576,11 @@
     },
     {
       "path": "conformance/map-0.2/cases.mjs",
-      "sha256": "ca43c6a5ae7780f07f451b78ff90dfcbc790319872f99f6410441d73324e2484"
+      "sha256": "06812409072ed0b313343ef3d8bb7faebd96c7d857d4ff9e9e0cc4779df7fd92"
     },
     {
       "path": "conformance/map-0.2/requirements.json",
-      "sha256": "89a6eea3a1af42f4b59ac07cb17be0bddd09a5b07972e922b06b7b8711d5b022"
+      "sha256": "6e4262dc37eaa29cecc19981cc083a8071509694dcbd0f8a6c4df2d51adb7883"
     },
     {
       "path": "scripts/map-fixtures.mjs",
@@ -1051,6 +1051,11 @@
       "id": "structured-email-selection",
       "title": "a client processes the one part labelled with its profile, wherever the partial representation sits",
       "expected": "other structured parts ignored; two labelled parts, none, or one outside a partial representation refused"
+    },
+    {
+      "id": "catalogue-contracts",
+      "title": "a client obtains a contract it has not bundled from its configured catalogue, by digest",
+      "expected": "acts once every digest verifies; an unlisted digest or altered bytes are refused"
     },
     {
       "id": "contract-identity",

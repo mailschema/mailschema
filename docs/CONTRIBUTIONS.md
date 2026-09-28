@@ -16,7 +16,7 @@ The selected path uses no submission service. After local validation, the websit
 
 ## What a vendor contributes
 
-1. **New type:** a definition, maintainers, operations, permissions, results, example and related work. The Registry shows its contributors and proposed maturity; Types, search and About update from the same data.
+1. **New type:** a definition, maintainers, operations, permissions, results, example and related work. The Registry shows its contributors and proposed maturity; Types, search and About update from the same data. An executable type also carries its contract and request schema in the same pull request, reviewed as exact bytes against the [contract rules](https://mailschema.org/specification/type-contracts) and published in the catalogue, where clients obtain it by digest.
 2. **Amendment:** a replacement definition bound to the current record digest. The compiler retains the contributor, summary and submission identifier in history. It rejects stale or competing amendments rather than silently choosing one.
 3. **Implementation:** a product's support declaration or test report, bound to a type, version, execution profile, exact record digest and named operations. It appears within that type's record. A declaration against an earlier draft remains labelled against that earlier record.
 
@@ -41,7 +41,7 @@ Validation is shared between the website and CLI. Full repository validation add
 
 Use `/contribute` to load a file or start from an example. The checker validates its format and references against `/registry/catalog.json`, previews attribution and prepares the exact JSON for GitHub. Editing the file invalidates the previous result. An unavailable Registry cannot produce a successful reference check. The contribution remains in the browser until the contributor chooses to continue to GitHub. A checked download remains available for local review or command-line use.
 
-The `/tools` page documents the published JavaScript, Python, Rust and Go packages with pinned installation commands and executable examples. JavaScript and Python validate MAP and Registry documents locally; the JavaScript API can also check references against a supplied catalogue. Rust provides canonical schemas for an existing validator. Go provides typed MAP documents, strict decoding and core validation. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the CLI validators' `--record` option.
+The `/tools` page documents the MAP 0.2 packages with pinned installation commands and examples, and the command-line validators that check Registry records; the JavaScript API can also check references against a supplied catalogue. Local validation does not submit a contribution or replace review. Each Registry type page also offers a raw record download accepted by the validators' `--record` option.
 
 In a checkout:
 
@@ -58,7 +58,7 @@ Generated examples use illustrative vendor names. They are preparation and test 
 
 ## Review and publication
 
-A contribution file is proposed in a pull request. Contributors can start that pull request from the checked browser handoff or add the same file from a local checkout. The GitHub workflow runs `npm run verify` and saves the built static site as a review artifact. It uses a read-only repository token and does not deploy. Protected `main` requires the verification check before merge.
+A contribution file is proposed in a pull request. Contributors can start that pull request from the checked browser handoff or add the same file from a local checkout. The GitHub workflow runs `npm run verify` with a read-only repository token and does not deploy. Protected `main` requires the verification check before merge.
 
 Review checks the interaction's scope, existing standards, contributor and maintainer attribution, requested maturity, exact changes and evidence claims. Schema validation is not editorial acceptance. A requested Draft status requires a version and maintained specification link; the cross-page tests check that the linked definition exists and agrees with the record's shared metadata and operation headings.
 

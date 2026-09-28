@@ -23,6 +23,7 @@ import {
   describeProblems,
   isJsonRequest,
   mapArtifacts,
+  obtainContract,
   serveHttp,
   trustedServicesFromMetadata,
 } from '../../src/map/reference.ts';
@@ -62,14 +63,18 @@ const service = (description = reviewDescription(), options = {}) =>
 const caseOf = (id, title, expected, run) => ({ id, title, expected, run });
 const orgDomainOf = (host) => host.split('.').slice(-2).join('.');
 
-/** Load the published artifacts with some files replaced, from a copy removed afterwards. */
+/**
+ * Load the published artifacts with some files replaced, or removed where the value is null,
+ * from a copy removed afterwards. The callback also receives the copy's root.
+ */
 async function withArtifacts(files, use) {
   const root = await mkdtemp(join(tmpdir(), 'map-contract-'));
   try {
     await cp(new URL('../../public', import.meta.url), join(root, 'public'), { recursive: true });
     for (const [path, value] of Object.entries(files))
-      await writeFile(join(root, 'public', path), JSON.stringify(value));
-    return await use(() => new MapArtifacts(root));
+      if (value === null) await rm(join(root, 'public', path));
+      else await writeFile(join(root, 'public', path), JSON.stringify(value));
+    return await use(() => new MapArtifacts(root), root);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -2045,6 +2050,65 @@ const representation = [
       await assert.rejects(
         read(related.replace(/multipart\/related(?=; boundary="map-related")/, 'multipart/mixed')),
         /not in a multipart\/related entity/,
+      );
+    },
+  ),
+  caseOf(
+    'catalogue-contracts',
+    'a client obtains a contract it has not bundled from its configured catalogue, by digest',
+    'acts once every digest verifies; an unlisted digest or altered bytes are refused',
+    async () => {
+      // The catalogue as /registry/catalog.json lists each executable contract.
+      const catalogue = {
+        contracts: artifacts.contracts.map(({ contract, contractDigest }) => ({
+          id: contract.id,
+          version: contract.version,
+          contract: {
+            url: `https://mailschema.org/contracts/${contract.id.split('/').at(-1)}-${contract.version}.json`,
+            canonicalDigest: contractDigest,
+          },
+          requestSchema: contract.requestSchema,
+        })),
+      };
+      const published = (url) =>
+        readFile(new URL(`../../public${new URL(url).pathname}`, import.meta.url), 'utf8').then(
+          JSON.parse,
+        );
+      const description = reviewDescription();
+      await withArtifacts(
+        {
+          'contracts/content-review-0.3.json': null,
+          'schemas/content-review-0.3.schema.json': null,
+        },
+        async (load, root) => {
+          assert.throws(() =>
+            new ReferenceMapClient(() => uuid(1), load()).verify(description, clock()),
+          );
+          const obtained = await obtainContract(catalogue, description.type, published);
+          for (const [url, document] of obtained) {
+            const { pathname } = new URL(url);
+            await writeFile(join(root, 'public', pathname), JSON.stringify(document));
+          }
+          assert.doesNotThrow(() =>
+            new ReferenceMapClient(() => uuid(1), load()).verify(description, clock()),
+          );
+          await assert.rejects(
+            obtainContract(
+              catalogue,
+              { ...description.type, contractDigest: `sha-256:${'0'.repeat(64)}` },
+              published,
+            ),
+            /does not list/,
+          );
+          const altered = async (url) => {
+            const document = await published(url);
+            return url.includes('/contracts/') ? { ...document, target: 'Anything.' } : document;
+          };
+          await assert.rejects(
+            obtainContract(catalogue, description.type, altered),
+            /does not match its digest/,
+          );
+        },
       );
     },
   ),

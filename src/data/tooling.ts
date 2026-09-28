@@ -294,6 +294,9 @@ func main() {
   ...(rubyRelease ? [rubyTool(rubyRelease, mapVersion('RubyGems'))] : []),
 ];
 
+/** The tooling on the current profile; packages on a withdrawn one carry only Registry tooling. */
+export const currentTooling = tooling.filter((tool) => !tool.withdrawn);
+
 export const localCheckCommands = {
   javascript: `npx mailschema@${npmRelease.version} check contribution.json`,
   python: 'python -m mailschema check contribution.json',

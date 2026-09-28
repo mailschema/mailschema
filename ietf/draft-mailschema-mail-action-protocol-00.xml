@@ -209,8 +209,9 @@
         labels, each offered at most once.</dd>
       </dl>
       <t>Before acting, a client <bcp14>MUST</bcp14> validate the description
-      against the core schema, match its profile, select the bundled contract
-      its type names and compare the contract digest, validate the details
+      against the core schema, match its profile, select the contract its
+      type names, bundled or obtained from its configured catalogue
+      (<xref target="types"/>), and compare the contract digest, validate the details
       against that contract, check that each offered operation permits the
       authority mode, and refuse a description whose expiry has passed. It
       prepares one request for each instruction of its principal, validates
@@ -572,23 +573,18 @@
       Implementations do not guess compatibility. Adding a type does not change
       this protocol.</t>
       <t>A Registry record adds discovery metadata, maintainers, examples,
-      evidence and history without changing the wire contract. Registry lookup
-      is not required during an interaction.</t>
-      <t>Ten types are published with MAP 0.2:</t>
-      <ul>
-        <li>Content Review;</li>
-        <li>Action Approval, whose terms follow the authorization details of
-        <xref target="RFC9396"/>;</li>
-        <li>Information Request;</li>
-        <li>Event Response, a binding of iTIP replies;</li>
-        <li>Meeting Scheduling;</li>
-        <li>Subscription Preferences, which leaves unsubscribing to
-        <xref target="RFC8058"/>;</li>
-        <li>Task Assignment;</li>
-        <li>Payment Request;</li>
-        <li>Email Confirmation;</li>
-        <li>Account Activity.</li>
-      </ul>
+      evidence and history without changing the wire contract. The Registry
+      publishes a catalogue of every executable contract with its canonical
+      digest and its request schema's digest, and types are added to it
+      without changing this document.</t>
+      <t>A client acts only on a contract it trusts: one it bundles, or one it
+      obtains from a Registry catalogue it has configured. It looks the type up
+      by its URI, version and contract digest, fetches the contract, its
+      request schema and every schema the contract pins, and verifies each
+      canonical digest before use. It <bcp14>MUST NOT</bcp14> fetch a contract,
+      schema or catalogue from a location a message names, since the
+      Registry's review is what makes a contract's consequences
+      trustworthy.</t>
     </section>
 
     <section anchor="security" numbered="true">
@@ -654,15 +650,14 @@
       publication as an RFC.</t>
       <t>The MailSchema repository at
       <eref target="https://github.com/mailschema/mailschema"/> publishes MAP
-      0.2's digest-bound schemas and ten type contracts. It also publishes a
+      0.2's digest-bound schemas and a Registry of type contracts. It also publishes a
       contract-driven reference service and client, and a conformance suite of
-      99 cases mapped to 38 requirements. The suite includes DKIM-signed
+      100 cases mapped to 39 requirements. The suite includes DKIM-signed
       genuine and forged messages and shared RFC 8785, I-JSON, lexical and
       media type vectors, which a Ruby implementation also passes.</t>
-      <t>Nitrosend completed a provider-delivered Content Review exchange on
-      MAP 0.1, the withdrawn predecessor of this document. No independent
-      implementation is claimed, and MailSchema and Nitrosend share
-      ownership.</t>
+      <t>Nitrosend's production API implements Content Review 0.3 on this
+      profile. No independent implementation is claimed, and MailSchema and
+      Nitrosend share ownership.</t>
     </section>
   </middle>
 
@@ -703,7 +698,6 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8601.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8693.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9396.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9421.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-httpapi-idempotency-key-header.xml"/>
     </references>
