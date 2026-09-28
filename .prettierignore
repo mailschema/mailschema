@@ -4,7 +4,7 @@ dist/
 .astro/
 brand/
 package-lock.json
-docs/screenshots/
+docs/history/
 public/fixtures/map-0.2/
 conformance/map-0.2/keys/
 # Released MAP 0.1-era artifacts stay byte-identical to what was published.

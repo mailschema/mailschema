@@ -33,13 +33,13 @@ The request carries a client-generated identifier. The service records the first
 
 The service reports the state of the requested operation and the target as it holds it. The result distinguishes recorded work from completed work. It also reports a failure with its reason, a pending approval with its link, and each refusal the core defines. A result resource returns the latest state after an interrupted exchange.
 
-Some operations are decisions: the first that completes decides the interaction. Others, such as feedback or a calendar reply, can repeat.
+Some operations are decisions, and the first to succeed decides the interaction. Others, such as feedback or a calendar reply, can repeat. The profile gives the [exact rules](/specification/profile#decisions-and-repeatable-operations).
 
 ## Human participation
 
 The readable email and the structured description refer to the same operation and target. People can use the human route without a compatible agent. When a client asks its principal to decide, it shows the bound details rather than the readable text.
 
-A client that meets an unknown type, an unsupported version or a description that fails its checks can still display the email. It must not guess how to execute an interaction it does not support.
+A client that meets a type it has not bundled can obtain its contract from the Registry catalogue it trusts, by digest. One that cannot, or that meets a description failing its checks, can still display the email; it never guesses how to execute an interaction.
 
 ## Delivery and execution
 

@@ -24,7 +24,7 @@ The profile URI is `https://mailschema.org/profiles/map/0.2`, and clients MUST m
 
 ## Email representation
 
-A description represents part of a message, as a [Structured Email](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06) partial representation. The service MUST place it in an `application/ld+json` part labelled with the profile through the media type's `profile` parameter, `Content-Type: application/ld+json; profile="https://mailschema.org/profiles/map/0.2"`. The part MUST carry `Content-Purpose: Machine-readable`, use `base64` or `quoted-printable` transfer encoding, and sit in a `multipart/related` entity beside the readable text and HTML. That entity is the message body or one of its parts, as when the message also carries attachments. Other structured parts, including descriptions labelled with other profiles, may sit beside it.
+A description represents part of a message, as a [Structured Email](https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06) partial representation. The service MUST place it in an `application/ld+json` part labelled with the profile through the [media type's `profile` parameter](https://www.w3.org/TR/json-ld11/#iana-considerations), `Content-Type: application/ld+json; profile="https://mailschema.org/profiles/map/0.2"`. The part MUST carry `Content-Purpose: Machine-readable`, use `base64` or `quoted-printable` transfer encoding, and sit in a `multipart/related` entity ([RFC 2387](https://www.rfc-editor.org/rfc/rfc2387)) beside the readable text and HTML. That entity is the message body or one of its parts, as when the message also carries attachments. Other structured parts, including descriptions labelled with other profiles, may sit beside it.
 
 A client MUST consider only parts outside any attached message. It processes the one designated part whose `profile` parameter lists the profile it implements, ignores every other structured part, and refuses the message when more than one part carries that label or the part is not in a `multipart/related` entity with readable content. A description inside an attached message is never processed.
 
@@ -38,7 +38,7 @@ JSON-LD expansion is optional. When it is used, the bundled context maps `MailAc
 
 | Member                     | Rule                                                                                                                                                                                                                                                                                                     |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@id`                      | A UUID URN identifying the interaction.                                                                                                                                                                                                                                                                  |
+| `@id`                      | A [UUID](https://www.rfc-editor.org/rfc/rfc9562) URN identifying the interaction.                                                                                                                                                                                                                        |
 | `profile`, `type`          | The exact profile, and the type URI, version and contract digest.                                                                                                                                                                                                                                        |
 | `describedAt`, `expiresAt` | When the interaction was created and when it expires. Expiry is later than creation.                                                                                                                                                                                                                     |
 | `service.authority`        | `credential` or `possession`. Every offered operation's contract entry MUST permit it.                                                                                                                                                                                                                   |
@@ -75,13 +75,17 @@ The digest binds everything the client was shown: the terms, the title, the oper
   "requestId": "urn:uuid:…",
   "interactionId": "urn:uuid:…",
   "descriptionDigest": "sha-256:…",
-  "type": { "id": "…", "version": "…", "contractDigest": "sha-256:…" },
+  "type": {
+    "id": "…",
+    "version": "…",
+    "contractDigest": "sha-256:…"
+  },
   "operation": "approve",
   "input": {}
 }
 ```
 
-The client sends it with a `POST` to `service.execution.url`, with its credential or through its capability. It MUST validate against the core schema and the contract's request schema. `type` lets a gateway choose the request schema without stored state. The service MUST answer another method on the execution URL with 405 and `Allow: POST`, and MUST answer 415 unless the `Content-Type` media type is `application/json`, compared case-insensitively, with no parameter other than `charset=utf-8`; empty parameter slots, which RFC 9110 permits, are ignored. The [shared media type vectors](/fixtures/map-0.2/media-type-vectors.json) pin the rule.
+The client sends it with a `POST` to `service.execution.url`, with its credential or through its capability. It MUST validate against the core schema and the contract's request schema. `type` lets a gateway choose the request schema without stored state. The service MUST answer another method on the execution URL with 405 and `Allow: POST`, and MUST answer 415 unless the `Content-Type` media type is `application/json`, compared case-insensitively, with no parameter other than `charset=utf-8`; empty parameter slots, which [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110) permits, are ignored. The [shared media type vectors](/fixtures/map-0.2/media-type-vectors.json) pin the rule.
 
 A contract's field bindings name an input that must contain only the fields the details define and satisfy them, including required fields and formats. Where the details define no fields block for a binding, its input is absent. A text field's `format` names a core lexical form: `email`, `uri`, `date` or `date-time`. The service rejects input that fails its contract, a field binding or a type rule with a claimed `invalid-request`. That problem carries `errors`, each with a `detail` and an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer into `input`. Implementations may report different sets of errors for the same input; the verdict is what must agree.
 
@@ -110,7 +114,7 @@ The message itself is the authority for the operations it offers on its target, 
 
 The service MUST:
 
-- issue one capability per interaction and recipient: at least 128 bits from a cryptographically secure generator, written as at least 22 base64url characters without padding, as the last segment of the execution URL path;
+- issue one capability per interaction and recipient: at least 128 bits from a cryptographically secure generator, written as at least 22 [base64url](https://www.rfc-editor.org/rfc/rfc4648#section-5) characters without padding, as the last segment of the execution URL path;
 - begin the result template with the execution URL followed by `/`, so every result sits under the capability, and scope request identifiers, retries and results to it;
 - use HTTPS, never redirect, and never require cookies or HTTP authentication;
 - send `Referrer-Policy: no-referrer` from capability-bearing pages;
@@ -122,8 +126,8 @@ The service MUST:
 
 Before any possession request, the client MUST establish all of the following:
 
-1. The top-level message carries a DKIM signature that the client verified on the raw message itself and that meets the service rules above. The signature is currently valid, its algorithm matches the published key, and it is aligned with the From domain under the [DMARC](https://www.rfc-editor.org/rfc/rfc9989) policy of that domain or its organizational domain. The client reads header fields as its DKIM verifier reads them and refuses a malformed field. The message carries each signed header, and Subject, at most once, its From header names exactly one mailbox, and its Date is a valid [RFC 5322 section 3.3](https://www.rfc-editor.org/rfc/rfc5322#section-3.3) date-time: a numeric zone, a year from 1900, and none of the obsolete forms. An SPF-only DMARC pass, a pass obtained through ARC or a local override, or an Authentication-Results header from anyone but the client's own receiving system, does not count.
-2. The hosts of the execution URL, result template, human route and service identifier are the From domain's organizational domain, as RFC 9989's DNS tree walk determines it, or subdomains of it, compared as A-labels. A DNS failure other than a definite absence, or an organizational domain that is a top-level domain, refuses the message.
+1. The top-level message carries a DKIM signature that the client verified on the raw message itself and that meets the service rules above. The signature is currently valid, its algorithm matches the published key, and it is aligned with the From domain under the [DMARC](https://www.rfc-editor.org/rfc/rfc9989) policy of that domain or its organizational domain. The client reads header fields as its DKIM verifier reads them and refuses a malformed field. The message carries each signed header, and Subject, at most once, its From header names exactly one mailbox, and its Date is a valid [RFC 5322 section 3.3](https://www.rfc-editor.org/rfc/rfc5322#section-3.3) date-time: a numeric zone, a year from 1900, and none of the obsolete forms. An SPF-only DMARC pass, a pass obtained through ARC or a local override, or an [Authentication-Results](https://www.rfc-editor.org/rfc/rfc8601) header from anyone but the client's own receiving system, does not count.
+2. The hosts of the execution URL, result template, human route and service identifier are the From domain's organizational domain, as RFC 9989's DNS tree walk determines it, or subdomains of it, compared as [A-labels](https://www.rfc-editor.org/rfc/rfc5890). A DNS failure other than a definite absence, or an organizational domain that is a top-level domain, refuses the message.
 3. `recipient` is an address the principal controls, and the message was sent to it. Addresses are compared with their ASCII letters in lowercase, every other character exactly, and their domains as A-labels. A local part may be internationalized, as [RFC 6531](https://www.rfc-editor.org/rfc/rfc6531) allows, without spaces or invisible and bidirectional format characters; a domain in a MAP document is always written as A-labels.
 4. The request carries no cookies, HTTP authentication or other credentials, and a redirect is treated as a failure.
 5. The operation's consequences and the type's client rule permit acting (see [Consequences](#consequences)).
@@ -203,7 +207,7 @@ Malformed requests, and requests for an unknown interaction or description, MUST
 
 ## Outcomes
 
-Results use `application/json`. Problems use `application/problem+json` with the [Problem Details](https://www.rfc-editor.org/info/rfc9457) members plus `profile`, `requestId`, `interactionId`, `code`, and `target` or `errors` where relevant. A problem's `type` is `https://mailschema.org/problems/` followed by its code, and its `type`, HTTP status and `code` MUST agree as the table below gives.
+Results use `application/json`. Problems use `application/problem+json` with the [Problem Details](https://www.rfc-editor.org/rfc/rfc9457) members plus `profile`, `requestId`, `interactionId`, `code`, and `target` or `errors` where relevant. A problem's `type` is `https://mailschema.org/problems/` followed by its code, and its `type`, HTTP status and `code` MUST agree as the table below gives.
 
 A problem is correlated, carrying the result URL as `instance` with `profile`, `requestId`, `code` and, when the service knows it, `interactionId`, only when it states what happened to a request: a claimed request's recorded response, or an `idempotency-conflict`, `request-in-progress`, `result-not-found` or `expired-interaction` for its identifier. A refusal of the caller's access to a claimed request, on a retry, a read or a decision, says nothing about the request, so it is not correlated and changes nothing. Neither is a problem for an unclaimed request, nor `authentication-required`. So only `invalid-request`, `refused` and `authentication-required` are ever uncorrelated, and the core schema requires `code` on every other problem.
 

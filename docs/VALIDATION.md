@@ -50,9 +50,9 @@ This run used MAP 0.1 and Content Review 0.2, both since withdrawn in favour of 
 
 ## Internet-Draft
 
-- `xml2rfc` 3.34.1 generated text and HTML from `ietf/draft-mailschema-mail-action-protocol-00.xml` without warnings.
+- The draft's rule sections are generated from the profile and the contract rules by `npm run draft`; verification fails if the committed draft differs. `xml2rfc` 3.34.1 builds it with no errors or warnings.
 - The draft requests no new media type, DNS record or well-known URI. Its only IANA request registers the `map_services` parameter in the existing OAuth Protected Resource Metadata registry.
-- The implementation section identifies the reference suite, the Ruby implementation that passes its vectors, and Nitrosend's first-party provider-delivered run on MAP 0.1, without claiming IETF submission or independent adoption. Community discussion and submission remain pending.
+- The implementation section identifies the reference suite, the Ruby implementation that passes its vectors, and Nitrosend's first-party production implementation, without claiming IETF submission or independent adoption. Community discussion and submission remain pending.
 
 ## Release boundary
 

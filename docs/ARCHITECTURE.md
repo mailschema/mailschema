@@ -47,7 +47,7 @@ Adopt suitable existing standards, including competitor work. No new identity sy
 
 ## First specification and implementation proof
 
-MAP began with **Content Review**. A structured email describes the review and its available operations, and execution uses authenticated HTTPS and the service's existing authorization. MAP 0.2 generalized that core so every type is data; see the [cutover plan](MAP-CORE-CUTOVER.md).
+MAP began with **Content Review**. A structured email describes the review and its available operations, and execution uses authenticated HTTPS and the service's existing authorization. MAP 0.2 generalized that core so every type is data; the [cutover record](history/MAP-CORE-CUTOVER.md) keeps its design reviews.
 
 An email service sends a test, a reviewer requests changes, a permitted agent revises the draft, and an authorized person approves the exact new revision. Stale approval fails. Approval records a decision; sending the campaign remains a separate authorized operation.
 
@@ -72,7 +72,7 @@ The identity brief lives in [brand/IDENTITY.md](../brand/IDENTITY.md). Direction
 
 Publication of the project site, exact profile and Registry tooling does not claim IETF adoption, a reproduced end-to-end product run or an independent implementation of the specification.
 
-The [24 September scope audit](SCOPE-AUDIT.md) records the baseline defects and their current resolution state. Its findings and the [execution plan](ROADMAP.md) govern the remaining product, release and adoption evidence; they do not reopen the selected names or expand the protocol's scope.
+The [roadmap](ROADMAP.md) governs the remaining product, release and adoption evidence; it does not reopen the selected names or expand the protocol's scope.
 
 ## Specification renderer
 
