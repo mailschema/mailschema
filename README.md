@@ -74,7 +74,7 @@ Contribute data files rather than editing application TypeScript. `npm run regis
 - `brand/direction-03-selected.png`: original selected imagegen board.
 - `brand/prompts.json`: exact initial fresh imagegen prompts.
 - `docs/ARCHITECTURE.md`: selected names and scope record.
-- `docs/screenshots/`: browser captures of the built site.
+- `docs/history/`: the MAP 0.2 cutover reviews and the September scope audit, kept as records.
 
 The strategy history is maintained separately from this standalone project. No portfolio application was modified to host the site.
 

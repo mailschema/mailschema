@@ -12,6 +12,8 @@ The caller already holds a credential for the service, such as an OAuth token fo
 
 The client trusts the service's endpoints only through its own configuration, directly or through [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) metadata. It never trusts them because an email names them. Credentials travel only in the `Authorization` header.
 
+A platform that sends for its customers names the customer it asks for in `service.onBehalfOf`. The client shows that party with the service, and its principal's policy is keyed to both, never to a name.
+
 ## Possession authority
 
 Some messages are themselves the authority, as a one-click unsubscribe link already is: confirm this address, report this sign-in, reply to this invitation. MAP makes that authority explicit and narrow. Such a service must:
@@ -26,30 +28,11 @@ Anyone who receives a forwarded copy holds the same authority. That is why contr
 
 ## Consequences
 
-Every operation declares what completing it gives away:
-
-- **refusal**: it declines what was asked;
-- **protection**: it cancels a pending request or reports activity;
-- **record**: it records a statement;
-- **disclosure**: it sends the principal's information;
-- **commitment**: it commits time, work or money;
-- **authorization**: it permits an effect;
-- **assertion**: it affirms that the principal made a request or performed an activity.
-
-A client's policy can use these without knowing the type. Under possession authority, anything beyond refusal, protection and record needs a prior relationship with the sender or the principal's decision.
+Every operation declares what completing it gives away, from a refusal to a commitment or an assertion, so a client's policy can decide without knowing the type. The profile defines [each consequence](/specification/profile#consequences) and what a client may complete under possession authority.
 
 ## Execution checks
 
-Before applying an effect, the service checks:
-
-- the description digest against the description it issued;
-- the authenticated principal, or the capability;
-- the requested operation and its authority;
-- expiry, a decided interaction and a stale target;
-- the input, its field bindings and the type's rules;
-- any additional approval its policy requires.
-
-Exact retries and result retrieval check current permission again before returning a saved response.
+The service checks the request before applying any effect: the description digest, the caller, the operation and its authority, expiry and the interaction's state, and the input. Exact retries and result reads check current permission again. The profile gives the [order and the answers](/specification/profile#processing).
 
 ## Human approval
 
@@ -61,7 +44,7 @@ Authority is explicit service state. A caller can have one of three levels of au
 
 MAP does not assign an authority level because a caller is automated.
 
-The approval link identifies the exact pending request, and a `GET` on it has no side effects. A decision is authorized separately from the proposal, and is recorded only through an authenticated mutation protected by the service's session and cross-site request controls. An undecided approval ends as expired when the interaction does.
+The approval link identifies the exact pending request and shows what it would approve. A person decides there, authorized separately from the proposal; the profile defines the [approval lifecycle](/specification/profile#results).
 
 ## Incoming content
 

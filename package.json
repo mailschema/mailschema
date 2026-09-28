@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
-    "check": "npm run registry:validate && npm run profile:validate && npm run fixtures:check && npm run map:test && npm run conformance:check && astro check",
+    "check": "npm run registry:validate && npm run profile:validate && npm run draft:check && npm run fixtures:check && npm run map:test && npm run conformance:check && astro check",
     "registry:validate": "node scripts/registry.ts validate",
     "registry:ingest": "node scripts/registry.ts ingest",
     "verify": "npm run check && npm run build && npm test",
@@ -23,6 +23,8 @@
     "packages:ruby-upstream": "node scripts/ruby-upstream.mjs",
     "profile:validate": "node scripts/map-profile.ts",
     "map:test": "node --test tests/map-conformance.test.mjs",
+    "draft": "node scripts/draft.mjs",
+    "draft:check": "node scripts/draft.mjs --check",
     "fixtures": "node scripts/map-fixtures.mjs",
     "fixtures:check": "node scripts/map-fixtures.mjs --check",
     "conformance:check": "node scripts/conformance.ts",
