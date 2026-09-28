@@ -1,6 +1,6 @@
 [package]
 name = "mailschema"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 rust-version = "1.70"
 description = "Embedded Mail Action Protocol 0.2 core artifacts and MailSchema Registry schemas"

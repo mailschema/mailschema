@@ -6,7 +6,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 MAP_PROFILE = "https://mailschema.org/profiles/map/0.2"
 """The MAP profile whose core artifacts this package carries."""
