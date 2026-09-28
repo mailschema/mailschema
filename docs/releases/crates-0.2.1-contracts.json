@@ -1,0 +1,48 @@
+{
+  "format": "mailschema-package-release/2",
+  "checkedAt": "2026-09-28T05:47:48.471Z",
+  "version": "0.2.1",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "contracts": [
+    {
+      "name": "contribution",
+      "sha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564"
+    },
+    {
+      "name": "record",
+      "sha256": "1b471bd7028cac029f4b250e513bc8a4db2ffa8ba617c1f6755549d961691c31"
+    },
+    {
+      "name": "map-0.2",
+      "sha256": "732d60fcb758d945dc15c57d885c9d1c0c76423a7439096d9755e8ec9830836a"
+    },
+    {
+      "name": "map-0.2-context",
+      "sha256": "dfed0189524d7d16d31ed3d8af97e9a0c458200c4c034b413f9d14fa35b60257"
+    },
+    {
+      "name": "type-contract-0.2",
+      "sha256": "e030007cc034662c9d9d448a8a035aff3106cfb96fb60e6aa9f92b99b25df0b9"
+    },
+    {
+      "name": "forms-0.1",
+      "sha256": "3a976b93a057380e3630ca05e77e221a43a98559fb7fda8066299ec4bf2a8f9e"
+    }
+  ],
+  "verification": "Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.",
+  "channels": [
+    {
+      "registry": "crates.io",
+      "name": "mailschema",
+      "version": "0.2.1",
+      "url": "https://crates.io/crates/mailschema/0.2.1",
+      "artifacts": [
+        {
+          "name": "mailschema-0.2.1.crate",
+          "sha256": "6aa048979ec297037b09b9cbe7a9328692e6aafedbb6ed8c527df0fc38f512b3"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

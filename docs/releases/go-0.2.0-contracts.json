@@ -1,0 +1,44 @@
+{
+  "format": "mailschema-package-release/2",
+  "checkedAt": "2026-09-28T05:47:49.834Z",
+  "version": "0.2.0",
+  "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
+  "contracts": [
+    {
+      "name": "contribution",
+      "sha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564"
+    },
+    {
+      "name": "map-0.2",
+      "sha256": "732d60fcb758d945dc15c57d885c9d1c0c76423a7439096d9755e8ec9830836a"
+    },
+    {
+      "name": "map-0.2-context",
+      "sha256": "dfed0189524d7d16d31ed3d8af97e9a0c458200c4c034b413f9d14fa35b60257"
+    },
+    {
+      "name": "type-contract-0.2",
+      "sha256": "e030007cc034662c9d9d448a8a035aff3106cfb96fb60e6aa9f92b99b25df0b9"
+    },
+    {
+      "name": "forms-0.1",
+      "sha256": "3a976b93a057380e3630ca05e77e221a43a98559fb7fda8066299ec4bf2a8f9e"
+    }
+  ],
+  "verification": "Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.",
+  "channels": [
+    {
+      "registry": "Go",
+      "name": "github.com/mailschema/go",
+      "version": "0.2.0",
+      "url": "https://pkg.go.dev/github.com/mailschema/go@v0.2.0",
+      "artifacts": [
+        {
+          "name": "v0.2.0.zip",
+          "sha256": "0fcc4dd00caf1ca74157113384248ceb739d18c57484075adc6b6c86b900a541"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}

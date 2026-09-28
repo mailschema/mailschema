@@ -12,7 +12,7 @@
 
 ## Packages
 
-- `docs/releases/current.json` selects RubyGems `0.2.0`, npm `0.1.5`, PyPI and crates.io `0.1.4`, and Go `v0.1.2`, all on MAP 0.2. Every one carries the MAP 0.2 core artifacts, and none bundles a type contract. Their immutable evidence binds every contract each ships and was verified by public readback at promotion. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched contract digest.
+- `docs/releases/current.json` selects RubyGems `0.2.0`, npm, PyPI and crates.io `0.2.1`, and Go `v0.2.0`, all on MAP 0.2. Every one carries the MAP 0.2 core artifacts, and none bundles a type contract. Their immutable evidence binds every contract each ships and was verified by public readback at promotion. The site build refuses a missing artifact, incorrect registry identity, unverified state, wrong version or mismatched contract digest.
 - Eight local distribution checks passed: declared versions, the preparation manifest, maintained repository metadata, removal of earlier build output, exact artifact bytes for every registry, compiled validation, Registry reference checks and CLI behavior.
 - The Ruby gem `0.2.0` passed its 53 tests and 13,204 assertions, RuboCop and `rbs validate` on Ruby 3.3, 3.4 and 4.0, and built. It was published from [`mailschema/ruby`](https://github.com/mailschema/ruby) through RubyGems trusted publishing, with no stored key, and joined the selected set after public readback. MAP 0.2 releases of the other packages follow the cutover.
 
