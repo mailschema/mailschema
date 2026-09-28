@@ -35,6 +35,7 @@ The website promotes an explicit verified package version for each registry. It 
 
 ## Change log
 
+- 28 September 2026, MAP 0.2, compatible clarification: a client may obtain a contract it has not bundled from a Registry catalogue it has configured, verifying every digest, so types added to the Registry are usable without a client release. The contract rules moved to the Type contracts chapter unchanged.
 - 25 September 2026, MAP 0.2: a type-agnostic core.
   - Types define `details`, and requests bind the exact description by its RFC 8785 digest.
   - Operations declare credential or possession authority, their consequences and whether they repeat.

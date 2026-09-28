@@ -44,6 +44,13 @@ export const specNavigation = [
     description:
       'Distinguish accepted, completed, failed, refused, stale and decided outcomes. Retry without duplicate effects.',
   },
+  {
+    slug: 'type-contracts',
+    label: 'Type contracts',
+    section: 'The protocol',
+    description:
+      'How a type is defined, reviewed and published, and the rules every contract meets.',
+  },
   ...typeChapters,
   {
     slug: 'interoperability',
