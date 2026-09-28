@@ -104,36 +104,35 @@ export const tooling = [
     runtime: 'Node.js 22+',
     map: mapVersion('npm'),
     withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('npm'))),
-    title: 'Validate MAP at the boundary.',
+    title: 'Bundle the MAP core and check Registry files.',
     description:
-      'Check MAP descriptions, requests, results and problems before your application trusts their fields.',
+      'The MAP 0.2 core artifacts for your validator, and local checks for Registry contributions and records.',
     install: `npm install mailschema@${npmRelease.version}`,
-    command: `npx mailschema@${npmRelease.version} check description.json --map`,
+    command: `npx mailschema@${npmRelease.version} check contribution.json`,
     installLanguage: 'bash' as const,
     language: 'javascript' as const,
     filename: 'check-description.mjs',
     example: `import { readFile } from 'node:fs/promises';
-import { assertMapDocument } from 'mailschema';
+import Ajv2020 from 'ajv/dist/2020.js';
+import { getMapSchema } from 'mailschema';
 
-const description = JSON.parse(
-  await readFile('description.json', 'utf8'),
-);
+const description = JSON.parse(await readFile('description.json', 'utf8'));
+const schema = getMapSchema();
+const ajv = new Ajv2020();
+ajv.addSchema(schema);
+const check = ajv.getSchema(\`\${schema.$id}#/$defs/description\`);
 
-assertMapDocument(description);`,
+if (!check(description)) console.error(check.errors);`,
     exampleNote:
-      'Returns normally for a valid MAP 0.1 document. Throws with field details when the contract does not match.',
+      'Schema checks only. The profile adds the I-JSON limits, digest binding and processing rules.',
     api: [
       {
-        name: 'assertMapDocument(value) / mapErrors(value)',
-        description: 'Validate a MAP 0.1 description, request, result or problem.',
+        name: 'getMapSchema() / getMapContext()',
+        description: 'The MAP 0.2 core schema and JSON-LD context.',
       },
       {
-        name: 'assertContentReviewRequest(value)',
-        description: 'Apply the withdrawn Content Review 0.2 request binding, on MAP 0.1.',
-      },
-      {
-        name: 'getMapSchema() / getContentReviewSchema()',
-        description: 'Return independent copies of the protocol schemas.',
+        name: 'getContractFormatSchema() / getFormsSchema()',
+        description: 'The contract format and the form fields block contracts pin.',
       },
       {
         name: 'assertContribution(value) / assertTypeRecord(value)',
@@ -145,7 +144,7 @@ assertMapDocument(description);`,
       },
     ],
     exports:
-      'Runtime validation, Registry reference checks and TypeScript definitions for Registry records.',
+      'The MAP 0.2 core artifacts, Registry validation and reference checks, and TypeScript definitions.',
   },
   {
     id: 'python',
@@ -155,44 +154,38 @@ assertMapDocument(description);`,
     runtime: 'Python 3.10+',
     map: mapVersion('PyPI'),
     withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('PyPI'))),
-    title: 'Use the same contract in Python.',
+    title: 'The same artifacts in Python.',
     description:
-      'Validate MAP 0.1 and Content Review documents locally with Draft 2020-12 format checking.',
+      'The MAP 0.2 core artifacts, and Draft 2020-12 checks for Registry contributions and records.',
     install: `python -m pip install mailschema==${pythonRelease.version}`,
-    command: 'python -m mailschema check description.json --map',
+    command: 'python -m mailschema check contribution.json',
     installLanguage: 'bash' as const,
     language: 'python' as const,
-    filename: 'check_description.py',
+    filename: 'check_contribution.py',
     example: `import json
 from pathlib import Path
-from mailschema import validate_map_document
+from mailschema import validate_contribution
 
-description = json.loads(
-    Path("description.json").read_text()
-)
-
-validate_map_document(description)`,
+validate_contribution(
+    json.loads(Path("contribution.json").read_text())
+)`,
     exampleNote:
-      'Returns None for a valid MAP 0.1 document. Raises ValueError with field details when validation fails.',
+      'Raises ValueError with field details when the contribution does not match the Registry schema.',
     api: [
       {
-        name: 'validate_map_document(value) / map_errors(value)',
-        description: 'Validate a MAP 0.1 description, request, result or problem.',
+        name: 'get_map_schema() / get_map_context()',
+        description: 'The MAP 0.2 core schema and JSON-LD context.',
       },
       {
-        name: 'validate_content_review_request(value)',
-        description: 'Apply the withdrawn Content Review 0.2 request binding, on MAP 0.1.',
-      },
-      {
-        name: 'get_map_schema() / get_content_review_schema()',
-        description: 'Return fresh copies of the protocol schemas.',
+        name: 'get_contract_format_schema() / get_forms_schema()',
+        description: 'The contract format and the form fields block contracts pin.',
       },
       {
         name: 'validate_contribution(value) / validate_record(value)',
         description: 'Validate Registry contributions and expanded type records.',
       },
     ],
-    exports: 'Local structure and format validation through the established jsonschema library.',
+    exports: 'The MAP 0.2 core artifacts and Registry validation through the jsonschema library.',
   },
   {
     id: 'rust',
@@ -202,42 +195,39 @@ validate_map_document(description)`,
     runtime: 'Rust 1.70+',
     map: mapVersion('crates.io'),
     withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('crates.io'))),
-    note: 'Enable format checking in your validator to check URI fields.',
-    title: 'Bundle exact schema bytes.',
+    note: 'MAP schemas never use format; the Registry schemas check URIs with it.',
+    title: 'Embed the exact artifact bytes.',
     description:
-      'Embed the MAP, Content Review and Registry schemas without a runtime dependency or network lookup.',
+      'The MAP 0.2 core artifacts and the Registry schemas as static strings, with no runtime dependency.',
     install: `[dependencies]\nmailschema = "=${rustRelease.version}"`,
     command: null,
     installLanguage: 'toml' as const,
     language: 'rust' as const,
     filename: 'src/main.rs',
-    example: `use mailschema::{MAP_0_1_SCHEMA, CONTENT_REVIEW_0_2_SCHEMA};
+    example: `use mailschema::{MAP_CONTEXT, MAP_SCHEMA};
 
 fn main() -> std::io::Result<()> {
-    std::fs::write("map-0.1.schema.json", MAP_0_1_SCHEMA)?;
-    std::fs::write(
-        "content-review-0.2.schema.json",
-        CONTENT_REVIEW_0_2_SCHEMA,
-    )?;
+    std::fs::write("map-0.2.schema.json", MAP_SCHEMA)?;
+    std::fs::write("map-0.2.jsonld", MAP_CONTEXT)?;
     Ok(())
 }`,
-    exampleNote: 'Writes the canonical schemas to local files for use with your chosen validator.',
+    exampleNote:
+      'Writes the canonical artifacts to local files for your chosen validator and JSON-LD processor.',
     api: [
       {
-        name: 'MAP_0_1_SCHEMA / CONTENT_REVIEW_0_2_SCHEMA',
-        description: 'The protocol schemas as static strings.',
+        name: 'MAP_SCHEMA / MAP_CONTEXT',
+        description: 'The MAP 0.2 core schema and JSON-LD context.',
+      },
+      {
+        name: 'CONTRACT_FORMAT_SCHEMA / FORMS_SCHEMA',
+        description: 'The contract format and the form fields block contracts pin.',
       },
       {
         name: 'CONTRIBUTION_SCHEMA / RECORD_SCHEMA',
-        description: 'The Registry schemas as static strings.',
-      },
-      {
-        name: 'Schema::Map01.as_str() / Schema::ContentReview02.as_str()',
-        description: 'Select a bundled protocol schema through the typed enum.',
+        description: 'The Registry schemas.',
       },
     ],
-    exports:
-      'Canonical schemas. Validation uses a Draft 2020-12 engine with format checking enabled.',
+    exports: 'The MAP 0.2 core artifacts and the Registry schemas, byte for byte.',
   },
   {
     id: 'go',
@@ -247,10 +237,10 @@ fn main() -> std::io::Result<()> {
     runtime: 'Go 1.22+',
     map: mapVersion('Go'),
     withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('Go'))),
-    note: 'Enable format checking in your validator to check URI fields.',
-    title: 'Decode into protocol types.',
+    note: 'MAP schemas never use format; the Registry schema checks URIs with it.',
+    title: 'Embed the artifacts in Go.',
     description:
-      'Use typed MAP documents, strict JSON decoding and core reference checks in a Go service or agent.',
+      'The MAP 0.2 core artifacts and the Registry contribution schema, returned as independent copies.',
     install: `go get github.com/mailschema/go@v${goRelease.version}`,
     command: null,
     installLanguage: 'bash' as const,
@@ -264,32 +254,28 @@ import (
 )
 
 func main() {
-    request, err := mailschema.Decode[mailschema.Request](os.Stdin)
+    schema, err := mailschema.Schema(mailschema.MAPSchema)
     if err != nil {
         panic(err)
     }
-    if err := mailschema.ValidateRequest(request); err != nil {
-        panic(err)
-    }
+    os.Stdout.Write(schema)
 }`,
-    exampleNote:
-      'Strict decoding rejects unknown fields. Core validation checks the fixed MAP identifiers and references.',
+    exampleNote: 'Prints the MAP 0.2 core schema exactly as the profile record binds it.',
     api: [
       {
-        name: 'Decode[T](reader)',
-        description: 'Strictly decode a MAP document into its typed representation.',
+        name: 'Schema(MAPSchema) / Schema(MAPContext)',
+        description: 'The MAP 0.2 core schema and JSON-LD context.',
       },
       {
-        name: 'ValidateDescription / ValidateRequest',
-        description: 'Check core MAP identifiers and references.',
+        name: 'Schema(ContractFormatSchema) / Schema(FormsSchema)',
+        description: 'The contract format and the form fields block contracts pin.',
       },
       {
-        name: 'Schema(MAP01Schema)',
-        description: 'Return an independent copy of a bundled schema.',
+        name: 'Schema(ContributionSchema)',
+        description: 'The Registry contribution schema.',
       },
     ],
-    exports:
-      'Typed descriptions, requests, results and problems, plus the MAP, Content Review and Registry schemas.',
+    exports: 'The MAP 0.2 core artifacts and the Registry contribution schema.',
   },
   ...(rubyRelease ? [rubyTool(rubyRelease, mapVersion('RubyGems'))] : []),
 ];

@@ -26,7 +26,7 @@ Make MAP a useful open standard for service actions carried through email, with 
 | Interaction types            | The initial [collection](TYPE-COLLECTION.md) of ten drafts, each with a digest-bound contract, request schema, chapter and fixtures                         |
 | Reference and conformance    | One contract-driven engine for every type; 100 executable cases mapped to 39 requirements, with shared vectors and a DKIM-signed message kit                |
 | Ruby                         | `mailschema` `0.2.0` on RubyGems, published from [`mailschema/ruby`](https://github.com/mailschema/ruby) through trusted publishing                         |
-| JavaScript, Python, Rust, Go | Published on MAP 0.1; they carry the Registry tooling until their MAP 0.2 releases                                                                          |
+| JavaScript, Python, Rust, Go | npm `0.1.5`, PyPI and crates.io `0.1.4` and Go `v0.1.2` carry the MAP 0.2 core artifacts and the Registry tooling, and no type contracts                    |
 | Nitrosend                    | Content Review 0.3 on MAP 0.2 deployed in production, on the Ruby gem; the MAP 0.2 evidence run is pending                                                  |
 | Sourcey                      | `3.6.10` renders the specification                                                                                                                          |
 | Internet-Draft               | Generated from the profile and the contract rules by `npm run draft`, and checked against them in verification; discussion and submission have not occurred |
@@ -40,10 +40,9 @@ Make MAP a useful open standard for service actions carried through email, with 
 
 ## Next
 
-1. **Language packages on MAP 0.2.** JavaScript, Python, Rust and Go releases carry the MAP 0.2 core artifacts and the Registry tooling, and never bundle type contracts, which clients obtain from the catalogue.
-2. **Nitrosend evidence.** Rerun the MAP 0.2 Content Review journey and record its implementation declaration against the Content Review 0.3 record, disclosing common ownership.
-3. **An independent implementation.** Seek one implementation outside the common-ownership group that reproduces a core case, before claiming interoperability.
-4. **IETF.** Seek early feedback on the generated draft and submit it as an individual draft.
+1. **Nitrosend evidence.** Rerun the MAP 0.2 Content Review journey and record its implementation declaration against the Content Review 0.3 record, disclosing common ownership.
+2. **An independent implementation.** Seek one implementation outside the common-ownership group that reproduces a core case, before claiming interoperability.
+3. **IETF.** Seek early feedback on the generated draft and submit it as an individual draft.
 
 ## Gates
 

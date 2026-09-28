@@ -90,9 +90,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
               code={tool.install}
               lang={tool.installLanguage}
             />
-            {tool.command && (
-              <CodeBlock label={`Check a MAP ${tool.map} file`} code={tool.command} />
-            )}
+            {tool.command && <CodeBlock label="Check a contribution" code={tool.command} />}
             {tool.command ? (
               <a
                 class="text-link"
@@ -217,7 +215,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
     </aside>
     <p class="tools-scope">
       {currentTooling.length > 0 &&
-        `The ${names(currentTooling)} ${currentTooling.length > 1 ? 'packages implement' : 'package implements'} the MAP 0.2 core with generic contract validation. `}
+        `The ${names(currentTooling)} ${currentTooling.length > 1 ? 'packages carry' : 'package carries'} the MAP 0.2 core artifacts exactly as published${currentTooling.some((tool) => tool.id === 'ruby') ? ', and the Ruby package also processes MAP documents' : ''}. `}
       {withdrawn.length > 0 &&
         `The ${names(withdrawn)} packages carry the Registry schema and the record checks below; their MAP 0.2 releases follow. `}
       {packageContractCoverage

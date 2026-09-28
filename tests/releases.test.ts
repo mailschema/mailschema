@@ -28,13 +28,8 @@ test('the Tools page offers exactly the selected releases, with Ruby once RubyGe
   expect(tooling.map((tool) => tool.registry).sort()).toEqual(
     current.channels.map((channel) => channel.registry).sort(),
   );
-  // Each tab's MAP version is the core schema its release evidence binds: the gem
-  // ships MAP 0.2, and the other selected releases still ship MAP 0.1.
-  for (const tool of tooling)
-    expect([tool.registry, tool.map]).toEqual([
-      tool.registry,
-      tool.registry === 'RubyGems' ? '0.2' : '0.1',
-    ]);
+  // Each tab's MAP version is the core schema its release evidence binds.
+  expect(tooling.map((tool) => tool.map)).toEqual(tooling.map(() => '0.2'));
   const ruby = rubyTool(
     {
       registry: 'RubyGems',
@@ -103,8 +98,8 @@ test('full-contract release evidence binds every distributed protocol schema', (
 
   expect(() => assertPackageRelease(release, contracts)).not.toThrow();
   expect(() =>
-    assertPackageRelease(release, { ...contracts, 'map-0.1': `${contracts['map-0.1']}\n` }),
-  ).toThrow(/map-0.1 contract differs/);
+    assertPackageRelease(release, { ...contracts, 'map-0.2': `${contracts['map-0.2']}\n` }),
+  ).toThrow(/map-0.2 contract differs/);
   const missing = structuredClone(release);
   missing.contracts!.pop();
   expect(() => assertPackageRelease(missing, contracts)).toThrow(/Invalid release contract set/);
