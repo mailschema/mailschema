@@ -1,14 +1,14 @@
 # MailSchema packages
 
-MailSchema packages provide MAP and Registry tooling. The published npm, PyPI, crates.io and Go releases implement MAP 0.1 and retain Content Review compatibility helpers. The Ruby gem is prepared for MAP 0.2 and not yet published. They validate or expose contracts; they do not establish endpoint trust, grant authority or send email.
+MailSchema packages carry the MAP 0.2 core artifacts and the Registry tooling. The Ruby gem also processes MAP 0.2: it parses and digests documents, verifies the contracts an implementation vendors, and builds results and problems. No package bundles a type contract; clients obtain contracts from the Registry catalogue by digest.
 
-| Distribution                                                      | Contents                                                                                                        |
-| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| [npm `mailschema`](https://github.com/mailschema/javascript)      | MAP and Registry schemas, runtime validation, TypeScript definitions, Registry reference checks and a local CLI |
-| [PyPI `mailschema`](https://github.com/mailschema/python)         | MAP and Registry schemas, validation through `jsonschema` and a local CLI                                       |
-| [crates.io `mailschema`](https://github.com/mailschema/rust)      | MAP, Content Review and Registry schemas embedded without runtime dependencies                                  |
-| [Go `github.com/mailschema/go`](https://github.com/mailschema/go) | Typed MAP documents, strict decoding, core reference validation and the canonical schemas                       |
-| [RubyGems `mailschema`](https://github.com/mailschema/ruby)       | MAP 0.2 parsing, RFC 8785 digests, contract verification, validation, and result and problem documents          |
+| Distribution                                                      | Contents                                                                                               |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [npm `mailschema`](https://github.com/mailschema/javascript)      | MAP 0.2 core artifacts, Registry validation, reference checks, TypeScript definitions and a local CLI  |
+| [PyPI `mailschema`](https://github.com/mailschema/python)         | MAP 0.2 core artifacts, Registry validation through `jsonschema` and a local CLI                       |
+| [crates.io `mailschema`](https://github.com/mailschema/rust)      | MAP 0.2 core artifacts and Registry schemas, embedded without runtime dependencies                     |
+| [Go `github.com/mailschema/go`](https://github.com/mailschema/go) | MAP 0.2 core artifacts and the Registry contribution schema, embedded                                  |
+| [RubyGems `mailschema`](https://github.com/mailschema/ruby)       | MAP 0.2 parsing, RFC 8785 digests, contract verification, validation, and result and problem documents |
 
 [`docs/releases/current.json`](../docs/releases/current.json) is the only selected package set. Public artifact evidence verifies every bundled contract in each selected release. Package versions are independent of the MAP profile and Registry type versions, and advance only when that package's code, API or bundled assets change. Distribution code and included schema assets use the MIT license in this directory. This file does not assign a license to unrelated website assets or other project documents.
 
@@ -16,7 +16,7 @@ MailSchema packages provide MAP and Registry tooling. The published npm, PyPI, c
 
 The files under `public/schemas/` and `public/contracts/` are canonical. JavaScript model and validation code come from the same sources used by the website. Python delegates JSON Schema interpretation to the established `jsonschema` library. Rust embeds schema documents for applications to use with their chosen validator. The Go module is maintained in [`mailschema/go`](https://github.com/mailschema/go) and embeds byte-identical schema files. Ruby delegates JSON Schema interpretation to `json_schemer` with ECMA-262 regular expressions, and carries its own RFC 8785 implementation, tested against ECMAScript's number formatting.
 
-The Registry and the packages have separate release lifecycles. A new or amended type is published as versioned Registry data and immutable contract/schema artifacts. Implementations select the exact type versions they support and vendor those bytes by URI, version and digest. They do not need a live Registry lookup at execution time. A Registry contribution does not trigger a language release; a package release is needed only when that package itself changes. Content Review remains in the current packages for compatibility with their first public APIs. Future Registry types do not enter packages automatically.
+The Registry and the packages have separate release lifecycles. A new or amended type is published as versioned Registry data and immutable contract/schema artifacts. Clients obtain the exact type versions they act on from the Registry catalogue by URI, version and digest, or vendor those bytes. A Registry contribution does not trigger a language release; a package release is needed only when that package itself changes.
 
 `packages/artifacts.json` is the one list of files deliberately distributed by each ecosystem. Package preparation, archive readback, website release checks and tests all consume that manifest. `packages/versions.json` declares the source version for every ecosystem. `npm run packages:prepare` creates npm, Python, Rust and Ruby release sources in `.release/packages/` and checks each package against its declared version. A tested copy of each release source is committed to its language repository, where CI, tags and registry publication are owned. The generated schema and shared validation files remain canonical here rather than being edited independently in multiple repositories. The Go implementation is maintained and released from its own repository. No vendor credentials or private operational data are included.
 

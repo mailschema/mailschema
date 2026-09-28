@@ -3,30 +3,31 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import {
-  assertContentReviewRequest,
-  assertMapDocument,
+  MAP_PROFILE,
+  assertContribution,
+  getContractFormatSchema,
   getContributionSchema,
-  getContentReviewContract,
-  getContentReview01Contract,
+  getFormsSchema,
+  getMapContext,
   getMapSchema,
 } from '../dist/index.js';
 
 const load = async (name) => JSON.parse(await readFile(new URL(name, import.meta.url), 'utf8'));
 
-test('exposes the canonical schema identifiers', () => {
-  assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.1.schema.json');
-  assert.equal(getContentReviewContract().id, 'https://mailschema.org/types/content-review');
-  assert.equal(getContentReviewContract().version, '0.2');
-  assert.equal(getContentReview01Contract().version, '0.1');
+test('exposes the MAP 0.2 core artifacts', () => {
+  assert.equal(MAP_PROFILE, 'https://mailschema.org/profiles/map/0.2');
+  assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.2.schema.json');
+  assert.equal(getMapContext()['@context'].MailAction, 'map:MailAction');
+  assert.equal(
+    getContractFormatSchema().$id,
+    'https://mailschema.org/schemas/type-contract-0.2.schema.json',
+  );
+  assert.equal(getFormsSchema().$id, 'https://mailschema.org/schemas/forms-0.1.schema.json');
   assert.equal(getContributionSchema().$schema, 'https://json-schema.org/draft/2020-12/schema');
 });
 
-test('validates MAP and Content Review fixtures', async () => {
-  assertMapDocument(await load('map-description.json'));
-  assertContentReviewRequest(await load('map-request.json'));
-  const result = await load('map-result.json');
-  assertMapDocument(result);
-  assert.equal(result.type.id, 'https://mailschema.org/types/content-review');
+test('validates a Registry contribution', async () => {
+  assertContribution(await load('new-type.json'));
 });
 
 test('preserves canonical artifact bytes during the build', async () => {

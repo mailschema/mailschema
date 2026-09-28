@@ -45,8 +45,7 @@ await put(
   json({
     name: 'mailschema',
     version: versions.npm,
-    description:
-      'Schemas and validation tools for Mail Action Protocol and the MailSchema Registry',
+    description: 'Mail Action Protocol 0.2 core artifacts and MailSchema Registry validation',
     type: 'module',
     license: 'MIT',
     author: 'MailSchema contributors',
@@ -69,7 +68,7 @@ await put(
       test: 'npm run build && node --test test/*.test.mjs',
     },
     dependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
-    devDependencies: { typescript: '5.9.3' },
+    devDependencies: { '@types/node': '24.13.6', typescript: '5.9.3' },
     keywords: ['email', 'schema', 'json-schema', 'agents', 'registry'],
     publishConfig: { access: 'public', registry: 'https://registry.npmjs.org/' },
   }),
@@ -89,12 +88,7 @@ await put('npm/build.mjs', await read('packages/javascript/build.mjs'));
 await put('npm/README.md', await read('packages/javascript/README.md'));
 await put('npm/LICENSE', license);
 await put('npm/test/package.test.mjs', await read('packages/javascript/package.test.mjs'));
-await put(
-  'npm/test/map-description.json',
-  await read('public/fixtures/map-0.1/content-review-description.json'),
-);
-await put('npm/test/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
-await put('npm/test/map-result.json', await read('public/fixtures/map-0.1/result-completed.json'));
+await put('npm/test/new-type.json', await read('registry/examples/new-type.json'));
 await put(
   'npm/tsconfig.json',
   json({
@@ -135,15 +129,6 @@ for (const item of artifacts.filter((entry) => entry.paths.PyPI))
   await put(`python/src/mailschema/${item.paths.PyPI}`, item.bytes);
 await put('python/tests/new-type.json', await read('registry/examples/new-type.json'));
 await put('python/tests/content-review.json', await read('registry/types/content-review.json'));
-await put(
-  'python/tests/map-description.json',
-  await read('public/fixtures/map-0.1/content-review-description.json'),
-);
-await put('python/tests/map-request.json', await read('public/fixtures/map-0.1/approve.json'));
-await put(
-  'python/tests/map-result.json',
-  await read('public/fixtures/map-0.1/result-completed.json'),
-);
 for (const item of artifacts.filter((entry) => entry.paths['crates.io']))
   await put(`rust/${item.paths['crates.io']}`, item.bytes);
 

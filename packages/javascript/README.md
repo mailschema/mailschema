@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/mailschema)](https://www.npmjs.com/package/mailschema)
 [![CI](https://github.com/mailschema/javascript/actions/workflows/test.yml/badge.svg)](https://github.com/mailschema/javascript/actions/workflows/test.yml)
 
-Validate Mail Action Protocol documents and MailSchema Registry contributions without making a network request.
+The Mail Action Protocol 0.2 core artifacts, and local validation of MailSchema Registry contributions, with no network requests.
 
 [Specification](https://mailschema.org/specification) · [Registry](https://mailschema.org/registry) · [Tools](https://mailschema.org/tools) · [Source](https://github.com/mailschema/javascript)
 
@@ -15,62 +15,40 @@ npm install mailschema
 
 Node.js 22 or newer is required. The package is ESM and includes TypeScript declarations.
 
-## Validate MAP documents
+## MAP 0.2 core artifacts
 
 ```js
 import {
-  assertMapDocument,
-  assertContentReviewRequest,
-  getContentReviewContract,
+  MAP_PROFILE,
+  getContractFormatSchema,
+  getFormsSchema,
+  getMapContext,
   getMapSchema,
 } from 'mailschema';
-
-assertMapDocument(description);
-assertContentReviewRequest(request);
-const mapSchema = getMapSchema();
-const contentReviewContract = getContentReviewContract();
 ```
 
-The CLI performs the same checks against local JSON files:
+Each is byte-identical to the file the [profile record](https://mailschema.org/profiles/map/0.2.json) binds by SHA-256, and is also exported raw as `mailschema/map-0.2.schema.json`, `mailschema/map-0.2.jsonld`, `mailschema/type-contract-0.2.schema.json` and `mailschema/forms-0.1.schema.json`. Type contracts are not bundled: a client obtains them from the [Registry catalogue](https://mailschema.org/registry/catalog.json) by digest. Processing MAP messages is outside this package; see the [profile](https://mailschema.org/specification/profile).
 
-```sh
-npx mailschema check description.json --map
-npx mailschema check request.json --content-review
-```
-
-## Work with Registry data
+## Registry data
 
 ```js
-import {
-  assertContribution,
-  contributionErrors,
-  getContributionSchema,
-  referenceErrors,
-} from 'mailschema';
+import { assertContribution, contributionErrors, referenceErrors } from 'mailschema';
 
 const errors = contributionErrors(candidate);
 if (errors.length) console.error(errors);
 else assertContribution(candidate);
 
-const schema = getContributionSchema();
 const referenceProblems = referenceErrors(candidate, catalog);
 ```
 
-`assertTypeRecord`, `getRecordSchema` and `mailschema check record.json --record` handle expanded Registry records. Reference checks use a catalogue supplied by the caller; the package never fetches one automatically.
+`assertTypeRecord` and `getRecordSchema` handle expanded Registry records. Reference checks use a catalogue supplied by the caller; the package never fetches one.
 
-Raw Draft 2020-12 schemas are exported as:
-
-- `mailschema/map-0.1.schema.json`
-- `mailschema/content-review-0.1.schema.json`
-- `mailschema/content-review-0.1.contract.json`
-- `mailschema/content-review-0.2.schema.json`
-- `mailschema/content-review-0.2.contract.json`
-- `mailschema/contribution.schema.json`
-
-The unversioned Content Review helpers use 0.2. The `*ContentReview01*` helpers and 0.1 raw exports remain available for implementations pinned to the earlier draft.
+```sh
+npx mailschema check contribution.json
+npx mailschema check record.json --record
+npx mailschema schema --map
+```
 
 ## Trust boundary
 
-A valid document is structured input. Validation does not authenticate a service, grant authority, approve an action or establish product conformance. Implementations must apply their own endpoint trust, credentials, permissions and policy before executing a request.
-
-The CLI reads one local file of at most 256 KiB and does not upload or modify it. Package versions and MAP profile versions advance independently. MIT licensed.
+A valid document is structured input. Validation does not authenticate a service, grant authority or establish product conformance. The CLI reads one local file of at most 256 KiB and does not upload or modify it. Package versions and MAP profile versions advance independently. MIT licensed.

@@ -1,4 +1,4 @@
-/** Schemas and validation tools for MAP documents and MailSchema Registry contributions. */
+/** The MAP 0.2 core artifacts and validation tools for MailSchema Registry contributions. */
 import schema from './contribution.schema.json' with { type: 'json' };
 
 export {
@@ -11,17 +11,11 @@ export type { CatalogView } from './validation.js';
 export { typeStages } from './model.js';
 export type { Party, TypeDefinition, TypeRecord, Contribution, Implementation } from './model.js';
 export {
-  mapErrors,
-  assertMapDocument,
-  contentReviewRequestErrors,
-  assertContentReviewRequest,
-  contentReview01RequestErrors,
-  assertContentReview01Request,
+  MAP_PROFILE,
   getMapSchema,
-  getContentReviewSchema,
-  getContentReviewContract,
-  getContentReview01Schema,
-  getContentReview01Contract,
+  getMapContext,
+  getContractFormatSchema,
+  getFormsSchema,
 } from './map.js';
 
 /** Return an independent copy of the contribution JSON Schema (Draft 2020-12). */
