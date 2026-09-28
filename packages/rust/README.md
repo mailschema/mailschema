@@ -11,7 +11,7 @@ The Mail Action Protocol 0.2 core artifacts and the MailSchema Registry schemas,
 
 ```toml
 [dependencies]
-mailschema = "0.1"
+mailschema = "0.2"
 ```
 
 Rust 1.70 or newer is required.
