@@ -29,6 +29,10 @@
       "kind": "schema",
       "source": "public/schemas/map-0.2.schema.json",
       "paths": {
+        "npm": "dist/map-0.2.schema.json",
+        "PyPI": "map-0.2.schema.json",
+        "crates.io": "schemas/map-0.2.schema.json",
+        "Go": "schemas/map-0.2.schema.json",
         "RubyGems": "schemas/map-0.2.schema.json"
       }
     },
@@ -38,6 +42,10 @@
       "kind": "context",
       "source": "public/contexts/map-0.2.jsonld",
       "paths": {
+        "npm": "dist/map-0.2.jsonld",
+        "PyPI": "map-0.2.jsonld",
+        "crates.io": "contexts/map-0.2.jsonld",
+        "Go": "contexts/map-0.2.jsonld",
         "RubyGems": "contexts/map-0.2.jsonld"
       }
     },
@@ -47,6 +55,10 @@
       "kind": "schema",
       "source": "public/schemas/type-contract-0.2.schema.json",
       "paths": {
+        "npm": "dist/type-contract-0.2.schema.json",
+        "PyPI": "type-contract-0.2.schema.json",
+        "crates.io": "schemas/type-contract-0.2.schema.json",
+        "Go": "schemas/type-contract-0.2.schema.json",
         "RubyGems": "schemas/type-contract-0.2.schema.json"
       }
     },
@@ -56,67 +68,11 @@
       "kind": "schema",
       "source": "public/schemas/forms-0.1.schema.json",
       "paths": {
+        "npm": "dist/forms-0.1.schema.json",
+        "PyPI": "forms-0.1.schema.json",
+        "crates.io": "schemas/forms-0.1.schema.json",
+        "Go": "schemas/forms-0.1.schema.json",
         "RubyGems": "schemas/forms-0.1.schema.json"
-      }
-    },
-    {
-      "name": "map-0.1",
-      "role": "core",
-      "kind": "schema",
-      "source": "public/schemas/map-0.1.schema.json",
-      "paths": {
-        "npm": "dist/map-0.1.schema.json",
-        "PyPI": "map-0.1.schema.json",
-        "crates.io": "schemas/map-0.1.schema.json",
-        "Go": "schemas/map-0.1.schema.json"
-      }
-    },
-    {
-      "name": "content-review-0.1",
-      "role": "compatibility",
-      "kind": "schema",
-      "source": "public/schemas/content-review-0.1.schema.json",
-      "paths": {
-        "npm": "dist/content-review-0.1.schema.json",
-        "PyPI": "content-review-0.1.schema.json",
-        "crates.io": "schemas/content-review-0.1.schema.json",
-        "Go": "schemas/content-review-0.1.schema.json"
-      }
-    },
-    {
-      "name": "content-review-0.1-contract",
-      "role": "compatibility",
-      "kind": "contract",
-      "source": "public/contracts/content-review-0.1.json",
-      "paths": {
-        "npm": "dist/content-review-0.1.contract.json",
-        "PyPI": "content-review-0.1.contract.json",
-        "crates.io": "contracts/content-review-0.1.json",
-        "Go": "contracts/content-review-0.1.json"
-      }
-    },
-    {
-      "name": "content-review-0.2",
-      "role": "compatibility",
-      "kind": "schema",
-      "source": "public/schemas/content-review-0.2.schema.json",
-      "paths": {
-        "npm": "dist/content-review-0.2.schema.json",
-        "PyPI": "content-review-0.2.schema.json",
-        "crates.io": "schemas/content-review-0.2.schema.json",
-        "Go": "schemas/content-review-0.2.schema.json"
-      }
-    },
-    {
-      "name": "content-review-0.2-contract",
-      "role": "compatibility",
-      "kind": "contract",
-      "source": "public/contracts/content-review-0.2.json",
-      "paths": {
-        "npm": "dist/content-review-0.2.contract.json",
-        "PyPI": "content-review-0.2.contract.json",
-        "crates.io": "contracts/content-review-0.2.json",
-        "Go": "contracts/content-review-0.2.json"
       }
     }
   ]

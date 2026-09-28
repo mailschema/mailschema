@@ -1,47 +1,44 @@
-"""JSON Schema validation for MAP documents and MailSchema Registry contributions."""
+"""The MAP 0.2 core artifacts and JSON Schema validation for MailSchema Registry contributions."""
 
 import json
 from importlib.resources import files
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
-from referencing import Registry, Resource
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
+
+MAP_PROFILE = "https://mailschema.org/profiles/map/0.2"
+"""The MAP profile whose core artifacts this package carries."""
 
 
 def _bundled(name: str) -> dict[str, Any]:
     return json.loads(files(__package__).joinpath(name).read_text(encoding="utf-8"))
 
 
-def get_contribution_schema() -> dict[str, Any]:
-    """Return a fresh copy of the bundled contribution schema."""
-    return _bundled("contribution.schema.json")
-
-
 def get_map_schema() -> dict[str, Any]:
-    """Return a fresh copy of the MAP 0.1 schema."""
-    return _bundled("map-0.1.schema.json")
+    """Return a fresh copy of the MAP 0.2 core schema, as the profile record binds it by SHA-256."""
+    return _bundled("map-0.2.schema.json")
 
 
-def get_content_review_schema() -> dict[str, Any]:
-    """Return a fresh copy of the current Content Review 0.2 request schema."""
-    return _bundled("content-review-0.2.schema.json")
+def get_map_context() -> dict[str, Any]:
+    """Return a fresh copy of the MAP 0.2 JSON-LD context."""
+    return _bundled("map-0.2.jsonld")
 
 
-def get_content_review_contract() -> dict[str, Any]:
-    """Return a fresh copy of the canonical Content Review 0.2 type contract."""
-    return _bundled("content-review-0.2.contract.json")
+def get_contract_format_schema() -> dict[str, Any]:
+    """Return a fresh copy of the type contract format every MAP 0.2 contract follows."""
+    return _bundled("type-contract-0.2.schema.json")
 
 
-def get_content_review_01_schema() -> dict[str, Any]:
-    """Return a fresh copy of the immutable Content Review 0.1 request schema."""
-    return _bundled("content-review-0.1.schema.json")
+def get_forms_schema() -> dict[str, Any]:
+    """Return a fresh copy of the form fields block contracts pin."""
+    return _bundled("forms-0.1.schema.json")
 
 
-def get_content_review_01_contract() -> dict[str, Any]:
-    """Return a fresh copy of the immutable Content Review 0.1 type contract."""
-    return _bundled("content-review-0.1.contract.json")
+def get_contribution_schema() -> dict[str, Any]:
+    """Return a fresh copy of the bundled Registry contribution schema."""
+    return _bundled("contribution.schema.json")
 
 
 def get_record_schema() -> dict[str, Any]:
@@ -60,18 +57,6 @@ _variants = {
     for variant in _schema["oneOf"]
 }
 _record_validator = Draft202012Validator(get_record_schema(), format_checker=FormatChecker())
-_map_schema = get_map_schema()
-_map_validator = Draft202012Validator(_map_schema, format_checker=FormatChecker())
-_content_review_validator = Draft202012Validator(
-    get_content_review_schema(),
-    registry=Registry().with_resource(_map_schema["$id"], Resource.from_contents(_map_schema)),
-    format_checker=FormatChecker(),
-)
-_content_review_01_validator = Draft202012Validator(
-    get_content_review_01_schema(),
-    registry=Registry().with_resource(_map_schema["$id"], Resource.from_contents(_map_schema)),
-    format_checker=FormatChecker(),
-)
 
 
 def _errors(validator: Draft202012Validator, value: Any) -> list[str]:
@@ -94,21 +79,6 @@ def record_errors(value: Any) -> list[str]:
     return _errors(_record_validator, value)
 
 
-def map_errors(value: Any) -> list[str]:
-    """Return structural errors for a MAP 0.1 description, request, result or problem."""
-    return _errors(_map_validator, value)
-
-
-def content_review_request_errors(value: Any) -> list[str]:
-    """Return errors for a Content Review 0.2 MAP request."""
-    return _errors(_content_review_validator, value)
-
-
-def content_review_01_request_errors(value: Any) -> list[str]:
-    """Return errors for an immutable Content Review 0.1 MAP request."""
-    return _errors(_content_review_01_validator, value)
-
-
 def validate_contribution(value: Any) -> None:
     """Raise ValueError if a contribution does not match the schema."""
     errors = contribution_errors(value)
@@ -121,24 +91,3 @@ def validate_record(value: Any) -> None:
     errors = record_errors(value)
     if errors:
         raise ValueError("Invalid type record:\n" + "\n".join(errors))
-
-
-def validate_map_document(value: Any) -> None:
-    """Raise ValueError if a value is not a MAP 0.1 document."""
-    errors = map_errors(value)
-    if errors:
-        raise ValueError("Invalid MAP 0.1 document:\n" + "\n".join(errors))
-
-
-def validate_content_review_request(value: Any) -> None:
-    """Raise ValueError if a value is not a Content Review 0.2 request."""
-    errors = content_review_request_errors(value)
-    if errors:
-        raise ValueError("Invalid Content Review 0.2 request:\n" + "\n".join(errors))
-
-
-def validate_content_review_01_request(value: Any) -> None:
-    """Raise ValueError if a value is not an immutable Content Review 0.1 request."""
-    errors = content_review_01_request_errors(value)
-    if errors:
-        raise ValueError("Invalid Content Review 0.1 request:\n" + "\n".join(errors))

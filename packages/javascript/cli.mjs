@@ -3,59 +3,52 @@ import { open } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import {
   assertContribution,
-  assertContentReviewRequest,
-  assertMapDocument,
   assertTypeRecord,
-  getContentReviewSchema,
+  getContractFormatSchema,
   getContributionSchema,
+  getFormsSchema,
+  getMapContext,
   getMapSchema,
   getRecordSchema,
 } from '../dist/index.js';
 
-const help = `MailSchema contribution tools
+const help = `MailSchema Registry tools
 
-  mailschema check <file.json> [--record | --map | --content-review]
-  mailschema schema [--record | --map | --content-review]
+  mailschema check <file.json> [--record]
+  mailschema schema [--record | --map | --context | --contract-format | --forms]
 
-Checks JSON structure and required fields locally. Registry references and
-editorial acceptance are separate checks. No files are uploaded or changed.`;
+check validates a Registry contribution, or with --record an expanded record,
+locally. schema prints a bundled schema: the contribution schema by default, or
+a MAP 0.2 core artifact. No files are uploaded or changed.`;
+
+const schemas = {
+  record: getRecordSchema,
+  map: getMapSchema,
+  context: getMapContext,
+  'contract-format': getContractFormatSchema,
+  forms: getFormsSchema,
+};
 
 try {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
-      record: { type: 'boolean' },
-      map: { type: 'boolean' },
-      'content-review': { type: 'boolean' },
+      ...Object.fromEntries(Object.keys(schemas).map((name) => [name, { type: 'boolean' }])),
       help: { type: 'boolean', short: 'h' },
     },
   });
   const [command, path, ...extra] = positionals;
-  const formats = [values.record, values.map, values['content-review']].filter(Boolean);
-  if (formats.length > 1) throw new Error('Choose only one document format.');
-  const selected = values['content-review']
-    ? 'Content Review request'
-    : values.map
-      ? 'MAP document'
-      : values.record
-        ? 'type record'
-        : 'contribution';
+  const chosen = Object.keys(schemas).filter((name) => values[name]);
+  if (chosen.length > 1) throw new Error('Choose only one schema.');
   if (values.help || !command) console.log(help);
   else if (command === 'schema' && !path && !extra.length)
-    console.log(
-      JSON.stringify(
-        values['content-review']
-          ? getContentReviewSchema()
-          : values.map
-            ? getMapSchema()
-            : values.record
-              ? getRecordSchema()
-              : getContributionSchema(),
-        null,
-        2,
-      ),
-    );
-  else if (command === 'check' && path && !extra.length) {
+    console.log(JSON.stringify((schemas[chosen[0]] ?? getContributionSchema)(), null, 2));
+  else if (
+    command === 'check' &&
+    path &&
+    !extra.length &&
+    chosen.every((name) => name === 'record')
+  ) {
     const file = await open(path, 'r');
     let value;
     try {
@@ -69,11 +62,9 @@ try {
     } finally {
       await file.close();
     }
-    if (values['content-review']) assertContentReviewRequest(value);
-    else if (values.map) assertMapDocument(value);
-    else if (values.record) assertTypeRecord(value);
+    if (values.record) assertTypeRecord(value);
     else assertContribution(value);
-    console.log(`Valid MailSchema ${selected}.`);
+    console.log(`Valid MailSchema ${values.record ? 'type record' : 'contribution'}.`);
   } else throw new Error(help);
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

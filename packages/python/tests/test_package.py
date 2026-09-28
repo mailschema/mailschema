@@ -4,27 +4,33 @@ import unittest
 from pathlib import Path
 
 from mailschema import (
+    MAP_PROFILE,
     contribution_errors,
+    get_contract_format_schema,
     get_contribution_schema,
-    get_content_review_contract,
-    get_content_review_01_contract,
-    get_record_schema,
+    get_forms_schema,
+    get_map_context,
     get_map_schema,
+    get_record_schema,
     validate_contribution,
     validate_record,
-    validate_map_document,
-    validate_content_review_request,
 )
 
 
 class PackageTests(unittest.TestCase):
     def setUp(self):
-        # The release preparation script supplies the same fixture as the site.
+        # The release preparation script supplies the same fixtures as the site.
         self.fixture = json.loads(Path("tests/new-type.json").read_text())
         self.record = json.loads(Path("tests/content-review.json").read_text())
-        self.description = json.loads(Path("tests/map-description.json").read_text())
-        self.request = json.loads(Path("tests/map-request.json").read_text())
-        self.result = json.loads(Path("tests/map-result.json").read_text())
+
+    def test_map_core_artifacts(self):
+        self.assertEqual(MAP_PROFILE, "https://mailschema.org/profiles/map/0.2")
+        self.assertEqual(get_map_schema()["$id"], "https://mailschema.org/schemas/map-0.2.schema.json")
+        self.assertEqual(get_map_context()["@context"]["MailAction"], "map:MailAction")
+        self.assertEqual(
+            get_contract_format_schema()["$id"], "https://mailschema.org/schemas/type-contract-0.2.schema.json"
+        )
+        self.assertEqual(get_forms_schema()["$id"], "https://mailschema.org/schemas/forms-0.1.schema.json")
 
     def test_valid_contribution_and_record(self):
         validate_contribution(self.fixture)
@@ -45,21 +51,6 @@ class PackageTests(unittest.TestCase):
         schema["title"] = "mutated"
         self.assertNotEqual(get_contribution_schema()["title"], "mutated")
         self.assertEqual(get_record_schema()["$ref"], "#/$defs/record")
-        self.assertEqual(get_map_schema()["$id"], "https://mailschema.org/schemas/map-0.1.schema.json")
-        self.assertEqual(get_content_review_contract()["id"], "https://mailschema.org/types/content-review")
-        self.assertEqual(get_content_review_contract()["version"], "0.2")
-        self.assertEqual(get_content_review_01_contract()["version"], "0.1")
-
-    def test_map_documents(self):
-        validate_map_document(self.description)
-        validate_map_document(self.request)
-        validate_map_document(self.result)
-        self.assertEqual(self.result["type"], self.request["type"])
-        validate_content_review_request(self.request)
-        invalid = copy.deepcopy(self.request)
-        invalid["operation"] = "publish"
-        with self.assertRaises(ValueError):
-            validate_content_review_request(invalid)
 
 
 if __name__ == "__main__":

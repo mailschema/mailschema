@@ -1,9 +1,26 @@
-//! Bundled JSON Schemas for Mail Action Protocol and the MailSchema Registry.
+//! The Mail Action Protocol 0.2 core artifacts and the MailSchema Registry schemas.
 //!
-//! These Draft 2020-12 schemas describe contribution files and expanded type
-//! records. Pass them to a JSON Schema validator with format checking enabled.
-//! This crate does not implement email delivery, MAP authorization or Registry
-//! reference checks. The embedded schemas need no filesystem or network access.
+//! The MAP 0.2 core schema, JSON-LD context, type contract format and form fields
+//! block are embedded exactly as the profile record binds them by SHA-256. Type
+//! contracts are not bundled: clients obtain them from the Registry catalogue by
+//! digest. The Registry schemas describe contribution files and expanded type
+//! records; pass them to a JSON Schema validator with format checking enabled.
+//! Nothing here needs filesystem or network access.
+
+/// The MAP profile whose core artifacts this crate carries.
+pub const MAP_PROFILE: &str = "https://mailschema.org/profiles/map/0.2";
+
+/// The MAP 0.2 core schema: descriptions, requests, results and problems.
+pub const MAP_SCHEMA: &str = include_str!("../schemas/map-0.2.schema.json");
+
+/// The MAP 0.2 JSON-LD context.
+pub const MAP_CONTEXT: &str = include_str!("../contexts/map-0.2.jsonld");
+
+/// The type contract format every MAP 0.2 contract follows.
+pub const CONTRACT_FORMAT_SCHEMA: &str = include_str!("../schemas/type-contract-0.2.schema.json");
+
+/// The form fields block contracts pin.
+pub const FORMS_SCHEMA: &str = include_str!("../schemas/forms-0.1.schema.json");
 
 /// Schema for new types, amendments and implementation declarations.
 pub const CONTRIBUTION_SCHEMA: &str = include_str!("../schemas/contribution.schema.json");
@@ -11,42 +28,25 @@ pub const CONTRIBUTION_SCHEMA: &str = include_str!("../schemas/contribution.sche
 /// Schema for expanded Registry records, including attribution and history.
 pub const RECORD_SCHEMA: &str = include_str!("../schemas/record.schema.json");
 
-/// Schema for MAP 0.1 descriptions, requests, results and problems.
-pub const MAP_0_1_SCHEMA: &str = include_str!("../schemas/map-0.1.schema.json");
-
-/// Content Review 0.1 request binding.
-pub const CONTENT_REVIEW_0_1_SCHEMA: &str =
-    include_str!("../schemas/content-review-0.1.schema.json");
-
-/// Canonical Content Review 0.1 type contract.
-pub const CONTENT_REVIEW_0_1_CONTRACT: &str = include_str!("../contracts/content-review-0.1.json");
-
-/// Content Review 0.2 request binding.
-pub const CONTENT_REVIEW_0_2_SCHEMA: &str =
-    include_str!("../schemas/content-review-0.2.schema.json");
-
-/// Canonical Content Review 0.2 type contract.
-pub const CONTENT_REVIEW_0_2_CONTRACT: &str = include_str!("../contracts/content-review-0.2.json");
-
-/// Supported local schema documents.
+/// The embedded JSON Schema documents.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Schema {
+    Map,
+    ContractFormat,
+    Forms,
     Contribution,
     Record,
-    Map01,
-    ContentReview01,
-    ContentReview02,
 }
 
 impl Schema {
     /// Return the embedded JSON text for this schema.
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::Map => MAP_SCHEMA,
+            Self::ContractFormat => CONTRACT_FORMAT_SCHEMA,
+            Self::Forms => FORMS_SCHEMA,
             Self::Contribution => CONTRIBUTION_SCHEMA,
             Self::Record => RECORD_SCHEMA,
-            Self::Map01 => MAP_0_1_SCHEMA,
-            Self::ContentReview01 => CONTENT_REVIEW_0_1_SCHEMA,
-            Self::ContentReview02 => CONTENT_REVIEW_0_2_SCHEMA,
         }
     }
 }
@@ -58,35 +58,21 @@ mod tests {
     #[test]
     fn embeds_standalone_draft_2020_12_documents() {
         for schema in [
+            Schema::Map,
+            Schema::ContractFormat,
+            Schema::Forms,
             Schema::Contribution,
             Schema::Record,
-            Schema::Map01,
-            Schema::ContentReview01,
-            Schema::ContentReview02,
         ] {
             let value: serde_json::Value = serde_json::from_str(schema.as_str()).unwrap();
-            assert_eq!(
-                value["$schema"],
-                "https://json-schema.org/draft/2020-12/schema"
-            );
+            assert_eq!(value["$schema"], "https://json-schema.org/draft/2020-12/schema");
         }
-        let contribution: serde_json::Value = serde_json::from_str(CONTRIBUTION_SCHEMA).unwrap();
-        assert!(contribution["$defs"]["record"].is_object());
-        let map: serde_json::Value = serde_json::from_str(MAP_0_1_SCHEMA).unwrap();
-        assert_eq!(
-            map["$id"],
-            "https://mailschema.org/schemas/map-0.1.schema.json"
-        );
+        let map: serde_json::Value = serde_json::from_str(MAP_SCHEMA).unwrap();
+        assert_eq!(map["$id"], "https://mailschema.org/schemas/map-0.2.schema.json");
+        let context: serde_json::Value = serde_json::from_str(MAP_CONTEXT).unwrap();
+        assert_eq!(context["@context"]["MailAction"], "map:MailAction");
         let record: serde_json::Value = serde_json::from_str(RECORD_SCHEMA).unwrap();
         assert_eq!(record["$ref"], "#/$defs/record");
-        let contract: serde_json::Value =
-            serde_json::from_str(CONTENT_REVIEW_0_1_CONTRACT).unwrap();
-        assert_eq!(
-            contract["id"],
-            "https://mailschema.org/types/content-review"
-        );
-        let current_contract: serde_json::Value =
-            serde_json::from_str(CONTENT_REVIEW_0_2_CONTRACT).unwrap();
-        assert_eq!(current_contract["version"], "0.2");
+        assert_eq!(MAP_PROFILE, "https://mailschema.org/profiles/map/0.2");
     }
 }

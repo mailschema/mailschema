@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -12,13 +12,11 @@ import {
   assertContribution,
   assertTypeRecord,
   referenceErrors,
+  MAP_PROFILE,
   getMapSchema,
-  getContentReviewSchema,
-  getContentReviewContract,
-  getContentReview01Schema,
-  getContentReview01Contract,
-  assertMapDocument,
-  assertContentReviewRequest,
+  getMapContext,
+  getContractFormatSchema,
+  getFormsSchema,
 } from '../.release/packages/npm/dist/index.js';
 
 const fixture = JSON.parse(
@@ -137,33 +135,19 @@ test('prepared distributions contain exactly the artifacts selected by the manif
   const edited = getContributionSchema();
   edited.title = 'mutated';
   assert.notEqual(getContributionSchema().title, 'mutated');
-  assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.1.schema.json');
-  assert.equal(
-    getContentReviewSchema().$id,
-    'https://mailschema.org/schemas/content-review-0.2.schema.json',
-  );
-  assert.equal(
-    getContentReview01Schema().$id,
-    'https://mailschema.org/schemas/content-review-0.1.schema.json',
-  );
-  for (const version of ['0.1', '0.2']) {
-    const contract = readFileSync(`public/contracts/content-review-${version}.json`, 'utf8');
-    for (const path of [
-      `npm/dist/content-review-${version}.contract.json`,
-      `python/src/mailschema/content-review-${version}.contract.json`,
-      `rust/contracts/content-review-${version}.json`,
-    ])
-      assert.equal(readFileSync(`.release/packages/${path}`, 'utf8'), contract);
-  }
-  assert.equal(getContentReviewContract().id, 'https://mailschema.org/types/content-review');
-  assert.equal(getContentReviewContract().version, '0.2');
-  assert.equal(getContentReview01Contract().version, '0.1');
-  const description = JSON.parse(
-    readFileSync('public/fixtures/map-0.1/content-review-description.json'),
-  );
-  const request = JSON.parse(readFileSync('public/fixtures/map-0.1/approve.json'));
-  assertMapDocument(description);
-  assertContentReviewRequest(request);
+  // The MAP 0.2 core artifacts, exactly as published; no type contract is bundled.
+  assert.equal(MAP_PROFILE, 'https://mailschema.org/profiles/map/0.2');
+  for (const [document, path] of [
+    [getMapSchema(), 'public/schemas/map-0.2.schema.json'],
+    [getMapContext(), 'public/contexts/map-0.2.jsonld'],
+    [getContractFormatSchema(), 'public/schemas/type-contract-0.2.schema.json'],
+    [getFormsSchema(), 'public/schemas/forms-0.1.schema.json'],
+  ])
+    assert.deepEqual(document, JSON.parse(readFileSync(path, 'utf8')));
+  for (const root of ['npm/dist', 'python/src/mailschema', 'rust/contracts', 'rust/schemas'])
+    if (existsSync(`.release/packages/${root}`))
+      for (const file of readdirSync(`.release/packages/${root}`))
+        assert.doesNotMatch(file, /content-review|map-0\.1/, `${root}/${file}`);
 });
 
 test('compiled API validates contributions and records and rejects unsupported claims', () => {
@@ -213,18 +197,10 @@ test('packaged CLI validates files, emits standalone schema and fails invalid in
     execFileSync(process.execPath, [cli, 'schema', '--record'], { encoding: 'utf8' }),
   );
   assert.equal(schema.$ref, '#/$defs/record');
-  const mapCheck = execFileSync(
-    process.execPath,
-    [cli, 'check', 'public/fixtures/map-0.1/content-review-description.json', '--map'],
-    { encoding: 'utf8' },
+  const context = JSON.parse(
+    execFileSync(process.execPath, [cli, 'schema', '--context'], { encoding: 'utf8' }),
   );
-  assert.match(mapCheck, /Valid MailSchema MAP document/);
-  const contentCheck = execFileSync(
-    process.execPath,
-    [cli, 'check', 'public/fixtures/map-0.1/approve.json', '--content-review'],
-    { encoding: 'utf8' },
-  );
-  assert.match(contentCheck, /Valid MailSchema Content Review request/);
+  assert.equal(context['@context'].MailAction, 'map:MailAction');
   const bad = spawnSync(process.execPath, [cli, 'check', 'package.json'], { encoding: 'utf8' });
   assert.equal(bad.status, 1);
   const missing = spawnSync(process.execPath, [cli, 'check', '/nonexistent-metadata-file.json'], {
