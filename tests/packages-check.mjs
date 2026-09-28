@@ -84,8 +84,13 @@ test('distribution metadata and READMEs point to maintained language repositorie
     const readme = readFileSync(`.release/packages/${language}/README.md`, 'utf8');
     assert.match(readme, /Mail Action Protocol/);
     assert.match(readme, new RegExp(`https://github\\.com/mailschema/${repository}`));
-    assert.doesNotMatch(readme, /(?:version|mailschema\s*=\s*)[ `"]*0\.2(?:\.0)?\b/i);
   }
+  // The crate's install line follows its declared version.
+  const minor = versions['crates.io'].split('.').slice(0, 2).join('.');
+  assert.match(
+    readFileSync('.release/packages/rust/README.md', 'utf8'),
+    new RegExp(`mailschema = "${minor.replace('.', '\\.')}"`),
+  );
 
   const gemspec = readFileSync('.release/packages/ruby/mailschema.gemspec', 'utf8');
   for (const [key, value] of [
