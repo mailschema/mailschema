@@ -4,23 +4,23 @@
   "channels": [
     {
       "registry": "npm",
-      "evidence": "npm-0.1.5-contracts",
-      "version": "0.1.5"
+      "evidence": "npm-0.2.1-contracts",
+      "version": "0.2.1"
     },
     {
       "registry": "PyPI",
-      "evidence": "pypi-0.1.4-contracts",
-      "version": "0.1.4"
+      "evidence": "pypi-0.2.1-contracts",
+      "version": "0.2.1"
     },
     {
       "registry": "crates.io",
-      "evidence": "crates-0.1.4-contracts",
-      "version": "0.1.4"
+      "evidence": "crates-0.2.1-contracts",
+      "version": "0.2.1"
     },
     {
       "registry": "Go",
-      "evidence": "go-0.1.2-contracts",
-      "version": "0.1.2"
+      "evidence": "go-0.2.0-contracts",
+      "version": "0.2.0"
     },
     {
       "registry": "RubyGems",
