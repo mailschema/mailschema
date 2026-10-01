@@ -23,8 +23,9 @@ for (const [name, path] of [
     `The profile record binds stale ${name} bytes.`,
   );
 
-// The Internet-Draft names every artifact the profile record binds, with its digest.
-const draft = read('ietf/draft-mailschema-mail-action-protocol-00.xml').toString('utf8');
+// The retained 0.2 draft projection still binds the live profile's artifacts.
+// The unsubmitted -00 candidate now describes the separately staged MAP 0.3.
+const draft = read('ietf/archive/map-0.2.xml').toString('utf8');
 for (const [name, bound] of Object.entries(profile.artifacts) as [
   string,
   { url: string; sha256?: string },

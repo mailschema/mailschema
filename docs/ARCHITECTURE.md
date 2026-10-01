@@ -1,5 +1,7 @@
 # MailSchema and Mail Action Protocol (MAP)
 
+This document records the earlier naming and product architecture. The current protocol direction is [MAP 0.3](MAP-0.3-DESIGN.md), with normative drafting in the [specification bundle](../specifications/map-0.3/README.md). In particular, its existing-operation bindings replace the shared request/result approach described below. Published 0.2 artifacts and implementations retain their existing meanings.
+
 MailSchema is the open project for agent interactions through email. Its first specification is **Mail Action Protocol (MAP)**, which defines how agents discover and complete service actions offered through email, with people retaining control.
 
 **Status: selected foundational architecture, 22 September 2026.** The project name, specification name and acronym are settled. Direction 03 is the selected yellow-and-blue identity; the technical specification remains a working draft.

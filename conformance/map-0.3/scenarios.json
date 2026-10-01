@@ -1,0 +1,1020 @@
+[
+  {
+    "id": "mime-related-with-attachments",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#email-representation"
+    ],
+    "given": [
+      "A signed outer multipart/mixed contains one readable-root multipart/related, one designated MAP part, and an ordinary attachment."
+    ],
+    "when": [
+      "Extract the MAP part."
+    ],
+    "then": [
+      "Select the part belonging to the outer message; do not reject merely because multipart/related is nested."
+    ]
+  },
+  {
+    "id": "mime-attached-original",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#email-representation"
+    ],
+    "given": [
+      "Only a message/rfc822 attachment contains a valid signed MAP description."
+    ],
+    "when": [
+      "Process the containing message."
+    ],
+    "then": [
+      "Expose no MAP action and make no MAP-driven network request."
+    ]
+  },
+  {
+    "id": "mime-two-parts",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#email-representation"
+    ],
+    "given": [
+      "Two MAP-profile machine parts occur in the outer message, with identical or conflicting descriptions."
+    ],
+    "when": [
+      "Process the message."
+    ],
+    "then": [
+      "Reject MAP actionability; do not choose one part."
+    ]
+  },
+  {
+    "id": "json-escaped-duplicate",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#json-processing-limits"
+    ],
+    "given": [
+      "Raw JSON contains both \"recipient\" and \"recip\\u0069ent\" members."
+    ],
+    "when": [
+      "Parse before a generic parser discards duplicates."
+    ],
+    "then": [
+      "Reject the document regardless of whether the values match."
+    ]
+  },
+  {
+    "id": "json-boundaries",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#json-processing-limits"
+    ],
+    "given": [
+      "Fixtures exercise 65536 and 65537 decoded octets, 32 and 33 container levels, numeric overflow and underflow, lone surrogates, noncharacters, and escaped NUL."
+    ],
+    "when": [
+      "Run the raw parser and bounded validator."
+    ],
+    "then": [
+      "Accept each valid boundary fixture and reject each beyond-limit or forbidden-code-point fixture; report each subcase separately."
+    ]
+  },
+  {
+    "id": "qualifying-signature",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "One signature is aligned with full body coverage and all required headers; another is unrelated."
+    ],
+    "when": [
+      "Verify the same qualifying signature satisfies every requirement."
+    ],
+    "then": [
+      "Permit subsequent trust checks; do not combine coverage from two different signatures."
+    ]
+  },
+  {
+    "id": "dkim-length-tag",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "A valid aligned DKIM signature contains l= equal to the complete received body length."
+    ],
+    "when": [
+      "Attempt to expose a MAP action."
+    ],
+    "then": [
+      "Reject actionability despite dkim=pass."
+    ]
+  },
+  {
+    "id": "dkim-unsigned-critical-header",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "A valid aligned signature omits To or Subject from its signed header list."
+    ],
+    "when": [
+      "Attempt MAP processing."
+    ],
+    "then": [
+      "Reject actionability and perform no service read."
+    ]
+  },
+  {
+    "id": "header-duplicate",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "A message has two From or Content-Type fields, one covered by a passing signature."
+    ],
+    "when": [
+      "Attempt MAP processing."
+    ],
+    "then": [
+      "Reject instead of choosing the signed or first copy."
+    ]
+  },
+  {
+    "id": "spf-only",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "DMARC passes through aligned SPF; no qualifying DKIM signature exists."
+    ],
+    "when": [
+      "Attempt MAP processing."
+    ],
+    "then": [
+      "Reject actionability."
+    ]
+  },
+  {
+    "id": "forged-authentication-results",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "An external message supplies Authentication-Results using the configured authserv-id. No authenticated receiver evidence exists."
+    ],
+    "when": [
+      "Attempt MAP processing."
+    ],
+    "then": [
+      "Reject that result as evidence."
+    ]
+  },
+  {
+    "id": "receiver-bare-pass",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "A trusted receiver reports dkim=pass without signature coverage or preserved-message evidence."
+    ],
+    "when": [
+      "Attempt MAP processing."
+    ],
+    "then": [
+      "Do not infer the missing MAP requirements; reject actionability until evidence is available."
+    ]
+  },
+  {
+    "id": "trusted-gateway-readable-rewrite",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "The trusted receiver retains a qualifying original signature and unchanged machine part; a controlled gateway changes only the readable URL."
+    ],
+    "when": [
+      "Validate using authenticated receiver evidence."
+    ],
+    "then": [
+      "Allow subsequent checks against the preserved original machine data."
+    ]
+  },
+  {
+    "id": "gateway-machine-rewrite",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#qualifying-message-authentication"
+    ],
+    "given": [
+      "A gateway rewrites capability.url; the consumer has only the old authentication verdict and modified JSON."
+    ],
+    "when": [
+      "Attempt capability processing."
+    ],
+    "then": [
+      "Reject; do not follow the wrapper URL to recover authority."
+    ]
+  },
+  {
+    "id": "forwarded-recipient",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#recipient-and-copy-handling"
+    ],
+    "given": [
+      "A signed proposal names alice@example.net, but the host controls only bob@example.net and received a forwarded copy."
+    ],
+    "when": [
+      "Attempt actionability."
+    ],
+    "then": [
+      "Reject; authentic signatures and forwarding do not establish Alice mailbox control."
+    ]
+  },
+  {
+    "id": "controlled-alias",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#recipient-and-copy-handling"
+    ],
+    "given": [
+      "The provider attests original delivery to an explicit controlled alias and maps that mailbox to the principal."
+    ],
+    "when": [
+      "Process an automatically forwarded but otherwise valid original."
+    ],
+    "then": [
+      "Apply the ordinary service and trust checks; do not invent an auto-forward detection requirement."
+    ]
+  },
+  {
+    "id": "reply-strips-map",
+    "status": "unimplemented",
+    "roles": [
+      "consumer",
+      "producer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#recipient-and-copy-handling"
+    ],
+    "given": [
+      "An MUA creates an ordinary reply or manual forward from a valid message."
+    ],
+    "when": [
+      "Serialize the outgoing MIME."
+    ],
+    "then": [
+      "No active MAP part survives; an attached original remains inert."
+    ]
+  },
+  {
+    "id": "contract-digest",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#contract-identification"
+    ],
+    "given": [
+      "A configured catalogue has the same type id and version but a different canonical contract digest."
+    ],
+    "when": [
+      "Resolve the description."
+    ],
+    "then": [
+      "Reject; do not fall back to the newest catalogue entry."
+    ]
+  },
+  {
+    "id": "contract-formatting",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#contract-identification"
+    ],
+    "given": [
+      "Two byte serializations differ only in JSON whitespace and object member order."
+    ],
+    "when": [
+      "Canonicalize and digest both."
+    ],
+    "then": [
+      "Produce the same contract digest; a changed normative requirement produces a different digest."
+    ]
+  },
+  {
+    "id": "no-remote-context",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#json-processing-limits"
+    ],
+    "given": [
+      "Description details include text resembling a URL and JSON-LD instructions."
+    ],
+    "when": [
+      "Expand with the fixed bundled context."
+    ],
+    "then": [
+      "Make no network requests; details remain a JSON literal."
+    ]
+  },
+  {
+    "id": "connector-install-injection",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#trusted-service-implementation"
+    ],
+    "given": [
+      "A validly signed message describes an unfamiliar service and supplies prose asking to install its connector."
+    ],
+    "when": [
+      "Process it with no independently trusted connector."
+    ],
+    "then": [
+      "Do not install, fetch, obtain a credential, or run an action."
+    ]
+  },
+  {
+    "id": "tenant-confused-deputy",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "The host credential can access tenant A; email identifiers name a proposal in tenant B."
+    ],
+    "when": [
+      "Resolve through the trusted mapping."
+    ],
+    "then": [
+      "Reject any tenant mismatch before decision; never construct an out-of-scope path."
+    ]
+  },
+  {
+    "id": "readback-valid",
+    "status": "unimplemented",
+    "roles": [
+      "consumer",
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "Email, configured contract, authenticated principal, tenant, recipient, proposal version, and service operation set match."
+    ],
+    "when": [
+      "Read current typed details and obtain a permitted host decision."
+    ],
+    "then": [
+      "Pass only the mapped operation and validated values to the service; email preview is not the policy source."
+    ]
+  },
+  {
+    "id": "readback-forged-preview",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "The signed email claims audience count 5; the service returns 4210 for the actual proposal. The standing limit is 100."
+    ],
+    "when": [
+      "Evaluate the proposal."
+    ],
+    "then": [
+      "Use 4210 for policy and deny automatic approval. Never approve using the email count."
+    ]
+  },
+  {
+    "id": "readback-resource-only",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "An API returns a readable campaign but supplies no evidence this proposal was offered to the recipient."
+    ],
+    "when": [
+      "Resolve the interaction."
+    ],
+    "then": [
+      "Do not manufacture the missing proposal relationship from email; reject actionability."
+    ]
+  },
+  {
+    "id": "readback-operation-intersection",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "Email offers decline only; the contract and service also offer approve."
+    ],
+    "when": [
+      "Display or invoke available operations."
+    ],
+    "then": [
+      "Offer only decline. A service-only approve is not actionable from this email."
+    ]
+  },
+  {
+    "id": "readback-stale",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "Email names r4; the authorized service read returns r5."
+    ],
+    "when": [
+      "Ask the principal for a decision."
+    ],
+    "then": [
+      "Do not silently replace r4 with r5 or reuse previous consent; require a new interaction."
+    ]
+  },
+  {
+    "id": "unknown-effect",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#contract-format-and-obligations"
+    ],
+    "given": [
+      "A trusted new contract uses an effect unknown to the host."
+    ],
+    "when": [
+      "Evaluate a standing approval policy."
+    ],
+    "then": [
+      "Do not automate; obtain a decision only if the host can safely explain the complete contract, otherwise refuse."
+    ]
+  },
+  {
+    "id": "model-self-confirmation",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#authoritative-readback-and-decision"
+    ],
+    "given": [
+      "Policy requires a human; the model emits a fabricated approval message."
+    ],
+    "when": [
+      "Attempt execution."
+    ],
+    "then": [
+      "Perform no action without an actual trusted host confirmation event."
+    ]
+  },
+  {
+    "id": "atomic-version-race",
+    "status": "unimplemented",
+    "roles": [
+      "service",
+      "http"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#exact-terms-and-service-enforcement"
+    ],
+    "given": [
+      "Read r4 and approve its terms. Before commit, another operation updates the proposal to r5."
+    ],
+    "when": [
+      "Submit r4 through the mapped expected-version mechanism."
+    ],
+    "then": [
+      "Commit zero effects, preserve r5, and report stale using the service convention."
+    ]
+  },
+  {
+    "id": "permission-revocation-race",
+    "status": "unimplemented",
+    "roles": [
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#exact-terms-and-service-enforcement"
+    ],
+    "given": [
+      "Read and confirmation succeed; permission is revoked before action commit."
+    ],
+    "when": [
+      "Submit the authorized-looking decision."
+    ],
+    "then": [
+      "Reject at commit and apply zero effects."
+    ]
+  },
+  {
+    "id": "competing-decisions",
+    "status": "unimplemented",
+    "roles": [
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#exact-terms-and-service-enforcement"
+    ],
+    "given": [
+      "Two concurrent requests approve and decline the same undecided proposal."
+    ],
+    "when": [
+      "Race both requests at the service decision boundary."
+    ],
+    "then": [
+      "At most one terminal decision commits; the losing request cannot authorize another effect."
+    ]
+  },
+  {
+    "id": "queued-snapshot",
+    "status": "unimplemented",
+    "roles": [
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#exact-terms-and-service-enforcement"
+    ],
+    "given": [
+      "A campaign approves audience snapshot a3 and content c4; before queued execution, a mutable segment and document change."
+    ],
+    "when": [
+      "Execute accepted work."
+    ],
+    "then": [
+      "Use the accepted immutable content and audience, permitting only safety suppression; never add recipients or use revised content."
+    ]
+  },
+  {
+    "id": "update-header-no-authority",
+    "status": "unimplemented",
+    "roles": [
+      "consumer"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#semantic-conditions-and-updates"
+    ],
+    "given": [
+      "A signed replacement message names SUPERSEDES; service state still rejects its claimed proposal."
+    ],
+    "when": [
+      "Process the replacement."
+    ],
+    "then": [
+      "The header can inform display but cannot create or authorize the proposal."
+    ]
+  },
+  {
+    "id": "http-tag-other-resource",
+    "status": "unimplemented",
+    "roles": [
+      "http"
+    ],
+    "requirements": [
+      "specifications/map-0.3/http.md#http-exact-terms"
+    ],
+    "given": [
+      "GET /campaigns/42 returns ETag r4; POST /approvals/7 has no documented conditional relationship."
+    ],
+    "when": [
+      "Attempt to use If-Match r4 on the approval."
+    ],
+    "then": [
+      "Refuse to claim an exact-terms binding; the API must supply atomic version semantics."
+    ]
+  },
+  {
+    "id": "http-existing-revision-field",
+    "status": "unimplemented",
+    "roles": [
+      "http",
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/http.md#http-exact-terms"
+    ],
+    "given": [
+      "An existing API accepts expected_revision in its own body and atomically checks it."
+    ],
+    "when": [
+      "Submit correct and stale revisions."
+    ],
+    "then": [
+      "Accept the correct revision under current permission; map the API's native stale response without requiring a new MAP endpoint or RFC 9457 body."
+    ]
+  },
+  {
+    "id": "http-redirect",
+    "status": "unimplemented",
+    "roles": [
+      "http"
+    ],
+    "requirements": [
+      "specifications/map-0.3/http.md#http-origin-and-credential-protection"
+    ],
+    "given": [
+      "A mapped authenticated operation responds with a same-origin or cross-origin redirect."
+    ],
+    "when": [
+      "Process the response with redirect following disabled."
+    ],
+    "then": [
+      "Send no redirected credentialed request."
+    ]
+  },
+  {
+    "id": "http-timeout",
+    "status": "unimplemented",
+    "roles": [
+      "http"
+    ],
+    "requirements": [
+      "specifications/map-0.3/http.md#http-decisions-retries-and-outcomes"
+    ],
+    "given": [
+      "The action commits but its response is lost; the API supplies no replay-safe retry guarantee."
+    ],
+    "when": [
+      "Handle the timeout."
+    ],
+    "then": [
+      "Report unknown outcome and do not retry automatically; a configured decision read may resolve it."
+    ]
+  },
+  {
+    "id": "http-accepted-not-complete",
+    "status": "unimplemented",
+    "roles": [
+      "http"
+    ],
+    "requirements": [
+      "specifications/map-0.3/http.md#http-decisions-retries-and-outcomes"
+    ],
+    "given": [
+      "An API returns 202 with a queued job."
+    ],
+    "when": [
+      "Present the result."
+    ],
+    "then": [
+      "Report accepted or pending; do not claim delivery or publication completed."
+    ]
+  },
+  {
+    "id": "capability-origin",
+    "status": "unimplemented",
+    "roles": [
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-origin-and-delivery"
+    ],
+    "given": [
+      "A capability differs from service.id by host or port, or its organization differs from the strict aligned author domain."
+    ],
+    "when": [
+      "Validate before POST."
+    ],
+    "then": [
+      "Reject; neither valid TLS nor a suffix substring repairs origin mismatch."
+    ]
+  },
+  {
+    "id": "capability-envelope-blindness",
+    "status": "unimplemented",
+    "roles": [
+      "producer",
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-origin-and-delivery"
+    ],
+    "given": [
+      "To contains one recipient but the producer actually used two envelope recipients."
+    ],
+    "when": [
+      "Audit producer delivery and consumer knowledge separately."
+    ],
+    "then": [
+      "Producer fails conformance. Consumer MUST NOT claim that single To proved exclusive delivery."
+    ]
+  },
+  {
+    "id": "capability-copied-bearer",
+    "status": "unimplemented",
+    "roles": [
+      "service",
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-origin-and-delivery"
+    ],
+    "given": [
+      "Another holder obtains a valid decline token from a forwarded copy."
+    ],
+    "when": [
+      "Use it outside the compliant receiving client."
+    ],
+    "then": [
+      "The server permits only the bound refusal; the test does not claim cryptographic non-transferability."
+    ]
+  },
+  {
+    "id": "capability-exact-body",
+    "status": "unimplemented",
+    "roles": [
+      "service",
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-service-processing"
+    ],
+    "given": [
+      "A valid capability is exercised with GET, HEAD, wrong Content-Type, an extra form field, or a trailing newline."
+    ],
+    "when": [
+      "Submit each request separately."
+    ],
+    "then": [
+      "No variant commits an effect; only exact authorized POST is accepted."
+    ]
+  },
+  {
+    "id": "capability-no-ambient-authority",
+    "status": "unimplemented",
+    "roles": [
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-decision-and-request"
+    ],
+    "given": [
+      "The ordinary HTTP client has cookies, Authorization, a client certificate, a Referer, and redirect handling configured."
+    ],
+    "when": [
+      "Send an approved capability POST through the isolated binding."
+    ],
+    "then": [
+      "None of that ambient authority accompanies it; no redirect is followed."
+    ]
+  },
+  {
+    "id": "capability-ssrf-rebinding",
+    "status": "unimplemented",
+    "roles": [
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-decision-and-request"
+    ],
+    "given": [
+      "A signed HTTPS capability hostname resolves first publicly then to loopback, private, or link-local addresses."
+    ],
+    "when": [
+      "Resolve and connect."
+    ],
+    "then": [
+      "Apply the egress decision to the actual connection address; no protected-network connection occurs."
+    ]
+  },
+  {
+    "id": "capability-lifetime",
+    "status": "unimplemented",
+    "roles": [
+      "capability",
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-eligibility"
+    ],
+    "given": [
+      "Refusal, report, and confirmation capabilities exceed their kind's maximum lifetime or the interaction expiry."
+    ],
+    "when": [
+      "Validate and attempt execution at the boundary."
+    ],
+    "then": [
+      "Reject over-limit lifetimes; at expiry the service commits no effect."
+    ]
+  },
+  {
+    "id": "capability-disallowed-effect",
+    "status": "unimplemented",
+    "roles": [
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-eligibility"
+    ],
+    "given": [
+      "A contract adds communication, authorization, an unknown effect, or semantic input to a capability operation."
+    ],
+    "when": [
+      "Validate the contract and ask a human to override."
+    ],
+    "then": [
+      "Reject capability execution even with human approval; use a separately conforming route."
+    ]
+  },
+  {
+    "id": "confirmation-uninitiated",
+    "status": "unimplemented",
+    "roles": [
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-decision-and-request"
+    ],
+    "given": [
+      "An authentic address-confirmation email has no independently recorded matching initiation."
+    ],
+    "when": [
+      "Attempt confirm."
+    ],
+    "then": [
+      "Do not POST; the email cannot create its own correlation record."
+    ]
+  },
+  {
+    "id": "confirmation-one-use",
+    "status": "unimplemented",
+    "roles": [
+      "service",
+      "capability"
+    ],
+    "requirements": [
+      "specifications/map-0.3/capability.md#capability-service-processing"
+    ],
+    "given": [
+      "A matching address-confirmation token is used successfully, then replayed."
+    ],
+    "when": [
+      "Submit both requests."
+    ],
+    "then": [
+      "Record confirmation once, never extend validity or create an authenticated session."
+    ]
+  },
+  {
+    "id": "human-scanner",
+    "status": "unimplemented",
+    "roles": [
+      "human"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#human-route"
+    ],
+    "given": [
+      "A scanner requests the human URL and all its redirects with GET and HEAD."
+    ],
+    "when": [
+      "Follow the readable route without an explicit form submission."
+    ],
+    "then": [
+      "Record zero decisions and consume no confirmation authority."
+    ]
+  },
+  {
+    "id": "human-csrf-and-stale-form",
+    "status": "unimplemented",
+    "roles": [
+      "human",
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#human-route"
+    ],
+    "given": [
+      "An authenticated page is framed by an untrusted origin, or a confirmation lacks CSRF protection, or its proposal changed after display."
+    ],
+    "when": [
+      "Attempt confirmation in each condition."
+    ],
+    "then": [
+      "Block the unauthorized frame or submission; stale terms commit no effect."
+    ]
+  },
+  {
+    "id": "identifier-display",
+    "status": "unimplemented",
+    "roles": [
+      "consumer",
+      "human"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#human-route"
+    ],
+    "given": [
+      "A title contains bidi controls and a displayed identity resembles a trusted service; an opaque token differs under Unicode normalization."
+    ],
+    "when": [
+      "Render and compare identities."
+    ],
+    "then": [
+      "Flag unsafe display characters, show the real origin, and never normalize the token into a match."
+    ]
+  },
+  {
+    "id": "publication-review-migration",
+    "status": "unimplemented",
+    "roles": [
+      "service"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#contract-identification"
+    ],
+    "given": [
+      "A historical Content Review approval exists for a revision also offered for Publication Approval."
+    ],
+    "when": [
+      "Attempt migration without a new publication decision."
+    ],
+    "then": [
+      "Retain the old review meaning and require an explicitly authorized publication proposal."
+    ]
+  }
+]
