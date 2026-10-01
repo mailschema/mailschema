@@ -4,8 +4,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const local = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    // Every page has one address without a trailing slash. Earlier slash links,
-    // including the published MAP 0.1 profile's, resolve in one permanent hop.
+    // Every page has one address without a trailing slash; a slash link resolves in one
+    // permanent hop.
     const canonical = new URL(url);
     if (!local && (url.protocol !== 'https:' || url.hostname === `www.${canonicalHost}`)) {
       canonical.protocol = 'https:';

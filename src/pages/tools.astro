@@ -2,13 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import CodeBlock from '../components/CodeBlock.astro';
-import {
-  tooling,
-  currentTooling,
-  packageSetLabel,
-  packageContractCoverage,
-  recordCheckCommands,
-} from '../data/tooling';
+import { tooling, packageSetLabel, recordCheckCommands } from '../data/tooling';
 import '../styles/tools.css';
 
 const names = (list: { name: string }[]) =>
@@ -18,16 +12,13 @@ const names = (list: { name: string }[]) =>
         .map((tool) => tool.name)
         .join(', ')} and ${list.at(-1)!.name}`
     : (list[0]?.name ?? '');
-// Tabs offer the MAP 0.2 tooling. Packages still on the withdrawn profile are listed once,
-// for the Registry tooling they carry, until their MAP 0.2 releases.
-const withdrawn = tooling.filter((tool) => tool.withdrawn);
 const python = tooling.find((tool) => tool.registry === 'PyPI');
 ---
 
 <Base
   title="MailSchema tools"
   theme="light"
-  description={`Install MailSchema for ${names(currentTooling).replace(/ and ([^,]+)$/, ' or $1')}. Validate MAP documents, bundle the exact schemas and prepare Registry contributions.`}
+  description={`Install MailSchema for ${names(tooling).replace(/ and ([^,]+)$/, ' or $1')}. Validate MAP documents, bundle the exact schemas and prepare Registry contributions.`}
 >
   <main id="main" class="container tools-page">
     <header class="page-hero tools-hero">
@@ -42,13 +33,9 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
       <div class="tools-hero-aside">
         <span class="pill soft">{packageSetLabel}</span>
         <p>
-          {packageContractCoverage
-            ? 'The complete contract bytes,'
-            : 'Registry schema bytes verified;'}
+          The complete contract bytes,
           <br />
-          {packageContractCoverage
-            ? 'verified in every selected release.'
-            : 'MAP patch releases pending.'}
+          verified in every selected release.
         </p>
         <a href="/specification/profile" class="text-link">
           Read the MAP 0.2 profile <Icon size={16} />
@@ -58,7 +45,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
 
     <div class="tool-selector">
       <nav class="tool-tabs" data-tool-tabs aria-label="Package language">
-        {currentTooling.map((tool) => (
+        {tooling.map((tool) => (
           <a id={`tab-${tool.id}`} href={`#${tool.id}`}>
             <span>{tool.name}</span>
             <small>{tool.registry}</small>
@@ -70,7 +57,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
       </a>
     </div>
 
-    {currentTooling.map((tool) => (
+    {tooling.map((tool) => (
       <section id={tool.id} class="tool-panel" aria-label={tool.name}>
         <div class="tool-start">
           <div class="tool-setup">
@@ -214,19 +201,13 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
       </a>
     </aside>
     <p class="tools-scope">
-      {currentTooling.length > 0 &&
-        `The ${names(currentTooling)} ${currentTooling.length > 1 ? 'packages carry' : 'package carries'} the MAP 0.2 core artifacts exactly as published${currentTooling.some((tool) => tool.id === 'ruby') ? ', and the Ruby package also processes MAP documents' : ''}. `}
-      {withdrawn.length > 0 &&
-        `The ${names(withdrawn)} packages carry the Registry schema and the record checks below; their MAP 0.2 releases follow. `}
-      {packageContractCoverage
-        ? 'Public artifact readback verifies every contract bundled in the selected releases.'
-        : 'The selected releases retain their recorded verification scope.'}{' '}
-      Registry types are published independently; adding a type does not require releases in every
-      language. Clients obtain the exact type versions they act on from the Registry catalogue by
-      digest, or vendor them. The packages validate documents; they do not establish endpoint trust,
-      grant authorization or send email. Read the{' '}
-      <a href="/specification/profile">MAP 0.2 profile</a> before acting on a message. Package and
-      specification versions are independent.
+      {`The ${names(tooling)} packages carry the MAP 0.2 core artifacts exactly as published${tooling.some((tool) => tool.id === 'ruby') ? ', and the Ruby package also processes MAP documents' : ''}. `}
+      Public artifact readback verifies every contract bundled in the selected releases. Registry
+      types are published independently; adding a type does not require releases in every language.
+      Clients obtain the exact type versions they act on from the Registry catalogue by digest, or
+      vendor them. The packages validate documents; they do not establish endpoint trust, grant
+      authorization or send email. Read the <a href="/specification/profile">MAP 0.2 profile</a>{' '}
+      before acting on a message. Package and specification versions are independent.
     </p>
   </main>
 </Base>

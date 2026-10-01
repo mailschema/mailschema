@@ -1,9 +1,9 @@
 import { specNavigation, specHref } from './spec';
 import { typeRecords, typeHref, typeStatusLabel } from './types';
-import { currentTooling } from './tooling';
+import { tooling } from './tooling';
 
 export const searchEntries = [
-  ...currentTooling.map((tool) => ({
+  ...tooling.map((tool) => ({
     title: `${tool.name} package`,
     description: `MailSchema ${tool.release.version} on ${tool.registry}. ${tool.description}`,
     href: `/tools#${tool.id}`,

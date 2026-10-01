@@ -10,9 +10,7 @@ import {
   type PackageSetSelection,
 } from '../src/lib/package-release';
 import { packageArtifactNames, packageContractBytes } from '../src/lib/package-artifacts';
-import { tooling, localCheckCommands, recordCheckCommands, rubyTool } from '../src/data/tooling';
-import { typeRecords } from '../src/data/types';
-import { assertTypeRecord } from '../src/registry/validation';
+import { tooling, rubyTool } from '../src/data/tooling';
 
 const contracts = packageContractBytes() as PackageContracts;
 const releases = new Map<string, PackageRelease>(
@@ -21,8 +19,6 @@ const releases = new Map<string, PackageRelease>(
     JSON.parse(readFileSync(`docs/releases/${evidence}.json`, 'utf8')) as PackageRelease,
   ]),
 );
-const selected = assertPackageSet(current as PackageSetSelection, releases, contracts);
-const npmRelease = selected.get('npm')!;
 
 test('the Tools page offers exactly the selected releases, with Ruby once RubyGems is selected', () => {
   expect(tooling.map((tool) => tool.registry).sort()).toEqual(

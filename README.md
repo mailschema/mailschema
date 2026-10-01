@@ -40,7 +40,7 @@ Specification content and Sourcey configuration live in `docs/specification/`. S
 
 MAP 0.2 is a type-agnostic core: a JSON-LD description in Structured Email, a request bound to that exact description by its digest, credential or possession authority over HTTPS, and recoverable results. Types are digest-bound contracts published through the Registry, and clients can obtain a new one from the Registry catalogue by its digest, so adding a type changes neither the core nor the clients. Nitrosend runs Content Review 0.3 on MAP 0.2 in production: an agent can propose approval of an exact flow revision, a signed-in person decides it, and both paths resolve through the same retained result. An independently operated implementation remains outstanding, so the project does not claim interoperability or IETF adoption. [The type collection record](docs/TYPE-COLLECTION.md) explains why each type exists and which standards it reuses.
 
-The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record. The previous `/types/content-review` address redirects to its Registry record.
+The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record.
 
 The example runs in the browser and never sends email. It illustrates revision binding, feedback acceptance, a predetermined edit, separate approval, permission refusal and stale requests. Sourcey renders the documentation; it is not presented as a MAP implementation.
 
@@ -52,7 +52,6 @@ The contribution page validates and previews new types, amendments and implement
 | ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `registry/types/*.json`            | Base type definitions, contributors and maintainers               | Registry compiler                                                                     |
 | `registry/contributions/*.json`    | Vendor type proposals, amendments and implementation declarations | Registry compiler, history and evidence sections                                      |
-| `registry/snapshots/<digest>.json` | Records edited in place before amendments existed, kept verbatim  | Registry loader and snapshot routes                                                   |
 | `src/data/types.ts`                | Validated projection of the Registry files                        | Types, Registry, detail pages, site search, About and linked type navigation metadata |
 | `docs/specification/*.md`          | Authored protocol and type semantics                              | Sourcey's specification reader and specification indexes                              |
 | `docs/specification/navigation.ts` | Chapter order and grouping                                        | Sourcey navigation and site search                                                    |
@@ -63,9 +62,7 @@ The contribution page validates and previews new types, amendments and implement
 
 Contribute data files rather than editing application TypeScript. `npm run registry:ingest -- contribution.json` validates without writing; add `--write` to create a contribution under `registry/contributions/`. The importer never overwrites another payload with the same identifier. Amendments reference the current record digest and are applied in dependency order; conflicting or stale changes fail. Counts, groups, routes and views are derived. Keep type identifiers stable when changing display names. Registry JSON edits restart the development server so all projections reload together.
 
-`tests/catalog.spec.ts` compares the rendered collection, status/version labels, operations and examples across pages. It also checks linked specification titles, summaries and operation headings against the record. `npm run verify` must pass after a content change. A change to the meaning of an operation still requires reviewing its Markdown definition, record and demonstration together; matching metadata cannot prove semantic agreement.
-
-`tests/registry.spec.ts` exercises schema validation, references, amendments, CLI imports, browser previews and an isolated production build with illustrative vendor contributions. Example files are generated with current record digests and are not included in the public collection. GitHub Actions runs verification and saves the build artifact on pull requests before protected `main` deploys it to Cloudflare.
+`tests/registry.test.ts` exercises schema validation, references, amendments and CLI imports with illustrative vendor contributions, generated with current record digests and kept out of the public collection. `npm run verify` must pass after a content change. A change to the meaning of an operation still requires reviewing its Markdown definition, record and demonstration together; matching metadata cannot prove semantic agreement. GitHub Actions runs verification on pull requests before protected `main` deploys to Cloudflare.
 
 ## Design and provenance
 
@@ -74,7 +71,6 @@ Contribute data files rather than editing application TypeScript. `npm run regis
 - `brand/direction-03-selected.png`: original selected imagegen board.
 - `brand/prompts.json`: exact initial fresh imagegen prompts.
 - `docs/ARCHITECTURE.md`: selected names and scope record.
-- `docs/history/`: the MAP 0.2 cutover reviews and the September scope audit, kept as records.
 
 The strategy history is maintained separately from this standalone project. No portfolio application was modified to host the site.
 

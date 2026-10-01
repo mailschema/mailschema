@@ -1000,7 +1000,7 @@ export class ReferenceMapClient {
         `The input does not satisfy the contract: ${errors.map((error) => `${error.pointer || '/'} ${error.detail}`).join('; ')}`,
       );
     // The rest of the request, such as its identifier, against the core and the contract.
-    const validateRequest = contract.validateRequest!;
+    const validateRequest = contract.validateRequest;
     const refused = [
       ...this.#artifacts.definitionErrors('request', request),
       ...(validateRequest(request) ? [] : errorList(validateRequest.errors)),

@@ -552,11 +552,11 @@
     },
     {
       "path": "src/map/artifacts.ts",
-      "sha256": "1221f2b9e35158a2a4bc27baf72282761d2b2fda6591afc8172acbe161763188"
+      "sha256": "3dfa9ece56beb3b13cb8207a097d9e5efc2b40a539f1a3636b582407442419d2"
     },
     {
       "path": "src/map/reference.ts",
-      "sha256": "e1bb43983ceb674a6f08cb3411ea139889e3dcc8735cf199c2e30e5af4c92493"
+      "sha256": "847fa6ea1455766455a4181ea210423d091c84268b463a9db52858d853795637"
     },
     {
       "path": "src/map/behaviours.ts",

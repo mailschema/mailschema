@@ -8,7 +8,6 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'never',
   build: { format: 'file' },
-  redirects: { '/types/content-review': '/registry/content-review' },
   devToolbar: { enabled: false },
   integrations: [
     sitemap({
