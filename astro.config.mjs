@@ -9,6 +9,25 @@ export default defineConfig({
   trailingSlash: 'never',
   build: { format: 'file' },
   devToolbar: { enabled: false },
+  vite: {
+    plugins: [
+      {
+        name: 'mailschema-reader-root',
+        enforce: 'pre',
+        apply: 'serve',
+        configureServer(server) {
+          // Give the draft a chapter URL so relative reader assets resolve correctly.
+          server.middlewares.use((req, res, next) => {
+            if (req.url?.split('?')[0] !== '/specification') return next();
+            res.writeHead(307, {
+              Location: req.url.replace('/specification', '/specification/core'),
+            });
+            res.end();
+          });
+        },
+      },
+    ],
+  },
   integrations: [
     sitemap({
       customPages: specNavigation.map(
@@ -39,6 +58,13 @@ export default defineConfig({
       config: './docs/specification/sourcey.config.ts',
       routeBase: '/specification',
       prettyUrls: 'strip',
+      dev: false,
+    }),
+    sourcey({
+      config: './docs/specification/draft.config.ts',
+      routeBase: '/specification',
+      prettyUrls: 'strip',
+      build: false,
     }),
   ],
 });

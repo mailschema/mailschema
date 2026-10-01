@@ -28,6 +28,8 @@ npm run verify
 
 The 0.2 draft projection remains reproducible from the existing site text in `ietf/archive/`. Its historical contents are retained unchanged. The new `-00` describes 0.3; neither file is evidence that an Internet-Draft was submitted.
 
+For the local Sourcey reader, run `npm run dev -- --port 4325` and open `http://127.0.0.1:4325/specification/core`. Development reads the files in this bundle directly; production builds continue using the published 0.2 reader until the new profile is deliberately activated.
+
 ## Drafting clarifications
 
 - A qualifying DKIM signature must satisfy all coverage rules itself. A trusted `dkim=pass` alone does not establish those facts or bind rewritten machine data.
