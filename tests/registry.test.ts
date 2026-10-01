@@ -30,6 +30,12 @@ test('executable contracts are discovered from canonical files and fail closed o
   expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).toEqual(
     expect.arrayContaining(baseline.types.map((type) => `${type.slug}@${type.version}`)),
   );
+  expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).not.toContain(
+    'content-review@0.1',
+  );
+  expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).not.toContain(
+    'content-review@0.2',
+  );
   expect(() => assertContractCoverage(baseline.types, catalog)).not.toThrow();
 
   const root = mkdtempSync(resolve(tmpdir(), 'mailschema-contracts-'));

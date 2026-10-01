@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import { BUNDLED, CORE_SCHEMA, FORMS_SCHEMA } from './core/artifacts.ts';
+import { BUNDLED, CORE_SCHEMA, FORMS_SCHEMA, MAP_PROFILE } from './core/artifacts.ts';
 import { APPROVAL_REASONS, Contract, InvalidContract } from './core/contract.ts';
 import { digest } from './core/document.ts';
 import { nodes } from './core/schemas.ts';
@@ -277,6 +277,10 @@ export class MapArtifacts {
     const entries = readdirSync(directory)
       .filter((file) => file.endsWith('.json'))
       .sort()
+      .filter((file) => {
+        const { value } = readArtifact(resolve(directory, file));
+        return value.profile === MAP_PROFILE;
+      })
       .map((file) => this.#loadContract(file, resolve(directory, file)));
     const keys = entries.map((entry) => `${entry.contract.id}@${entry.contract.version}`);
     if (new Set(keys).size !== keys.length) throw new Error('Duplicate type contract version');
