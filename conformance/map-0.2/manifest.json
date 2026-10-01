@@ -617,7 +617,7 @@
     },
     {
       "path": "src/map/artifacts.ts",
-      "sha256": "42daa90d3079532d5b35e1f28af5551ad6747e92b54e13227cc7385e6c7341bc"
+      "sha256": "344a1dbc3597470b9b76a6c809496ddca6840fad11678eaa323a5abd42609415"
     },
     {
       "path": "src/map/reference.ts",
