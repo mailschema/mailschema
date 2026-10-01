@@ -1,0 +1,191 @@
+{
+  "campaign-send-approval": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d40",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:object:42",
+      "title": "Send September update"
+    },
+    "terms": {
+      "id": "urn:example:proposal:p7",
+      "version": "\"p7-r4\""
+    },
+    "human": {
+      "url": "https://service.example/review/p7"
+    },
+    "details": {
+      "summary": "Send September update to the fixed newsletter audience.",
+      "requester": "Campaign editor",
+      "content": {
+        "id": "urn:example:content:42",
+        "revision": "r4",
+        "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
+        "title": "September update"
+      },
+      "sender": {
+        "mailbox": "news@service.example",
+        "name": "Service newsletter"
+      },
+      "audience": {
+        "id": "urn:example:audience:9",
+        "revision": "snapshot-3",
+        "count": 4210,
+        "label": "Newsletter subscribers"
+      },
+      "schedule": {
+        "mode": "immediate"
+      }
+    },
+    "operations": [
+      {
+        "id": "approve"
+      },
+      {
+        "id": "decline"
+      },
+      {
+        "id": "request-changes"
+      }
+    ]
+  },
+  "publication-approval": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d41",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:object:42",
+      "title": "Publish the documentation revision"
+    },
+    "terms": {
+      "id": "urn:example:proposal:p7",
+      "version": "\"p7-r4\""
+    },
+    "human": {
+      "url": "https://service.example/review/p7"
+    },
+    "details": {
+      "summary": "Publish the approved documentation revision.",
+      "requester": "Documentation editor",
+      "content": {
+        "id": "urn:example:content:42",
+        "revision": "r4",
+        "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
+        "title": "September update"
+      },
+      "destinations": [
+        {
+          "id": "https://docs.service.example/guide",
+          "account": "urn:example:account:7",
+          "visibility": "public"
+        }
+      ],
+      "schedule": {
+        "mode": "scheduled",
+        "at": "2026-10-02T10:00:00Z"
+      }
+    },
+    "operations": [
+      {
+        "id": "approve"
+      },
+      {
+        "id": "decline"
+      },
+      {
+        "id": "request-changes"
+      }
+    ]
+  },
+  "email-address-confirmation": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d42",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:object:42",
+      "title": "Confirm the requested communication address"
+    },
+    "terms": {
+      "id": "urn:example:proposal:p7",
+      "version": "\"p7-r4\""
+    },
+    "human": {
+      "url": "https://service.example/review/p7"
+    },
+    "details": {
+      "mailbox": "owner@example.net",
+      "requestId": "urn:example:request:17",
+      "requestedAt": "2026-10-02T07:59:00Z",
+      "purpose": "communication-address",
+      "serviceName": "Example Service"
+    },
+    "operations": [
+      {
+        "id": "confirm",
+        "capability": {
+          "url": "https://service.example/c/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  "account-security-response": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d43",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:object:42",
+      "title": "Review a sign-in from a new device"
+    },
+    "terms": {
+      "id": "urn:example:proposal:p7",
+      "version": "\"p7-r4\""
+    },
+    "human": {
+      "url": "https://service.example/review/p7"
+    },
+    "details": {
+      "account": {
+        "id": "urn:example:account:7",
+        "label": "Example account"
+      },
+      "event": {
+        "id": "urn:example:event:23",
+        "occurredAt": "2026-10-02T07:50:00Z",
+        "activity": "Sign-in from a new device",
+        "device": "Example browser"
+      }
+    },
+    "operations": [
+      {
+        "id": "report-unrecognized",
+        "capability": {
+          "url": "https://service.example/c/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      }
+    ]
+  }
+}

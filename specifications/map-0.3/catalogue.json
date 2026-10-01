@@ -1,0 +1,66 @@
+{
+  "profile": "https://mailschema.org/profiles/map/0.3",
+  "status": "draft",
+  "published": false,
+  "notice": "Draft build inventory, not a published profile or an active runtime catalogue.",
+  "artifacts": [
+    {
+      "path": "specifications/map-0.3/core.md",
+      "sha256": "b107c949e5f234d7e9d57d89c7928b4b2709b1ce2f392920e2427fa012a8001f"
+    },
+    {
+      "path": "specifications/map-0.3/http.md",
+      "sha256": "9a990ea2e112d91231134f4a26873dc09a66bc00e811f6bb18a21a25f77d79ef"
+    },
+    {
+      "path": "specifications/map-0.3/capability.md",
+      "sha256": "cf0304a1848d490cf1f044823685f7563e57b09fb39643637fedc7317f9a19dd"
+    },
+    {
+      "path": "specifications/map-0.3/schemas/core.schema.json",
+      "sha256": "50261ee405f7aaf7eefafff1e8592136958a8842ba3e9beb672a6204b4ab0e88"
+    },
+    {
+      "path": "specifications/map-0.3/schemas/contract.schema.json",
+      "sha256": "144da61c8d7236e64b91b738509b3ccf085a4f79984c6cd8a7fd1fb34efad0b6"
+    },
+    {
+      "path": "specifications/map-0.3/context.jsonld",
+      "sha256": "a51490d1fe8af695c14ea508aad88fd0429d18564791b6b52f3ab07d5c51aab3"
+    }
+  ],
+  "types": [
+    {
+      "id": "https://mailschema.org/types/account-security-response",
+      "version": "0.1",
+      "contractDigest": "sha-256:ec7c85eb9415914a59be29496f6b50ea77839a579420155f17b39a5968a4e611",
+      "path": "specifications/map-0.3/contracts/account-security-response.json",
+      "status": "draft",
+      "implementationEvidence": []
+    },
+    {
+      "id": "https://mailschema.org/types/campaign-send-approval",
+      "version": "0.1",
+      "contractDigest": "sha-256:0eb7b6e98affe21a6f2c1a2228f11c37b0cb3a006365bb160b623901ff626d59",
+      "path": "specifications/map-0.3/contracts/campaign-send-approval.json",
+      "status": "draft",
+      "implementationEvidence": []
+    },
+    {
+      "id": "https://mailschema.org/types/email-address-confirmation",
+      "version": "0.1",
+      "contractDigest": "sha-256:75324bb52325f84aa36f434dc1df7430589679385a5aed626c1e20333f507a30",
+      "path": "specifications/map-0.3/contracts/email-address-confirmation.json",
+      "status": "draft",
+      "implementationEvidence": []
+    },
+    {
+      "id": "https://mailschema.org/types/publication-approval",
+      "version": "0.1",
+      "contractDigest": "sha-256:247dc8524076c11b713b83ee4fa0168bae4df0f9456758d48d9483b3ece70c5b",
+      "path": "specifications/map-0.3/contracts/publication-approval.json",
+      "status": "draft",
+      "implementationEvidence": []
+    }
+  ]
+}

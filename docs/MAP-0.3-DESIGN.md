@@ -1,6 +1,6 @@
 # MAP 0.3 design
 
-Status: architecture decision, 2 October 2026. Frozen as the baseline for specification drafting; no implementation or package change has been made.
+Status: architecture decision, 2 October 2026. The baseline is now expressed in the [MAP 0.3 specification bundle](../specifications/map-0.3/README.md). Its normative text and digest-bound contracts govern the draft; this document records architectural rationale. No runtime or package change has been made.
 
 ## 1. Decision
 
@@ -63,6 +63,8 @@ This separation gives MAP a stable core while services, transports and type cont
 
 MAP uses the Structured Email container: an `application/ld+json` partial representation in `multipart/related`, beside readable text or HTML, with the machine-readable part designated through `Content-Purpose` and a profile parameter. The current Structured Email draft defines this container and the relationship between machine-readable and human-readable parts ([draft-ietf-sml-structured-email-06](https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/)).
 
+The following is the architectural sketch; the [generated 0.3 examples](../specifications/map-0.3/examples/) carry the complete fields required by the concrete contracts.
+
 ```json
 {
   "@context": "https://mailschema.org/contexts/map-0.3.jsonld",
@@ -110,7 +112,7 @@ The description contains instance data only. It does not contain a credentialed 
 | Member       | Rule                                                                                                                                                                                                                             |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@id`        | Identifies this recipient's interaction instance. A materially changed interaction gets a new identifier.                                                                                                                        |
-| `type`       | Names the type contract and binds its exact bytes by digest. Clients use a bundled or configured catalogue, never a contract location introduced by the message.                                                                 |
+| `type`       | Names the type contract and binds its RFC 8785 canonical bytes, including normative requirements, by digest. Clients use a bundled or configured catalogue, never a contract location introduced by the message.                 |
 | `service`    | Names the service and optional tenant resolved through a trusted connector, or subject to the capability-origin rule in section 5.5. The values alone do not create trust.                                                       |
 | `recipient`  | Names the intended mailbox. A client acts only for a principal that controls it and received the message there.                                                                                                                  |
 | `subject`    | Names the resource the proposal concerns. Its title is display text, not identity or authority.                                                                                                                                  |
@@ -119,7 +121,7 @@ The description contains instance data only. It does not contain a credentialed 
 | `operations` | Offers operation identifiers from the type contract. The email cannot define new operation semantics.                                                                                                                            |
 | `human`      | Names the service page where a person can review and act. Opening it never performs the action.                                                                                                                                  |
 
-The I-JSON, size, nesting and lexical limits from 0.2 remain. URLs are absolute HTTPS URLs without user information. Clients do not dereference type, context or problem identifiers while processing a message.
+The specification restates bounded I-JSON processing and defines 0.3's lexical forms explicitly, including opaque service tokens and fixed UTC timestamps. Network URLs are absolute HTTPS URLs without user information. Clients do not dereference type, context or problem identifiers while processing a message. The 0.2 validator is not a validator for this new profile.
 
 ## 4. Exact terms
 
@@ -205,7 +207,7 @@ The binding stays Experimental until two independent clients interoperate with i
 
 ## 6. Trust boundary
 
-MAP builds on Structured Email's trust model and adds an explicit authentication floor for actionable messages. The current SML trust draft requires a trusted sender and a valid signature but does not define a DKIM or DMARC profile ([draft-ietf-sml-trust-01](https://datatracker.ietf.org/doc/draft-ietf-sml-trust/)). MAP therefore requires all of the following before a client exposes a MAP action:
+MAP builds on Structured Email's trust model and adds an explicit authentication floor for actionable messages. The current SML trust draft discusses several trust criteria, including a trusted sender with a signature, but does not impose a universal DKIM or DMARC floor ([draft-ietf-sml-trust-01](https://datatracker.ietf.org/doc/draft-ietf-sml-trust/)). MAP therefore requires all of the following before a client exposes a MAP action:
 
 - at least one valid DKIM signature whose signing domain aligns with the RFC 5322 `From` domain under DMARC alignment; capability messages require strict alignment;
 - a signature over the complete body, with no DKIM `l=` body-length tag;
@@ -218,8 +220,8 @@ These rules use DKIM's required `From` coverage, header-signing and body-length 
 MAP also requires these processing rules:
 
 - process only the designated MAP part belonging to the containing top-level message; never discover or activate MAP data inside an attached message, including `message/rfc822`;
-- strip the MAP part when creating an ordinary reply or a manual forward; a forwarded-as-attachment copy remains inert under the top-level-part rule above; automatic forwarding does not change actionability, which is determined by the recipient-control rule below; this is a MAP rule because capabilities and recipient binding make copied actions unsafe, while Structured Email only requires removal when structured data no longer represents the message ([draft-ietf-sml-structured-email-06 §5.1](https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/));
-- validate security-sensitive identifiers after Unicode normalization, reject bidirectional controls and invisible formatting characters in identifiers, and visibly escape or warn on such characters in display text; use Unicode confusable detection to warn when displayed identities resemble trusted identities ([Unicode UTS #39](https://unicode.org/reports/tr39/)).
+- strip the MAP part when creating an ordinary reply or a manual forward; a forwarded-as-attachment copy remains inert under the top-level-part rule above; automatic forwarding does not change actionability, which is determined by the recipient-control rule below; this is a MAP rule because capabilities and recipient binding make copied actions unsafe, while Structured Email requires removal of non-representative structured data on user forwarding ([draft-ietf-sml-structured-email-06 §5.1](https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/));
+- preserve opaque tokens and compare identifiers under their defining standards; reject bidirectional controls and invisible formatting characters in identifiers, and visibly escape or warn on such characters in display text; use Unicode confusable detection to warn when displayed identities resemble trusted identities ([Unicode UTS #39](https://unicode.org/reports/tr39/)). Display defenses do not authorize blanket normalization of opaque values or mailbox local parts.
 
 The remaining action rules are:
 
@@ -273,7 +275,7 @@ The Registry does not publish a generic `Approval` type. Campaign sending and co
 | -------------------------- | --------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Campaign Send Approval     | Concrete type   | Draft; target Experimental | Nitrosend must prove approval of an exact campaign revision, audience, sender identity and schedule before external communication.                                                                                                                                                                                                                             |
 | Publication Approval       | Concrete type   | Draft; target Experimental | Sourcey or Stompstart must prove approval of an exact content revision and publication destination.                                                                                                                                                                                                                                                            |
-| Content Review             | Concrete type   | Superseded after migration | Its published identifier and contract remain immutable. Publication Approval succeeds it once equivalent fields and migration fixtures exist.                                                                                                                                                                                                                  |
+| Content Review             | Concrete type   | Superseded after migration | Its published identifier and contract remain immutable. Publication Approval is a separate publication-authorizing contract; historical review-only decisions never become publication permission. Migration requires a new explicit decision.                                                                                                                 |
 | Email Address Confirmation | Concrete type   | Draft; target Experimental | Confirms control of an address for a recorded request; it is not sign-in or an authenticator. Promotion requires a conforming capability implementation. NIST excludes address-validation confirmation codes from its prohibition on email out-of-band authentication ([NIST SP 800-63B §3.1.3.1](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/)). |
 | Account Security Response  | Concrete type   | Draft                      | Report unrecognized activity or request a reversible protective step. It becomes Experimental only with an implementation.                                                                                                                                                                                                                                     |
 | Event Response             | Boundary record | Existing standard          | Use iTIP/iMIP rather than a MAP type ([RFC 5546](https://www.rfc-editor.org/rfc/rfc5546.html)).                                                                                                                                                                                                                                                                |

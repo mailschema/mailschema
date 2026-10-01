@@ -36,6 +36,12 @@ jobs:
       - run: bundle exec rake
         working-directory: .release/packages/ruby
       - run: npm run verify
+      - name: Render the submission candidate
+        run: |
+          python3 -m venv .release/xml2rfc
+          .release/xml2rfc/bin/pip install -r ietf/requirements.txt
+          mkdir -p .release/ietf/map-0.3
+          .release/xml2rfc/bin/xml2rfc --text --html --path .release/ietf/map-0.3 ietf/draft-mailschema-mail-action-protocol-00.xml
       - name: Deploy verified main build
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npx wrangler deploy

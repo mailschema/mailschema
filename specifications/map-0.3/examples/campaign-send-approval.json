@@ -1,0 +1,64 @@
+{
+  "@context": "https://mailschema.org/contexts/map-0.3.jsonld",
+  "@type": "MailAction",
+  "profile": "https://mailschema.org/profiles/map/0.3",
+  "type": {
+    "id": "https://mailschema.org/types/campaign-send-approval",
+    "version": "0.1",
+    "contractDigest": "sha-256:0eb7b6e98affe21a6f2c1a2228f11c37b0cb3a006365bb160b623901ff626d59"
+  },
+  "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d40",
+  "issuedAt": "2026-10-02T08:00:00Z",
+  "expiresAt": "2026-10-03T08:00:00Z",
+  "inLanguage": "en",
+  "service": {
+    "id": "https://service.example",
+    "tenant": "urn:example:tenant:7"
+  },
+  "recipient": "owner@example.net",
+  "subject": {
+    "id": "urn:example:object:42",
+    "title": "Send September update"
+  },
+  "terms": {
+    "id": "urn:example:proposal:p7",
+    "version": "\"p7-r4\""
+  },
+  "human": {
+    "url": "https://service.example/review/p7"
+  },
+  "details": {
+    "summary": "Send September update to the fixed newsletter audience.",
+    "requester": "Campaign editor",
+    "content": {
+      "id": "urn:example:content:42",
+      "revision": "r4",
+      "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
+      "title": "September update"
+    },
+    "sender": {
+      "mailbox": "news@service.example",
+      "name": "Service newsletter"
+    },
+    "audience": {
+      "id": "urn:example:audience:9",
+      "revision": "snapshot-3",
+      "count": 4210,
+      "label": "Newsletter subscribers"
+    },
+    "schedule": {
+      "mode": "immediate"
+    }
+  },
+  "operations": [
+    {
+      "id": "approve"
+    },
+    {
+      "id": "decline"
+    },
+    {
+      "id": "request-changes"
+    }
+  ]
+}

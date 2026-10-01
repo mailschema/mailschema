@@ -1,16 +1,15 @@
-// Builds the Internet-Draft from the specification, so the profile is the one normative text.
-// The template holds what only the draft needs: front matter, introduction, terminology,
-// security, privacy, IANA, implementation status and references. Everything between them is
-// generated from the MAP 0.2 profile and the contract rules. `--check` fails if the committed
-// draft differs from what the specification generates.
+// Generate the active MAP 0.3 submission candidate and preserve the MAP 0.2 projection.
+// Normative prose and type contracts have one source; templates hold RFC front matter,
+// implementation status, and references. --check verifies both generated documents.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { contractText } from './map-0.3.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const TEMPLATE = 'ietf/draft.template.xml';
-const DRAFT = 'ietf/draft-mailschema-mail-action-protocol-00.xml';
+const TEMPLATE = 'ietf/archive/map-0.2.template.xml';
+const DRAFT = 'ietf/archive/map-0.2.xml';
 const SITE = 'https://mailschema.org';
 const MARKER = '    <!-- profile -->';
 
@@ -30,10 +29,12 @@ const slug = (text) =>
     .replace(/^-|-$/g, '');
 
 const cited = new Set();
+let currentProfile = false;
 
 /** A link as the draft cites it: an RFC or draft reference, a section of this draft, or a URL. */
 function link(text, href) {
-  const rfc = /^https:\/\/www\.rfc-editor\.org\/rfc\/rfc(\d+)(?:#section-([\d.]+))?$/.exec(href);
+  const rfc =
+    /^https:\/\/www\.rfc-editor\.org\/rfc\/rfc(\d+)(?:\.html)?(?:#section-([\d.]+))?$/.exec(href);
   if (rfc) {
     const target = `RFC${rfc[1]}`;
     cited.add(target);
@@ -48,6 +49,10 @@ function link(text, href) {
   if (href.startsWith('https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email')) {
     cited.add('I-D.ietf-sml-structured-email');
     return `${text} <xref target="I-D.ietf-sml-structured-email"/>`;
+  }
+  if (href === 'https://json-schema.org/draft/2020-12/json-schema-validation') {
+    cited.add('JSON-SCHEMA');
+    return `${text} <xref target="JSON-SCHEMA"/>`;
   }
   const section = /^(?:\/specification\/(?:profile|type-contracts))?#([a-z0-9-]+)$/.exec(href);
   if (section) return `${text} (<xref target="${section[1]}"/>)`;
@@ -66,7 +71,12 @@ function inline(source) {
   const plain = (value) => value.replace(/\u0000(\d+)\u0000/g, (_, index) => code[Number(index)]);
   text = escape(text)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\b(MUST NOT|SHOULD NOT|MUST|SHOULD|MAY)\b/g, '<bcp14>$1</bcp14>')
+    .replace(
+      currentProfile
+        ? /\b(NOT RECOMMENDED|MUST NOT|SHALL NOT|SHOULD NOT|RECOMMENDED|REQUIRED|OPTIONAL|MUST|SHALL|SHOULD|MAY)\b/g
+        : /\b(MUST NOT|SHOULD NOT|MUST|SHOULD|MAY)\b/g,
+      '<bcp14>$1</bcp14>',
+    )
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) =>
       link(plain(label), href.replace(/&amp;/g, '&')),
     );
@@ -81,7 +91,7 @@ const cells = (row) =>
     .map((cell) => cell.trim());
 
 /** Block Markdown to xml2rfc: sections, paragraphs, lists, tables and code. */
-function blocks(markdown, depth) {
+function blocks(markdown, depth, fold = false) {
   const lines = ascii(markdown).split('\n');
   const out = [];
   const open = [];
@@ -103,7 +113,8 @@ function blocks(markdown, depth) {
       const type = line.slice(3).trim();
       const body = [];
       for (i += 1; !lines[i].startsWith('```'); i += 1) body.push(lines[i]);
-      out.push(`${indent()}<sourcecode type="${type}"><![CDATA[${body.join('\n')}]]></sourcecode>`);
+      const source = fold ? foldCode(body.join('\n')) : body.join('\n');
+      out.push(`${indent()}<sourcecode type="${type}"><![CDATA[${source}]]></sourcecode>`);
       i += 1;
     } else if (line.startsWith('|')) {
       const rows = [];
@@ -133,6 +144,25 @@ function blocks(markdown, depth) {
     out.push(`${indent()}</section>`);
   }
   return out;
+}
+
+// RFC 8792 single-backslash folding, applied only to the displayed draft code.
+// JSON artifacts remain unmodified and executable in the drafting bundle.
+function foldCode(source) {
+  if (!source.split('\n').some((line) => line.length > 69)) return source;
+  const lines = [];
+  for (let line of source.split('\n')) {
+    while (line.length > 69) {
+      let cut = 68;
+      while (line[cut - 1] === '\\' || /\s/.test(line[cut])) cut -= 1;
+      lines.push(line.slice(0, cut) + '\\');
+      line = '    ' + line.slice(cut);
+    }
+    lines.push(line);
+  }
+  const folded = lines.join('\n');
+  if (folded.replace(/\\\n[ \t]*/g, '') !== source) throw new Error('Code folding changed content');
+  return "NOTE: '\\' line wrapping per RFC 8792\n\n" + folded;
 }
 
 /** A list, with one level of nesting as the profile uses it. */
@@ -189,11 +219,52 @@ for (const target of cited)
   )
     throw new Error(`${target} is cited but not listed in ${TEMPLATE}`);
 
-if (process.argv.includes('--check')) {
-  if (read(DRAFT) !== draft)
-    throw new Error(`${DRAFT} differs from the specification; run npm run draft`);
-  console.log(`${DRAFT} matches the specification.`);
-} else {
-  writeFileSync(resolve(root, DRAFT), draft);
-  console.log(`Wrote ${DRAFT} from the specification.`);
+function output(path, value) {
+  if (process.argv.includes('--check')) {
+    if (read(path) !== value) throw new Error(`${path} differs from its source; run npm run draft`);
+    console.log(`${path} matches its source.`);
+  } else {
+    writeFileSync(resolve(root, path), value);
+    console.log(`Wrote ${path} from its source.`);
+  }
 }
+output(DRAFT, draft);
+
+cited.clear();
+currentProfile = true;
+const base = 'specifications/map-0.3';
+const section = (name) => read(`${base}/${name}.md`).replace(/^# [^\n]+\n/, '');
+const core03 = section('core');
+// Bindings precede security/privacy/conformance without duplicating the source prose.
+const split = core03.indexOf('## Security considerations');
+if (split < 0) throw new Error('Core security section is missing');
+const main = core03.slice(0, split) + section('http') + section('capability') + core03.slice(split);
+const context = read(`${base}/context.jsonld`).trim();
+const example = read(`${base}/examples/campaign-send-approval.json`).trim();
+const appendix =
+  contractText({ schemas: false }) +
+  '\n## Description example\n\n' +
+  'This generated example uses synthetic identities and an inert service. The content digest is illustrative. Long code lines are folded as described in [RFC 8792](https://www.rfc-editor.org/rfc/rfc8792); unfold them before parsing. The complete contract documents and schemas are maintained alongside the specification source.\n\n```json\n' +
+  example +
+  '\n```\n\n' +
+  '## Fixed JSON-LD context\n\nThe following context defines the compact representation. Consumers resolve it locally, never from an email-triggered network request.\n\n```json\n' +
+  context +
+  '\n```\n';
+const currentTemplate = read('ietf/draft.template.xml');
+let current = currentTemplate;
+for (const [marker, text] of [
+  ['<!-- specification -->', main],
+  ['<!-- appendices -->', appendix],
+]) {
+  if (current.split(marker).length !== 2) throw new Error(`Missing or duplicate marker ${marker}`);
+  current = current.replace(marker, blocks(text, 2, true).join('\n'));
+}
+for (const target of cited)
+  if (
+    !current.includes(`reference.${target.replace(/^RFC/, 'RFC.')}.xml`) &&
+    !current.includes(`anchor="${target}"`)
+  )
+    throw new Error(`${target} is cited but not listed in the 0.3 template`);
+const anchors = [...current.matchAll(/\banchor="([^"]+)"/g)].map((m) => m[1]);
+if (anchors.length !== new Set(anchors).size) throw new Error('Duplicate draft anchor');
+output('ietf/draft-mailschema-mail-action-protocol-00.xml', current);

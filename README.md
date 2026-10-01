@@ -4,6 +4,8 @@ The public specification site for **MailSchema** and **Mail Action Protocol (MAP
 
 The dependency-ordered project plan is maintained in [docs/ROADMAP.md](docs/ROADMAP.md). Project governance, contribution terms, security reporting and versioning are documented at the repository root.
 
+The [MAP 0.3 specification bundle](specifications/map-0.3/README.md) is now drafted: Core, HTTP and experimental capability bindings, four concrete contracts, conformance skeletons, and a generated individual Internet-Draft. It is staged separately from the live MAP 0.2 site and packages. The bundle includes the implementation handoff and generation commands.
+
 ## Run locally
 
 Use Node.js 24 or later.
@@ -19,7 +21,7 @@ Open http://127.0.0.1:4325. Astro 7 may start the development server in the back
 npm run verify
 ```
 
-`verify` validates the Registry, the MAP 0.2 profile, fixtures and conformance manifest, runs the conformance suite, type-checks, builds the site, and runs the Registry, release-evidence and worker tests with Vitest.
+`verify` validates the Registry, the MAP 0.2 profile, fixtures and conformance manifest, checks the separate 0.3 draft artifacts and both draft projections, runs the existing conformance suite, type-checks, builds the site, and runs the Registry, release-evidence and worker tests with Vitest.
 
 ## Site structure
 

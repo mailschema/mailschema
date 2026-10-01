@@ -1,0 +1,45 @@
+{
+  "@context": "https://mailschema.org/contexts/map-0.3.jsonld",
+  "@type": "MailAction",
+  "profile": "https://mailschema.org/profiles/map/0.3",
+  "type": {
+    "id": "https://mailschema.org/types/email-address-confirmation",
+    "version": "0.1",
+    "contractDigest": "sha-256:75324bb52325f84aa36f434dc1df7430589679385a5aed626c1e20333f507a30"
+  },
+  "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d42",
+  "issuedAt": "2026-10-02T08:00:00Z",
+  "expiresAt": "2026-10-03T08:00:00Z",
+  "inLanguage": "en",
+  "service": {
+    "id": "https://service.example",
+    "tenant": "urn:example:tenant:7"
+  },
+  "recipient": "owner@example.net",
+  "subject": {
+    "id": "urn:example:object:42",
+    "title": "Confirm the requested communication address"
+  },
+  "terms": {
+    "id": "urn:example:proposal:p7",
+    "version": "\"p7-r4\""
+  },
+  "human": {
+    "url": "https://service.example/review/p7"
+  },
+  "details": {
+    "mailbox": "owner@example.net",
+    "requestId": "urn:example:request:17",
+    "requestedAt": "2026-10-02T07:59:00Z",
+    "purpose": "communication-address",
+    "serviceName": "Example Service"
+  },
+  "operations": [
+    {
+      "id": "confirm",
+      "capability": {
+        "url": "https://service.example/c/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ]
+}
