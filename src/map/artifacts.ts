@@ -8,20 +8,11 @@ import coreSchema from '../../public/schemas/map-0.2.schema.json' with { type: '
 export const MAP_PROFILE = 'https://mailschema.org/profiles/map/0.2';
 export const CORE_SCHEMA = 'https://mailschema.org/schemas/map-0.2.schema.json';
 export const FORMS_SCHEMA = 'https://mailschema.org/schemas/forms-0.1.schema.json';
+/** The format every MAP 0.2 type contract follows. */
+export const CONTRACT_FORMAT = 'https://mailschema.org/schemas/type-contract-0.2.schema.json';
 const JSON_SCHEMA_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
-const LEGACY_PROFILE = 'https://mailschema.org/profiles/map/0.1';
-/** Profiles withdrawn from use; their artifacts stay published unchanged. */
-export const WITHDRAWN_PROFILES: ReadonlySet<string> = new Set([LEGACY_PROFILE]);
-/** The profile URI of a MAP version. */
-export const mapProfileUri = (version: string) => `https://mailschema.org/profiles/map/${version}`;
 const PUBLIC_ORIGIN = 'https://mailschema.org';
 const MAX_ARTIFACT_BYTES = 256 * 1024;
-
-/** The format each profile's type contracts follow. */
-export const CONTRACT_FORMATS: Record<string, string> = {
-  [LEGACY_PROFILE]: `${PUBLIC_ORIGIN}/schemas/type-contract-0.1.schema.json`,
-  [MAP_PROFILE]: `${PUBLIC_ORIGIN}/schemas/type-contract-0.2.schema.json`,
-};
 
 /** Reasons the core assigns: an approval's own ends, and a decision awaiting approval overtaken. */
 export const APPROVAL_REASONS = ['declined', 'stale-target', 'expired', 'superseded'] as const;
@@ -70,8 +61,7 @@ export interface LoadedContract {
   contractDigest: string;
   requestSchema: { url: string; value: JsonObject; bytes: Buffer; canonicalDigest: string };
   validateDetails?: ValidateFunction;
-  /** The whole request schema, for a contract on the current profile. */
-  validateRequest?: ValidateFunction;
+  validateRequest: ValidateFunction;
   /** The input schema of one operation's request branch. */
   validateInput(operation: string): ValidateFunction | undefined;
   operation(id: string): ContractOperation | undefined;
@@ -636,7 +626,7 @@ export class MapArtifacts {
   readonly contracts: LoadedContract[];
   readonly #validateDocument: ValidateFunction;
   readonly #definitions: Record<string, ValidateFunction>;
-  readonly #validateFormat: Record<string, ValidateFunction>;
+  readonly #validateFormat: ValidateFunction;
   readonly #fieldValidators = new Map<string, { schema: JsonObject; validate: ValidateFunction }>();
 
   constructor(root = process.cwd()) {
@@ -655,14 +645,9 @@ export class MapArtifacts {
         this.ajv.getSchema(`${CORE_SCHEMA}#/$defs/${name}`)!,
       ]),
     );
-    const format = (profile: string) =>
-      readArtifact(resolve(root, `public/schemas/${basename(CONTRACT_FORMATS[profile])}`)).value;
-    const current = format(MAP_PROFILE);
-    assertPortable('type-contract-0.2', current);
-    this.#validateFormat = {
-      [LEGACY_PROFILE]: this.ajv.compile(format(LEGACY_PROFILE)),
-      [MAP_PROFILE]: this.ajv.compile(current),
-    };
+    const format = readArtifact(schemaPath(root, CONTRACT_FORMAT)).value;
+    assertPortable('type-contract-0.2', format);
+    this.#validateFormat = this.ajv.compile(format);
     this.contracts = this.#loadContracts();
   }
 
@@ -681,7 +666,6 @@ export class MapArtifacts {
   contract(reference: { id: string; version: string; contractDigest: string }) {
     return this.contracts.find(
       (entry) =>
-        entry.contract.profile === MAP_PROFILE &&
         entry.contract.id === reference.id &&
         entry.contract.version === reference.version &&
         entry.contractDigest === reference.contractDigest,
@@ -735,11 +719,9 @@ export class MapArtifacts {
   #loadContract(file: string, path: string): LoadedContract {
     const { bytes, value } = readArtifact(path);
     const contract = value as unknown as TypeContract;
-    const validateFormat = this.#validateFormat[contract.profile];
-    if (!validateFormat) throw new Error(`${file}: unknown profile ${String(contract.profile)}`);
-    if (!validateFormat(contract))
+    if (!this.#validateFormat(contract))
       throw new Error(
-        `${file}: invalid type contract:\n${errorList(validateFormat.errors).join('\n')}`,
+        `${file}: invalid type contract:\n${errorList(this.#validateFormat.errors).join('\n')}`,
       );
     const slug = new URL(contract.id).pathname.split('/').filter(Boolean).at(-1)!;
     if (file !== `${slug}-${contract.version}.json`)
@@ -766,7 +748,18 @@ export class MapArtifacts {
       if (!constants.has(expected))
         throw new Error(`${label}: request schema does not bind ${expected}`);
 
-    const loaded: LoadedContract = {
+    this.#lint(contract, label, request.value);
+    const outputs = new Map<string, ValidateFunction>();
+    for (const operation of contract.operations)
+      for (const result of operation.results)
+        outputs.set(`${operation.id}/${result.state}`, this.ajv.compile(result.outputSchema));
+    const inputs = new Map(
+      operationBranches(request.value).map((branch) => [
+        branch.operation,
+        this.ajv.compile(branch.input as JsonObject),
+      ]),
+    );
+    return {
       contract,
       slug,
       file,
@@ -779,32 +772,13 @@ export class MapArtifacts {
         canonicalDigest: requestDigest,
       },
       operation: (id) => contract.operations.find((operation) => operation.id === id),
-      validateInput: () => undefined,
-      validateOutput: () => undefined,
-      fieldErrors: (fields, values) => this.fieldErrors(fields, values),
-    };
-    if (contract.profile !== MAP_PROFILE) return loaded;
-
-    this.#lint(contract, label, request.value);
-    const validateDetails = contract.detailsSchema
-      ? this.ajv.compile(contract.detailsSchema)
-      : undefined;
-    const outputs = new Map<string, ValidateFunction>();
-    for (const operation of contract.operations)
-      for (const result of operation.results)
-        outputs.set(`${operation.id}/${result.state}`, this.ajv.compile(result.outputSchema));
-    const inputs = new Map(
-      operationBranches(request.value).map((branch) => [
-        branch.operation,
-        this.ajv.compile(branch.input as JsonObject),
-      ]),
-    );
-    return {
-      ...loaded,
-      validateDetails,
+      validateDetails: contract.detailsSchema
+        ? this.ajv.compile(contract.detailsSchema)
+        : undefined,
       validateRequest: this.ajv.compile(request.value),
       validateInput: (operation) => inputs.get(operation),
       validateOutput: (operation, state) => outputs.get(`${operation}/${state}`),
+      fieldErrors: (fields, values) => this.fieldErrors(fields, values),
     };
   }
 

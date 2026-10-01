@@ -1,4 +1,4 @@
-import { CONTRACT_FORMATS, MapArtifacts, sha256 } from '../map/artifacts.ts';
+import { CONTRACT_FORMAT, MapArtifacts, sha256 } from '../map/artifacts.ts';
 import type { TypeRecord } from './model';
 
 const publicOrigin = 'https://mailschema.org';
@@ -8,7 +8,7 @@ export interface TypeContractCatalogEntry {
   id: string;
   version: string;
   profile: string;
-  /** The format this contract follows, which its profile fixes. */
+  /** The format this contract follows. */
   contractFormat: string;
   contract: { url: string; canonicalDigest: string; sha256: string };
   requestSchema: { url: string; canonicalDigest: string; sha256: string };
@@ -17,7 +17,7 @@ export interface TypeContractCatalogEntry {
 
 /**
  * Every executable contract version with its exact digests. Loading validates each
- * contract against its format and, for MAP 0.2, the rules a schema cannot express.
+ * contract against its format and the rules a schema cannot express.
  */
 export function loadTypeContractCatalog(root = process.cwd()): TypeContractCatalogEntry[] {
   return new MapArtifacts(root).contracts
@@ -26,7 +26,7 @@ export function loadTypeContractCatalog(root = process.cwd()): TypeContractCatal
       id: entry.contract.id,
       version: entry.contract.version,
       profile: entry.contract.profile,
-      contractFormat: CONTRACT_FORMATS[entry.contract.profile],
+      contractFormat: CONTRACT_FORMAT,
       contract: {
         url: `${publicOrigin}/contracts/${entry.file}`,
         canonicalDigest: entry.contractDigest,

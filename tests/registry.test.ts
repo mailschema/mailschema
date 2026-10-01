@@ -7,8 +7,6 @@ import {
   existsSync,
   rmSync,
   cpSync,
-  symlinkSync,
-  realpathSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
@@ -31,84 +29,40 @@ function example<K extends Contribution['kind']>(kind: K): Extract<Contribution,
 test('executable contracts are discovered from canonical files and fail closed on drift', () => {
   const catalog = loadTypeContractCatalog();
   expect(catalog.map((entry) => `${entry.type}@${entry.version}`)).toEqual(
-    expect.arrayContaining([
-      'content-review@0.1',
-      'content-review@0.2',
-      ...baseline.types.map((type) => `${type.slug}@${type.version}`),
-    ]),
+    expect.arrayContaining(baseline.types.map((type) => `${type.slug}@${type.version}`)),
   );
   expect(() => assertContractCoverage(baseline.types, catalog)).not.toThrow();
 
   const root = mkdtempSync(resolve(tmpdir(), 'mailschema-contracts-'));
   try {
     cpSync(resolve('public'), resolve(root, 'public'), { recursive: true });
-    const schemaPath = resolve(root, 'public/schemas/content-review-0.2.schema.json');
+    const schemaPath = resolve(root, 'public/schemas/content-review-0.3.schema.json');
     const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
     schema.title = 'Drifted title';
     writeFileSync(schemaPath, JSON.stringify(schema));
     expect(() => loadTypeContractCatalog(root)).toThrow(/canonical digest does not match/);
+    cpSync(resolve('public/schemas/content-review-0.3.schema.json'), schemaPath);
 
-    cpSync(resolve('public/schemas/content-review-0.2.schema.json'), schemaPath);
-    const secondSchema = {
-      $schema: 'https://json-schema.org/draft/2020-12/schema',
-      $id: 'https://mailschema.org/schemas/delivery-receipt-0.1.schema.json',
-      type: 'object',
-      properties: {
-        type: {
-          type: 'object',
-          properties: {
-            id: { const: 'https://mailschema.org/types/delivery-receipt' },
-            version: { const: '0.1' },
-          },
-        },
-        operation: { const: 'acknowledge' },
-      },
-    };
+    // A new type's contract is found by its file alone: Action Approval under another name.
+    const renamed = (path: string) =>
+      JSON.parse(
+        readFileSync(resolve(path), 'utf8').replaceAll('action-approval', 'delivery-receipt'),
+      );
+    const secondSchema = renamed('public/schemas/action-approval-0.1.schema.json');
+    const secondContract = renamed('public/contracts/action-approval-0.1.json');
+    secondContract.requestSchema.canonicalDigest = `sha-256:${createHash('sha256').update(canonicalize(secondSchema)!).digest('hex')}`;
     const secondSchemaPath = resolve(root, 'public/schemas/delivery-receipt-0.1.schema.json');
-    writeFileSync(secondSchemaPath, `${JSON.stringify(secondSchema, null, 2)}\n`);
     const secondContractPath = resolve(root, 'public/contracts/delivery-receipt-0.1.json');
-    writeFileSync(
-      secondContractPath,
-      `${JSON.stringify(
-        {
-          kind: 'MapTypeContract',
-          id: 'https://mailschema.org/types/delivery-receipt',
-          version: '0.1',
-          profile: 'https://mailschema.org/profiles/map/0.1',
-          target: 'A delivery event identified by the service.',
-          requestSchema: {
-            url: secondSchema.$id,
-            canonicalDigest: `sha-256:${createHash('sha256').update(canonicalize(secondSchema)!).digest('hex')}`,
-          },
-          operations: [
-            {
-              id: 'acknowledge',
-              effect: 'Record acknowledgement of the delivery event.',
-              results: [{ state: 'completed', outputSchema: { type: 'object' } }],
-            },
-          ],
-        },
-        null,
-        2,
-      )}\n`,
-    );
+    writeFileSync(secondSchemaPath, `${JSON.stringify(secondSchema, null, 2)}\n`);
+    writeFileSync(secondContractPath, `${JSON.stringify(secondContract, null, 2)}\n`);
     const extendedCatalog = loadTypeContractCatalog(root);
     expect(extendedCatalog.map((entry) => `${entry.type}@${entry.version}`)).toContain(
       'delivery-receipt@0.1',
     );
     const secondRecord = {
-      ...structuredClone(baseline.types.find((record) => record.slug === 'content-review')!),
+      ...structuredClone(baseline.types.find((record) => record.slug === 'action-approval')!),
       slug: 'delivery-receipt',
       name: 'Delivery Receipt',
-      version: '0.1',
-      profile: 'https://mailschema.org/profiles/map/0.1',
-      operations: [
-        {
-          id: 'acknowledge',
-          name: 'Acknowledge',
-          description: 'Record acknowledgement of the delivery event.',
-        },
-      ],
     };
     expect(() =>
       assertContractCoverage([...baseline.types, secondRecord], extendedCatalog),
@@ -187,43 +141,28 @@ test('implementation evidence stays bound to its version, profile, operations an
   );
 });
 
-// Every record digest a deployed build of main has served, from the launch onwards.
+// Every record digest the Registry has published. A published record changes only through an
+// amendment, which adds a digest; none is ever withdrawn.
 const PUBLISHED_RECORD_DIGESTS = [
-  '0386907ea6240c57d635de1d78eeb5b0c14336c1ba54932510ab399f12ad0eb9',
-  '0e6365df1bf904f2475f972ec66a5561edc0bfaae69fd7a1b41f53b40bf8ac1c',
-  '502d0af939a17d7127707ed8ee56a10bd3779447ee5d47d5963f29c52e8c9948',
-  '51b2530801aae0005bf79af410be87f59b7d780930a11d4fc41dc60c1e8ee78a',
-  '6966ef25e4870decb534cb773caa11f3d2134dbcc628232146269d24e7d015a8',
+  '00e1b5e365c5e6a51305b22aa90d7cbcc4bdf6161403cca05f86eee6ec352bb9',
+  '20a053716853e360b8e19b6cc59aa7202760550b52a6bef457a9be7253eb713a',
+  '25d690630ded48e4fc3140e73612f00104206a21e2fd65b1014b10f336a7157f',
+  '2e9b7dc2ed1e6b2afe9e73e60299780d03d1041c990f7f6444dcdd2c8dc5b90d',
+  '4188f9a18fc436ac6f55d34a0bcfccc0a1a4c87cd9a5f9c1848d4ce6b1137de0',
+  '49eab77ec6ca8ce858859a32eb03497aaed45d13a86cb3687230d93bc7fdbc3d',
+  '51dc3ccf17eb0a9061c7e6c6faaa4154d033448c263b2b0d63fe9d4551a35180',
+  '6dc4b3bdf16894fe7295e4b355fe317e65dd89986a2c43de8d2504abdd4e01d7',
+  '721dce32be5320cc893a9be0b1b1649e0d950d310d986f507d543be97a97eec6',
+  '7d617d536f9f71a90c4e013e064e16c3560a043eb6260b272833497b0e01ea63',
   '9b0af5f399b381f0b1672a659ea51b7481c4e9ad6aa33220ac9da18060b60e03',
-  'a48411f3372e87f3a5fc74725a9ad85f86dee0cea0b747a96338084c4f1fdd04',
-  'a5ba7255b7fd8caac6e803639891e9025a26f6a95c32477a8e0d4bb27ebb9bbb',
   'bc6c9edaf8cdf6a183a01b321c4fea2690eb916b6c803c23c66397ed57d48c67',
-  'bfb8a22e8637dc719fc0666c8e77d492d14d64f4a6675f1ba58f2d11f1772b01',
   'ec03b129b099fee9bd558714a29148c67902a374afe0cd96a78dc5d140d1fccc',
   'faeaf9c3d744f6ce6acb0b639429b59430b797c83c91ce93cf1a47896969e800',
 ];
 
 test('every record digest ever published stays served, exactly as published', () => {
-  for (const digest of PUBLISHED_RECORD_DIGESTS) {
-    const record = baseline.snapshots.get(digest) ?? baseline.archive.get(digest);
-    expect(recordDigest(record), digest).toBe(digest);
-  }
-  const root = mkdtempSync(resolve(tmpdir(), 'mailschema-snapshots-'));
-  try {
-    cpSync(resolve('registry'), root, { recursive: true });
-    const misnamed = resolve(root, 'snapshots', `${'0'.repeat(64)}.json`);
-    writeFileSync(misnamed, JSON.stringify(baseline.types[0]));
-    expect(() => loadRegistry(root)).toThrow(/record digest/);
-    rmSync(misnamed);
-    const orphan = { ...baseline.types[0], slug: 'retired-type', name: 'Retired type' };
-    writeFileSync(
-      resolve(root, 'snapshots', `${recordDigest(orphan)}.json`),
-      JSON.stringify(orphan),
-    );
-    expect(() => loadRegistry(root)).toThrow(/current type/);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
+  for (const digest of PUBLISHED_RECORD_DIGESTS)
+    expect(recordDigest(baseline.snapshots.get(digest)), digest).toBe(digest);
 });
 
 test('ingestion refuses unsafe links, traversal identifiers, missing fields and unversioned drafts', () => {

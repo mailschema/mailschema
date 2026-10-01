@@ -49,4 +49,3 @@ Make MAP a useful open standard for service actions carried through email, with 
 - A change to a published profile, contract or schema is a new version; its artifacts are never edited in place.
 - Every package release is verified against the canonical bytes by public readback before the site selects it.
 - Every implementation claim links to reproducible evidence and states who operates the implementation.
-- The cutover reviews and the September scope audit are kept in [`history/`](history/).

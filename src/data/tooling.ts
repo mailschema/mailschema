@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import selection from '../../docs/releases/current.json' with { type: 'json' };
-import { WITHDRAWN_PROFILES, mapProfileUri } from '../map/artifacts';
 import { packageContractBytes } from '../lib/package-artifacts';
 import {
   assertPackageSet,
@@ -45,9 +44,6 @@ const versions = new Set(selectedChannels.values().map((entry) => entry.version)
 const sharedVersion = [...versions][0];
 export const packageSetLabel =
   versions.size === 1 ? `Package set ${sharedVersion}` : 'Verified package set';
-export const packageContractCoverage = [...evidence.values()].every(
-  (release) => release.format === 'mailschema-package-release/2',
-);
 
 /** The Ruby tab, shown once a RubyGems release is selected and verified. */
 export const rubyTool = (release: PackageReleaseChannel, map: string) => ({
@@ -57,7 +53,6 @@ export const rubyTool = (release: PackageReleaseChannel, map: string) => ({
   release,
   runtime: 'Ruby 3.3+',
   map,
-  withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(map)),
   note: undefined,
   title: 'Run the MAP 0.2 lifecycle in Ruby.',
   description:
@@ -103,7 +98,6 @@ export const tooling = [
     release: npmRelease,
     runtime: 'Node.js 22+',
     map: mapVersion('npm'),
-    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('npm'))),
     title: 'Bundle the MAP core and check Registry files.',
     description:
       'The MAP 0.2 core artifacts for your validator, and local checks for Registry contributions and records.',
@@ -153,7 +147,6 @@ if (!check(description)) console.error(check.errors);`,
     release: pythonRelease,
     runtime: 'Python 3.10+',
     map: mapVersion('PyPI'),
-    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('PyPI'))),
     title: 'The same artifacts in Python.',
     description:
       'The MAP 0.2 core artifacts, and Draft 2020-12 checks for Registry contributions and records.',
@@ -194,7 +187,6 @@ validate_contribution(
     release: rustRelease,
     runtime: 'Rust 1.70+',
     map: mapVersion('crates.io'),
-    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('crates.io'))),
     note: 'MAP schemas never use format; the Registry schemas check URIs with it.',
     title: 'Embed the exact artifact bytes.',
     description:
@@ -236,7 +228,6 @@ fn main() -> std::io::Result<()> {
     release: goRelease,
     runtime: 'Go 1.22+',
     map: mapVersion('Go'),
-    withdrawn: WITHDRAWN_PROFILES.has(mapProfileUri(mapVersion('Go'))),
     note: 'MAP schemas never use format; the Registry schema checks URIs with it.',
     title: 'Embed the artifacts in Go.',
     description:
@@ -279,9 +270,6 @@ func main() {
   },
   ...(rubyRelease ? [rubyTool(rubyRelease, mapVersion('RubyGems'))] : []),
 ];
-
-/** The tooling on the current profile; packages on a withdrawn one carry only Registry tooling. */
-export const currentTooling = tooling.filter((tool) => !tool.withdrawn);
 
 export const localCheckCommands = {
   javascript: `npx mailschema@${npmRelease.version} check contribution.json`,

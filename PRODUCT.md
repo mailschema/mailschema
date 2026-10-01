@@ -43,4 +43,4 @@ Readable at mobile and desktop widths, keyboard access, visible focus, semantic 
 
 ## Source decisions
 
-The selected name, hierarchy and scope are recorded in `docs/ARCHITECTURE.md` and `MAILSCHEMA-CHARTER-2026-09-22.md`. The copy and collection review in `docs/editorial-review/` was applied on 23 September 2026. The build preserves the selected visual direction.
+The selected name, hierarchy and scope are recorded in `docs/ARCHITECTURE.md`. The build preserves the selected visual direction.

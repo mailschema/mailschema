@@ -24,7 +24,7 @@ Public API absence is a candidate-availability signal, not proof that registrati
 
 Add another ecosystem when it serves a real implementation or contribution workflow. A new package must expose useful schema or validation behavior, preserve the canonical bytes and join the same public readback gate. RubyGems joins for Nitrosend's MAP 0.2 implementation. JSR, NuGet and Packagist remain candidates, not launch requirements.
 
-The published packages cover MAP 0.1 and Registry contributions; the prepared Ruby package covers MAP 0.2. They do not imply runtime authorization, product conformance or IETF adoption. A package release number is separate from a specification version.
+The published packages carry the MAP 0.2 core artifacts and Registry tooling, and the Ruby package also processes MAP 0.2. They do not imply runtime authorization, product conformance or IETF adoption. A package release number is separate from a specification version.
 
 Owning the npm organization does not claim the bare `mailschema` package. It controls the `@mailschema/*` family. Avoid creating numerous empty packages merely to hold names.
 
