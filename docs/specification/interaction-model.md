@@ -41,6 +41,12 @@ The readable email and the structured description refer to the same operation an
 
 A client that meets a type it has not bundled can obtain its contract from the Registry catalogue it trusts, by digest. One that cannot, or that meets a description failing its checks, can still display the email; it never guesses how to execute an interaction.
 
+## Readable actions
+
+A service may put a button in the readable email for each operation it offers. Each is labelled with the operation's `name` from the description and links to the human route, with the operation chosen in a way the service defines, such as `?operation=approve`. Opening a link never acts, since link scanners follow links in mail: the page shows the target and the terms the description binds, and the person confirms there. A confirmation follows the same rules as a client's request, so the first decision decides the interaction. Clients act on the description, never on these links.
+
+The [example message](/fixtures/map-0.2/emails/content-review.eml) carries one link for each operation it offers.
+
 ## Delivery and execution
 
 Email carries the description, and HTTPS carries the request and result. SMTP, IMAP and provider inbox APIs continue to handle email delivery and access.

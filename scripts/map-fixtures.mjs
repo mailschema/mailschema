@@ -153,8 +153,25 @@ for (const slug of ['content-review', 'action-approval']) {
 // Messages. Boundaries, dates and signing times are fixed so signatures reproduce.
 const base64 = (bytes) => Buffer.from(bytes).toString('base64').replace(/.{76}/g, '$&\r\n');
 /**
+ * The readable actions of a description: one link for each operation it offers, labelled
+ * with the operation's name, to the human route with that operation chosen. Opening a link
+ * never acts; the person confirms on the page.
+ */
+function readableActions(description) {
+  const links = description.operations.map(({ id, name }) => {
+    const url = new URL(description.service.humanUrl);
+    url.searchParams.set('operation', id);
+    return { name, href: url.href };
+  });
+  return {
+    text: links.map(({ name, href }) => `${name}: ${href}`).join('\n'),
+    html: links.map(({ name, href }) => `<a href="${href}">${name}</a>`).join(' '),
+  };
+}
+
+/**
  * A message whose MAP part, labelled with the profile, sits in a multipart/related partial
- * representation beside the readable text and any other structured parts. With
+ * representation beside the readable text, any HTML and any other structured parts. With
  * attachments, that entity is the first part of a multipart/mixed body.
  */
 function message({
@@ -164,6 +181,7 @@ function message({
   messageId,
   description,
   text,
+  html,
   calendar,
   headers = [],
   structured = [],
@@ -175,6 +193,15 @@ function message({
     'Content-Transfer-Encoding: base64',
     '',
     base64(text),
+    ...(html
+      ? [
+          '--map-readable',
+          'Content-Type: text/html; charset="utf-8"',
+          'Content-Transfer-Encoding: base64',
+          '',
+          base64(html),
+        ]
+      : []),
     '--map-readable--',
   ];
   const related = [
@@ -275,6 +302,7 @@ const bodyLength = (raw) => Buffer.byteLength(raw.slice(raw.indexOf('\r\n\r\n') 
 
 {
   const entry = example('content-review');
+  const actions = readableActions(describe(entry));
   put(
     'emails/content-review.eml',
     message({
@@ -283,7 +311,8 @@ const bodyLength = (raw) => Buffer.byteLength(raw.slice(raw.indexOf('\r\n\r\n') 
       subject: 'Review September product update',
       messageId: 'content-review-4@reviews.example',
       description: describe(entry),
-      text: 'September product update, revision 4, is ready for review. Request changes or approve it in the review service.',
+      text: `September product update, revision 4, is ready for review.\n\n${actions.text}\n`,
+      html: `<!doctype html><html><body><p>September product update, revision 4, is ready for review.</p><p>${actions.html}</p></body></html>\n`,
     }),
   );
   // The same interaction beside an attachment and another structured part, which a MAP

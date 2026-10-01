@@ -1,10 +1,10 @@
 ---
 title: Content Review
-description: Request changes or decide approval for a specific revision of content.
+description: Request changes, approve or decline a specific revision of content.
 navTitle: Content Review
 ---
 
-Content Review defines two operations on a revision of content: request changes and approve. The service owns the content and controls who can review it. Version 0.3 runs on MAP 0.2.
+Content Review defines three operations on a revision of content: request changes, approve and decline. The service owns the content and controls who can review it. Version 0.4 runs on MAP 0.2.
 
 The first example is a campaign test email. The same review model applies to a documentation draft or a company listing, provided the service supports the same operations and results.
 
@@ -44,12 +44,19 @@ The service's content and sending rules still apply at the decision. If they do 
 
 Approval records a review decision. Sending, publication and any other operation stay under the service's separate permissions.
 
+## Decline
+
+Decline takes an optional `reason` for the content's author, up to 2,000 characters, and the service returns `completed` with `{"decision": "declined"}`. It decides the interaction: a later approval is refused with `already-decided`, and a proposed approval still awaiting a person ends as `failed` with reason `superseded`. A changed revision is a new interaction, which can be approved.
+
+Declining a revision differs from declining an agent's proposed approval. The first decides the interaction; the second ends that proposal and leaves the revision undecided.
+
 ## Authority and consequences
 
 | Operation       | Authority  | Consequences  | Kind       |
 | --------------- | ---------- | ------------- | ---------- |
 | Request changes | Credential | Record        | Repeatable |
 | Approve         | Credential | Authorization | Decision   |
+| Decline         | Credential | Refusal       | Decision   |
 
 ## Example exchange
 
@@ -63,7 +70,7 @@ The [interactive example](/examples) simulates this exchange in the browser, inc
 
 ## Contract
 
-- [Contract](/contracts/content-review-0.3.json)
-- [Request schema](/schemas/content-review-0.3.schema.json)
+- [Contract](/contracts/content-review-0.4.json)
+- [Request schema](/schemas/content-review-0.4.schema.json)
 - [Example description](/fixtures/map-0.2/content-review/description.json)
 - [Example message](/fixtures/map-0.2/emails/content-review.eml)

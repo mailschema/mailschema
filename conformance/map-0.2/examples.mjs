@@ -18,7 +18,7 @@ export const ics = (lines) => `${lines.join('\r\n')}\r\n`;
 export const examples = [
   {
     slug: 'content-review',
-    version: '0.3',
+    version: '0.4',
     authority: 'credential',
     host: 'reviews.example',
     name: 'Example Review Service',
@@ -41,10 +41,12 @@ export const examples = [
         description: 'Record feedback on revision 4.',
       },
       { id: 'approve', name: 'Approve', description: 'Record approval of revision 4.' },
+      { id: 'decline', name: 'Decline', description: 'Record that revision 4 is declined.' },
     ],
     inputs: {
       'request-changes': { feedback: 'Add the event timezone to the opening paragraph.' },
       approve: {},
+      decline: { reason: 'The update repeats last month’s announcement.' },
     },
   },
   {

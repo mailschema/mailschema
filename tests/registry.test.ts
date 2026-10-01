@@ -35,12 +35,12 @@ test('executable contracts are discovered from canonical files and fail closed o
   const root = mkdtempSync(resolve(tmpdir(), 'mailschema-contracts-'));
   try {
     cpSync(resolve('public'), resolve(root, 'public'), { recursive: true });
-    const schemaPath = resolve(root, 'public/schemas/content-review-0.3.schema.json');
+    const schemaPath = resolve(root, 'public/schemas/content-review-0.4.schema.json');
     const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
     schema.title = 'Drifted title';
     writeFileSync(schemaPath, JSON.stringify(schema));
     expect(() => loadTypeContractCatalog(root)).toThrow(/request schema digest differs/);
-    cpSync(resolve('public/schemas/content-review-0.3.schema.json'), schemaPath);
+    cpSync(resolve('public/schemas/content-review-0.4.schema.json'), schemaPath);
 
     // A new type's contract is found by its file alone: Action Approval under another name.
     const renamed = (path: string) =>
@@ -68,7 +68,7 @@ test('executable contracts are discovered from canonical files and fail closed o
     ).not.toThrow();
     rmSync(secondSchemaPath);
     rmSync(secondContractPath);
-    rmSync(resolve(root, 'public/contracts/content-review-0.3.json'));
+    rmSync(resolve(root, 'public/contracts/content-review-0.4.json'));
     expect(() => assertContractCoverage(baseline.types, loadTypeContractCatalog(root))).toThrow(
       /expected one current executable contract/,
     );

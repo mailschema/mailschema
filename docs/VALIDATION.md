@@ -4,9 +4,9 @@
 
 ## Protocol and Registry
 
-- Registry validation passed with ten types on MAP 0.2, four contributions, no implementation declarations and 14 served record snapshots.
-- MAP 0.2 profile validation passed for ten type contracts, 62 published fixture documents and a profile record bound to its schema, context and contract format.
-- The conformance manifest verified 145 digest-bound artifacts, 100 executable cases and mappings for 39 normative requirements. The cases run on `src/map/core`, the MAP core the npm package ships.
+- Registry validation passed with ten types on MAP 0.2, five contributions, no implementation declarations and 15 served record snapshots.
+- MAP 0.2 profile validation passed for 11 type contracts, Content Review 0.3 and 0.4 among them, 64 published fixture documents and a profile record bound to its schema, context and contract format.
+- The conformance manifest verified 149 digest-bound artifacts, 100 executable cases and mappings for 39 normative requirements. The cases run on `src/map/core`, the MAP core the npm package ships.
 - The suite covers every operation of every type, description binding and forged descriptions, credential and possession authority, the DKIM-signed message kit, decisions and the approval lifecycle, recovery and retention, the HTTP binding, and the shared RFC 8785, I-JSON, lexical and media type vectors.
 - The Ruby package passed the same shared vectors and every published JSON fixture document: 53 tests and 13,204 assertions, with no RuboCop offenses.
 

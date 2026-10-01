@@ -1,7 +1,7 @@
 {
   "kind": "MapResult",
   "profile": "https://mailschema.org/profiles/map/0.2",
-  "requestId": "urn:uuid:01926a00-0000-7000-8000-000000001011",
+  "requestId": "urn:uuid:01926a00-0000-7000-8000-000000001021",
   "interactionId": "urn:uuid:01926a00-0000-7000-8000-000000000001",
   "descriptionDigest": "sha-256:65df79e20e690dea1d2bd4450505f537e9b267061be504d5e09807f40487ec6c",
   "type": {
@@ -9,7 +9,7 @@
     "version": "0.4",
     "contractDigest": "sha-256:3d0a61d63b5edd444591ada7c6a3d18f01a5cfbe6dcb44b66856f239fadfa5f1"
   },
-  "operation": "approve",
+  "operation": "decline",
   "state": "completed",
   "target": {
     "id": "https://reviews.example/content/campaign-42",
@@ -18,9 +18,9 @@
     "digest": "sha-256:0ee3ba1e0357f0d96da4f7f04b2d6ef5c8e3cab055f3ffd97204e530eef6e143"
   },
   "recordedAt": "2026-09-25T09:00:00.000Z",
-  "resultUrl": "https://reviews.example/map/results/urn%3Auuid%3A01926a00-0000-7000-8000-000000001011",
+  "resultUrl": "https://reviews.example/map/results/urn%3Auuid%3A01926a00-0000-7000-8000-000000001021",
   "actor": "agent-client-3",
   "output": {
-    "decision": "approved"
+    "decision": "declined"
   }
 }

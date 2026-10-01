@@ -18,6 +18,11 @@
       "contractDigest": "sha-256:4d5eef369cd6fbeb219221ae3d1c1dd3eeb8e751fd1b634f1e131838558519b7"
     },
     {
+      "id": "https://mailschema.org/types/content-review",
+      "version": "0.4",
+      "contractDigest": "sha-256:3d0a61d63b5edd444591ada7c6a3d18f01a5cfbe6dcb44b66856f239fadfa5f1"
+    },
+    {
       "id": "https://mailschema.org/types/email-confirmation",
       "version": "0.1",
       "contractDigest": "sha-256:f7ba22e7d20ae004d248655e2c744eb1a131b3d1b88de77525551ce70ac131e3"
@@ -97,6 +102,14 @@
     {
       "path": "public/schemas/content-review-0.3.schema.json",
       "sha256": "5cc321da9f34f0a9024a008d1d3c2a3bb1555083a7d597eaa7606e1d66fe3eec"
+    },
+    {
+      "path": "public/contracts/content-review-0.4.json",
+      "sha256": "3b03f2a4a4be4d3550948d9257987a582eca7e4594cb7b0d79c315ee573fcd12"
+    },
+    {
+      "path": "public/schemas/content-review-0.4.schema.json",
+      "sha256": "e6736b4b6bda5ff719abc97e393bd2c5ea53b414487f3b149469a9fc16a2e56e"
     },
     {
       "path": "public/contracts/email-confirmation-0.1.json",
@@ -204,31 +217,39 @@
     },
     {
       "path": "public/fixtures/map-0.2/content-review/approve.approval-required.json",
-      "sha256": "db54a35c830d52b8b3848345fe39d24503b07844b37f12cb868eedc715800749"
+      "sha256": "910b330cf4dad69c59ec424eea1d2030a4665194dd1c0db0c56883d07892ab59"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/approve.declined.json",
-      "sha256": "aa193059832590d37d7dac6408ee544447f4b52e5341b8cd099ffee2fdc9c3ba"
+      "sha256": "e2925d21f605aab22525a93fbf9a68e4da14811be6018d7e71db70ca68149d4d"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/approve.request.json",
-      "sha256": "4fa298431595a6c3544e173cbd215f4736f4ae82bf39f951d97eeb555d0d95e1"
+      "sha256": "d7eda8c90ac8bbf232266d9dfcde7e078fd30789415d76b0a2506834a4dadc27"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/approve.result.json",
-      "sha256": "cc787111e779c9f30113ee626789e5569324761bdc0f216e86145fa659eec09e"
+      "sha256": "20665f139baf1ea27bc33e416c4bd14d813e03055c6694f513c7f72c3ebfddd8"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/decline.request.json",
+      "sha256": "4e0490991d404ea7b4af1fda83e8a5595194f7051e7c2b86ccdc05155d0a912f"
+    },
+    {
+      "path": "public/fixtures/map-0.2/content-review/decline.result.json",
+      "sha256": "b08c1a67fb22504fd3613e9f46d8516c9b3ee691d2fc22f9fd2a16540d4c72e1"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/description.json",
-      "sha256": "b15ef92aa6d83df6fc6f50c4cbdc70a58ea2718d51971ccd01aee647d41a680e"
+      "sha256": "662e86325e55581c8c103d1f92dd778bd0d666ee98d70b51d70a9f3ce1fca983"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/request-changes.request.json",
-      "sha256": "8bb95180217c61e0722b87db4938bd2fce6a0c0d755b8127303ab6dd67080cba"
+      "sha256": "cbb94a4b8aee693e29af3315106aacb46d99c4d95bcd9df7ef5b831e7c38a0bd"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/request-changes.result.json",
-      "sha256": "3d95243e18625e4705582fca02dab54563415ce40cba887d15ccb0d8fe927879"
+      "sha256": "99304df9a292b9a093381ac9e8f9ce8f311af78af34c5895d0cdcb7e55a8a4e7"
     },
     {
       "path": "public/fixtures/map-0.2/content-review/stale-target.problem.json",
@@ -260,11 +281,11 @@
     },
     {
       "path": "public/fixtures/map-0.2/emails/content-review-mixed.eml",
-      "sha256": "7ee3666e54d6ef753e5fb5734a4d8190f8ead7b308e1da07f217b0911ab7730f"
+      "sha256": "a0ddbcfeed164c61bc02d92d0bef463fc607afd6e258d34002df9fbcbbe90cfe"
     },
     {
       "path": "public/fixtures/map-0.2/emails/content-review.eml",
-      "sha256": "fb4919c4d520b8443ab93e5794be79e92e74eed79e393706ced28eefd6885206"
+      "sha256": "e02be4b574b69f65f94a272a1aaf420762334432e97e7965c6c48f4d1fe8ac37"
     },
     {
       "path": "public/fixtures/map-0.2/emails/email-confirmation.eml",
@@ -612,7 +633,7 @@
     },
     {
       "path": "conformance/map-0.2/examples.mjs",
-      "sha256": "2cf954a0566eb4b13b259e23e19b5266e791411ed03bef800c4bfb5d9c1a1fb5"
+      "sha256": "7246367c88ee0dfa7162480a15e12a8f92adfb36b0dcd22eee97818016465f80"
     },
     {
       "path": "conformance/map-0.2/build.mjs",
@@ -620,7 +641,7 @@
     },
     {
       "path": "conformance/map-0.2/cases.mjs",
-      "sha256": "9770024cc80a0bbbce6945e3ae690e5803f4b82aa3e9101715cdd85efd29b105"
+      "sha256": "21b1f6128b513aa683f70eb838346b9b5da3d2aa697eb7c3f6f39a5425f6e299"
     },
     {
       "path": "conformance/map-0.2/requirements.json",
@@ -628,7 +649,7 @@
     },
     {
       "path": "scripts/map-fixtures.mjs",
-      "sha256": "15b24e7380583305e8bd29aadb8df7a7bcfd455c4ffb1006d825cf0bfe15b453"
+      "sha256": "e79cb0452225521006949e1261eb9b64c35445c634ea9f22664ec2d86ebf25a3"
     },
     {
       "path": "tests/map-conformance.test.mjs",
