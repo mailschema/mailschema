@@ -1,27 +1,28 @@
 import { reviewCopy } from '../data/review';
 
-type Status = 'waiting' | 'feedback' | 'approved';
+type Status = 'waiting' | 'feedback' | 'approved' | 'declined';
 for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]')) {
   const get = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
   const request = get<HTMLButtonElement>('[data-request]');
   const approve = get<HTMLButtonElement>('[data-approve]');
+  const decline = get<HTMLButtonElement>('[data-decline]');
   const revise = get<HTMLButtonElement>('[data-revise]');
   const form = get<HTMLFormElement>('[data-feedback-form]');
   const actions = get<HTMLElement>('[data-main-actions]');
   const role = get<HTMLSelectElement>('[data-role]');
   let revision = 3;
   let status: Status = 'waiting';
-  // Approval decides the revision; feedback is repeatable, so it stays available.
-  let decided = false;
+  // Approving or declining decides the revision; feedback is repeatable, so it stays available.
+  let decision: 'approval' | 'decline' | undefined;
   function result(text: string) {
     get('[data-result]').textContent = text;
   }
   function showPermissionHint() {
     get('[data-action-footnote]').textContent =
       status === 'feedback'
-        ? decided
-          ? 'The approval of this revision stands. You can send more feedback, or switch to the editor to create the next revision using a predetermined edit.'
-          : 'You can send more feedback or approve this revision, or switch to the editor to create the next revision using a predetermined edit.'
+        ? decision
+          ? `The ${decision} of this revision stands. You can send more feedback, or switch to the editor to create the next revision using a predetermined edit.`
+          : 'You can send more feedback, approve or decline this revision, or switch to the editor to create the next revision using a predetermined edit.'
         : role.value === 'editor'
           ? 'Switch to the reviewer to record a review decision.'
           : 'Approval applies to this revision. Sending is a separate action.';
@@ -38,19 +39,25 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
         '↗',
         'Awaiting a decision',
         `Revision ${revision} is ready for review.`,
-        'You can request changes or approve this revision. The service checks your permission when you submit the request.',
+        'You can request changes, approve or decline this revision. The service checks your permission when you submit the request.',
       ],
       feedback: [
         '↻',
         'Changes requested',
         'Feedback recorded.',
-        `The feedback applies to revision ${revision}.${decided ? ' Its approval stands.' : ''} The content has not changed yet. An editor can now prepare the next revision.`,
+        `The feedback applies to revision ${revision}.${decision ? ` Its ${decision} stands.` : ''} The content has not changed yet. An editor can now prepare the next revision.`,
       ],
       approved: [
         '✓',
         'Decision recorded',
         `Revision ${revision} approved.`,
         `The service has recorded approval of revision ${revision}. Sending the campaign requires separate permission.`,
+      ],
+      declined: [
+        '✕',
+        'Decision recorded',
+        `Revision ${revision} declined.`,
+        `The service has recorded that revision ${revision} is declined. A new revision needs its own review.`,
       ],
     };
     ['symbol', 'label', 'title', 'description'].forEach((key, i) => {
@@ -61,7 +68,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
     get('[data-next-revision]').textContent = String(revision + 1);
     // Feedback is repeatable, so both operations stay available after it.
     actions.hidden = false;
-    approve.disabled = decided;
+    approve.disabled = decline.disabled = Boolean(decision);
     form.hidden = true;
     showPermissionHint();
   }
@@ -109,7 +116,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
     if (!permitted('edit')) return;
     revision += 1;
     status = 'waiting';
-    decided = false;
+    decision = undefined;
     render();
     result(`Revision ${revision} created in this example. It needs its own approval.`);
     approve.focus();
@@ -117,11 +124,19 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
   approve.addEventListener('click', () => {
     if (!permitted()) return;
     status = 'approved';
-    decided = true;
+    decision = 'approval';
     render();
     result(
       `Recorded approval of revision ${revision}. Sending the campaign requires separate permission.`,
     );
+    get<HTMLButtonElement>('[data-reset]').focus();
+  });
+  decline.addEventListener('click', () => {
+    if (!permitted()) return;
+    status = 'declined';
+    decision = 'decline';
+    render();
+    result(`Recorded that revision ${revision} is declined. A new revision needs its own review.`);
     get<HTMLButtonElement>('[data-reset]').focus();
   });
   get<HTMLButtonElement>('[data-stale]').addEventListener('click', () => {
@@ -133,7 +148,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-review-demo]'))
   get<HTMLButtonElement>('[data-reset]').addEventListener('click', () => {
     revision = 3;
     status = 'waiting';
-    decided = false;
+    decision = undefined;
     role.value = 'reviewer';
     form.reset();
     get<HTMLTextAreaElement>('#review-feedback').setCustomValidity('');

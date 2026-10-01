@@ -5,8 +5,8 @@
   "profile": "https://mailschema.org/profiles/map/0.2",
   "type": {
     "id": "https://mailschema.org/types/content-review",
-    "version": "0.3",
-    "contractDigest": "sha-256:4d5eef369cd6fbeb219221ae3d1c1dd3eeb8e751fd1b634f1e131838558519b7"
+    "version": "0.4",
+    "contractDigest": "sha-256:3d0a61d63b5edd444591ada7c6a3d18f01a5cfbe6dcb44b66856f239fadfa5f1"
   },
   "describedAt": "2026-09-25T08:00:00Z",
   "expiresAt": "2026-10-02T08:00:00Z",
@@ -47,6 +47,11 @@
       "id": "approve",
       "name": "Approve",
       "description": "Record approval of revision 4."
+    },
+    {
+      "id": "decline",
+      "name": "Decline",
+      "description": "Record that revision 4 is declined."
     }
   ]
 }

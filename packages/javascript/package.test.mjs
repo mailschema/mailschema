@@ -88,14 +88,26 @@ test('reproduces the shared RFC 8785, I-JSON, lexical and media type vectors', a
 });
 
 test('verifies every contract by its pinned digest and accepts its published documents', async () => {
+  const requestSchema = (contract) =>
+    fixture(`schemas/${contract.requestSchema.url.split('/').at(-1)}`);
   for (const file of await fixtureNames('contracts')) {
     const contract = await fixture(`contracts/${file}`);
-    const slug = file.replace(/-[0-9.]+\.json$/, '');
-    const description = await fixture(`map-0.2/${slug}/description.json`);
-    const schema = await fixture(`schemas/${contract.requestSchema.url.split('/').at(-1)}`);
-    const pinned = description.type.contractDigest;
+    const schema = await requestSchema(contract);
+    const pinned = digest(contract);
     assert.throws(() => new Contract(contract, schema, { digest: `${pinned}0` }), InvalidContract);
-    const loaded = new Contract(contract, schema, { digest: pinned });
+    assert.equal(new Contract(contract, schema, { digest: pinned }).digest, pinned, file);
+  }
+  const types = (
+    await readdir(new URL('fixtures/map-0.2', import.meta.url), { withFileTypes: true })
+  )
+    .filter((entry) => entry.isDirectory() && entry.name !== 'emails')
+    .map((entry) => entry.name);
+  for (const slug of types) {
+    const description = await fixture(`map-0.2/${slug}/description.json`);
+    const contract = await fixture(`contracts/${slug}-${description.type.version}.json`);
+    const loaded = new Contract(contract, await requestSchema(contract), {
+      digest: description.type.contractDigest,
+    });
     assert.deepEqual(loaded.descriptionErrors(description), [], slug);
     for (const name of await fixtureNames(`map-0.2/${slug}`)) {
       const document = await fixture(`map-0.2/${slug}/${name}`);

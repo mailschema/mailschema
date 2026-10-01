@@ -686,6 +686,22 @@ const binding = [
       const superseded = reference.recover(proposal.requestId, context);
       assert.equal(superseded.body.state, 'failed');
       assert.equal(superseded.body.reason, 'superseded');
+
+      // Declining a revision is a decision too: it ends a proposed approval, and the
+      // revision can no longer be approved.
+      proposals = true;
+      const reviewing = new ReferenceMapService(reviewDescription(), {
+        now: clock,
+        requireApproval: () => proposals,
+      });
+      const proposed = approve();
+      assert.equal(reviewing.submit(proposed, context).body.state, 'approval-required');
+      proposals = false;
+      const declined = reviewing.submit(request(review, 'decline'), context);
+      assert.deepEqual([declined.status, declined.body.output], [200, { decision: 'declined' }]);
+      assert.equal(reviewing.recover(proposed.requestId, context).body.reason, 'superseded');
+      const late = reviewing.submit(request(review, 'approve', { n: 2 }), context);
+      assert.deepEqual([late.status, late.body.code], [409, 'already-decided']);
     },
   ),
   caseOf(
@@ -705,7 +721,7 @@ const binding = [
 
       // Content Review with its repeatable feedback behind an approval.
       const contract = JSON.parse(
-        await readFile(new URL('../../public/contracts/content-review-0.3.json', import.meta.url)),
+        await readFile(new URL('../../public/contracts/content-review-0.4.json', import.meta.url)),
       );
       const feedback = contract.operations.find(({ id }) => id === 'request-changes');
       const proposal = contract.operations
@@ -716,12 +732,12 @@ const binding = [
         reasons: ['declined', 'stale-target', 'expired'],
         outputSchema: proposal.outputSchema,
       });
-      await withArtifacts({ 'contracts/content-review-0.3.json': contract }, (load) => {
+      await withArtifacts({ 'contracts/content-review-0.4.json': contract }, (load) => {
         const loaded = load();
         const description = reviewDescription();
         description.type.contractDigest = loaded.contractFor(
           'content-review',
-          '0.3',
+          '0.4',
         ).contractDigest;
         const gated = new ReferenceMapService(
           description,
@@ -2079,8 +2095,8 @@ const representation = [
       const description = reviewDescription();
       await withArtifacts(
         {
-          'contracts/content-review-0.3.json': null,
-          'schemas/content-review-0.3.schema.json': null,
+          'contracts/content-review-0.4.json': null,
+          'schemas/content-review-0.4.schema.json': null,
         },
         async (load, root) => {
           assert.throws(() =>
@@ -2121,7 +2137,7 @@ const representation = [
     async () => {
       const contract = JSON.parse(
         await readFile(
-          new URL('../../public/contracts/content-review-0.3.json', import.meta.url),
+          new URL('../../public/contracts/content-review-0.4.json', import.meta.url),
           'utf8',
         ),
       );

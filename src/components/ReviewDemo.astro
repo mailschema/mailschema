@@ -50,8 +50,8 @@ import '../styles/demo.css';
         </div>
         <h3>{reviewCopy.subject}</h3>
         <p class="message-intro">
-          Please review the opening for the September update. You can request changes or approve
-          this revision.
+          Please review the opening for the September update. You can request changes, approve or
+          decline this revision.
         </p>
         <div class="review-content">
           <div class="review-content-label">
@@ -77,7 +77,7 @@ import '../styles/demo.css';
         <div class="interaction-title">
           <span class="eyebrow">The same message, understood by a client</span>
           <h3>Content Review</h3>
-          <span class="pill soft">Draft type · 0.3</span>
+          <span class="pill soft">Draft type · 0.4</span>
         </div>
         <dl class="interaction-fields">
           <div>
@@ -94,7 +94,7 @@ import '../styles/demo.css';
           </div>
           <div>
             <dt>Available actions</dt>
-            <dd>Request changes · Approve</dd>
+            <dd>Request changes · Approve · Decline</dd>
           </div>
           <div>
             <dt>Execution</dt>
@@ -132,6 +132,9 @@ import '../styles/demo.css';
             Approve revision <span data-revision>3</span>
             <Icon name="check" size={15} />
           </button>
+          <button class="button outline compact" data-decline disabled>
+            Decline
+          </button>
         </div>
         <button class="button dark-button compact" data-revise hidden>
           Create revision <span data-next-revision>4</span> <Icon size={16} />
@@ -141,8 +144,8 @@ import '../styles/demo.css';
         </p>
       </div>
       <p class="demo-noscript" data-demo-fallback>
-        Enable JavaScript to try the local example. The email offers two actions: request changes or
-        approve this exact revision.
+        Enable JavaScript to try the local example. The email offers three actions: request changes,
+        approve or decline this exact revision.
       </p>
     </div>
     <aside class="demo-inspector" aria-label="Interaction result">
@@ -159,8 +162,8 @@ import '../styles/demo.css';
         </span>
         <h4 data-state-title>Revision 3 is ready for review.</h4>
         <p data-state-description>
-          You can request changes or approve this revision. The service checks your permission when
-          you submit the request.
+          You can request changes, approve or decline this revision. The service checks your
+          permission when you submit the request.
         </p>
       </div>
       <div class="demo-result" role="status" aria-live="polite" aria-atomic="true">
