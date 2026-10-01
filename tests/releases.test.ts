@@ -20,7 +20,7 @@ const releases = new Map<string, PackageRelease>(
   ]),
 );
 
-test('the Tools page offers exactly the selected releases, with Ruby once RubyGems is selected', () => {
+test('the Tools page offers exactly the selected releases', () => {
   expect(tooling.map((tool) => tool.registry).sort()).toEqual(
     current.channels.map((channel) => channel.registry).sort(),
   );

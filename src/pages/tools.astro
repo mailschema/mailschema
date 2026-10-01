@@ -201,7 +201,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
       </a>
     </aside>
     <p class="tools-scope">
-      {`The ${names(tooling)} packages carry the MAP 0.2 core artifacts exactly as published${tooling.some((tool) => tool.id === 'ruby') ? ', and the Ruby package also processes MAP documents' : ''}. `}
+      {`The ${names(tooling)} packages carry the MAP 0.2 core artifacts exactly as published, and the JavaScript and Ruby packages also process MAP documents. `}
       Public artifact readback verifies every contract bundled in the selected releases. Registry
       types are published independently; adding a type does not require releases in every language.
       Clients obtain the exact type versions they act on from the Registry catalogue by digest, or

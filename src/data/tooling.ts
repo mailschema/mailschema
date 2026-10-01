@@ -28,7 +28,7 @@ const npmRelease = channel('npm');
 const pythonRelease = channel('PyPI');
 const rustRelease = channel('crates.io');
 const goRelease = channel('Go');
-const rubyRelease = selectedChannels.get('RubyGems');
+const rubyRelease = channel('RubyGems');
 
 /** The MAP version a selected release implements: the one core schema its evidence binds. */
 function mapVersion(registry: string) {
@@ -45,7 +45,7 @@ const sharedVersion = [...versions][0];
 export const packageSetLabel =
   versions.size === 1 ? `Package set ${sharedVersion}` : 'Verified package set';
 
-/** The Ruby tab, shown once a RubyGems release is selected and verified. */
+/** The Ruby tab. */
 export const rubyTool = (release: PackageReleaseChannel, map: string) => ({
   id: 'ruby',
   name: 'Ruby',
@@ -98,47 +98,46 @@ export const tooling = [
     release: npmRelease,
     runtime: 'Node.js 22+',
     map: mapVersion('npm'),
-    title: 'Bundle the MAP core and check Registry files.',
+    title: 'Run the MAP 0.2 lifecycle in JavaScript.',
     description:
-      'The MAP 0.2 core artifacts for your validator, and local checks for Registry contributions and records.',
+      'Parse and digest MAP documents, verify the contracts you vendor, build results and problems the core accepts, and check Registry files.',
     install: `npm install mailschema@${npmRelease.version}`,
     command: `npx mailschema@${npmRelease.version} check contribution.json`,
     installLanguage: 'bash' as const,
     language: 'javascript' as const,
     filename: 'check-description.mjs',
     example: `import { readFile } from 'node:fs/promises';
-import Ajv2020 from 'ajv/dist/2020.js';
-import { getMapSchema } from 'mailschema';
+import { descriptionErrors, parse } from 'mailschema';
 
-const description = JSON.parse(await readFile('description.json', 'utf8'));
-const schema = getMapSchema();
-const ajv = new Ajv2020();
-ajv.addSchema(schema);
-const check = ajv.getSchema(\`\${schema.$id}#/$defs/description\`);
-
-if (!check(description)) console.error(check.errors);`,
+const description = parse(await readFile('description.json'));
+const errors = descriptionErrors(description);
+if (errors.length) throw new Error(errors.join('\\n'));`,
     exampleNote:
-      'Schema checks only. The profile adds the I-JSON limits, digest binding and processing rules.',
+      'Parses the file as I-JSON within the MAP limits, or throws. Lists every error when the description breaks the MAP 0.2 core.',
     api: [
       {
-        name: 'getMapSchema() / getMapContext()',
-        description: 'The MAP 0.2 core schema and JSON-LD context.',
+        name: 'parse(text) / digest(value)',
+        description: 'Read a MAP document as I-JSON and compute its RFC 8785 digest.',
       },
       {
-        name: 'getContractFormatSchema() / getFormsSchema()',
-        description: 'The contract format and the form fields block contracts pin.',
+        name: 'new Contract(contract, schema, { digest })',
+        description: 'Verify a vendored type contract against the digest you pinned.',
       },
       {
-        name: 'assertContribution(value) / assertTypeRecord(value)',
-        description: 'Validate Registry contributions and expanded type records.',
+        name: 'contract.descriptionErrors / requestProblem / inputErrors',
+        description: 'Check descriptions, requests and inputs against the contract.',
       },
       {
-        name: 'referenceErrors(contribution, catalog)',
-        description: 'Check exact Registry versions, profiles, digests and operations.',
+        name: 'result() / problem()',
+        description: 'Build results and problems the core accepts.',
+      },
+      {
+        name: 'assertContribution(value) / referenceErrors(contribution, catalog)',
+        description: 'Validate Registry contributions against the exact Registry versions.',
       },
     ],
     exports:
-      'The MAP 0.2 core artifacts, Registry validation and reference checks, and TypeScript definitions.',
+      'MAP 0.2 parsing, RFC 8785 digests, contract verification, validation and documents; the core artifacts; Registry validation; TypeScript definitions.',
   },
   {
     id: 'python',
@@ -268,7 +267,7 @@ func main() {
     ],
     exports: 'The MAP 0.2 core artifacts and the Registry contribution schema.',
   },
-  ...(rubyRelease ? [rubyTool(rubyRelease, mapVersion('RubyGems'))] : []),
+  rubyTool(rubyRelease, mapVersion('RubyGems')),
 ];
 
 export const localCheckCommands = {
