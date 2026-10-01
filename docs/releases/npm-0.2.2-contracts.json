@@ -1,7 +1,7 @@
 {
   "format": "mailschema-package-release/2",
-  "checkedAt": "2026-09-28T05:47:45.433Z",
-  "version": "0.2.1",
+  "checkedAt": "2026-10-01T09:12:52.892Z",
+  "version": "0.2.2",
   "schemaSha256": "a8a241b4837971a6251bcc135c704283536f4fb825fbbaedaf1598c6e688d564",
   "contracts": [
     {
@@ -30,13 +30,13 @@
     {
       "registry": "npm",
       "name": "mailschema",
-      "version": "0.2.1",
-      "url": "https://www.npmjs.com/package/mailschema/v/0.2.1",
+      "version": "0.2.2",
+      "url": "https://www.npmjs.com/package/mailschema/v/0.2.2",
       "artifacts": [
         {
-          "name": "mailschema-0.2.1.tgz",
-          "sha256": "6acd1bf0d7fa0cdee61016f4058c80e0da9c676a6ea796aeef076fb8cba87a80",
-          "integrity": "sha512-Idk8m6DYvuKkfLmM20cUvODGknZCnbunEEBZHdqoA1OL26ULSQX7nHCWZ9zvLrln313owcVqjHQ7F/PQt1G+rw=="
+          "name": "mailschema-0.2.2.tgz",
+          "sha256": "5b0b8b1225bdc9f9106b77444e46d078f2b8bbfad334453510d286fd56050866",
+          "integrity": "sha512-RVpCUtVuk8EkuBeJvUhQQewR61qOaZihMLOBhDogyJFvEgRsZlO0RusYBgGgYMyMbsc9nDUEaKUc3kGYBTVfNw=="
         }
       ],
       "status": "verified"

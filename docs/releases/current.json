@@ -4,8 +4,8 @@
   "channels": [
     {
       "registry": "npm",
-      "evidence": "npm-0.2.1-contracts",
-      "version": "0.2.1"
+      "evidence": "npm-0.2.2-contracts",
+      "version": "0.2.2"
     },
     {
       "registry": "PyPI",
