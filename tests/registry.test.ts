@@ -11,8 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import canonicalize from 'canonicalize';
+import { digest } from '../src/map/core/index.ts';
 import { compileRegistry, loadRegistry, recordDigest } from '../src/registry/catalog';
 import { assertContractCoverage, loadTypeContractCatalog } from '../src/registry/contracts';
 import { assertContribution } from '../src/registry/validation';
@@ -40,7 +39,7 @@ test('executable contracts are discovered from canonical files and fail closed o
     const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
     schema.title = 'Drifted title';
     writeFileSync(schemaPath, JSON.stringify(schema));
-    expect(() => loadTypeContractCatalog(root)).toThrow(/canonical digest does not match/);
+    expect(() => loadTypeContractCatalog(root)).toThrow(/request schema digest differs/);
     cpSync(resolve('public/schemas/content-review-0.3.schema.json'), schemaPath);
 
     // A new type's contract is found by its file alone: Action Approval under another name.
@@ -50,7 +49,7 @@ test('executable contracts are discovered from canonical files and fail closed o
       );
     const secondSchema = renamed('public/schemas/action-approval-0.1.schema.json');
     const secondContract = renamed('public/contracts/action-approval-0.1.json');
-    secondContract.requestSchema.canonicalDigest = `sha-256:${createHash('sha256').update(canonicalize(secondSchema)!).digest('hex')}`;
+    secondContract.requestSchema.canonicalDigest = digest(secondSchema);
     const secondSchemaPath = resolve(root, 'public/schemas/delivery-receipt-0.1.schema.json');
     const secondContractPath = resolve(root, 'public/contracts/delivery-receipt-0.1.json');
     writeFileSync(secondSchemaPath, `${JSON.stringify(secondSchema, null, 2)}\n`);

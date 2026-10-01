@@ -1,8 +1,5 @@
 import { readFileSync } from 'node:fs';
 
-/** The MAP profile whose core artifacts this package carries. */
-export const MAP_PROFILE = 'https://mailschema.org/profiles/map/0.2';
-
 const artifact = (name: string): Record<string, unknown> =>
   JSON.parse(readFileSync(new URL(`./${name}`, import.meta.url), 'utf8'));
 

@@ -1,11 +1,13 @@
+import { sha256 } from './artifacts.ts';
 import {
   reached,
-  sha256,
-  type ContractOperation,
-  type JsonObject,
   type Authority,
-} from './artifacts.ts';
-import type { InputError, MapDescription, MapRequest } from './reference.ts';
+  type ContractOperation,
+  type InputError,
+  type JsonObject,
+  type MapDescription,
+  type MapRequest,
+} from './core/index.ts';
 
 /**
  * The only type-specific code in the reference implementation. Everything a

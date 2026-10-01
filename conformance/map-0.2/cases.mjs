@@ -2,26 +2,28 @@ import assert from 'node:assert/strict';
 import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
 import { simpleParser } from 'mailparser';
+import { MapArtifacts } from '../../src/map/artifacts.ts';
+import { definition } from '../../src/map/core/artifacts.ts';
 import {
   CORE_SCHEMA,
+  InvalidDocument,
   MAP_PROFILE,
-  MapArtifacts,
-  canonicalDigest,
-  descriptionDigest,
-  parseMapBytes,
-  parseMapJson,
+  canonicalize,
+  capability,
+  digest,
+  isJsonRequest,
+  mapErrors,
+  parse,
+  problemErrors,
   reached,
-} from '../../src/map/artifacts.ts';
+} from '../../src/map/core/index.ts';
 import {
   ReferenceMapClient,
   ReferenceMapService,
   assertTrustedExecution,
-  capabilityOf,
   describeProblems,
-  isJsonRequest,
   mapArtifacts,
   obtainContract,
   serveHttp,
@@ -87,7 +89,7 @@ const core = [
     assert.equal(result.status, 200);
     assert.equal(result.body.state, 'completed');
     assert.equal(result.body.output.decision, 'approved');
-    assert.equal(result.body.descriptionDigest, descriptionDigest(reviewDescription()));
+    assert.equal(result.body.descriptionDigest, digest(reviewDescription()));
     assert.deepEqual(result.body.target, reviewDescription().target);
     assert.equal(reference.effectCount, 1);
   }),
@@ -315,14 +317,14 @@ const core = [
       // Member names become JSON Pointer tokens, escaped as RFC 6901 requires.
       const escaped = service().submit(approve({ input: { 'a/b': 1, '~': 1 } }), context);
       assert.deepEqual(escaped.body.errors.map((error) => error.pointer).sort(), ['/a~1b', '/~0']);
-      assert.deepEqual(artifacts.documentErrors(escaped.body), []);
+      assert.deepEqual(mapErrors(escaped.body), []);
       // A pointer too long for a problem names the nearest ancestor that fits.
       const long = service().submit(approve({ input: { ['x'.repeat(1500)]: 1 } }), context);
       assert.deepEqual(
         long.body.errors.map((error) => error.pointer),
         [''],
       );
-      assert.deepEqual(artifacts.documentErrors(long.body), []);
+      assert.deepEqual(mapErrors(long.body), []);
       // However many and however long its errors, the problem stays within 64 KiB.
       const many = Object.fromEntries(
         Array.from({ length: 100 }, (_, index) => [`${'~'.repeat(490)}${index}`, 1]),
@@ -330,7 +332,7 @@ const core = [
       const crowded = service().submit(approve({ input: many }), context);
       assert.ok(Buffer.byteLength(JSON.stringify(crowded.body)) <= 64 * 1024);
       assert.ok(crowded.body.errors.length >= 1);
-      assert.deepEqual(artifacts.documentErrors(crowded.body), []);
+      assert.deepEqual(mapErrors(crowded.body), []);
       // Lengths count code points, as JSON Schema does: 601 of them fit.
       const astral = '\u{1F600}'.repeat(600);
       const wide = service().submit(approve({ input: { [astral]: 1 } }), context);
@@ -338,7 +340,7 @@ const core = [
         wide.body.errors.map((error) => error.pointer),
         [`/${astral}`],
       );
-      assert.deepEqual(artifacts.documentErrors(wide.body), []);
+      assert.deepEqual(mapErrors(wide.body), []);
       assert.equal(reference.effectCount, 0);
     },
   ),
@@ -770,10 +772,10 @@ const perType = examples.flatMap((entry) => [
     async () => {
       const description = describe(entry);
       assert.deepEqual(await json(`${entry.slug}/description.json`), description);
-      assert.deepEqual(artifacts.documentErrors(description), []);
+      assert.deepEqual(mapErrors(description), []);
       const contract = new ReferenceMapClient(() => uuid(1)).verify(description, clock());
       assert.equal(contract.slug, entry.slug);
-      assert.deepEqual(parseMapJson(JSON.stringify(description)), description);
+      assert.deepEqual(parse(JSON.stringify(description)), description);
     },
   ),
   caseOf(
@@ -787,7 +789,7 @@ const perType = examples.flatMap((entry) => [
         assert.deepEqual(response.body, await json(`${entry.slug}/${id}.result.json`));
         const declared = artifacts
           .contractFor(entry.slug, entry.version)
-          .operation(id)
+          .core.operation(id)
           .results.map((result) => result.state);
         assert.ok(declared.includes(response.body.state));
         assert.deepEqual(reference.submit(request(entry, id), contextOf(entry)), response);
@@ -1300,7 +1302,7 @@ const types = [
         unauthenticated.body.type,
         'https://mailschema.org/problems/authentication-required',
       );
-      assert.deepEqual(artifacts.definitionErrors('problem', unauthenticated.body), []);
+      assert.deepEqual(problemErrors(unauthenticated.body), []);
       const done = post({
         'content-type': 'application/json',
         authorization: 'Bearer agent-token',
@@ -1465,7 +1467,7 @@ const types = [
         );
       await assert.rejects(
         readDeliveredMessage(withPart(Buffer.from([0x7b, 0x22, 0xff, 0x22, 0x7d]))),
-        TypeError,
+        InvalidDocument,
       );
       const part = Buffer.from(original.slice(start, end).replace(/\s+/g, ''), 'base64');
       await assert.rejects(
@@ -1481,7 +1483,7 @@ const types = [
     'every shared lexical vector decided by the core definition; unparseable dates refused',
     async () => {
       for (const vector of await json('lexical-vectors.json')) {
-        const validate = artifacts.ajv.getSchema(`${vector.schema}#/$defs/${vector.definition}`);
+        const validate = definition(vector.schema, vector.definition);
         assert.equal(
           validate(vector.value),
           vector.valid,
@@ -1575,7 +1577,7 @@ const types = [
     'policy follows consequences',
     () => {
       const operation = (slug, id) =>
-        artifacts.contractFor(slug, example(slug).version).operation(id);
+        artifacts.contractFor(slug, example(slug).version).core.operation(id);
       assert.equal(
         needsPrincipalDecision(operation('information-request', 'decline'), 'possession'),
         false,
@@ -1627,7 +1629,7 @@ const possession = [
       const wrong = reference.submit(request(entry, 'confirm'), { capability: 'guessed' });
       assert.equal(wrong.status, 404);
       assert.equal(wrong.body.code, undefined);
-      assert.equal(capabilityOf(description), entry.capability);
+      assert.equal(capability(description), entry.capability);
       const done = reference.submit(request(entry, 'confirm'), { capability: entry.capability });
       assert.equal(done.body.state, 'completed');
       assert.equal(done.body.actor, undefined);
@@ -2123,7 +2125,7 @@ const representation = [
           'utf8',
         ),
       );
-      assert.equal(reviewDescription().type.contractDigest, canonicalDigest(contract));
+      assert.equal(reviewDescription().type.contractDigest, digest(contract));
     },
   ),
   caseOf(
@@ -2132,21 +2134,15 @@ const representation = [
     'contradictory problems and misplaced errors rejected',
     async () => {
       const problem = await json('content-review/stale-target.problem.json');
-      assert.deepEqual(artifacts.documentErrors(problem), []);
+      assert.deepEqual(mapErrors(problem), []);
       assert.notDeepEqual(
-        artifacts.documentErrors({ type: problem.type, title: 'Stale', status: 500, detail: 'x' }),
+        mapErrors({ type: problem.type, title: 'Stale', status: 500, detail: 'x' }),
         [],
       );
-      assert.notDeepEqual(
-        artifacts.documentErrors({ ...problem, status: 500, code: 'refused' }),
-        [],
-      );
-      assert.notDeepEqual(
-        artifacts.documentErrors({ ...problem, errors: [{ detail: 'x', pointer: '/a' }] }),
-        [],
-      );
+      assert.notDeepEqual(mapErrors({ ...problem, status: 500, code: 'refused' }), []);
+      assert.notDeepEqual(mapErrors({ ...problem, errors: [{ detail: 'x', pointer: '/a' }] }), []);
       const decided = await json('meeting-scheduling/already-decided.problem.json');
-      assert.deepEqual(artifacts.documentErrors(decided), []);
+      assert.deepEqual(mapErrors(decided), []);
     },
   ),
   caseOf(
@@ -2156,14 +2152,14 @@ const representation = [
     async () => {
       const pending = await json('content-review/approve.approval-required.json');
       const declined = await json('content-review/approve.declined.json');
-      assert.deepEqual(artifacts.documentErrors(pending), []);
-      assert.deepEqual(artifacts.documentErrors(declined), []);
+      assert.deepEqual(mapErrors(pending), []);
+      assert.deepEqual(mapErrors(declined), []);
       const { approvalUrl, ...withoutLink } = pending;
       assert.ok(approvalUrl);
-      assert.notDeepEqual(artifacts.documentErrors(withoutLink), []);
-      assert.notDeepEqual(artifacts.documentErrors({ ...declined, reason: undefined }), []);
+      assert.notDeepEqual(mapErrors(withoutLink), []);
+      assert.notDeepEqual(mapErrors({ ...declined, reason: undefined }), []);
       assert.notDeepEqual(
-        artifacts.documentErrors({
+        mapErrors({
           ...(await json('content-review/approve.result.json')),
           reason: 'declined',
         }),
@@ -2178,10 +2174,10 @@ const representation = [
     () => {
       const fraction = describe(example('action-approval'));
       fraction.details.authorizationDetails[0].seats = 20.5;
-      assert.notDeepEqual(artifacts.documentErrors(fraction), []);
+      assert.notDeepEqual(mapErrors(fraction), []);
       const key = describe(example('action-approval'));
       key.details.authorizationDetails[0]['prix€'] = 'x';
-      assert.notDeepEqual(artifacts.documentErrors(key), []);
+      assert.notDeepEqual(mapErrors(key), []);
     },
   ),
   caseOf(
@@ -2191,7 +2187,7 @@ const representation = [
     async () => {
       for (const vector of await json('jcs-vectors.json')) {
         assert.equal(canonicalize(JSON.parse(vector.json)), vector.canonical, vector.name);
-        assert.equal(canonicalDigest(JSON.parse(vector.json)), vector.digest, vector.name);
+        assert.equal(digest(JSON.parse(vector.json)), vector.digest, vector.name);
       }
     },
   ),
@@ -2204,11 +2200,10 @@ const representation = [
         const bytes = vector.base64
           ? Buffer.from(vector.base64, 'base64')
           : Buffer.from(vector.json, 'utf8');
-        if (vector.valid)
-          assert.equal(canonicalize(parseMapBytes(bytes)), vector.canonical, vector.name);
-        else assert.throws(() => parseMapBytes(bytes), undefined, vector.name);
+        if (vector.valid) assert.equal(canonicalize(parse(bytes)), vector.canonical, vector.name);
+        else assert.throws(() => parse(bytes), undefined, vector.name);
       }
-      assert.deepEqual(parseMapJson('{"__proto__":{"x":1}}'), JSON.parse('{"__proto__":{"x":1}}'));
+      assert.deepEqual(parse('{"__proto__":{"x":1}}'), JSON.parse('{"__proto__":{"x":1}}'));
     },
   ),
   caseOf(
@@ -2450,7 +2445,7 @@ const representation = [
         const files = { 'contracts/meeting-scheduling-0.1.json': nextContract };
         if (mutateSchema) {
           mutateSchema(nextSchema);
-          nextContract.requestSchema.canonicalDigest = canonicalDigest(nextSchema);
+          nextContract.requestSchema.canonicalDigest = digest(nextSchema);
           files['schemas/meeting-scheduling-0.1.schema.json'] = nextSchema;
         }
         await withArtifacts(files, (load) => (refusal ? assert.throws(load, refusal) : load()));

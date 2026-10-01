@@ -31,9 +31,36 @@ for (const registry of packageRegistries)
   if (!/^\d+\.\d+\.\d+$/.test(versions[registry] ?? ''))
     throw new Error(`Invalid ${registry} package version.`);
 const license = await read('packages/LICENSE');
-const validation = (await read('src/registry/validation.ts'))
-  .replace('../../public/schemas/contribution.schema.json', './contribution.schema.json')
-  .replace("'./model.ts'", "'./model.js'");
+const validation = (await read('src/registry/validation.ts')).replace(
+  '../../public/schemas/contribution.schema.json',
+  './contribution.schema.json',
+);
+// The MAP core, exactly as the repository runs it. Only its three artifact imports point
+// at the package's own copies.
+const core = (await readdir(resolve(root, 'src/map/core'))).sort();
+const coreSource = async (file) => {
+  const source = await read(`src/map/core/${file}`);
+  if (file !== 'bundled.ts') return source;
+  const rewritten = source.replaceAll("'../../../public/schemas/", "'../");
+  if (rewritten.split("'../").length - 1 !== 3)
+    throw new Error('The core must import exactly three bundled artifacts.');
+  return rewritten;
+};
+// The published MAP 0.2 fixtures, contracts and request schemas a package's tests read.
+async function copyMapFixtures(destination) {
+  await cp(resolve(root, 'public/fixtures/map-0.2'), resolve(output, destination, 'map-0.2'), {
+    recursive: true,
+    filter: (path) => !/\/(?:emails|dns\.json)(?:\/|$)/.test(path),
+  });
+  for (const file of (await readdir(resolve(root, 'public/contracts'))).sort()) {
+    const schema = JSON.parse(await read(`public/contracts/${file}`))
+      .requestSchema.url.split('/')
+      .at(-1);
+    await put(`${destination}/contracts/${file}`, await read(`public/contracts/${file}`));
+    await put(`${destination}/schemas/${schema}`, await read(`public/schemas/${schema}`));
+  }
+  await put(`${destination}/profile.json`, await read('public/profiles/map/0.2.json'));
+}
 
 // A package build must contain only files produced for this release. This also
 // prevents an older wheel, crate or compiled file from entering a later upload.
@@ -45,7 +72,8 @@ await put(
   json({
     name: 'mailschema',
     version: versions.npm,
-    description: 'Mail Action Protocol 0.2 core artifacts and MailSchema Registry validation',
+    description:
+      'Mail Action Protocol 0.2 processing and core artifacts, and MailSchema Registry validation',
     type: 'module',
     license: 'MIT',
     author: 'MailSchema contributors',
@@ -77,6 +105,7 @@ await put('npm/src/model.ts', await read('src/registry/model.ts'));
 await put('npm/src/validation.ts', validation);
 await put('npm/src/index.ts', await read('packages/javascript/index.ts'));
 await put('npm/src/map.ts', await read('packages/javascript/map.ts'));
+for (const file of core) await put(`npm/src/core/${file}`, await coreSource(file));
 for (const item of artifacts.filter((entry) => entry.paths.npm))
   await put(`npm/src/${item.paths.npm.split('/').at(-1)}`, item.bytes);
 await put(
@@ -89,6 +118,7 @@ await put('npm/README.md', await read('packages/javascript/README.md'));
 await put('npm/LICENSE', license);
 await put('npm/test/package.test.mjs', await read('packages/javascript/package.test.mjs'));
 await put('npm/test/new-type.json', await read('registry/examples/new-type.json'));
+await copyMapFixtures('npm/test/fixtures');
 await put(
   'npm/tsconfig.json',
   json({
@@ -98,6 +128,8 @@ await put(
       moduleResolution: 'Bundler',
       strict: true,
       resolveJsonModule: true,
+      rewriteRelativeImportExtensions: true,
+      stripInternal: true,
       esModuleInterop: true,
       declaration: true,
       rootDir: 'src',
@@ -143,18 +175,7 @@ await cp(rubySource, resolve(output, 'ruby'), {
 await put('ruby/LICENSE', license);
 for (const item of artifacts.filter((entry) => entry.paths.RubyGems))
   await put(`ruby/${item.paths.RubyGems}`, item.bytes);
-await cp(resolve(root, 'public/fixtures/map-0.2'), resolve(output, 'ruby/test/fixtures/map-0.2'), {
-  recursive: true,
-  filter: (path) => !/\/(?:emails|dns\.json)(?:\/|$)/.test(path),
-});
-for (const file of (await readdir(resolve(root, 'public/contracts'))).sort()) {
-  const contract = JSON.parse(await read(`public/contracts/${file}`));
-  if (contract.profile !== 'https://mailschema.org/profiles/map/0.2') continue;
-  const schema = contract.requestSchema.url.split('/').at(-1);
-  await put(`ruby/test/fixtures/contracts/${file}`, await read(`public/contracts/${file}`));
-  await put(`ruby/test/fixtures/schemas/${schema}`, await read(`public/schemas/${schema}`));
-}
-await put('ruby/test/fixtures/profile.json', await read('public/profiles/map/0.2.json'));
+await copyMapFixtures('ruby/test/fixtures');
 await put('ruby/test/fixtures/numbers.json', json(ecmaScriptNumbers()));
 
 // ECMAScript's own formatting of doubles across the whole range, each carried as its

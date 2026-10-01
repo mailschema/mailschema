@@ -15,15 +15,16 @@ import { fileURLToPath } from 'node:url';
 import canonicalize from 'canonicalize';
 import { dkimSign } from 'mailauth/lib/dkim/sign.js';
 import { dkimVerify } from 'mailauth/lib/dkim/verify.js';
-import { ReferenceMapService, descriptionDigest, isJsonRequest } from '../src/map/reference.ts';
+import { ReferenceMapService } from '../src/map/reference.ts';
+import { sha256 } from '../src/map/artifacts.ts';
+import { definition as coreDefinition } from '../src/map/core/artifacts.ts';
 import {
   CORE_SCHEMA,
   FORMS_SCHEMA,
   MAP_PROFILE,
-  canonicalDigest,
-  parseMapBytes,
-} from '../src/map/artifacts.ts';
-import { mapArtifacts } from '../src/map/reference.ts';
+  isJsonRequest,
+  parse,
+} from '../src/map/core/index.ts';
 import { clock, describedAt, digestOf } from '../conformance/map-0.2/examples.mjs';
 import { contextOf, describe, example, examples, request } from '../conformance/map-0.2/build.mjs';
 
@@ -601,15 +602,16 @@ const vectors = [
   ],
   ['nesting and empties', '{"a":[],"b":{},"c":[{"z":null,"y":true,"x":false}]}'],
 ].map(([name, text]) => {
+  // An independent RFC 8785 implementation writes the vectors the core is checked against.
   const canonical = canonicalize(JSON.parse(text));
-  return { name, json: text, canonical, digest: canonicalDigest(JSON.parse(text)) };
+  return { name, json: text, canonical, digest: `sha-256:${sha256(canonical)}` };
 });
 const confirmationDescription = describe(confirmation);
 vectors.push({
   name: 'Email Confirmation description',
   json: JSON.stringify(confirmationDescription),
   canonical: canonicalize(confirmationDescription),
-  digest: descriptionDigest(confirmationDescription),
+  digest: `sha-256:${sha256(canonicalize(confirmationDescription))}`,
 });
 put('jcs-vectors.json', json(vectors));
 
@@ -682,7 +684,7 @@ const ijson = [
   const bytes = Buffer.isBuffer(value) ? value : Buffer.from(value, 'utf8');
   let canonical;
   try {
-    canonical = canonicalize(parseMapBytes(bytes));
+    canonical = canonicalize(parse(bytes));
   } catch {
     canonical = undefined;
   }
@@ -912,7 +914,7 @@ const lexicalVectors = [
   ...Object.entries(lexical).map((entry) => [CORE_SCHEMA, coreDefinitions, ...entry]),
   ...Object.entries(formsLexical).map((entry) => [FORMS_SCHEMA, formsDefinitions, ...entry]),
 ].flatMap(([schema, definitions, definition, [valid, invalid]]) => {
-  const validate = mapArtifacts().ajv.compile({ $ref: `${schema}#/$defs/${definition}` });
+  const validate = coreDefinition(schema, definition);
   // An anchored form refuses a valid value with a line break before or after it, so an
   // engine whose `$` matches before a final newline, or whose anchors match at line
   // breaks, must read `^` and `$` as whole-value anchors to agree.

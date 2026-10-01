@@ -3,8 +3,14 @@ import { domainToASCII } from 'node:url';
 import { simpleParser } from 'mailparser';
 import { dkimVerify } from 'mailauth/lib/dkim/verify.js';
 import { parseHeaders } from 'mailauth/lib/tools.js';
-import { MAP_PROFILE, parseMapBytes, sha256, type JsonObject } from './artifacts.ts';
-import type { MapDescription } from './reference.ts';
+import { sha256 } from './artifacts.ts';
+import {
+  MAP_PROFILE,
+  isDescriptionPart,
+  parse,
+  type JsonObject,
+  type MapDescription,
+} from './core/index.ts';
 
 /** Resolves DNS TXT records as `dns.promises.resolveTxt` does. */
 export type TxtResolver = (name: string) => Promise<string[][]>;
@@ -143,9 +149,8 @@ function descendants(entity: Part): { part: Part; parent: Part }[] {
 function isMapPart(part: Part) {
   const { type, params } = contentType(part);
   return (
-    type === 'application/ld+json' &&
-    lower(header(part, 'content-purpose') ?? '') === 'machine-readable' &&
-    (params.profile ?? '').split(/[ \t]+/).includes(MAP_PROFILE)
+    isDescriptionPart(type, params.profile) &&
+    lower(header(part, 'content-purpose') ?? '') === 'machine-readable'
   );
 }
 
@@ -222,7 +227,7 @@ export async function readDeliveredMessage(raw: Buffer): Promise<DeliveredMessag
     !['base64', 'quoted-printable'].includes(lower(header(part, 'content-transfer-encoding') ?? ''))
   )
     throw new Error('The MAP part must use base64 or quoted-printable encoding.');
-  const description = parseMapBytes(decoded(part)) as JsonObject;
+  const description = parse(decoded(part)) as JsonObject;
   if (description['@type'] !== 'MailAction')
     throw new Error('The designated part is not a MAP description.');
 
