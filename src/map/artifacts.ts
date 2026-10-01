@@ -1,58 +1,18 @@
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import Ajv2020, { type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
-import canonicalize from 'canonicalize';
-import coreSchema from '../../public/schemas/map-0.2.schema.json' with { type: 'json' };
+import { BUNDLED, CORE_SCHEMA, FORMS_SCHEMA } from './core/artifacts.ts';
+import { APPROVAL_REASONS, Contract, InvalidContract } from './core/contract.ts';
+import { digest } from './core/document.ts';
+import { nodes } from './core/schemas.ts';
+import type { JsonObject, TypeContract } from './core/types.ts';
 
-export const MAP_PROFILE = 'https://mailschema.org/profiles/map/0.2';
-export const CORE_SCHEMA = 'https://mailschema.org/schemas/map-0.2.schema.json';
-export const FORMS_SCHEMA = 'https://mailschema.org/schemas/forms-0.1.schema.json';
-/** The format every MAP 0.2 type contract follows. */
-export const CONTRACT_FORMAT = 'https://mailschema.org/schemas/type-contract-0.2.schema.json';
-const JSON_SCHEMA_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
 const PUBLIC_ORIGIN = 'https://mailschema.org';
 const MAX_ARTIFACT_BYTES = 256 * 1024;
-
-/** Reasons the core assigns: an approval's own ends, and a decision awaiting approval overtaken. */
-export const APPROVAL_REASONS = ['declined', 'stale-target', 'expired', 'superseded'] as const;
 const SUCCESS_STATES = ['accepted', 'completed'];
 const EXCLUSIVE_CONSEQUENCES = ['refusal', 'protection'];
 
-export type JsonObject = Record<string, unknown>;
-export type Authority = 'credential' | 'possession';
-export type ResultState = 'accepted' | 'completed' | 'failed' | 'pending' | 'approval-required';
-export type Consequence =
-  'refusal' | 'protection' | 'record' | 'disclosure' | 'commitment' | 'authorization' | 'assertion';
-
-export interface SchemaReference {
-  url: string;
-  canonicalDigest: string;
-}
-
-export interface ContractOperation {
-  id: string;
-  effect: string;
-  authority: Authority[];
-  consequences: Consequence[];
-  repeatable?: boolean;
-  fieldBindings?: { input: string; fields: string }[];
-  results: { state: ResultState; reasons?: string[]; outputSchema: JsonObject }[];
-}
-
-export interface TypeContract {
-  kind: 'MapTypeContract';
-  id: string;
-  version: string;
-  profile: string;
-  target: string;
-  dependencies?: SchemaReference[];
-  detailsSchema?: JsonObject;
-  requestSchema: SchemaReference;
-  operations: ContractOperation[];
-}
-
-/** A contract with its compiled validators, ready for description and request processing. */
+/** A repository contract: its files, its exact bytes and the core contract built from them. */
 export interface LoadedContract {
   contract: TypeContract;
   slug: string;
@@ -60,177 +20,12 @@ export interface LoadedContract {
   bytes: Buffer;
   contractDigest: string;
   requestSchema: { url: string; value: JsonObject; bytes: Buffer; canonicalDigest: string };
-  validateDetails?: ValidateFunction;
-  validateRequest: ValidateFunction;
-  /** The input schema of one operation's request branch. */
-  validateInput(operation: string): ValidateFunction | undefined;
-  operation(id: string): ContractOperation | undefined;
-  validateOutput(operation: string, state: ResultState): ValidateFunction | undefined;
-  /** Errors in the values of a form fields block, by the artifacts that loaded this contract. */
-  fieldErrors(fields: JsonObject, values: unknown): ErrorObject[];
+  core: Contract;
 }
 
+/** The SHA-256 of exact bytes, as artifact evidence records them. */
 export function sha256(bytes: string | Buffer) {
   return createHash('sha256').update(bytes).digest('hex');
-}
-
-/** SHA-256 over the RFC 8785 canonical form, as used for contract, schema and description digests. */
-export function canonicalDigest(value: unknown) {
-  const canonical = canonicalize(value);
-  if (canonical === undefined) throw new Error('Value is not canonical JSON.');
-  return `sha-256:${sha256(canonical)}`;
-}
-
-// The core date-time form. Date.parse reads every value of it, and other forms too,
-// which must never count as a deadline.
-const DATE_TIME = new RegExp(coreSchema.$defs.dateTime.pattern, 'u');
-
-const UUID_URN = new RegExp(coreSchema.$defs.uuidUrn.pattern, 'u');
-
-/** Whether a value is a request identifier: the core UUID URN form. */
-export const isRequestId = (value: unknown) => typeof value === 'string' && UUID_URN.test(value);
-
-/**
- * Whether a deadline has been reached. Anything but a core date-time counts as
- * reached, so a mistake fails closed.
- */
-export function reached(now: Date, deadline: string, afterMs = 0) {
-  return !(DATE_TIME.test(deadline) && now.getTime() < Date.parse(deadline) + afterMs);
-}
-
-/** The digest a request carries: RFC 8785 over the description exactly as parsed from the message. */
-export const descriptionDigest = (description: unknown) => canonicalDigest(description);
-
-const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-// Unicode's noncharacters: U+FDD0 to U+FDEF, and the last two code points of every plane.
-const NONCHARACTER = new RegExp(
-  `[\\u{FDD0}-\\u{FDEF}${Array.from({ length: 17 }, (_, plane) => `\\u{${(plane * 0x10000 + 0xfffe).toString(16)}}\\u{${(plane * 0x10000 + 0xffff).toString(16)}}`).join('')}]`,
-  'u',
-);
-
-/**
- * Parse a MAP document as I-JSON (RFC 7493) within the core limits: no duplicate
- * member names, no lone surrogates or noncharacters, no U+0000 in any string, every number within
- * ±(2^53−1), and arrays and objects nested at most 32 deep, the outermost counting as
- * one.
- */
-export function parseMapJson(text: string, { maxBytes = 64 * 1024, maxDepth = 32 } = {}): unknown {
-  if (Buffer.byteLength(text, 'utf8') > maxBytes)
-    throw new Error(`MAP document exceeds ${maxBytes} bytes.`);
-  let index = 0;
-  const fail = (message: string): never => {
-    throw new Error(`Invalid MAP JSON at offset ${index}: ${message}`);
-  };
-  const space = () => {
-    while (' \t\n\r'.includes(text[index] ?? '-')) index += 1;
-  };
-  const string = () => {
-    const start = index;
-    index += 1;
-    while (index < text.length && text[index] !== '"') index += text[index] === '\\' ? 2 : 1;
-    if (text[index] !== '"') fail('unterminated string');
-    index += 1;
-    const value = JSON.parse(text.slice(start, index)) as string;
-    if (LONE_SURROGATE.test(value)) fail('lone surrogate');
-    if (value.includes('\u0000')) fail('U+0000 in a string');
-    if (NONCHARACTER.test(value)) fail('a noncharacter in a string');
-    return value;
-  };
-  // `depth` counts the arrays and objects enclosing the value.
-  const value = (depth: number): unknown => {
-    space();
-    const next = text[index];
-    if ((next === '{' || next === '[') && depth >= maxDepth)
-      fail(`nesting deeper than ${maxDepth}`);
-    if (next === '{') {
-      index += 1;
-      const result: JsonObject = {};
-      const names = new Set<string>();
-      space();
-      if (text[index] === '}') {
-        index += 1;
-        return result;
-      }
-      for (;;) {
-        space();
-        if (text[index] !== '"') fail('expected a member name');
-        const name = string();
-        if (names.has(name)) fail(`duplicate member ${JSON.stringify(name)}`);
-        names.add(name);
-        space();
-        if (text[index] !== ':') fail('expected ":"');
-        index += 1;
-        Object.defineProperty(result, name, {
-          value: value(depth + 1),
-          enumerable: true,
-          writable: true,
-          configurable: true,
-        });
-        space();
-        if (text[index] === ',') {
-          index += 1;
-          continue;
-        }
-        if (text[index] === '}') {
-          index += 1;
-          return result;
-        }
-        fail('expected "," or "}"');
-      }
-    }
-    if (next === '[') {
-      index += 1;
-      const result: unknown[] = [];
-      space();
-      if (text[index] === ']') {
-        index += 1;
-        return result;
-      }
-      for (;;) {
-        result.push(value(depth + 1));
-        space();
-        if (text[index] === ',') {
-          index += 1;
-          continue;
-        }
-        if (text[index] === ']') {
-          index += 1;
-          return result;
-        }
-        fail('expected "," or "]"');
-      }
-    }
-    if (next === '"') return string();
-    const literal =
-      /^(?:true|false|null|-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)/.exec(
-        text.slice(index),
-      );
-    if (!literal) fail('unexpected token');
-    index += literal![0].length;
-    const parsed = JSON.parse(literal![0]) as unknown;
-    if (
-      typeof parsed === 'number' &&
-      (!Number.isFinite(parsed) || Math.abs(parsed) > Number.MAX_SAFE_INTEGER)
-    )
-      fail('number outside the I-JSON range');
-    return parsed;
-  };
-  const result = value(0);
-  space();
-  if (index !== text.length) fail('trailing content');
-  return result;
-}
-
-/**
- * Parse a MAP document from bytes: strict UTF-8, with a byte order mark kept so the
- * I-JSON parser refuses it, then parseMapJson.
- */
-export function parseMapBytes(
-  bytes: Uint8Array,
-  limits?: { maxBytes?: number; maxDepth?: number },
-) {
-  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
-  return parseMapJson(text, limits);
 }
 
 function readArtifact(path: string) {
@@ -262,140 +57,19 @@ function* walk(value: unknown, path = ''): Generator<[string, unknown]> {
     }
 }
 
-// The JSON Schema 2020-12 keywords whose value is a schema, an array of schemas, or a
-// map from names to schemas.
-const SUBSCHEMA = [
-  'additionalProperties',
-  'propertyNames',
-  'items',
-  'contains',
-  'not',
-  'if',
-  'then',
-  'else',
-  'unevaluatedItems',
-  'unevaluatedProperties',
-  'contentSchema',
-];
-const SUBSCHEMA_LISTS = ['allOf', 'anyOf', 'oneOf', 'prefixItems'];
-const SUBSCHEMA_MAPS = ['properties', 'patternProperties', '$defs', 'dependentSchemas'];
-
-/** Every schema object within a schema, never the names of a map of schemas. */
-function* schemaNodes(schema: unknown): Generator<JsonObject> {
-  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return;
-  const node = schema as JsonObject;
-  yield node;
-  for (const keyword of SUBSCHEMA) yield* schemaNodes(node[keyword]);
-  for (const keyword of SUBSCHEMA_LISTS)
-    if (Array.isArray(node[keyword])) for (const item of node[keyword]) yield* schemaNodes(item);
-  for (const keyword of SUBSCHEMA_MAPS)
-    for (const item of Object.values((node[keyword] ?? {}) as JsonObject)) yield* schemaNodes(item);
-}
-
-const UNPINNED = ['$dynamicRef', '$recursiveRef', '$dynamicAnchor', '$recursiveAnchor', '$anchor'];
-
-const refsOf = (value: unknown) =>
-  [...walk(value)]
-    .filter(([path, item]) => path.endsWith('/$ref') && typeof item === 'string')
-    .map(([, item]) => item as string);
-
-const constantsOf = (value: unknown) =>
-  new Set(
-    [...walk(value)]
-      .filter(([path, item]) => path.endsWith('/const') && typeof item === 'string')
-      .map(([, item]) => item as string),
-  );
-
-function decodePointer(pointer: string) {
-  return pointer
-    .split('/')
-    .slice(1)
-    .map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
-}
-
 /** Follow a JSON Pointer over data through an object schema's `properties`. */
 function schemaAt(schema: unknown, pointer: string): JsonObject | undefined {
   let current = schema as JsonObject | undefined;
-  for (const segment of decodePointer(pointer)) {
+  for (const segment of pointer.split('/').slice(1)) {
     const properties = current?.properties as JsonObject | undefined;
-    current = properties?.[segment] as JsonObject | undefined;
+    current = properties?.[segment.replaceAll('~1', '/').replaceAll('~0', '~')] as
+      JsonObject | undefined;
   }
   return current;
-}
-
-// A reference fragment is a plain JSON Pointer: nothing percent-encoded, nothing to decode.
-const PLAIN_POINTER = /^(?:\/[A-Za-z0-9._~!$&'()*+,;=:@-]*)*$/;
-
-/** The value an RFC 6901 pointer names, through objects and arrays, or undefined. */
-function resolvePointer(document: unknown, pointer: string): unknown {
-  let current = document;
-  for (const segment of decodePointer(pointer)) {
-    if (Array.isArray(current)) {
-      if (!/^(?:0|[1-9][0-9]*)$/.test(segment) || Number(segment) >= current.length) return;
-      current = current[Number(segment)];
-    } else if (current && typeof current === 'object' && Object.hasOwn(current, segment))
-      current = (current as JsonObject)[segment];
-    else return;
-  }
-  return current;
-}
-
-/**
- * Resolve a JSON Pointer over object members. The contract rules bind fields only
- * through object properties, so no binding indexes an array.
- */
-export function valueAt(value: unknown, pointer: string): unknown {
-  let current = value;
-  for (const segment of decodePointer(pointer)) {
-    if (
-      !current ||
-      typeof current !== 'object' ||
-      Array.isArray(current) ||
-      !Object.hasOwn(current, segment)
-    )
-      return undefined;
-    current = (current as JsonObject)[segment];
-  }
-  return current;
-}
-
-/**
- * Rules of a form fields block that JSON Schema cannot state: every required field
- * exists, choices are distinct, and defaults are among the choices.
- */
-export function formProblems(fields: JsonObject): string[] {
-  const problems: string[] = [];
-  const properties = (fields.properties ?? {}) as Record<string, JsonObject>;
-  for (const name of (fields.required ?? []) as string[])
-    if (!Object.hasOwn(properties, name)) problems.push(`required field ${name} is not defined`);
-  for (const [name, field] of Object.entries(properties)) {
-    const choices = (
-      (field.oneOf ?? (field.items as JsonObject | undefined)?.anyOf ?? []) as JsonObject[]
-    ).map((choice) => choice.const as string);
-    if (new Set(choices).size !== choices.length) problems.push(`field ${name} repeats a choice`);
-    const defaults = field.default === undefined ? [] : [field.default].flat();
-    if (choices.length && defaults.some((value) => !choices.includes(value as string)))
-      problems.push(`field ${name} defaults to a value it does not offer`);
-  }
-  return problems;
-}
-
-/** Form rule problems in the fields blocks a description's details carry. */
-export function detailsProblems(contract: TypeContract, details: unknown): string[] {
-  const blocks = new Set(
-    contract.operations.flatMap((operation) =>
-      (operation.fieldBindings ?? []).map((binding) => binding.fields),
-    ),
-  );
-  return [...blocks].flatMap((pointer) => {
-    const fields = valueAt(details, pointer) as JsonObject | undefined;
-    return fields ? formProblems(fields).map((problem) => `${pointer}: ${problem}`) : [];
-  });
 }
 
 function operationBranches(requestSchema: JsonObject) {
-  const branches = (requestSchema.allOf as JsonObject[] | undefined) ?? [];
-  const last = branches.at(-1) ?? {};
+  const last = ((requestSchema.allOf as JsonObject[] | undefined) ?? []).at(-1) ?? {};
   return ((last.oneOf as JsonObject[] | undefined) ?? [last]).map((branch) => {
     const properties = branch.properties as JsonObject | undefined;
     return {
@@ -405,39 +79,21 @@ function operationBranches(requestSchema: JsonObject) {
   });
 }
 
-// MAP states every lexical form as a pattern, so `format` stays an annotation: format
-// checkers differ between validators, and a verdict must not depend on the validator.
-function createAjv() {
-  const ajv = new Ajv2020({
-    allErrors: true,
-    strict: true,
-    strictRequired: false,
-    validateFormats: false,
-  });
-  // HTML autofill field names label form fields; they are annotations, not assertions.
-  ajv.addKeyword({ keyword: 'autocomplete', schemaType: 'string' });
-  // Only JSON Schema 2020-12 vocabulary keywords. Ajv also reads OpenAPI's `nullable`,
-  // which admits a null other validators refuse, and the earlier `dependencies` and
-  // `definitions`; strict mode now refuses them as unknown.
-  for (const keyword of ['nullable', 'dependencies', 'definitions']) ajv.removeKeyword(keyword);
-  return ajv;
-}
-
 const SYNTAX_CHARACTERS = '^$\\.*+?()[]{}|/';
 const CONTROL_ESCAPES: Record<string, number> = { t: 0x09, n: 0x0a, f: 0x0c, r: 0x0d };
 const QUANTIFIERS = '*+?{';
 
 /**
- * Why a pattern is not in the portable subset that ECMA-262 (with the u flag) and
- * other engines read alike, or undefined. The subset is printable ASCII text, with any
- * other code point written as \uXXXX. It has literal characters and escaped syntax
- * characters; \t, \n, \f and \r; non-empty classes of such members and ranges, with
- * a literal hyphen only first or last; (?: groups; alternation; ^ and $; and one *, +,
- * ?, {n}, {n,} or {n,m} after an atom. Class escapes such as \s and the dot match
- * different characters in different engines, and brackets, && or a stray brace inside
- * a class, or a quantifier on a quantifier, are read differently or refused by one of
- * them. ^ and $ are whole-value anchors, as in ECMA-262; an engine whose anchors also
- * match at line breaks, such as Ruby's or Python's, must read them as such.
+ * Why a pattern is not in the portable subset that ECMA-262 (with the u flag) and other
+ * engines read alike, or undefined. The subset is printable ASCII text, with any other code
+ * point written as \uXXXX. It has literal characters and escaped syntax characters; \t, \n,
+ * \f and \r; non-empty classes of such members and ranges, with a literal hyphen only first
+ * or last; (?: groups; alternation; ^ and $; and one *, +, ?, {n}, {n,} or {n,m} after an
+ * atom. Class escapes such as \s and the dot match different characters in different
+ * engines, and brackets, && or a stray brace inside a class, or a quantifier on a
+ * quantifier, are read differently or refused by one of them. ^ and $ are whole-value
+ * anchors, as in ECMA-262; an engine whose anchors also match at line breaks, such as
+ * Ruby's or Python's, must read them as such.
  */
 export function unportablePattern(pattern: string): string | undefined {
   if (!/^[\x20-\x7e]*$/.test(pattern)) return 'a character outside printable ASCII';
@@ -558,8 +214,8 @@ export function unportablePattern(pattern: string): string | undefined {
 
 /**
  * Why a schema is not portable, or undefined: every pattern, including the names of
- * patternProperties, is in the portable subset, and every multipleOf is an integer,
- * since validators round fractional divisors differently.
+ * patternProperties, is in the portable subset, and every multipleOf is an integer, since
+ * validators round fractional divisors differently.
  */
 export function unportableSchema(value: unknown): string | undefined {
   for (const [path, item] of walk(value)) {
@@ -583,83 +239,20 @@ function assertPortable(label: string, value: unknown) {
   if (problem) throw new Error(`${label}: ${problem}`);
 }
 
-/** The core definitions that give a form text field's `format` its lexical form. */
-const FIELD_FORMATS: Record<string, string> = {
-  email: 'address',
-  uri: 'identifier',
-  date: 'date',
-  'date-time': 'dateTime',
-};
-
-/** A form fields block as the schema its values must satisfy. */
-function fieldsSchema(fields: JsonObject): JsonObject {
-  const properties = Object.fromEntries(
-    Object.entries((fields.properties ?? {}) as Record<string, JsonObject>).map(([name, field]) => {
-      if (typeof field.format !== 'string') return [name, field];
-      const { format, ...rest } = field;
-      return [name, { ...rest, $ref: `${CORE_SCHEMA}#/$defs/${FIELD_FORMATS[format as string]}` }];
-    }),
-  );
-  return { ...fields, properties, additionalProperties: false };
-}
-
-const FIELD_VALIDATORS = 128;
-
-export function errorList(errors: ErrorObject[] | null | undefined) {
-  return (errors ?? []).map(
-    (error) =>
-      `${error.instancePath || '/'} ${error.message}${error.keyword === 'required' ? `: ${error.params.missingProperty}` : ''}`,
-  );
-}
-
 /**
- * The canonical MAP 0.2 artifacts and every type contract in the repository.
- * One loader serves the reference implementation, the conformance suite and the Registry catalogue.
+ * The repository's type contracts, compiled by the Registry. Each is loaded as an
+ * implementation would vendor it, as a core contract pinned by its digest, and must also meet
+ * the contract rules the Registry applies before it publishes one. One loader serves the
+ * reference implementation, the conformance suite and the Registry catalogue.
  */
 export class MapArtifacts {
   readonly root: string;
-  readonly ajv = createAjv();
-  readonly schemas = new Map<
-    string,
-    { bytes: Buffer; value: JsonObject; canonicalDigest: string }
-  >();
   readonly contracts: LoadedContract[];
-  readonly #validateDocument: ValidateFunction;
-  readonly #definitions: Record<string, ValidateFunction>;
-  readonly #validateFormat: ValidateFunction;
-  readonly #fieldValidators = new Map<string, { schema: JsonObject; validate: ValidateFunction }>();
 
   constructor(root = process.cwd()) {
     this.root = root;
-    for (const url of [CORE_SCHEMA, FORMS_SCHEMA]) {
-      const { bytes, value } = readArtifact(schemaPath(root, url));
-      if (value.$id !== url) throw new Error(`${url}: $id does not match its URL`);
-      assertPortable(url, value);
-      this.schemas.set(url, { bytes, value, canonicalDigest: canonicalDigest(value) });
-      this.ajv.addSchema(value);
-    }
-    this.#validateDocument = this.ajv.getSchema(CORE_SCHEMA)!;
-    this.#definitions = Object.fromEntries(
-      ['description', 'request', 'result', 'problem'].map((name) => [
-        name,
-        this.ajv.getSchema(`${CORE_SCHEMA}#/$defs/${name}`)!,
-      ]),
-    );
-    const format = readArtifact(schemaPath(root, CONTRACT_FORMAT)).value;
-    assertPortable('type-contract-0.2', format);
-    this.#validateFormat = this.ajv.compile(format);
+    for (const [url, schema] of BUNDLED) assertPortable(url, schema);
     this.contracts = this.#loadContracts();
-  }
-
-  /** Validate a description, request, result or problem against the core schema. */
-  documentErrors(value: unknown) {
-    return this.#validateDocument(value) ? [] : errorList(this.#validateDocument.errors);
-  }
-
-  /** Validate a document against one core definition: description, request, result or problem. */
-  definitionErrors(name: 'description' | 'request' | 'result' | 'problem', value: unknown) {
-    const validate = this.#definitions[name];
-    return validate(value) ? [] : errorList(validate.errors);
   }
 
   /** The exact contract a type reference names, or nothing when the digest differs. */
@@ -676,29 +269,6 @@ export class MapArtifacts {
     return this.contracts.find(
       (entry) => entry.slug === slug && entry.contract.version === version,
     );
-  }
-
-  /**
-   * Validate values against a form fields block from a description's details. A text
-   * field's `format` names the core lexical form its value takes.
-   */
-  fieldErrors(fields: JsonObject, values: unknown) {
-    const key = canonicalDigest(fields);
-    let entry = this.#fieldValidators.get(key);
-    if (entry) this.#fieldValidators.delete(key);
-    else {
-      const schema = fieldsSchema(fields);
-      entry = { schema, validate: this.ajv.compile(schema) };
-    }
-    // Least recently used blocks leave first, and Ajv drops its compiled copy with them,
-    // so a long-running service stays bounded.
-    this.#fieldValidators.set(key, entry);
-    if (this.#fieldValidators.size > FIELD_VALIDATORS) {
-      const [oldest, evicted] = this.#fieldValidators.entries().next().value!;
-      this.#fieldValidators.delete(oldest);
-      this.ajv.removeSchema(evicted.schema);
-    }
-    return entry.validate(values) ? [] : (entry.validate.errors ?? []);
   }
 
   #loadContracts() {
@@ -719,123 +289,47 @@ export class MapArtifacts {
   #loadContract(file: string, path: string): LoadedContract {
     const { bytes, value } = readArtifact(path);
     const contract = value as unknown as TypeContract;
-    if (!this.#validateFormat(contract))
-      throw new Error(
-        `${file}: invalid type contract:\n${errorList(this.#validateFormat.errors).join('\n')}`,
-      );
-    const slug = new URL(contract.id).pathname.split('/').filter(Boolean).at(-1)!;
+    const slug =
+      typeof contract.id === 'string'
+        ? new URL(contract.id).pathname.split('/').filter(Boolean).at(-1)!
+        : '';
     if (file !== `${slug}-${contract.version}.json`)
       throw new Error(`${file}: filename must match type identifier and version`);
     const label = `${slug}@${contract.version}`;
-    const ids = contract.operations.map((operation) => operation.id);
-    if (new Set(ids).size !== ids.length)
-      throw new Error(`${label}: duplicate operation identifiers`);
-    for (const operation of contract.operations) {
-      const states = operation.results.map((result) => result.state);
-      if (new Set(states).size !== states.length)
-        throw new Error(`${label}: duplicate ${operation.id} result states`);
+    const request = readArtifact(schemaPath(this.root, contract.requestSchema.url));
+    // Patterns must be portable before any validator reads them.
+    assertPortable(label, contract);
+    assertPortable(label, request.value);
+    const contractDigest = digest(contract);
+    let core: Contract;
+    try {
+      core = new Contract(contract, request.value, { digest: contractDigest });
+    } catch (error) {
+      if (error instanceof InvalidContract) throw new Error(`${label}: ${error.message}`);
+      throw error;
     }
-
-    const requestPath = schemaPath(this.root, contract.requestSchema.url);
-    const request = readArtifact(requestPath);
-    if (request.value.$id !== contract.requestSchema.url)
-      throw new Error(`${label}: request schema $id does not match its contract URL`);
-    const requestDigest = canonicalDigest(request.value);
-    if (requestDigest !== contract.requestSchema.canonicalDigest)
-      throw new Error(`${label}: request schema canonical digest does not match the contract`);
-    const constants = constantsOf(request.value);
-    for (const expected of [contract.id, contract.version, ...ids])
-      if (!constants.has(expected))
-        throw new Error(`${label}: request schema does not bind ${expected}`);
-
-    this.#lint(contract, label, request.value);
-    const outputs = new Map<string, ValidateFunction>();
-    for (const operation of contract.operations)
-      for (const result of operation.results)
-        outputs.set(`${operation.id}/${result.state}`, this.ajv.compile(result.outputSchema));
-    const inputs = new Map(
-      operationBranches(request.value).map((branch) => [
-        branch.operation,
-        this.ajv.compile(branch.input as JsonObject),
-      ]),
-    );
+    this.#lint(core.document, label, core.requestSchema);
     return {
-      contract,
+      contract: core.document,
       slug,
       file,
       bytes,
-      contractDigest: canonicalDigest(contract),
+      contractDigest,
       requestSchema: {
         url: contract.requestSchema.url,
-        value: request.value,
+        value: core.requestSchema,
         bytes: request.bytes,
-        canonicalDigest: requestDigest,
+        canonicalDigest: digest(request.value),
       },
-      operation: (id) => contract.operations.find((operation) => operation.id === id),
-      validateDetails: contract.detailsSchema
-        ? this.ajv.compile(contract.detailsSchema)
-        : undefined,
-      validateRequest: this.ajv.compile(request.value),
-      validateInput: (operation) => inputs.get(operation),
-      validateOutput: (operation, state) => outputs.get(`${operation}/${state}`),
-      fieldErrors: (fields, values) => this.fieldErrors(fields, values),
+      core,
     };
   }
 
-  /** The contract rules a JSON Schema cannot express. */
+  /**
+   * The contract rules the Registry applies before it publishes a contract, beyond what an
+   * implementation checks when it loads one.
+   */
   #lint(contract: TypeContract, label: string, requestSchema: JsonObject) {
-    assertPortable(label, contract);
-    assertPortable(label, requestSchema);
-    const dependencies = contract.dependencies ?? [];
-    const pinned = new Set<string>();
-    for (const dependency of dependencies) {
-      const schema = this.schemas.get(dependency.url);
-      if (!schema) throw new Error(`${label}: unknown dependency ${dependency.url}`);
-      if (schema.canonicalDigest !== dependency.canonicalDigest)
-        throw new Error(`${label}: dependency ${dependency.url} digest differs`);
-      pinned.add(dependency.url);
-    }
-    if (!pinned.has(CORE_SCHEMA)) throw new Error(`${label}: the core schema must be pinned`);
-    const inline = [
-      contract.detailsSchema,
-      ...contract.operations.flatMap((operation) =>
-        operation.results.map((result) => result.outputSchema),
-      ),
-    ];
-    // Keywords that resolve by scope, and a nested $id, would move where a reference
-    // resolves away from its pinned address. A nested $schema would change the dialect
-    // a validator reads that subschema in, and a type list is not one type.
-    if (requestSchema.$schema !== JSON_SCHEMA_2020_12)
-      throw new Error(`${label}: the request schema must declare JSON Schema 2020-12`);
-    for (const node of [...inline, requestSchema].flatMap((root) => [...schemaNodes(root)])) {
-      const keyword = UNPINNED.find((name) => name in node);
-      if (keyword) throw new Error(`${label}: ${keyword} is not pinned by any digest`);
-      if ('$id' in node && node !== requestSchema)
-        throw new Error(`${label}: a nested $id would move references`);
-      if ('$schema' in node && node !== requestSchema)
-        throw new Error(`${label}: a nested $schema would change the dialect`);
-      if (Array.isArray(node.type)) throw new Error(`${label}: type names one type, never a list`);
-      // The form fields block's annotation, never a contract's own keyword.
-      if ('autocomplete' in node)
-        throw new Error(`${label}: autocomplete belongs to the form fields block`);
-    }
-    // Every reference names a schema inside a pinned dependency now, so none can fail,
-    // or silently match anything, when a request arrives.
-    for (const ref of [...refsOf(inline), ...refsOf(requestSchema)]) {
-      const [url, fragment = ''] = ref.split('#');
-      if (!pinned.has(url)) throw new Error(`${label}: ${ref} is not a pinned dependency`);
-      if (fragment && !fragment.startsWith('/'))
-        throw new Error(`${label}: ${ref} names an anchor, not a JSON Pointer`);
-      if (!PLAIN_POINTER.test(fragment))
-        throw new Error(`${label}: ${ref} is not a plain JSON Pointer`);
-      const target = resolvePointer(this.schemas.get(url)!.value, fragment);
-      if (
-        typeof target !== 'boolean' &&
-        !(target && typeof target === 'object' && !Array.isArray(target))
-      )
-        throw new Error(`${label}: ${ref} does not name a schema`);
-    }
-
     const [core, binding, operations] = (requestSchema.allOf as JsonObject[] | undefined) ?? [];
     if (core?.$ref !== `${CORE_SCHEMA}#/$defs/request`)
       throw new Error(`${label}: the request schema must extend the core request`);
@@ -856,11 +350,10 @@ export class MapArtifacts {
       throw new Error(
         `${label}: the request schema branches must be exactly the contract operations`,
       );
-    for (const [path] of [...walk(contract.detailsSchema)].filter(([path]) =>
-      /\/properties\/[^/]+$/.test(path),
-    ))
-      if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(path.split('/').at(-1)!))
-        throw new Error(`${label}: details member names are ASCII identifiers (${path})`);
+    for (const node of nodes(contract.detailsSchema))
+      for (const name of Object.keys((node.properties ?? {}) as JsonObject))
+        if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(name))
+          throw new Error(`${label}: details member names are ASCII identifiers (${name})`);
     for (const operation of contract.operations) {
       const name = `${label} ${operation.id}`;
       const states = operation.results.map((result) => result.state);
@@ -894,8 +387,7 @@ export class MapArtifacts {
         operation.consequences.some((consequence) => EXCLUSIVE_CONSEQUENCES.includes(consequence))
       )
         throw new Error(`${name}: refusal and protection stand alone`);
-      const branch = branches.find((candidate) => candidate.operation === operation.id);
-      if (!branch) throw new Error(`${name}: the request schema has no branch for this operation`);
+      const branch = branches.find((candidate) => candidate.operation === operation.id)!;
       for (const binding of operation.fieldBindings ?? []) {
         const fields = schemaAt(contract.detailsSchema, binding.fields)?.$ref;
         if (

@@ -1,4 +1,5 @@
-import { CONTRACT_FORMAT, MapArtifacts, sha256 } from '../map/artifacts.ts';
+import { MapArtifacts, sha256 } from '../map/artifacts.ts';
+import { CONTRACT_FORMAT } from '../map/core/index.ts';
 import type { TypeRecord } from './model';
 
 const publicOrigin = 'https://mailschema.org';

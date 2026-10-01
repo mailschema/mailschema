@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { MAP_PROFILE, MapArtifacts, sha256 } from '../src/map/artifacts.ts';
+import { MapArtifacts, sha256 } from '../src/map/artifacts.ts';
+import { MAP_PROFILE, mapErrors } from '../src/map/core/index.ts';
 import { ReferenceMapClient } from '../src/map/reference.ts';
 import { loadRegistry } from '../src/registry/catalog.ts';
 
@@ -35,7 +36,7 @@ for (const [name, bound] of Object.entries(profile.artifacts) as [
     );
 
 const artifacts = new MapArtifacts(root);
-const current = artifacts.contracts.filter((entry) => entry.contract.profile === MAP_PROFILE);
+const current = artifacts.contracts;
 const registry = loadRegistry();
 for (const entry of current) {
   const record = registry.types.find((type) => type.slug === entry.slug);
@@ -111,7 +112,7 @@ const client = new ReferenceMapClient(
 let count = 0;
 for (const path of documents('public/fixtures/map-0.2')) {
   const value = JSON.parse(read(path).toString('utf8'));
-  assert.deepEqual(artifacts.documentErrors(value), [], path);
+  assert.deepEqual(mapErrors(value), [], path);
   if (path.endsWith('/description.json')) client.verify(value, new Date(value.describedAt));
   count += 1;
 }

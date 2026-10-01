@@ -1,60 +1,39 @@
-import canonicalize from 'canonicalize';
-import {
-  APPROVAL_REASONS,
-  MAP_PROFILE,
-  MapArtifacts,
-  canonicalDigest,
-  descriptionDigest,
-  detailsProblems,
-  errorList,
-  isRequestId,
-  parseMapJson,
-  reached,
-  valueAt,
-  type Authority,
-  type ContractOperation,
-  type JsonObject,
-  type LoadedContract,
-  type ResultState,
-  type TypeContract,
-} from './artifacts.ts';
+import { MapArtifacts, type LoadedContract } from './artifacts.ts';
 import { serviceBehaviour, type ServiceBehaviour } from './behaviours.ts';
+import {
+  MAP_PROFILE,
+  APPROVAL_REASONS,
+  InvalidDocument,
+  canonicalize,
+  capability,
+  descriptionErrors,
+  digest,
+  isJsonRequest,
+  isRequestId,
+  parse,
+  problem,
+  reached,
+  requestErrors,
+  result,
+  resultStatus,
+  resultUrl,
+  retainUntil,
+  settle,
+  transition,
+  writtenPath,
+  type ContractOperation,
+  type InputError,
+  type JsonObject,
+  type MapDescription,
+  type MapRequest,
+  type MapResult,
+  type ProblemCode,
+  type ResultState,
+  type Target,
+  type TypeContract,
+  type TypeReference,
+} from './core/index.ts';
 
-export { MAP_PROFILE, descriptionDigest };
-
-export type Target = { id: string; revision: string; digest: string; title?: string };
-export type TypeReference = { id: string; version: string; contractDigest: string };
-export interface MapDescription {
-  '@context': string;
-  '@type': 'MailAction';
-  '@id': string;
-  profile: string;
-  type: TypeReference;
-  describedAt: string;
-  expiresAt: string;
-  service: {
-    id: string;
-    name: string;
-    authority: Authority;
-    resource?: string;
-    execution: { url: string; resultUrlTemplate: string; resultRetentionSeconds: number };
-    humanUrl: string;
-  };
-  recipient?: string;
-  target: Target;
-  details?: JsonObject;
-  operations: { id: string; name: string; description: string }[];
-}
-export interface MapRequest {
-  kind: 'MapRequest';
-  profile: string;
-  requestId: string;
-  interactionId: string;
-  descriptionDigest: string;
-  type: TypeReference;
-  operation: string;
-  input: JsonObject;
-}
 export interface Response {
   status: number;
   mediaType: 'application/json' | 'application/problem+json';
@@ -63,7 +42,6 @@ export interface Response {
   allow?: string;
   body: JsonObject;
 }
-export type InputError = { detail: string; pointer: string };
 
 /** Established by server-side authentication, never taken from the MAP body. */
 export type CredentialContext = { principal: string; tenant: string; actor?: string };
@@ -121,24 +99,6 @@ const isPossession = (context: RequestContext): context is PossessionContext =>
   'capability' in context;
 const sameTarget = (left: Target, right: Target) =>
   left.id === right.id && left.revision === right.revision && left.digest === right.digest;
-const resultUrl = (template: string, requestId: string) =>
-  template.replace('{requestId}', encodeURIComponent(requestId));
-
-function fingerprint(request: MapRequest) {
-  const bytes = canonicalize(request);
-  if (bytes === undefined) throw new Error('MAP requests must contain JSON values.');
-  return bytes;
-}
-
-/** The path of an absolute URL exactly as written, with no dot segments removed and nothing decoded. */
-function writtenPath(url: string) {
-  return /^[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/?#]*([^?#]*)/.exec(url)?.[1] ?? '';
-}
-
-/** The capability a possession interaction issued: the last path segment of its execution URL, as written. */
-export function capabilityOf(description: MapDescription) {
-  return writtenPath(description.service.execution.url).split('/').at(-1) ?? '';
-}
 
 /** Every result a contract declares whose output is fully determined by constants. */
 function constantOutput(schema: JsonObject): JsonObject | undefined {
@@ -148,112 +108,28 @@ function constantOutput(schema: JsonObject): JsonObject | undefined {
   return Object.fromEntries(required.map((name) => [name, properties[name].const]));
 }
 
-const CAPABILITY = /^[A-Za-z0-9_-]{22,}$/;
-
 /**
- * Every rule a description must satisfy beyond the core schema, shared by the
- * service that issues it and the client that receives it.
+ * Every rule a description must satisfy beyond the core schema, shared by the service that
+ * issues it and the client that receives it: its contract's, then its type's own.
  */
 export function describeProblems(description: MapDescription, artifacts = mapArtifacts()) {
-  const errors = artifacts.definitionErrors('description', description);
+  const errors = descriptionErrors(description);
   if (errors.length) return { errors };
   const contract = artifacts.contract(description.type);
   if (!contract) return { errors: ['The type contract is not bundled or its digest differs.'] };
-  const problems: string[] = [];
-  if (
-    contract.validateDetails
-      ? !contract.validateDetails(description.details)
-      : description.details !== undefined
-  )
-    problems.push('The details do not satisfy the type contract.');
-  else
-    problems.push(
-      ...detailsProblems(contract.contract, description.details),
-      ...(serviceBehaviour(contract.contract.id).descriptionProblems?.(description) ?? []),
-    );
-  const ids = description.operations.map((operation) => operation.id);
-  if (new Set(ids).size !== ids.length) problems.push('An operation is offered twice.');
-  for (const id of ids) {
-    const operation = contract.operation(id);
-    if (!operation?.authority.includes(description.service.authority))
-      problems.push(`${id} is not a ${description.service.authority} operation of this type.`);
-  }
-  if (!(Date.parse(description.describedAt) < Date.parse(description.expiresAt)))
-    problems.push('The interaction expires before it was described.');
-  if (description.service.authority === 'possession') {
-    const { url, resultUrlTemplate } = description.service.execution;
-    const capability = capabilityOf(description);
-    if (!CAPABILITY.test(capability))
-      problems.push('The capability is too short to be unguessable.');
-    if ([url, resultUrlTemplate].some((value) => dotSegment(writtenPath(value))))
-      problems.push('A capability URL must not contain dot segments.');
-    if (!resultUrlTemplate.startsWith(`${url}/`))
-      problems.push('The result template must extend the execution URL and its capability.');
-    if (description.service.humanUrl.includes(capability))
-      problems.push('The human route must not carry the capability.');
-  }
-  return { contract, errors: problems };
-}
-
-const dotSegment = (path: string) =>
-  path.split('/').some((segment) => /^(?:\.|%2e){1,2}$/i.test(segment));
-
-/** A JSON Pointer to the failing member, naming a missing or extra member itself. */
-function pointerOf(error: {
-  instancePath: string;
-  keyword: string;
-  params: Record<string, unknown>;
-}) {
-  const member = error.params.missingProperty ?? error.params.additionalProperty;
-  if (member === undefined) return error.instancePath;
-  return `${error.instancePath}/${String(member).replaceAll('~', '~0').replaceAll('/', '~1')}`;
+  const problems = contract.core.descriptionErrors(description);
+  return {
+    contract,
+    errors: problems.length
+      ? problems
+      : (serviceBehaviour(contract.contract.id).descriptionProblems?.(description) ?? []),
+  };
 }
 
 /**
- * Input problems for one request, as JSON Pointers into its input: the operation's
- * schema, field bindings against the description's details, and the type's rules.
+ * Input problems for one request, as JSON Pointers into its input: the contract's, then the
+ * type's own rules once the input satisfies the contract.
  */
-const POINTER_LIMIT = 1000;
-const DETAIL_LIMIT = 2000;
-
-/**
- * Input errors within the core problem's limits. A pointer too long to report names
- * its nearest ancestor that fits, with a detail that says so, and a detail too long is
- * cut at a code point.
- */
-// Lengths as JSON Schema counts them: in code points, not UTF-16 code units.
-const codePoints = (text: string) => [...text].length;
-
-function withinLimits(errors: InputError[]): InputError[] {
-  const seen = new Set<string>();
-  return errors
-    .flatMap(({ detail, pointer }) => {
-      if (codePoints(pointer) > POINTER_LIMIT) {
-        const segments = pointer.split('/');
-        while (codePoints(segments.join('/')) > POINTER_LIMIT) segments.pop();
-        pointer = segments.join('/');
-        detail = 'A member within this value does not satisfy the contract.';
-      }
-      if (codePoints(detail) > DETAIL_LIMIT)
-        detail = `${[...detail].slice(0, DETAIL_LIMIT - 1).join('')}…`;
-      const key = JSON.stringify([pointer, detail]);
-      if (seen.has(key)) return [];
-      seen.add(key);
-      return [{ detail, pointer }];
-    })
-    .slice(0, 100);
-}
-
-const DOCUMENT_LIMIT = 64 * 1024;
-
-/** A problem with as many of its errors, in order, as fit within the document limit. */
-function withinDocument(problem: JsonObject, errors: InputError[]): JsonObject {
-  const kept = [...errors];
-  const size = () => Buffer.byteLength(JSON.stringify({ ...problem, errors: kept }), 'utf8');
-  while (kept.length > 1 && size() > DOCUMENT_LIMIT) kept.pop();
-  return { ...problem, errors: kept };
-}
-
 export function inputErrors(
   contract: LoadedContract,
   description: MapDescription,
@@ -261,44 +137,8 @@ export function inputErrors(
   now: Date,
   behaviour: ServiceBehaviour = serviceBehaviour(contract.contract.id),
 ): InputError[] {
-  const operation = contract.operation(request.operation);
-  const validate = contract.validateInput(request.operation);
-  if (!operation || !validate)
-    return [{ detail: 'The operation is not part of this type.', pointer: '' }];
-  if (!validate(request.input))
-    return withinLimits(
-      (validate.errors ?? [])
-        .filter((error) => error.keyword !== 'if')
-        .map((error) => ({ detail: error.message ?? 'invalid', pointer: pointerOf(error) })),
-    );
-  const errors: InputError[] = [];
-  for (const binding of operation.fieldBindings ?? []) {
-    const fields = valueAt(description.details, binding.fields) as JsonObject | undefined;
-    const values = valueAt(request.input, binding.input);
-    if (!fields) {
-      if (values !== undefined)
-        errors.push({
-          detail: 'This interaction defines no fields for these values.',
-          pointer: binding.input,
-        });
-      continue;
-    }
-    if (values === undefined) {
-      if (((fields.required as string[] | undefined) ?? []).length)
-        errors.push({
-          detail: 'Values for the required fields are missing.',
-          pointer: binding.input,
-        });
-      continue;
-    }
-    for (const error of contract.fieldErrors(fields, values))
-      errors.push({
-        detail: error.message ?? 'invalid',
-        pointer: `${binding.input}${pointerOf(error)}`,
-      });
-  }
-  errors.push(...(behaviour.check?.(request, description, now) ?? []));
-  return withinLimits(errors);
+  const errors = contract.core.inputErrors(description, request);
+  return errors.length ? errors : (behaviour.check?.(request, description, now) ?? []);
 }
 
 /**
@@ -312,7 +152,6 @@ export class ReferenceMapService {
   readonly #options: ReferenceServiceOptions;
   readonly #behaviour: ServiceBehaviour;
   readonly #responses = new Map<string, RecordedResponse>();
-  readonly #artifacts: MapArtifacts;
   #decided = false;
   #effectCount = 0;
 
@@ -324,11 +163,10 @@ export class ReferenceMapService {
     const { contract, errors } = describeProblems(description, artifacts);
     if (!contract || errors.length)
       throw new Error(`The service must not issue this description: ${errors.join('; ')}`);
-    this.#artifacts = artifacts;
     this.#behaviour = { ...serviceBehaviour(contract.contract.id), ...options.behaviour };
     this.#behaviour.describe?.(description);
     this.#description = structuredClone(description);
-    this.#digest = descriptionDigest(description);
+    this.#digest = digest(description);
     this.#contract = contract;
     this.#options = options;
   }
@@ -379,7 +217,7 @@ export class ReferenceMapService {
    */
   capabilityProblem(context: RequestContext): Response | undefined {
     if (!isPossession(context)) return undefined;
-    if (context.capability !== capabilityOf(this.#description))
+    if (context.capability !== capability(this.#description))
       return {
         status: 404,
         mediaType: 'application/problem+json',
@@ -388,7 +226,7 @@ export class ReferenceMapService {
     // A capability lapses once the interaction and its retention have ended, and no
     // result of a request claimed before expiry is still retained. Refusals recorded
     // after expiry never extend it, so holding the message cannot keep it alive.
-    const retention = this.#description.service.execution.resultRetentionSeconds * 1000;
+    const retention = this.#description.service.execution.resultRetentionSeconds;
     const now = this.#now();
     const expiresAt = new Date(this.#description.expiresAt);
     const retained = [...this.#responses.values()].some(
@@ -407,14 +245,10 @@ export class ReferenceMapService {
     this.#assertContext(context);
     const lapsed = this.capabilityProblem(context);
     if (lapsed) return lapsed;
-    if (
-      this.#artifacts.documentErrors(request).length ||
-      (request as { kind?: string }).kind !== 'MapRequest'
-    )
+    if (requestErrors(request).length)
       return this.#problem(
         request,
         'invalid-request',
-        400,
         'Invalid MAP request',
         'The request does not satisfy the MAP document contract.',
         { correlated: false },
@@ -423,7 +257,6 @@ export class ReferenceMapService {
       return this.#problem(
         request,
         'invalid-request',
-        400,
         'Unknown interaction',
         'The request does not identify this interaction.',
         { correlated: false },
@@ -432,7 +265,6 @@ export class ReferenceMapService {
       return this.#problem(
         request,
         'invalid-request',
-        400,
         'Unknown description',
         'The request does not match the description this service issued.',
         { correlated: false },
@@ -449,7 +281,6 @@ export class ReferenceMapService {
         return this.#problem(
           request,
           'refused',
-          403,
           'Operation refused',
           'The request identifier belongs to another caller.',
           { correlated: false },
@@ -458,16 +289,14 @@ export class ReferenceMapService {
         return this.#problem(
           request,
           'refused',
-          403,
           'Operation refused',
           'The caller is not permitted to access this request.',
           { correlated: false },
         );
-      if (previous.fingerprint !== fingerprint(request))
+      if (previous.fingerprint !== canonicalize(request))
         return this.#problem(
           request,
           'idempotency-conflict',
-          409,
           'Request identifier already used',
           'The request identifier was previously used with a different request body.',
         );
@@ -475,7 +304,6 @@ export class ReferenceMapService {
         return this.#problem(
           request,
           'expired-interaction',
-          410,
           'Interaction and retained result expired',
           'The request will not be applied again. Its retained result is no longer available.',
         );
@@ -488,48 +316,23 @@ export class ReferenceMapService {
   }
 
   #evaluate(request: MapRequest, context: RequestContext): Response {
-    const operation = this.#contract.operation(request.operation);
     const actor = isPossession(context) ? undefined : context.actor;
     if (!this.#authorized(request, context, 'execute'))
       return this.#problem(
         request,
         'refused',
-        403,
         'Operation refused',
         'The caller is not permitted to perform this operation.',
       );
-    if (canonicalDigest(request.type) !== canonicalDigest(this.#description.type))
-      return this.#problem(
-        request,
-        'unsupported-type',
-        422,
-        'Unsupported interaction type',
-        'The service does not implement this exact interaction type contract.',
-      );
-    if (
-      !operation ||
-      !this.#description.operations.some((offered) => offered.id === request.operation)
-    )
-      return this.#problem(
-        request,
-        'unsupported-operation',
-        422,
-        'Unsupported operation',
-        'The operation was not offered in this interaction.',
-      );
-    if (reached(this.#now(), this.#description.expiresAt))
-      return this.#problem(
-        request,
-        'expired-interaction',
-        410,
-        'Interaction expired',
-        'The interaction expired before the request was processed.',
-      );
+    const refused = this.#contract.core.requestProblem(this.#description, request, {
+      now: this.#now(),
+    });
+    if (refused) return this.#problem(request, refused.code, refused.title, refused.detail);
+    const operation = this.#contract.core.operation(request.operation)!;
     if (!operation.repeatable && this.#decided)
       return this.#problem(
         request,
         'already-decided',
-        409,
         'Interaction already decided',
         'Another request has already decided this interaction.',
       );
@@ -538,7 +341,6 @@ export class ReferenceMapService {
       return this.#problem(
         request,
         'stale-target',
-        409,
         'The target revision is stale',
         'The target has changed since this interaction was described. No effect was applied.',
         { target: current },
@@ -554,7 +356,6 @@ export class ReferenceMapService {
       return this.#problem(
         request,
         'invalid-request',
-        400,
         'Invalid request input',
         'The input does not satisfy the operation contract.',
         { errors },
@@ -598,17 +399,9 @@ export class ReferenceMapService {
     for (const recorded of this.#responses.values())
       if (
         recorded.response.body.state === 'approval-required' &&
-        !this.#contract.operation(recorded.request.operation)!.repeatable
+        this.#contract.core.isDecision(recorded.request.operation)
       )
-        this.#transition(
-          recorded,
-          this.#result(
-            recorded.request,
-            'failed',
-            {},
-            { actor: recorded.attribution.actor, reason: 'superseded' },
-          ),
-        );
+        this.#end(recorded, 'superseded');
   }
 
   #record(key: string, request: MapRequest, context: RequestContext, response: Response) {
@@ -618,49 +411,38 @@ export class ReferenceMapService {
         ? { principal: principal.principal, actor: context.actor }
         : { principal: principal.principal };
     this.#responses.set(key, {
-      fingerprint: fingerprint(request),
+      fingerprint: canonicalize(request),
       attribution,
       tenant: principal.tenant,
       request: structuredClone(request),
       response,
       claimedAt: this.#now(),
-      retainUntil: this.#retention(this.#now()),
+      retainUntil: retainUntil(this.#description, this.#now()),
     });
   }
 
-  /** Retention runs from the latest recorded state and never ends before the interaction expires. */
-  #retention(recordedAt: Date) {
-    return new Date(
-      Math.max(
-        new Date(this.#description.expiresAt).getTime(),
-        recordedAt.getTime() + this.#description.service.execution.resultRetentionSeconds * 1000,
-      ),
-    );
+  /** The recorded result moves to its next state; retention runs from that state. */
+  #transition(recorded: RecordedResponse, next: MapResult) {
+    recorded.response = this.#response(next);
+    recorded.retainUntil = retainUntil(this.#description, new Date(next.recordedAt));
   }
 
-  #transition(recorded: RecordedResponse, response: Response, at = this.#now()) {
-    recorded.response = response;
-    recorded.retainUntil = this.#retention(at);
+  /** A proposal awaiting approval ends as failed for the reason given. */
+  #end(recorded: RecordedResponse, reason: string) {
+    this.#transition(
+      recorded,
+      transition(recorded.response.body as MapResult, {
+        state: 'failed',
+        reason,
+        recordedAt: this.#now(),
+      }),
+    );
   }
 
   /** An undecided approval ends as expired at the interaction's expiry, whether or not anyone looks. */
   #settle(recorded: RecordedResponse) {
-    const expiresAt = new Date(this.#description.expiresAt);
-    if (
-      recorded.response.body.state === 'approval-required' &&
-      reached(this.#now(), this.#description.expiresAt)
-    )
-      this.#transition(
-        recorded,
-        this.#result(
-          recorded.request,
-          'failed',
-          {},
-          { actor: recorded.attribution.actor, reason: 'expired' },
-          expiresAt,
-        ),
-        expiresAt,
-      );
+    const settled = settle(recorded.response.body as MapResult, this.#description, this.#now());
+    if (settled) this.#transition(recorded, settled);
   }
 
   /** Record an authorized human decision for an approval-required request. */
@@ -682,7 +464,6 @@ export class ReferenceMapService {
       return this.#problem(
         recorded.request,
         'refused',
-        403,
         'Operation refused',
         'The caller is not permitted to decide this approval.',
         { correlated: false },
@@ -692,30 +473,21 @@ export class ReferenceMapService {
 
     const current = this.#options.currentTarget?.() ?? this.#description.target;
     const actor = recorded.attribution.actor;
-    if (decision === 'decline')
-      this.#transition(
-        recorded,
-        this.#result(recorded.request, 'failed', {}, { actor, reason: 'declined' }),
-      );
-    else if (!sameTarget(current, this.#description.target))
-      this.#transition(
-        recorded,
-        this.#result(recorded.request, 'failed', {}, { actor, reason: 'stale-target' }),
-      );
+    if (decision === 'decline') this.#end(recorded, 'declined');
+    else if (!sameTarget(current, this.#description.target)) this.#end(recorded, 'stale-target');
     // A rule refusal answers this attempt only; the proposal can still be declined or expire.
     else if (this.#options.permitsApproval?.(recorded.request) === false)
       return this.#problem(
         recorded.request,
         'refused',
-        403,
         'Approval refused',
         'The service rules do not permit this approval.',
         { correlated: false },
       );
     else {
-      const operation = this.#contract.operation(recorded.request.operation)!;
+      const operation = this.#contract.core.operation(recorded.request.operation)!;
       recorded.response = this.#perform(recorded.request, operation, actor);
-      recorded.retainUntil = this.#retention(this.#now());
+      recorded.retainUntil = retainUntil(this.#description, this.#now());
     }
     recorded.attribution.decision = context.actor
       ? { principal: context.principal, actor: context.actor }
@@ -730,14 +502,11 @@ export class ReferenceMapService {
   endProposal(requestId: string, context: CredentialContext, reason: string) {
     const recorded = this.#responses.get(this.#key(context, requestId));
     if (!recorded || recorded.response.body.state !== 'approval-required') return undefined;
-    const operation = this.#contract.operation(recorded.request.operation)!;
+    const operation = this.#contract.core.operation(recorded.request.operation)!;
     const declared = operation.results.find((result) => result.state === 'failed')?.reasons ?? [];
     if (!declared.includes(reason) || (APPROVAL_REASONS as readonly string[]).includes(reason))
       throw new Error(`${operation.id} does not declare ${reason} as a type reason.`);
-    this.#transition(
-      recorded,
-      this.#result(recorded.request, 'failed', {}, { actor: recorded.attribution.actor, reason }),
-    );
+    this.#end(recorded, reason);
     return structuredClone(recorded.response);
   }
 
@@ -765,7 +534,6 @@ export class ReferenceMapService {
       return this.#problem(
         recorded.request,
         'refused',
-        403,
         'Result access refused',
         'The request identifier belongs to another caller.',
         { correlated: false },
@@ -774,7 +542,6 @@ export class ReferenceMapService {
       return this.#problem(
         recorded.request,
         'refused',
-        403,
         'Result access refused',
         'The caller is not permitted to retrieve this result.',
         { correlated: false },
@@ -788,53 +555,36 @@ export class ReferenceMapService {
     state: ResultState,
     output: JsonObject,
     extra: { approvalUrl?: string; reason?: string; actor?: string } = {},
-    recordedAt = this.#now(),
   ): Response {
-    const validateOutput = this.#contract.validateOutput(request.operation, state);
-    if (!validateOutput)
-      throw new Error(`The contract does not declare ${request.operation}/${state}.`);
-    if (!validateOutput(output)) throw new Error(`Invalid ${request.operation}/${state} output.`);
-    const declared = this.#contract
-      .operation(request.operation)!
-      .results.find((result) => result.state === state)!;
-    if (extra.reason && !declared.reasons?.includes(extra.reason))
-      throw new Error(`${request.operation} does not declare the reason ${extra.reason}.`);
-    const location = resultUrl(
-      this.#description.service.execution.resultUrlTemplate,
-      request.requestId,
-    );
-    const body = {
-      kind: 'MapResult',
-      profile: MAP_PROFILE,
-      requestId: request.requestId,
-      interactionId: request.interactionId,
-      descriptionDigest: request.descriptionDigest,
-      type: request.type,
-      operation: request.operation,
+    const body = result(request, {
       state,
       target: this.#description.target,
-      recordedAt: recordedAt.toISOString(),
-      resultUrl: location,
-      ...Object.fromEntries(Object.entries(extra).filter(([, value]) => value !== undefined)),
+      resultUrl: resultUrl(this.#description, request.requestId),
+      recordedAt: this.#now(),
       output,
-    };
-    const errors = this.#artifacts.documentErrors(body);
+      ...extra,
+    });
+    return this.#response(body);
+  }
+
+  /** A result the contract accepts, with its HTTP status and headers. */
+  #response(body: MapResult): Response {
+    const errors = this.#contract.core.resultErrors(body);
     if (errors.length)
       throw new Error(`The reference produced an invalid result: ${errors.join('; ')}`);
-    const pending = state === 'pending' || state === 'approval-required';
+    const status = resultStatus(body);
     return {
-      status: pending ? 202 : 200,
+      status,
       mediaType: 'application/json',
-      location,
-      ...(pending ? { retryAfter: 60 } : {}),
+      location: body.resultUrl,
+      ...(status === 202 ? { retryAfter: 60 } : {}),
       body,
     };
   }
 
   #problem(
     request: MapRequest,
-    code: string,
-    status: number,
+    code: ProblemCode,
     title: string,
     detail: string,
     {
@@ -843,49 +593,40 @@ export class ReferenceMapService {
       errors,
     }: { correlated?: boolean; target?: Target; errors?: InputError[] } = {},
   ): Response {
-    const location = correlated
-      ? resultUrl(this.#description.service.execution.resultUrlTemplate, request.requestId)
-      : undefined;
-    const body: JsonObject = {
-      type: `https://mailschema.org/problems/${code}`,
+    const location = correlated ? resultUrl(this.#description, request.requestId) : undefined;
+    const body = problem(code, {
       title,
-      status,
       detail,
       ...(correlated
         ? {
-            instance: location,
-            profile: MAP_PROFILE,
             requestId: request.requestId,
             interactionId: request.interactionId,
-            code,
+            resultUrl: location,
           }
         : {}),
-      ...(target ? { target } : {}),
-    };
+      target,
+      errors,
+    });
     return {
-      status,
+      status: body.status,
       mediaType: 'application/problem+json',
       ...(location ? { location } : {}),
-      body: errors ? withinDocument(body, errors) : body,
+      body,
     };
   }
 
   #notFound(requestId: string): Response {
-    const location = resultUrl(this.#description.service.execution.resultUrlTemplate, requestId);
+    const location = resultUrl(this.#description, requestId);
     return {
       status: 404,
       mediaType: 'application/problem+json',
       location,
-      body: {
-        type: 'https://mailschema.org/problems/result-not-found',
+      body: problem('result-not-found', {
         title: 'Result not found',
-        status: 404,
         detail: 'No retained result exists for this request identifier.',
-        instance: location,
-        profile: MAP_PROFILE,
         requestId,
-        code: 'result-not-found',
-      },
+        resultUrl: location,
+      }),
     };
   }
 }
@@ -919,9 +660,9 @@ export async function obtainContract(
   if (!entry)
     throw new Error(`The catalogue does not list ${type.id} ${type.version} with that digest.`);
   const documents = new Map<string, JsonObject>();
-  const verified = async (url: string, digest: string) => {
+  const verified = async (url: string, pinned: string) => {
     const value = (await fetchDocument(url)) as JsonObject;
-    if (canonicalDigest(value) !== digest) throw new Error(`${url} does not match its digest.`);
+    if (digest(value) !== pinned) throw new Error(`${url} does not match its digest.`);
     documents.set(url, value);
     return value;
   };
@@ -971,14 +712,11 @@ export class ReferenceMapClient {
     { instruction, now = new Date() }: { instruction: string; now?: Date },
   ): MapRequest {
     const contract = this.verify(description, now);
-    const digest = descriptionDigest(description);
-    const key = `${digest}\n${instruction}`;
+    const descriptionDigest = digest(description);
+    const key = `${descriptionDigest}\n${instruction}`;
     const existing = this.#requests.get(key);
     if (existing) {
-      if (
-        existing.operation !== operation ||
-        canonicalDigest(existing.input) !== canonicalDigest(input)
-      )
+      if (existing.operation !== operation || canonicalize(existing.input) !== canonicalize(input))
         throw new Error('An instruction always carries out the same request.');
       return structuredClone(existing);
     }
@@ -987,7 +725,7 @@ export class ReferenceMapClient {
       profile: description.profile,
       requestId: this.#requestId(),
       interactionId: description['@id'],
-      descriptionDigest: digest,
+      descriptionDigest,
       type: structuredClone(description.type),
       operation,
       input: structuredClone(input),
@@ -1000,11 +738,7 @@ export class ReferenceMapClient {
         `The input does not satisfy the contract: ${errors.map((error) => `${error.pointer || '/'} ${error.detail}`).join('; ')}`,
       );
     // The rest of the request, such as its identifier, against the core and the contract.
-    const validateRequest = contract.validateRequest;
-    const refused = [
-      ...this.#artifacts.definitionErrors('request', request),
-      ...(validateRequest(request) ? [] : errorList(validateRequest.errors)),
-    ];
+    const refused = contract.core.requestErrors(request);
     if (refused.length)
       throw new Error(
         `The request does not satisfy the core and its request schema: ${refused.join('; ')}`,
@@ -1043,24 +777,6 @@ export interface HttpRequest {
 }
 
 /**
- * Whether a request body is declared as JSON: the media type application/json, compared
- * case-insensitively, with no parameter other than a UTF-8 charset. Only HTTP's
- * optional whitespace, spaces and tabs, may surround each part.
- */
-export function isJsonRequest(contentType: string | undefined) {
-  const [type, ...parameters] = (contentType ?? '')
-    .split(';')
-    .map((part) => part.replace(/^[ \t]+|[ \t]+$/g, '').toLowerCase());
-  return (
-    type === 'application/json' &&
-    // RFC 9110 permits empty parameter slots, as in `application/json;`.
-    parameters.every(
-      (parameter) => parameter === '' || /^charset=(?:utf-8|"utf-8")$/.test(parameter),
-    )
-  );
-}
-
-/**
  * A minimal HTTP binding of the reference service: the routes, methods, media type
  * and authentication the profile fixes, in front of submit and recover.
  */
@@ -1077,11 +793,10 @@ export function serveHttp(
     body: { type: 'about:blank', title, status },
   });
   // Problems before a request is correlated carry no MAP correlation members.
-  const uncorrelated = (code: string, status: number, title: string, detail: string): Response => ({
-    status,
-    mediaType: 'application/problem+json',
-    body: { type: `https://mailschema.org/problems/${code}`, title, status, detail },
-  });
+  const uncorrelated = (code: ProblemCode, title: string, detail: string): Response => {
+    const body = problem(code, { title, detail });
+    return { status: body.status, mediaType: 'application/problem+json', body };
+  };
   const headers = Object.fromEntries(
     Object.entries(request.headers).map(([name, value]) => [name.toLowerCase(), value]),
   );
@@ -1096,7 +811,6 @@ export function serveHttp(
       credential ||
       uncorrelated(
         'authentication-required',
-        401,
         'Authentication required',
         'Send a credential for this service in the Authorization header.',
       )
@@ -1116,11 +830,11 @@ export function serveHttp(
     if (refused) return refused;
     let body: MapRequest;
     try {
-      body = parseMapJson(request.body ?? '') as unknown as MapRequest;
-    } catch {
+      body = parse(request.body ?? '') as MapRequest;
+    } catch (error) {
+      if (!(error instanceof InvalidDocument)) throw error;
       return uncorrelated(
         'invalid-request',
-        400,
         'Invalid MAP request',
         'The body is not I-JSON within the MAP limits.',
       );

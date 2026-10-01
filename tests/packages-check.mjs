@@ -121,6 +121,20 @@ test('package preparation removes artifacts from earlier builds', () => {
   );
 });
 
+test('the npm package carries the MAP core exactly as the repository runs it', () => {
+  const core = readdirSync('src/map/core').sort();
+  assert.deepEqual(readdirSync('.release/packages/npm/src/core').sort(), core);
+  for (const file of core) {
+    const source = readFileSync(`src/map/core/${file}`, 'utf8');
+    assert.equal(
+      readFileSync(`.release/packages/npm/src/core/${file}`, 'utf8'),
+      // Only the bundled artifacts' imports point at the package's own copies.
+      file === 'bundled.ts' ? source.replaceAll("'../../../public/schemas/", "'../") : source,
+      file,
+    );
+  }
+});
+
 test('prepared distributions contain exactly the artifacts selected by the manifest', () => {
   const roots = {
     npm: 'npm',

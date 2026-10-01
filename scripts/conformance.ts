@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { MAP_PROFILE, MapArtifacts, sha256 } from '../src/map/artifacts.ts';
+import { MapArtifacts, sha256 } from '../src/map/artifacts.ts';
+import { MAP_PROFILE } from '../src/map/core/index.ts';
 import { conformanceCases } from '../conformance/map-0.2/cases.mjs';
 
 const root = process.cwd();
@@ -12,7 +13,7 @@ const matrix = JSON.parse(
   readFileSync(resolve(root, 'conformance/map-0.2/requirements.json'), 'utf8'),
 );
 const artifacts = new MapArtifacts(root);
-const current = artifacts.contracts.filter((entry) => entry.contract.profile === MAP_PROFILE);
+const current = artifacts.contracts;
 
 const filesUnder = (directory: string): string[] =>
   readdirSync(resolve(root, directory))
@@ -33,6 +34,7 @@ const bound = [
     `public/schemas/${entry.requestSchema.url.split('/').at(-1)}`,
   ]),
   ...filesUnder('public/fixtures/map-0.2'),
+  ...filesUnder('src/map/core'),
   'src/map/artifacts.ts',
   'src/map/reference.ts',
   'src/map/behaviours.ts',

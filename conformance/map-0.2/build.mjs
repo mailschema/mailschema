@@ -1,6 +1,7 @@
 // Builds MAP 0.2 documents from the example data. Shared by the fixture
 // generator and the conformance suite so both read exactly the same bytes.
-import { MAP_PROFILE, descriptionDigest, mapArtifacts } from '../../src/map/reference.ts';
+import { mapArtifacts } from '../../src/map/reference.ts';
+import { MAP_PROFILE, digest } from '../../src/map/core/index.ts';
 import {
   credentialContext,
   describedAt,
@@ -98,7 +99,7 @@ export function request(
     profile: MAP_PROFILE,
     requestId: requestId(entry, n),
     interactionId: description['@id'],
-    descriptionDigest: descriptionDigest(description),
+    descriptionDigest: digest(description),
     type: description.type,
     operation,
     input,
