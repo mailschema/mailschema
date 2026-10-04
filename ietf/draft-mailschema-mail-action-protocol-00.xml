@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
-     category="std" consensus="true"
+     category="std"
      docName="draft-mailschema-mail-action-protocol-00"
      ipr="trust200902" submissionType="IETF" version="3">
   <front>
@@ -15,28 +15,27 @@
     <workgroup>Individual Submission</workgroup>
     <keyword>email</keyword><keyword>agents</keyword><keyword>structured email</keyword>
     <abstract>
-      <t>The Mail Action Protocol (MAP) describes a service proposal in email
-      so a recipient or an agent acting for that recipient can evaluate it
-      and use the service's existing operations. Versioned contracts define
-      the proposal's data, operations, and effects. A trusted service
-      implementation resolves those operations independently of the email;
-      authoritative readback and an atomic terms-version check bind a
-      credentialed decision to the current proposal. MAP uses Structured
-      Email's JSON-LD and MIME representation. It defines no general action
-      endpoint, execution envelope, identity provider, or permission language.
-      This document specifies Core 0.3, an HTTP binding, and an optional
-      experimental bearer-capability binding limited to refusal, protective
-      reports, and confirmation of an initiated address-validation request.</t>
+      <t>Mail Action Protocol (MAP) describes actions offered by email, such
+      as approval to publish an article. A type contract defines each
+      decision and its effects. A trusted service binding connects that
+      decision to an existing service operation. Before acting, a client
+      reads the current proposal and applies the user's policy. The service
+      checks permission and the exact terms when it records the decision.
+      MAP uses Structured Email's MIME and JSON-LD representation. Core is
+      independent of the interface used to call the service. This document
+      specifies an HTTP binding, Registry
+      discovery rules and an experimental capability binding for a limited
+      set of actions without a service account connection. It defines no
+      general action endpoint or replacement authentication system.</t>
     </abstract>
   </front>
   <middle>
     <!-- Generated from specifications/map-0.3. Edit its sources, not this projection. -->
         <section anchor="introduction" numbered="true">
       <name>Introduction</name>
-      <t>Email frequently asks its recipient to make a decision in a service. An automated client needs to know what the decision means, which proposal it concerns, and whether its principal is permitted to make it. Message text alone does not establish any of those facts.</t>
-      <t>The Mail Action Protocol (MAP) describes such a proposal in a structured email part. A versioned type contract defines its data and operations. A connector that the recipient already trusts maps those operations to the service's existing interface. Before a credentialed decision, the connector obtains the current proposal from the service. The service checks permission and the proposal version when applying the decision.</t>
-      <t>MAP defines a description and processing requirements. It defines no general execution endpoint, request envelope, result envelope, agent identity service, or permission language. It does not replace SMTP, mailbox access, service authentication, or service-specific authorization. A type catalogue assists discovery; it is not a runtime authority.</t>
-      <t>This document specifies MAP Core 0.3, an HTTP binding, and an optional experimental capability binding. A conforming implementation declares the roles and bindings it implements. Support for one binding does not imply support for another. The capability binding's experimental designation describes its maturity in this project; it does not claim an IETF Experimental publication or working-group adoption.</t>
+      <t>Mail Action Protocol (MAP) describes a service action in email. It tells a client what is proposed, which exact terms apply and which decisions are available. A type contract defines the meaning of those decisions. A trusted connector maps them to the service's existing operations.</t>
+      <t>For example, a publication request can offer approval of one article revision. The client reads that revision and its publication terms from the service, applies the user's policy, and obtains confirmation when required. The service checks permission and the terms version when it records the decision. An approval for one revision cannot authorize another.</t>
+      <t>MAP uses ordinary email delivery and service authentication. It defines the description and the rules for acting on it. The HTTP binding uses existing APIs; the optional capability binding permits a small set of actions without a service credential. Neither the message nor a Registry listing grants general permission to act.</t>
       <section anchor="conventions-and-terminology" numbered="true">
         <name>Conventions and terminology</name>
         <t>The key words <bcp14>MUST</bcp14>, <bcp14>MUST NOT</bcp14>, <bcp14>REQUIRED</bcp14>, <bcp14>SHALL</bcp14>, <bcp14>SHALL NOT</bcp14>, <bcp14>SHOULD</bcp14>, <bcp14>SHOULD NOT</bcp14>, <bcp14>RECOMMENDED</bcp14>, <bcp14>NOT RECOMMENDED</bcp14>, <bcp14>MAY</bcp14>, and <bcp14>OPTIONAL</bcp14> are to be interpreted as described in <xref target="RFC2119"/> and <xref target="RFC8174"/> when, and only when, they appear in all capitals.</t>
@@ -46,14 +45,130 @@
           <li>A <strong>producer</strong> constructs and sends a MAP message. It may send on a service's behalf.</li>
           <li>A <strong>consumer</strong> extracts and processes MAP descriptions. It may present them in a mail client or to an agent host.</li>
           <li>A <strong>service</strong> owns the proposal, authorizes its operations, and applies their effects.</li>
-          <li>An <strong>interaction</strong> is one proposal to one recipient under one contract and one exact terms version.</li>
+          <li>An <strong>interaction</strong> is one proposal addressed to one recipient, using one contract and one terms version.</li>
           <li>A <strong>type contract</strong> is an immutable definition of an interaction's data, operations, effects, and client obligations.</li>
-          <li>A <strong>service implementation</strong> is the trusted mapping between a type contract and a service's existing read and action operations. It may be connector code or a versioned implementation manifest interpreted by a connector.</li>
-          <li><strong>Authoritative readback</strong> is information obtained from that service through a trusted implementation, independently of the email's claims.</li>
+          <li>A <strong>service binding</strong> maps a type contract to the service's read and action operations. A connector implements that mapping, either as installed code or by interpreting a supported declarative binding.</li>
+          <li><strong>Service readback</strong> means reading the current proposal through the trusted service connection. It supplies the facts used to decide, independently of the email's claims.</li>
           <li>An <strong>effect</strong> is a semantic consequence declared by a contract, including downstream consequences directly authorized by the operation.</li>
           <li>A <strong>capability</strong> is an opaque bearer URL authorizing one narrowly limited operation. Possession, including possession of a forwarded copy, conveys that authority.</li>
         </ul>
       </section>
+    </section>
+    <section anchor="type-contracts" numbered="true">
+      <name>Type contracts</name>
+      <section anchor="contract-identification" numbered="true">
+        <name>Contract identification</name>
+        <t>A contract binds all normative semantics, its schemas, and its operation declarations in one JSON document. The digest is SHA-256 of its UTF-8 JSON Canonicalization Scheme representation, using <xref target="RFC8785"/> and <xref target="RFC6234"/>. The spelling is <tt>sha-256:</tt> followed by 64 lowercase hexadecimal characters. This hashes the canonical contract, not its download formatting and not the email description. A contract <bcp14>MUST NOT</bcp14> contain its own digest.</t>
+        <t>The contract's <tt>id</tt>, <tt>version</tt>, and <tt>profile</tt> <bcp14>MUST</bcp14> match the description and the selected profile. A consumer <bcp14>MUST</bcp14> obtain the contract from a bundled or explicitly configured catalogue and verify its digest before use. The presence of an unfamiliar URI in email <bcp14>MUST NOT</bcp14> trigger retrieval, installation, or acceptance of a contract. Failure to resolve an exact digest makes that interaction non-actionable. A catalogue <bcp14>MAY</bcp14> be local, organizational, vendor-maintained, or public; MailSchema is not a required online dependency.</t>
+        <t>Publication fixes the contract's canonical contents. An incompatible or compatible change to any normative content requires a new version and digest. A catalogue <bcp14>MAY</bcp14> update lifecycle metadata separately, including Draft, Experimental, Stable, Deprecated, or Superseded status and successor links. Such metadata <bcp14>MUST NOT</bcp14> rewrite a published contract or automatically authorize migration to its successor. Withdrawal from new use does not justify deleting artifacts required to interpret earlier messages.</t>
+      </section>
+      <section anchor="contract-format-and-obligations" numbered="true">
+        <name>Contract format and obligations</name>
+        <t>A contract contains <tt>id</tt>, <tt>version</tt>, <tt>profile</tt>, <tt>name</tt>, <tt>summary</tt>, <tt>requirements</tt>, <tt>detailsSchema</tt>, and <tt>operations</tt>. <tt>requirements</tt> is a nonempty array of normative prose strings. It <bcp14>MUST</bcp14> state the exact terms covered, actor obligations, restrictions, and any semantic conditions that JSON Schema cannot express. Documentation outside the digest-bound contract <bcp14>MAY</bcp14> explain it but <bcp14>MUST NOT</bcp14> silently change its meaning.</t>
+        <t><tt>detailsSchema</tt> and each input schema use JSON Schema Draft 2020-12 <xref target="JSON-SCHEMA"/>. They <bcp14>MUST</bcp14> be self-contained: references <bcp14>MAY</bcp14> target fragments within that schema document, but <bcp14>MUST NOT</bcp14> require external retrieval. Validation <bcp14>MUST</bcp14> use the format-assertion vocabulary for formats the contract uses. Consumers <bcp14>MUST</bcp14> reject contracts whose keywords, formats, or semantic requirements they cannot enforce. Resource limits apply during validation; a schema is not permission to consume unbounded computation.</t>
+        <t>Every operation object contains <tt>id</tt>, <tt>name</tt>, <tt>semantics</tt>, <tt>effects</tt>, <tt>bindings</tt>, <tt>actors</tt>, <tt>exactTerms</tt>, <tt>inputSchema</tt>, and <tt>outcomes</tt>. <tt>semantics</tt> is normative text, not text to execute. <tt>effects</tt> is a nonempty set of absolute HTTPS identifiers. <tt>bindings</tt> selects the permitted authority modes: <tt>credential</tt>, <tt>capability</tt>, or both. It does not enumerate service protocols; API calls, tool invocations and brokered commands can all use the credential mode. <tt>actors</tt> selects <tt>human</tt>, <tt>agent</tt>, or both; this declares permitted interfaces, not the caller's entitlement. <tt>exactTerms</tt> is a boolean. <tt>inputSchema</tt> is either a schema for one JSON input object or <tt>null</tt>, which means the operation accepts no caller-supplied semantic input. <tt>outcomes</tt> maps operation-local identifiers to their semantic meanings; these are not protocol response bodies or HTTP status codes.</t>
+        <t>An operation that permits the capability binding also contains <tt>capability</tt> with <tt>kind</tt> and <tt>maxLifetimeSeconds</tt>. Its kind is one of <tt>refusal</tt>, <tt>protective-report</tt>, or <tt>address-confirmation</tt>, with the additional restrictions in that binding. No other operation may contain that member. A capability operation <bcp14>MUST</bcp14> have <tt>inputSchema: null</tt> and <tt>exactTerms: true</tt>.</t>
+        <t>Every effect resulting directly from a successful operation or from work that it authorizes <bcp14>MUST</bcp14> be declared. Approval to send a campaign therefore declares external communication, even if sending occurs later. A service <bcp14>MUST NOT</bcp14> use a narrower label such as recording a decision to conceal that effect. A service binding <bcp14>MUST NOT</bcp14> broaden a contract's semantics or accept additional semantic inputs under its identifier.</t>
+        <t>A host <bcp14>MUST NOT</bcp14> automatically approve an unrecognized effect. It <bcp14>MAY</bcp14> present such an operation for an explicit principal decision only if it understands and can accurately explain the complete contract. Otherwise it <bcp14>MUST</bcp14> refuse it. A model-generated explanation alone does not establish this understanding. Capability processing has a stricter, closed set of permitted effects.</t>
+      </section>
+      <section anchor="initial-effect-vocabulary" numbered="true">
+        <name>Initial effect vocabulary</name>
+        <t>The initial vocabulary uses identifiers under <tt>https://mailschema.org/effects/</tt>. These meanings are stable; adding identifiers does not change Core. The following suffixes have these meanings:</t>
+        <ul>
+          <li><tt>communication</tt>: sending or publishing content to an external audience.</li>
+          <li><tt>disclosure</tt>: making information available to another principal or audience.</li>
+          <li><tt>payment</tt>: authorizing or causing a monetary charge, transfer, purchase, or use of prepaid value. The amount, currency, payee and funding source are separate terms that a contract must define where they matter.</li>
+          <li><tt>commitment</tt>: accepting an obligation on behalf of the principal.</li>
+          <li><tt>authorization</tt>: granting or changing another actor's permission.</li>
+          <li><tt>assertion</tt>: making a statement of identity, control, or fact attributed to the principal.</li>
+          <li><tt>state</tt>: changing a service record.</li>
+          <li><tt>protection</tt>: reporting or taking action intended to protect the principal.</li>
+          <li><tt>refusal</tt>: declining the stated proposal without authorizing its requested effect.</li>
+        </ul>
+        <t>These labels are inputs to host policy, not a universal policy language. A contract <bcp14>MUST</bcp14> provide the typed facts needed to judge its effect. A host <bcp14>MUST NOT</bcp14> treat a category as sufficient authorization without those facts. Other maintainers <bcp14>MAY</bcp14> define stable effect identifiers in their own namespaces.</t>
+      </section>
+    </section>
+    <section anchor="message-trust-and-recipient-control" numbered="true">
+      <name>Message trust and recipient control</name>
+      <section anchor="qualifying-message-authentication" numbered="true">
+        <name>Qualifying message authentication</name>
+        <t>Before exposing an actionable MAP control or making a MAP-driven service read, a consumer <bcp14>MUST</bcp14> establish one qualifying DKIM signature as specified in <xref target="RFC6376"/>. That same signature <bcp14>MUST</bcp14> satisfy all of the following:</t>
+        <ol>
+          <li>Its signing domain aligns with the RFC 5322 author domain under <xref target="RFC9989"/>. Relaxed alignment suffices for credentialed operations unless local policy requires strict alignment. Capability operations require strict alignment. An SPF-only or aggregate DMARC pass is insufficient.</li>
+          <li>It verifies the entire body and contains no <tt>l=</tt> body-length tag, even if that tag happens to cover the received body.</li>
+          <li>It covers <tt>From</tt>, <tt>To</tt>, <tt>Subject</tt>, <tt>Date</tt>, <tt>Message-ID</tt>, <tt>MIME-Version</tt>, and <tt>Content-Type</tt>, all of which <bcp14>MUST</bcp14> be present, and <tt>Cc</tt>, <tt>SUPERSEDES</tt>, and <tt>Expires</tt> when present. A producer <bcp14>SHOULD</bcp14> oversign <tt>From</tt> to detect an added instance. Consumers <bcp14>MUST</bcp14> reject duplicate occurrences of these fields rather than choose the convenient copy.</li>
+          <li>It uses a currently acceptable DKIM algorithm and key. Implementations <bcp14>MUST</bcp14> reject <tt>rsa-sha1</tt> and RSA keys shorter than 1,024 bits in accordance with <xref target="RFC8301"/>. Producers <bcp14>SHOULD</bcp14> use RSA keys of at least 2,048 bits or Ed25519; consumers <bcp14>MUST</bcp14> support verification of <tt>ed25519-sha256</tt> as specified in <xref target="RFC8463"/>.</li>
+        </ol>
+        <t>There <bcp14>MUST</bcp14> be exactly one author mailbox in <tt>From</tt>, parsed according to <xref target="RFC5322"/>. Display names do not participate in authentication. Failure of these requirements disables MAP actions; it does not change general mail-delivery policy.</t>
+        <t>A consumer <bcp14>MAY</bcp14> verify the received message itself or rely on its trusted receiving pipeline. In the latter case, a locally configured <tt>authserv-id</tt> and the trust-boundary rules of <xref target="RFC8601"/> apply. The pipeline <bcp14>MUST</bcp14> supply evidence for all requirements above for the same signature and bind that evidence to the message and MAP part being processed. A bare <tt>dkim=pass</tt> does not prove absence of <tt>l=</tt>, header coverage, or preservation of the MAP data. This specification introduces no new Authentication-Results property; an implementation can retain the verified original message and signature metadata or use an authenticated receiver interface.</t>
+        <t>An intervening trusted transformation <bcp14>MAY</bcp14> change readable links or formatting only if the pipeline preserves the authenticated MAP bytes and security-relevant header values, or supplies the authenticated original for MAP processing. A consumer <bcp14>MUST NOT</bcp14> treat modified machine data as the signed original. A rewritten capability URL is unusable unless the trusted pipeline supplies the authenticated original URL; the consumer <bcp14>MUST NOT</bcp14> discover it by following the wrapper URL. An attacker-supplied Authentication-Results field, or a field merely containing a familiar <tt>authserv-id</tt>, <bcp14>MUST NOT</bcp14> be accepted across an untrusted boundary.</t>
+      </section>
+      <section anchor="recipient-and-copy-handling" numbered="true">
+        <name>Recipient and copy handling</name>
+        <t>The consumer <bcp14>MUST</bcp14> establish through its trusted mailbox context that the message was delivered to the mailbox named by <tt>recipient</tt> and that its principal controls that mailbox. A visible <tt>To</tt> address is insufficient evidence of delivery or control. Aliases and shared mailboxes require explicit provider or administrator mappings. A service <bcp14>MUST</bcp14> separately establish the principal's authority for the proposal; mailbox access alone does not supply service permission.</t>
+        <t>A forwarded copy does not establish control of its original recipient. Automatic forwarding is not reliably detectable and is not a separate protocol test: recipient control, original delivery evidence, and the service checks remain <bcp14>REQUIRED</bcp14>. A client creating an ordinary reply or manual forward <bcp14>MUST</bcp14> remove the active MAP part. Forwarded-as-attachment originals remain inert. This is a MAP-specific requirement in addition to Structured Email's treatment of non-representative data on forwarding.</t>
+        <t>Valid signed messages can be replayed. Message identifiers and DKIM verification are not freshness or single-use proofs. Clients <bcp14>SHOULD</bcp14> suppress duplicate prompts for the same service, tenant, recipient, interaction, and terms version. Services <bcp14>MUST</bcp14> enforce expiry, current authorization, decision state, and exact terms regardless of delivery count.</t>
+      </section>
+    </section>
+    <section anchor="credentialed-processing" numbered="true">
+      <name>Credentialed processing</name>
+      <section anchor="binding-independence" numbered="true">
+        <name>Binding independence</name>
+        <t>Core does not require an HTTP API or a particular tool protocol for credentialed operations. A service binding <bcp14>MUST</bcp14> satisfy the following processing rules using its chosen interface. It <bcp14>MUST</bcp14> document the trusted connection, account and tenant, current-proposal read, operation and input mapping, atomic version check, native outcomes and retry behaviour.</t>
+        <t>The service's HTTPS origin identifies the authority; it does not select the execution transport. The installed binding supplies the actual connection and credential destination. A consumer <bcp14>MUST</bcp14> refuse a binding it cannot enforce. The email <bcp14>MUST NOT</bcp14> select another protocol or connection as a fallback.</t>
+        <t>A binding <bcp14>MUST</bcp14> establish the authenticity of authoritative service data and protect the integrity of submitted decisions and results. It <bcp14>MUST</bcp14> protect credentials from disclosure outside their authorized audience. Its documentation <bcp14>MUST</bcp14> state how its native transport and authentication satisfy these requirements, including any intermediaries.</t>
+        <t>An additional binding can be specified independently of Core and the type contract when it preserves their semantics. Queued or delegated execution <bcp14>MUST</bcp14> preserve the same authorization and exact terms. Receipt by a broker, agent or intermediary <bcp14>MUST NOT</bcp14> be reported as the service's decision or completed effect without evidence that establishes that state. The service <bcp14>MUST</bcp14> establish the original principal's authority at the decision; authenticating an intermediary alone is insufficient. Results <bcp14>MUST</bcp14> be authenticated and correlated with the decision, service, tenant and principal through the installed binding. Delegation <bcp14>MUST NOT</bcp14> broaden the selected operation, semantic input or approved terms.</t>
+      </section>
+      <section anchor="trusted-service-implementation" numbered="true">
+        <name>Trusted service implementation</name>
+        <t>A consumer <bcp14>MUST</bcp14> use a service binding enabled by its principal or administrator for <tt>service.id</tt> and, when needed, <tt>service.tenant</tt>. Neither authenticated email nor a Registry record can install that implementation or extend its credential destinations. The mapping <bcp14>MUST</bcp14> bind the exact type contract digest it implements. A change to its code or manifest is subject to the host's normal installation and review policy; a message cannot select an unreviewed mapping revision.</t>
+        <t>The mapping identifies the service's existing read and action operations, authenticated principal, tenant interpretation, credential destination, request-value sources, expected-version mechanism, and response interpretation. It <bcp14>MUST</bcp14> establish these from trusted configuration and service information. It <bcp14>MUST NOT</bcp14> take an HTTP method, endpoint, tool name, executable template, or constant tool arguments from email. Parsing a service identifier or resource identifier <bcp14>MUST NOT</bcp14> permit it to override the mapped origin, path structure, or tenant.</t>
+        <t>A multi-tenant service <bcp14>MAY</bcp14> send through customer-owned domains. DKIM authenticates the sender domain; it does not prove that a resource belongs to the service or tenant. The implementation and service readback establish that relationship. A trusted sender-domain list <bcp14>MAY</bcp14> impose an additional restriction but does not replace readback.</t>
+      </section>
+      <section anchor="authoritative-readback-and-decision" numbered="true">
+        <name>Authoritative readback and decision</name>
+        <t>The host <bcp14>MUST</bcp14> authorize the service read under local policy. Message arrival alone does not grant network access. When permitted, the connector <bcp14>MUST</bcp14> read current service state with an existing, appropriately scoped credential before evaluating an operation for execution or asking the principal to authorize it. The read <bcp14>MAY</bcp14> use a synchronous response or an authenticated, correlated reply through the installed binding. The host <bcp14>MUST</bcp14> complete it before evaluating or submitting the decision. No new MAP read endpoint or response envelope is required.</t>
+        <t>The binding <bcp14>MUST</bcp14> establish the following facts from the service and its documented API behaviour. Copying them from the email is insufficient:</t>
+        <ol>
+          <li>The interaction exists for the stated service and tenant, concerns the stated subject and proposal, and was offered to the intended recipient.</li>
+          <li>The authenticated principal is permitted to inspect it and has the relevant relationship to that recipient.</li>
+          <li>Its type identifier, version, and contract digest match the description.</li>
+          <li>Its current terms identifier and version match the description, and it has not expired, been withdrawn, or been superseded.</li>
+          <li>The currently offered operations and the current typed details are known.</li>
+        </ol>
+        <t>An existing API need not store a literal MAP object. A connector <bcp14>MAY</bcp14> derive these facts from authenticated records under an unambiguous, documented mapping. It <bcp14>MUST NOT</bcp14> manufacture a missing fact from message content. A read that returns only a generally readable subject is insufficient evidence that the principal was offered this proposal.</t>
+        <t>The connector <bcp14>MUST</bcp14> validate the details read from the service against the contract. The host <bcp14>MUST</bcp14> base policy and confirmation on those details, including any additional content retrieved through the trusted mapping that the policy needs. It <bcp14>MUST NOT</bcp14> treat the email's preview as evidence that a content, destination, or audience restriction passed. It <bcp14>MUST</bcp14> distinguish service-supplied user content from service assertions.</t>
+        <t>An operation <bcp14>MUST</bcp14> be offered by all three: the email, the selected contract and the service's current proposal. The service cannot add an action to the email by returning it in readback. A mismatch in identity, digest, version, or authority makes the interaction non-actionable. The consumer <bcp14>MUST NOT</bcp14> silently upgrade it to a newer proposal.</t>
+        <t>The host <bcp14>MUST</bcp14> apply the principal's standing policy to the complete operation, typed values, declared effects, and actor restrictions. If that policy does not authorize the operation, the host <bcp14>MUST</bcp14> obtain an explicit human decision through a trusted interface. A language model <bcp14>MUST NOT</bcp14> supply or simulate that decision. Any changed action-relevant value invalidates the decision and requires reevaluation. Free-form message text, contract prose, and service-returned content <bcp14>MUST NOT</bcp14> alter host instructions, permissions, connector configuration, or confirmation policy.</t>
+      </section>
+      <section anchor="client-readiness" numbered="true">
+        <name>Client readiness</name>
+        <t>A client <bcp14>MUST</bcp14> distinguish an unsupported action from a refused or completed action. When a profile, exact contract, binding or required semantic rule is unsupported, it <bcp14>MUST</bcp14> disable that operation and <bcp14>MAY</bcp14> continue displaying the ordinary email. Unknown fields or operations <bcp14>MUST NOT</bcp14> be discarded to make an otherwise unsupported action executable.</t>
+        <t>If the service is not connected, the host <bcp14>MAY</bcp14> offer a separate setup flow under the Registry and discovery rules. The email <bcp14>MUST NOT</bcp14> authorize setup. Once setup completes, the client <bcp14>MUST</bcp14> repeat message, contract, recipient and service checks before offering an action. Credential acquisition during explicit setup does not grant permission to execute the waiting proposal.</t>
+        <t>A client <bcp14>MUST</bcp14> make missing permission, changed terms, expiry and an unknown execution result distinguishable to its user or calling application. Its interface <bcp14>MAY</bcp14> use different wording, but <bcp14>MUST</bcp14> preserve those meanings. It <bcp14>MUST NOT</bcp14> silently substitute a newer proposal or retry an operation whose effect is uncertain.</t>
+      </section>
+      <section anchor="exact-terms-and-service-enforcement" numbered="true">
+        <name>Exact terms and service enforcement</name>
+        <t>Every operation whose effect depends on proposal content <bcp14>MUST</bcp14> declare <tt>exactTerms: true</tt>. The service-issued version <bcp14>MUST</bcp14> change whenever a value that affects the action changes. This includes referenced content, destinations, audience membership and schedule. These values are the proposal's exact terms. A mutable document URL, audience label, or count alone is not an exact terms binding. A service <bcp14>MAY</bcp14> keep immutable referenced revisions or include their state in its version calculation.</t>
+        <t>For such an operation, the connector <bcp14>MUST</bcp14> convey the readback version through the trusted binding. Before committing the effect or authorizing the work, the service <bcp14>MUST</bcp14> check the acting account, recipient relationship, expiry, decision state and terms version together. These checks and the decision <bcp14>MUST</bcp14> be atomic: no intervening change may invalidate a check before the decision commits. A mismatch <bcp14>MUST</bcp14> commit no effect. A separate read followed by an unconditional write does not conform. Revocation or loss of permission between read and commit <bcp14>MUST</bcp14> take effect at commit.</t>
+        <t>When work is asynchronous, accepting the decision <bcp14>MAY</bcp14> authorize a job rather than complete its external effect. The job <bcp14>MUST</bcp14> remain bound to the accepted immutable terms; it <bcp14>MUST NOT</bcp14> later resolve a mutable audience, content revision, or destination to different terms. The binding <bcp14>MUST</bcp14> distinguish acceptance, pending work, completion, refusal, and indeterminate execution using the service's existing semantics. MAP does not promise exactly-once delivery or define a job protocol.</t>
+        <t>Services <bcp14>MUST</bcp14> prevent conflicting terminal decisions from both taking effect. Repetition <bcp14>MUST NOT</bcp14> repeat a terminal effect. Services <bcp14>MAY</bcp14> use their existing transaction, idempotency, and decision-record mechanisms. A consumer <bcp14>MUST NOT</bcp14> retry an indeterminate operation unless its trusted binding establishes that doing so cannot duplicate the effect.</t>
+      </section>
+      <section anchor="semantic-conditions-and-updates" numbered="true">
+        <name>Semantic conditions and updates</name>
+        <t>A type defines successful decisions and the service-specific outcomes an implementation must interpret. These common conditions have the following meaning wherever reported: <tt>already-decided</tt> means a terminal decision exists; <tt>superseded</tt> means another interaction replaces this one; <tt>stale</tt> means the presented version is not current; <tt>expired</tt> means the allowed lifetime ended; <tt>declined</tt> means a refusal was recorded; and <tt>withdrawn</tt> means the service removed the proposal. They are semantic conditions, not six required HTTP problem types. A valid decline is a successful decision, not a transport failure.</t>
+        <t>A binding <bcp14>MUST</bcp14> preserve the distinction between failure before execution, acceptance with work pending, a known terminal outcome, and an unknown outcome. It <bcp14>MUST NOT</bcp14> represent lack of an error as proof of completion. It <bcp14>MUST</bcp14> expose no result details beyond the principal's current authorization.</t>
+        <t>Interaction expiry limits when a decision may be accepted. It does not by itself cancel work already authorized before expiry. A contract or the accepted schedule can impose an execution deadline; the service <bcp14>MUST</bcp14> preserve that deadline with the accepted terms and enforce it. Clients <bcp14>MUST NOT</bcp14> promise that recalling an email cancels an already accepted service operation.</t>
+        <t>When terms change, the producer <bcp14>MUST</bcp14> issue a new interaction identifier and version. It <bcp14>MUST</bcp14> use Structured Email's <tt>SUPERSEDES</tt> mechanism to associate a replacement with the previous message. A signed replacement header <bcp14>MAY</bcp14> inform presentation; it <bcp14>MUST NOT</bcp14> itself grant authority, revoke service state, or cause execution. Services enforce withdrawal and supersession independently of whether the recipient receives an update. Clients <bcp14>MUST NOT</bcp14> act on a recalled, empty structured representation as though it were an operation.</t>
+      </section>
+    </section>
+    <section anchor="human-route" numbered="true">
+      <name>Human route</name>
+      <t>The human URL <bcp14>MUST</bcp14> lead to a page that displays the current proposal without performing the action. GET and HEAD <bcp14>MUST</bcp14> be safe in the sense of <xref target="RFC9110"/>. Merely fetching a link, loading its subresources, opening a preview, or passing through an authentication redirect <bcp14>MUST NOT</bcp14> approve, decline, confirm an address, or consume a capability.</t>
+      <t>The URL in the email is a sender claim. A qualifying DKIM signature does not establish that its destination belongs to the named service. A consumer <bcp14>MAY</bcp14> show it as an ordinary email link with its actual origin visible. To present it as a verified service review route or use it for a MAP control, the consumer <bcp14>MUST</bcp14> establish the permitted route through its trusted service binding. An unconnected client cannot make that claim.</t>
+      <t>The page <bcp14>MUST</bcp14> require an explicit confirmation submitted by an unsafe method before applying the operation. It <bcp14>MUST</bcp14> check current authorization, expiry, proposal state, and exact terms at that submission. Consequential actions <bcp14>MUST</bcp14> require service authentication; the narrow bearer operations permitted by the capability binding <bcp14>MAY</bcp14> instead use an equivalent server-side bearer confirmation flow. A bearer flow <bcp14>MUST</bcp14> preserve all effect and lifetime limits and <bcp14>MUST NOT</bcp14> turn its initial GET into a decision.</t>
+      <t>An authenticated page <bcp14>MUST</bcp14> protect the confirmation against CSRF and clickjacking. It <bcp14>MUST</bcp14> use the application's established CSRF defenses and restrict framing to trusted origins, for example with CSP <tt>frame-ancestors</tt>. Cookie SameSite behavior alone <bcp14>MUST NOT</bcp14> be its only authorization check. A confirmation <bcp14>MUST</bcp14> be bound to the principal's session and exact proposal; a previously authorized form <bcp14>MUST NOT</bcp14> approve revised terms.</t>
+      <t>The page and any native action control <bcp14>MUST</bcp14> display the destination service origin, recipient or acting account, material terms, and effect before confirmation. Display names <bcp14>MUST NOT</bcp14> substitute for origins or account identity. A host <bcp14>SHOULD</bcp14> warn about confusable identifiers using <eref target="https://unicode.org/reports/tr39/">Unicode security mechanisms</eref>; it <bcp14>MUST</bcp14> escape or visibly flag bidirectional and invisible formatting controls in display text. Display defenses <bcp14>MUST NOT</bcp14> rewrite identifiers used for security comparisons.</t>
     </section>
     <section anchor="email-representation" numbered="true">
       <name>Email representation</name>
@@ -90,107 +205,6 @@
         <t>Identifiers are not instructions to fetch. In particular, <tt>subject.id</tt>, <tt>terms.id</tt>, a type URI, and an effect URI can identify something without being a client-accessible resource. The client <bcp14>MUST</bcp14> resolve service objects through its trusted mapping.</t>
       </section>
     </section>
-    <section anchor="type-contracts" numbered="true">
-      <name>Type contracts</name>
-      <section anchor="contract-identification" numbered="true">
-        <name>Contract identification</name>
-        <t>A contract binds all normative semantics, its schemas, and its operation declarations in one JSON document. The digest is SHA-256 of its UTF-8 JSON Canonicalization Scheme representation, using <xref target="RFC8785"/> and <xref target="RFC6234"/>. The spelling is <tt>sha-256:</tt> followed by 64 lowercase hexadecimal characters. This hashes the canonical contract, not its download formatting and not the email description. A contract <bcp14>MUST NOT</bcp14> contain its own digest.</t>
-        <t>The contract's <tt>id</tt>, <tt>version</tt>, and <tt>profile</tt> <bcp14>MUST</bcp14> match the description and the selected profile. A consumer <bcp14>MUST</bcp14> obtain the contract from a bundled or explicitly configured catalogue and verify its digest before use. The presence of an unfamiliar URI in email <bcp14>MUST NOT</bcp14> trigger retrieval, installation, or acceptance of a contract. Failure to resolve an exact digest makes that interaction non-actionable. A catalogue <bcp14>MAY</bcp14> be local, organizational, vendor-maintained, or public; MailSchema is not a required online dependency.</t>
-        <t>Publication fixes the contract's canonical contents. An incompatible or compatible change to any normative content requires a new version and digest. A catalogue <bcp14>MAY</bcp14> update lifecycle metadata separately, including Draft, Experimental, Stable, Deprecated, or Superseded status and successor links. Such metadata <bcp14>MUST NOT</bcp14> rewrite a published contract or automatically authorize migration to its successor. Withdrawal from new use does not justify deleting artifacts required to interpret earlier messages.</t>
-      </section>
-      <section anchor="contract-format-and-obligations" numbered="true">
-        <name>Contract format and obligations</name>
-        <t>A contract contains <tt>id</tt>, <tt>version</tt>, <tt>profile</tt>, <tt>name</tt>, <tt>summary</tt>, <tt>requirements</tt>, <tt>detailsSchema</tt>, and <tt>operations</tt>. <tt>requirements</tt> is a nonempty array of normative prose strings. It <bcp14>MUST</bcp14> state the exact terms covered, actor obligations, restrictions, and any semantic conditions that JSON Schema cannot express. Documentation outside the digest-bound contract <bcp14>MAY</bcp14> explain it but <bcp14>MUST NOT</bcp14> silently change its meaning.</t>
-        <t><tt>detailsSchema</tt> and each input schema use JSON Schema Draft 2020-12 <xref target="JSON-SCHEMA"/>. They <bcp14>MUST</bcp14> be self-contained: references <bcp14>MAY</bcp14> target fragments within that schema document, but <bcp14>MUST NOT</bcp14> require external retrieval. Validation <bcp14>MUST</bcp14> use the format-assertion vocabulary for formats the contract uses. Consumers <bcp14>MUST</bcp14> reject contracts whose keywords, formats, or semantic requirements they cannot enforce. Resource limits apply during validation; a schema is not permission to consume unbounded computation.</t>
-        <t>Every operation object contains <tt>id</tt>, <tt>name</tt>, <tt>semantics</tt>, <tt>effects</tt>, <tt>bindings</tt>, <tt>actors</tt>, <tt>exactTerms</tt>, <tt>inputSchema</tt>, and <tt>outcomes</tt>. <tt>semantics</tt> is normative text, not text to execute. <tt>effects</tt> is a nonempty set of absolute HTTPS identifiers. <tt>bindings</tt> selects <tt>credential</tt>, <tt>capability</tt>, or both. <tt>actors</tt> selects <tt>human</tt>, <tt>agent</tt>, or both; this declares permitted interfaces, not the caller's entitlement. <tt>exactTerms</tt> is a boolean. <tt>inputSchema</tt> is either a schema for one JSON input object or <tt>null</tt>, which means the operation accepts no caller-supplied semantic input. <tt>outcomes</tt> maps operation-local identifiers to their semantic meanings; these are not protocol response bodies or HTTP status codes.</t>
-        <t>An operation that permits the capability binding also contains <tt>capability</tt> with <tt>kind</tt> and <tt>maxLifetimeSeconds</tt>. Its kind is one of <tt>refusal</tt>, <tt>protective-report</tt>, or <tt>address-confirmation</tt>, with the additional restrictions in that binding. No other operation may contain that member. A capability operation <bcp14>MUST</bcp14> have <tt>inputSchema: null</tt> and <tt>exactTerms: true</tt>.</t>
-        <t>Every effect resulting directly from a successful operation or from work that it authorizes <bcp14>MUST</bcp14> be declared. Approval to send a campaign therefore declares external communication, even if sending occurs later. A service <bcp14>MUST NOT</bcp14> use a narrower label such as recording a decision to conceal that effect. A service implementation <bcp14>MUST NOT</bcp14> broaden a contract's semantics or accept additional semantic inputs under its identifier.</t>
-        <t>A host <bcp14>MUST NOT</bcp14> automatically approve an unrecognized effect. It <bcp14>MAY</bcp14> present such an operation for an explicit principal decision only if it understands and can accurately explain the complete contract. Otherwise it <bcp14>MUST</bcp14> refuse it. A model-generated explanation alone does not establish this understanding. Capability processing has a stricter, closed set of permitted effects.</t>
-      </section>
-      <section anchor="initial-effect-vocabulary" numbered="true">
-        <name>Initial effect vocabulary</name>
-        <t>The initial vocabulary uses identifiers under <tt>https://mailschema.org/effects/</tt>. These meanings are stable; adding identifiers does not change Core. The following suffixes have these meanings:</t>
-        <ul>
-          <li><tt>communication</tt>: sending or publishing content to an external audience.</li>
-          <li><tt>disclosure</tt>: making information available to another principal or audience.</li>
-          <li><tt>commitment</tt>: accepting an obligation on behalf of the principal.</li>
-          <li><tt>authorization</tt>: granting or changing another actor's permission.</li>
-          <li><tt>assertion</tt>: making a statement of identity, control, or fact attributed to the principal.</li>
-          <li><tt>state</tt>: changing a service record.</li>
-          <li><tt>protection</tt>: reporting or taking action intended to protect the principal.</li>
-          <li><tt>refusal</tt>: declining the stated proposal without authorizing its requested effect.</li>
-        </ul>
-        <t>These labels are inputs to host policy, not a universal policy language. A contract <bcp14>MUST</bcp14> provide the typed facts needed to judge its effect. A host <bcp14>MUST NOT</bcp14> treat a category as sufficient authorization without those facts. Other maintainers <bcp14>MAY</bcp14> define stable effect identifiers in their own namespaces.</t>
-      </section>
-    </section>
-    <section anchor="message-trust-and-recipient-control" numbered="true">
-      <name>Message trust and recipient control</name>
-      <section anchor="qualifying-message-authentication" numbered="true">
-        <name>Qualifying message authentication</name>
-        <t>Before exposing an actionable MAP control or making a MAP-driven service read, a consumer <bcp14>MUST</bcp14> establish one qualifying DKIM signature as specified in <xref target="RFC6376"/>. That same signature <bcp14>MUST</bcp14> satisfy all of the following:</t>
-        <ol>
-          <li>Its signing domain aligns with the RFC 5322 author domain under <xref target="RFC9989"/>. Relaxed alignment suffices for credentialed operations unless local policy requires strict alignment. Capability operations require strict alignment. An SPF-only or aggregate DMARC pass is insufficient.</li>
-          <li>It verifies the entire body and contains no <tt>l=</tt> body-length tag, even if that tag happens to cover the received body.</li>
-          <li>It covers <tt>From</tt>, <tt>To</tt>, <tt>Subject</tt>, <tt>Date</tt>, <tt>Message-ID</tt>, <tt>MIME-Version</tt>, and <tt>Content-Type</tt>, all of which <bcp14>MUST</bcp14> be present, and <tt>Cc</tt>, <tt>SUPERSEDES</tt>, and <tt>Expires</tt> when present. A producer <bcp14>SHOULD</bcp14> oversign <tt>From</tt> to detect an added instance. Consumers <bcp14>MUST</bcp14> reject duplicate occurrences of these fields rather than choose the convenient copy.</li>
-          <li>It uses a currently acceptable DKIM algorithm and key. Implementations <bcp14>MUST</bcp14> reject <tt>rsa-sha1</tt> and RSA keys shorter than 1,024 bits in accordance with <xref target="RFC8301"/>. Producers <bcp14>SHOULD</bcp14> use RSA keys of at least 2,048 bits or Ed25519; consumers <bcp14>MUST</bcp14> support verification of <tt>ed25519-sha256</tt> as specified in <xref target="RFC8463"/>.</li>
-        </ol>
-        <t>There <bcp14>MUST</bcp14> be exactly one author mailbox in <tt>From</tt>, parsed according to <xref target="RFC5322"/>. Display names do not participate in authentication. Failure of these requirements disables MAP actions; it does not change general mail-delivery policy.</t>
-        <t>A consumer <bcp14>MAY</bcp14> verify the received message itself or rely on its trusted receiving pipeline. In the latter case, a locally configured <tt>authserv-id</tt> and the trust-boundary rules of <xref target="RFC8601"/> apply. The pipeline <bcp14>MUST</bcp14> supply evidence for all requirements above for the same signature and bind that evidence to the message and MAP part being processed. A bare <tt>dkim=pass</tt> does not prove absence of <tt>l=</tt>, header coverage, or preservation of the MAP data. This specification introduces no new Authentication-Results property; an implementation can retain the verified original message and signature metadata or use an authenticated receiver interface.</t>
-        <t>An intervening trusted transformation <bcp14>MAY</bcp14> change readable links or formatting only if the pipeline preserves the authenticated MAP bytes and security-relevant header values, or supplies the authenticated original for MAP processing. A consumer <bcp14>MUST NOT</bcp14> treat modified machine data as the signed original. A rewritten capability URL is unusable unless the trusted pipeline supplies the authenticated original URL; the consumer <bcp14>MUST NOT</bcp14> discover it by following the wrapper URL. An attacker-supplied Authentication-Results field, or a field merely containing a familiar <tt>authserv-id</tt>, <bcp14>MUST NOT</bcp14> be accepted across an untrusted boundary.</t>
-      </section>
-      <section anchor="recipient-and-copy-handling" numbered="true">
-        <name>Recipient and copy handling</name>
-        <t>The consumer <bcp14>MUST</bcp14> establish through its trusted mailbox context that the message was delivered to the mailbox named by <tt>recipient</tt> and that its principal controls that mailbox. A visible <tt>To</tt> address is insufficient evidence of delivery or control. Aliases and shared mailboxes require explicit provider or administrator mappings. A service <bcp14>MUST</bcp14> separately establish the principal's authority for the proposal; mailbox access alone does not supply service permission.</t>
-        <t>A forwarded copy does not establish control of its original recipient. Automatic forwarding is not reliably detectable and is not a separate protocol test: recipient control, original delivery evidence, and the service checks remain <bcp14>REQUIRED</bcp14>. A client creating an ordinary reply or manual forward <bcp14>MUST</bcp14> remove the active MAP part. Forwarded-as-attachment originals remain inert. This is a MAP-specific requirement in addition to Structured Email's treatment of non-representative data on forwarding.</t>
-        <t>Valid signed messages can be replayed. Message identifiers and DKIM verification are not freshness or single-use proofs. Clients <bcp14>SHOULD</bcp14> suppress duplicate prompts for the same service, tenant, recipient, interaction, and terms version. Services <bcp14>MUST</bcp14> enforce expiry, current authorization, decision state, and exact terms regardless of delivery count.</t>
-      </section>
-    </section>
-    <section anchor="credentialed-processing" numbered="true">
-      <name>Credentialed processing</name>
-      <section anchor="trusted-service-implementation" numbered="true">
-        <name>Trusted service implementation</name>
-        <t>A consumer <bcp14>MUST</bcp14> select a service implementation already installed or explicitly trusted by its principal or administrator for <tt>service.id</tt> and, where applicable, <tt>service.tenant</tt>. Neither authenticated email nor a Registry record can install that implementation or extend its credential destinations. The mapping <bcp14>MUST</bcp14> bind the exact type contract digest it implements. A change to its code or manifest is subject to the host's normal installation and review policy; a message cannot select an unreviewed mapping revision.</t>
-        <t>The mapping identifies the service's existing read and action operations, authenticated principal, tenant interpretation, credential destination, request-value sources, expected-version mechanism, and response interpretation. It <bcp14>MUST</bcp14> establish these from trusted configuration and service information. It <bcp14>MUST NOT</bcp14> take an HTTP method, endpoint, tool name, executable template, or constant tool arguments from email. Parsing a service identifier or resource identifier <bcp14>MUST NOT</bcp14> permit it to override the mapped origin, path structure, or tenant.</t>
-        <t>A multi-tenant service <bcp14>MAY</bcp14> send through customer-owned domains. DKIM authenticates the sender domain; it does not prove that a resource belongs to the service or tenant. The implementation and authoritative readback establish that relationship. A trusted sender-domain list <bcp14>MAY</bcp14> impose an additional restriction but does not replace readback.</t>
-      </section>
-      <section anchor="authoritative-readback-and-decision" numbered="true">
-        <name>Authoritative readback and decision</name>
-        <t>A host <bcp14>MUST</bcp14> permit the read under local policy before it occurs. Message arrival alone does not grant network access. When permitted, the connector <bcp14>MUST</bcp14> read current service state with an existing, appropriately scoped credential before evaluating an operation for execution or asking the principal to authorize it. No new MAP read endpoint or response envelope is required.</t>
-        <t>The trusted mapping <bcp14>MUST</bcp14> establish all of these facts from service state and configured semantics, not by echoing the description:</t>
-        <ol>
-          <li>The interaction exists for the stated service and tenant, concerns the stated subject and proposal, and was offered to the intended recipient.</li>
-          <li>The authenticated principal is permitted to inspect it and has the relevant relationship to that recipient.</li>
-          <li>Its type identifier, version, and contract digest match the description.</li>
-          <li>Its current terms identifier and version match the description, and it has not expired, been withdrawn, or been superseded.</li>
-          <li>The currently offered operations and the authoritative typed details are known.</li>
-        </ol>
-        <t>An existing API need not store a literal MAP object. A connector <bcp14>MAY</bcp14> derive these facts from authenticated records under an unambiguous, documented mapping. It <bcp14>MUST NOT</bcp14> manufacture a missing fact from message content. A read that returns only a generally readable subject is insufficient evidence that the principal was offered this proposal.</t>
-        <t>The connector <bcp14>MUST</bcp14> validate the normalized authoritative details against the contract. The host <bcp14>MUST</bcp14> base policy and confirmation on those details, including any additional content retrieved through the trusted mapping that the policy needs. It <bcp14>MUST NOT</bcp14> treat the email's preview as evidence that a content, destination, or audience restriction passed. It <bcp14>MUST</bcp14> distinguish service-supplied user content from service assertions.</t>
-        <t>An actionable operation <bcp14>MUST</bcp14> occur in the intersection of the email's offered identifiers, the exact contract, and the service's current offered operations. The service cannot add an action to the email by returning it in readback. A mismatch in identity, digest, version, or authority makes the interaction non-actionable. The consumer <bcp14>MUST NOT</bcp14> silently upgrade it to a newer proposal.</t>
-        <t>The host <bcp14>MUST</bcp14> apply the principal's standing policy to the complete operation, typed values, declared effects, and actor restrictions. If that policy does not authorize the operation, the host <bcp14>MUST</bcp14> obtain an explicit human decision through a trusted interface. A language model <bcp14>MUST NOT</bcp14> supply or simulate that decision. Any changed effect-bearing value invalidates the decision and requires reevaluation. Free-form message text, contract prose, and service-returned content <bcp14>MUST NOT</bcp14> alter host instructions, permissions, connector configuration, or confirmation policy.</t>
-      </section>
-      <section anchor="exact-terms-and-service-enforcement" numbered="true">
-        <name>Exact terms and service enforcement</name>
-        <t>Every operation whose effect depends on proposal content <bcp14>MUST</bcp14> declare <tt>exactTerms: true</tt>. The service-issued version <bcp14>MUST</bcp14> change whenever any effect-bearing term changes, including data indirectly referenced by that proposal. A mutable document URL, audience label, or count alone is not an exact terms binding. A service <bcp14>MAY</bcp14> keep immutable referenced revisions or include their state in its version calculation.</t>
-        <t>For such an operation, the connector <bcp14>MUST</bcp14> convey the readback version through the trusted binding. The service <bcp14>MUST</bcp14> authorize the principal, verify the interaction and recipient relationship, enforce expiry and decision state, and compare that version to current terms in the same atomic decision boundary as committing the effect or authorizing the work. A mismatch <bcp14>MUST</bcp14> commit no effect. A separate read followed by an unconditional write does not conform. Revocation or loss of permission between read and commit <bcp14>MUST</bcp14> take effect at commit.</t>
-        <t>When work is asynchronous, accepting the decision <bcp14>MAY</bcp14> authorize a job rather than complete its external effect. The job <bcp14>MUST</bcp14> remain bound to the accepted immutable terms; it <bcp14>MUST NOT</bcp14> later resolve a mutable audience, content revision, or destination to different terms. The binding <bcp14>MUST</bcp14> distinguish acceptance, pending work, completion, refusal, and indeterminate execution using the service's existing semantics. MAP does not promise exactly-once delivery or define a job protocol.</t>
-        <t>Services <bcp14>MUST</bcp14> prevent conflicting terminal decisions from both taking effect. Repetition <bcp14>MUST NOT</bcp14> repeat a terminal effect. Services <bcp14>MAY</bcp14> use their existing transaction, idempotency, and decision-record mechanisms. A consumer <bcp14>MUST NOT</bcp14> retry an indeterminate operation unless its trusted binding establishes that doing so cannot duplicate the effect.</t>
-      </section>
-      <section anchor="semantic-conditions-and-updates" numbered="true">
-        <name>Semantic conditions and updates</name>
-        <t>A type defines successful decisions and the service-specific outcomes an implementation must interpret. These common conditions have the following meaning wherever reported: <tt>already-decided</tt> means a terminal decision exists; <tt>superseded</tt> means another interaction replaces this one; <tt>stale</tt> means the presented version is not current; <tt>expired</tt> means the allowed lifetime ended; <tt>declined</tt> means a refusal was recorded; and <tt>withdrawn</tt> means the service removed the proposal. They are semantic conditions, not six required HTTP problem types. A valid decline is a successful decision, not a transport failure.</t>
-        <t>A binding <bcp14>MUST</bcp14> preserve the distinction between failure before execution, acceptance with work pending, a known terminal outcome, and an unknown outcome. It <bcp14>MUST NOT</bcp14> represent lack of an error as proof of completion. It <bcp14>MUST</bcp14> expose no result details beyond the principal's current authorization.</t>
-        <t>Interaction expiry limits when a decision may be accepted. It does not by itself cancel work already authorized before expiry. A contract or the accepted schedule can impose an execution deadline; the service <bcp14>MUST</bcp14> preserve that deadline with the accepted terms and enforce it. Clients <bcp14>MUST NOT</bcp14> promise that recalling an email cancels an already accepted service operation.</t>
-        <t>When terms change, the producer <bcp14>MUST</bcp14> issue a new interaction identifier and version. It <bcp14>MUST</bcp14> use Structured Email's <tt>SUPERSEDES</tt> mechanism to associate a replacement with the previous message. A signed replacement header <bcp14>MAY</bcp14> inform presentation; it <bcp14>MUST NOT</bcp14> itself grant authority, revoke service state, or cause execution. Services enforce withdrawal and supersession independently of whether the recipient receives an update. Clients <bcp14>MUST NOT</bcp14> act on a recalled, empty structured representation as though it were an operation.</t>
-      </section>
-    </section>
-    <section anchor="human-route" numbered="true">
-      <name>Human route</name>
-      <t>The human URL <bcp14>MUST</bcp14> lead to a page that displays the current proposal without performing the action. GET and HEAD <bcp14>MUST</bcp14> be safe in the sense of <xref target="RFC9110"/>. Merely fetching a link, loading its subresources, opening a preview, or passing through an authentication redirect <bcp14>MUST NOT</bcp14> approve, decline, confirm an address, or consume a capability.</t>
-      <t>The page <bcp14>MUST</bcp14> require an explicit confirmation submitted by an unsafe method before applying the operation. It <bcp14>MUST</bcp14> check current authorization, expiry, proposal state, and exact terms at that submission. Consequential actions <bcp14>MUST</bcp14> require service authentication; the narrow bearer operations permitted by the capability binding <bcp14>MAY</bcp14> instead use an equivalent server-side bearer confirmation flow. A bearer flow <bcp14>MUST</bcp14> preserve all effect and lifetime limits and <bcp14>MUST NOT</bcp14> turn its initial GET into a decision.</t>
-      <t>An authenticated page <bcp14>MUST</bcp14> protect the confirmation against CSRF and clickjacking. It <bcp14>MUST</bcp14> use the application's established CSRF defenses and restrict framing to trusted origins, for example with CSP <tt>frame-ancestors</tt>. Cookie SameSite behavior alone <bcp14>MUST NOT</bcp14> be its only authorization check. A confirmation <bcp14>MUST</bcp14> be bound to the principal's session and exact proposal; a previously authorized form <bcp14>MUST NOT</bcp14> approve revised terms.</t>
-      <t>The page and any native action control <bcp14>MUST</bcp14> display the destination service origin, recipient or acting account, material terms, and effect before confirmation. Display names <bcp14>MUST NOT</bcp14> substitute for origins or account identity. A host <bcp14>SHOULD</bcp14> warn about confusable identifiers using <eref target="https://unicode.org/reports/tr39/">Unicode security mechanisms</eref>; it <bcp14>MUST</bcp14> escape or visibly flag bidirectional and invisible formatting controls in display text. Display defenses <bcp14>MUST NOT</bcp14> rewrite identifiers used for security comparisons.</t>
-    </section>
     <section anchor="http-binding" numbered="true">
       <name>HTTP binding</name>
       <t>This binding maps a contract's credentialed operations to an existing HTTPS API. It does not prescribe a MAP endpoint, URL layout, request body, or response format. The client and service <bcp14>MUST</bcp14> satisfy Core's credentialed processing requirements in addition to this section.</t>
@@ -199,7 +213,7 @@
         <t>A trusted implementation <bcp14>MUST</bcp14> document its service origin, tenant interpretation, supported contract digest, authenticated principal mapping, read operation, and each action operation. It <bcp14>SHOULD</bcp14> identify API operations by stable references to the service's API documentation or OpenAPI description. A reference is documentation or installed configuration, not something an email can cause the client to fetch or execute.</t>
         <t>For the read, the mapping <bcp14>MUST</bcp14> identify the existing resource lookup and the service-backed sources establishing the interaction, recipient, subject, type, contract digest, terms, expiry, decision state, operations, and typed details. Where the API returns several resources, the mapping <bcp14>MUST</bcp14> define a coherent proposal version over them. A collection of independently changing reads cannot establish exact terms unless the service binds the resulting snapshot.</t>
         <t>For each action, the mapping <bcp14>MUST</bcp14> specify the existing method and resource selection; the placement and encoding of the expected version; the sources of request values; authentication and tenant context; permitted success and pending-work responses; terminal and nonterminal error interpretation; and retry or idempotency behavior. Each semantic value <bcp14>MUST</bcp14> come from validated authoritative readback, a validated principal input, or trusted configuration. Email-provided identifiers <bcp14>MAY</bcp14> select records only within the independently authorized service and tenant. They <bcp14>MUST NOT</bcp14> provide request templates, method names, credentials, headers, or executable expressions.</t>
-        <t>The mapping <bcp14>MAY</bcp14> be ordinary connector code. If distributed as an implementation manifest, its immutable contents <bcp14>MUST</bcp14> be addressed by digest and accepted through the host's installation policy. MAP does not define a second manifest language or require services to publish a discovery endpoint.</t>
+        <t>The mapping <bcp14>MAY</bcp14> be ordinary connector code. If distributed as an implementation manifest, its immutable contents <bcp14>MUST</bcp14> be addressed by digest and accepted through the host's installation policy. Native API descriptions can identify the operations and their schemas; this draft defines no general mapping language. <eref target="https://mailschema.org/specification/bindings">Service bindings</eref> gives implementation guidance. Services need no MAP discovery endpoint.</t>
       </section>
       <section anchor="http-origin-and-credential-protection" numbered="true">
         <name>HTTP origin and credential protection</name>
@@ -223,6 +237,7 @@
       </section>
       <section anchor="http-example" numbered="true">
         <name>HTTP example</name>
+        <t>The <eref target="https://mailschema.org/examples">MIME-to-service walkthrough</eref> uses an existing API described by OpenAPI and a native <tt>expected_revision</tt> argument. The following smaller example shows the alternative: an API that already supports HTTP conditional requests.</t>
         <t>Suppose an installed connector reads <tt>GET /v1/proposals/p7</tt> at its configured service origin and receives an authorized proposal with the strong tag <tt>"p7-r4"</tt>. The API documents <tt>PATCH /v1/proposals/p7</tt> as a conditional update of that same representation. The host displays the current typed terms and obtains a decision. The connector then uses the API's existing update format:</t>
         <sourcecode type="http"><![CDATA[PATCH /v1/proposals/p7 HTTP/1.1
 Host: api.service.example
@@ -271,6 +286,77 @@ Content-Type: application/json
         <t>The fixed POST is not a replacement for CSRF protection on the human route. Services <bcp14>MUST</bcp14> keep its bearer validation separate from ambient authenticated browser authority. Link scanners normally issue safe requests, but a scanner or intermediary that extracts and POSTs bearer URLs can exercise them; the protocol cannot prevent that misuse by a bearer. This limitation is a reason for the narrow effect classes, not a reason to make GET actionable.</t>
       </section>
     </section>
+    <section anchor="from-a-type-to-a-service" numbered="true">
+      <name>From a type to a service</name>
+      <t>A type catalogue answers "what does this action mean?" An implementation record answers "which service supports it, and how can a client connect?" A host may use MailSchema's Registry, an organization catalogue or a locally installed collection.</t>
+      <t>A client <bcp14>MUST</bcp14> select catalogues through its own configuration. Identifiers in email are lookup keys within those catalogues, not permission to fetch or install arbitrary resources. If no configured catalogue supplies the exact contract, the action remains unsupported.</t>
+      <t>The Registry holds descriptions and evidence. Account permissions remain with the service; installation and execution policy remain with the host.</t>
+      <section anchor="type-records" numbered="true">
+        <name>Type records</name>
+        <t>A type record identifies the contract's URI, version, profile and canonical digest, together with a download reference, lifecycle status and maintainers. Examples and explanatory material <bcp14>MAY</bcp14> accompany it. The contract supplies the name, semantics and schemas; a record <bcp14>MUST NOT</bcp14> override them.</t>
+        <t>Before use, a client <bcp14>MUST</bcp14> verify the downloaded contract's identity and digest. Matching a digest establishes which bytes were obtained. It does not establish that the publisher is trustworthy or that the client can enforce the contract's semantics.</t>
+      </section>
+      <section anchor="implementation-records" numbered="true">
+        <name>Implementation records</name>
+        <t>An implementation record <bcp14>MUST</bcp14> identify:</t>
+        <ul>
+          <li>the service origin and the party maintaining the integration;</li>
+          <li>the exact contract identifier, version and digest;</li>
+          <li>the operation identifiers it supports;</li>
+          <li>the binding it implements;</li>
+          <li>the integration artifact's location and digest and the exact digest procedure;</li>
+          <li>the supported host interface or declarative format;</li>
+          <li>its lifecycle status, documentation and available evidence.</li>
+        </ul>
+        <t>The <tt>binding</tt> value is an HTTPS identifier for its binding specification or documented service binding, not a closed transport enumeration. A client must explicitly support that binding; the identifier does not trigger a fetch. A declarative integration names the specific description or workflow format and profile it uses. A code integration names its actual host interface and version. Clients <bcp14>MUST NOT</bcp14> assume either form supports an unlisted contract version, operation or host.</t>
+        <t>Records <bcp14>MUST</bcp14> distinguish a publisher's support declaration from a reproducible implementation report. A report identifies the implementation revision, tested roles and operations, setup, observations and missing coverage. The record <bcp14>MUST</bcp14> disclose common ownership when making an interoperability claim. A listing is not certification.</t>
+      </section>
+      <section anchor="first-connection" numbered="true">
+        <name>First connection</name>
+        <t>When the service is unconnected, a client <bcp14>MAY</bcp14> offer setup separately from the email's action. Setup <bcp14>MUST</bcp14> use a binding obtained through configured discovery and selected under host installation policy. The host <bcp14>MUST</bcp14> show the service identity, integration publisher, requested account access and supported effects before the principal grants access. An administrator can perform this setup for an organization under its policy.</t>
+        <t>Authentication follows the service's existing mechanism. For OAuth, clients can use Protected Resource Metadata <xref target="RFC9728"/> to discover authorization configuration for an independently selected resource. Such metadata does not attest to a MAP contract or authorize an action. MAP introduces no identity provider or DNS record.</t>
+        <t>After setup, the consumer <bcp14>MUST</bcp14> restart Core processing for the waiting message. It <bcp14>MUST</bcp14> obtain current service state and reevaluate permission, terms, expiry and the offered operation. Approval to connect an account is not approval to carry out that message.</t>
+        <t>If setup is unavailable or declined, the client <bcp14>MAY</bcp14> retain the readable email and its ordinary links. It <bcp14>MUST NOT</bcp14> present an unverified link as the service's trusted review route or fall back to another protocol, account or bearer action merely to make the operation succeed.</t>
+      </section>
+      <section anchor="client-states" numbered="true">
+        <name>Client states</name>
+        <t>Clients can use their own presentation and internal APIs, but <bcp14>MUST</bcp14> preserve these distinctions:</t>
+        <table>
+          <thead><tr><th>Situation</th><th>Required behaviour</th></tr></thead>
+          <tbody>
+            <tr><td>Unsupported profile, contract or binding</td><td>Keep ordinary email readable; do not execute the action.</td></tr>
+            <tr><td>Service not connected</td><td>Offer explicit setup or the ordinary review link with its actual origin visible; do not label the link verified.</td></tr>
+            <tr><td>Permission missing</td><td>Explain that the current account cannot perform this operation.</td></tr>
+            <tr><td>Confirmation needed</td><td>Present the service's exact terms and requested effect.</td></tr>
+            <tr><td>Terms changed</td><td>Stop; obtain a new proposal and a new decision.</td></tr>
+            <tr><td>Expired, withdrawn or superseded</td><td>Disable the old action.</td></tr>
+            <tr><td>Decision accepted or work pending</td><td>Report acceptance or progress without claiming completion.</td></tr>
+            <tr><td>Outcome unknown</td><td>Preserve uncertainty; recover only through a trusted service mechanism.</td></tr>
+          </tbody>
+        </table>
+        <t>A human route remains a separate service interaction. Its page must enforce Core's safe-navigation and confirmation requirements; opening it never performs the operation.</t>
+      </section>
+    </section>
+    <section anchor="versions-and-lifecycle" numbered="true">
+      <name>Versions and lifecycle</name>
+      <section anchor="separate-identities" numbered="true">
+        <name>Separate identities</name>
+        <t>Core, contracts and service bindings have separate identities. Adding a type does not change Core. Adding a service binding does not change the type. An implementation <bcp14>MUST</bcp14> list the exact contract digests it supports; support for a name or a numeric version range is insufficient.</t>
+        <t>A published contract version fixes all its canonical bytes, including normative prose. Changing those bytes requires a new version and digest. A published binding revision likewise retains its original artifact. The implementation record's <tt>artifact.digestMode</tt> is <tt>canonical-json</tt> for an RFC 8785 representation or <tt>bytes</tt> for the exact downloaded artifact; both use SHA-256. The declared format determines which procedure applies; a JSON artifact is not implicitly canonicalized. Code artifacts use <tt>bytes</tt>. Consumers <bcp14>MUST</bcp14> verify the declared digest before installation and <bcp14>MUST NOT</bcp14> infer a different procedure to make it match. Lifecycle metadata, evidence and successor references can change without changing those definitions.</t>
+        <t>Development previews <bcp14>MUST</bcp14> be labelled as drafts. A catalogue <bcp14>MUST</bcp14> distinguish a mutable preview from an immutable published revision. Clients <bcp14>MUST</bcp14> pin exact artifacts before execution, including when evaluating a draft. A publisher <bcp14>MUST NOT</bcp14> replace an immutable revision with a changed preview under the same identity.</t>
+      </section>
+      <section anchor="moving-to-a-new-version" numbered="true">
+        <name>Moving to a new version</name>
+        <t>A successor record is a discovery hint. It <bcp14>MUST NOT</bcp14> rewrite an earlier message's contract, convert a prior decision or silently extend standing permission. The host can review and install support for the successor under its ordinary policy. A proposal using that successor needs its own current terms and decision.</t>
+        <t>An older message may remain usable only while its exact contract and binding are supported and the service still authorizes its proposal. Retaining history does not oblige a service to keep accepting an old operation. Conversely, ending support does not justify deleting the published definition needed to interpret past messages.</t>
+        <t>Core additions require a new profile when they change interpretation of the fixed description. Type-specific fields belong in the type's details or input schema. New transports have their own bindings. A consumer <bcp14>MUST</bcp14> refuse required features it cannot enforce; it <bcp14>MUST NOT</bcp14> guess a compatible interpretation.</t>
+      </section>
+      <section anchor="maturity-labels" numbered="true">
+        <name>Maturity labels</name>
+        <t>A catalogue <bcp14>SHOULD</bcp14> distinguish Draft, Experimental, Stable, Deprecated and Superseded records. Draft means a definition is under review. Experimental means implementation experience is being gathered. Stable requires the publisher's stated evidence and review criteria. Deprecated discourages new use. Superseded identifies a replacement without authorizing migration.</t>
+        <t>A status label alone proves none of those claims. Records <bcp14>MUST</bcp14> link the evidence or policy on which they rely. The current MailSchema contracts remain Draft, and illustrative mappings are kept separate from implementation listings.</t>
+      </section>
+    </section>
     <section anchor="security-considerations" numbered="true">
       <name>Security considerations</name>
       <t>DKIM establishes domain responsibility for signed content, not the honesty of the sender or correctness of a proposal. A malicious domain can authenticate its own mail. Credentialed readback, independently selected connectors, narrow capability rules, and host policy are therefore separate requirements. A compromise of the authorized service or connector is outside the protection offered by the email description.</t>
@@ -286,8 +372,8 @@ Content-Type: application/json
     </section>
     <section anchor="conformance" numbered="true">
       <name>Conformance</name>
-      <t>A claim <bcp14>MUST</bcp14> identify the MAP profile, supported roles, exact type contract digests, implemented bindings, and the evidence available. Core producer conformance covers description construction, MIME placement, readable correspondence, and message authentication. Core consumer conformance covers parsing, trust, recipient control, contract resolution, host decision, and applicable processing rules. Service conformance covers authoritative state, authorization, exact terms, expiry, and decision integrity. Human-route conformance covers safe navigation and confirmed submission. HTTP and capability conformance add their respective binding requirements.</t>
-      <t>A parser or schema validator alone <bcp14>MUST NOT</bcp14> claim consumer or service conformance. Passing an example or a vector subset <bcp14>MUST NOT</bcp14> be described as passing the complete profile. Evidence <bcp14>MUST</bcp14> distinguish executable tests from scenario skeletons and identify missing adapters. Shared ownership between implementations <bcp14>MUST</bcp14> be disclosed when reporting interoperability. No MAP 0.3 runtime implementation or independent interoperability is claimed by this drafting bundle.</t>
+      <t>A claim <bcp14>MUST</bcp14> identify the MAP profile, supported roles, exact type contract digests, implemented bindings, and the evidence available. Core producer conformance covers description construction, MIME placement, readable correspondence, and message authentication. Core consumer conformance covers parsing, trust, recipient control, contract resolution, host decision, and applicable processing rules. Service conformance covers current state, authorization, exact terms, expiry, and decision integrity. Human-route conformance covers safe navigation and confirmed submission. HTTP and capability conformance add their respective binding requirements.</t>
+      <t>A parser or schema validator alone <bcp14>MUST NOT</bcp14> claim consumer or service conformance. Passing an example or a vector subset <bcp14>MUST NOT</bcp14> be described as passing the complete profile. Evidence <bcp14>MUST</bcp14> distinguish executable tests from scenario skeletons and identify missing adapters. Shared ownership between implementations <bcp14>MUST</bcp14> be disclosed when reporting interoperability. Implementation reports <bcp14>MUST</bcp14> identify the tested profile version; evidence from another version does not establish conformance.</t>
     </section>
     <section anchor="iana-considerations" numbered="true">
       <name>IANA considerations</name>
@@ -298,16 +384,16 @@ Content-Type: application/json
       <t>This section follows <xref target="RFC7942"/> and is to be removed
       before publication as an RFC. The specification source, four Draft
       Registry contracts, schemas, examples, and conformance scenarios are at
-      <eref target="https://github.com/mailschema/mailschema/tree/docs/map-0-3-specification/specifications/map-0.3"/>.
+      <eref target="https://github.com/mailschema/mailschema/tree/main/specifications/map-0.3"/>.
       Artifact checks establish shape, digest consistency, and offline
       JSON-LD interpretation. Runtime scenarios are unimplemented skeletons.
       No MAP 0.3 runtime conformance or independent interoperability is claimed.
-      Existing MAP 0.2 implementations do not establish MAP 0.3 conformance.</t>
+      Schema checks alone do not establish service behaviour.</t>
       <t>Feedback is sought on receiver authentication evidence, existing API
       readback mappings, atomic version enforcement, and the limited
       capability binding. The latter requires explicit opt-in and remains
       experimental pending implementation evidence. No MCP binding is
-      specified here. This document is prepared as an individual submission;
+      specified here; the companion MCP walkthrough is illustrative. This document is prepared as an individual submission;
       it does not assert adoption by the Structured Email working group.</t>
     </section>
   </middle>
@@ -322,6 +408,7 @@ Content-Type: application/json
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5890.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6234.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6376.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6454.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6531.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7493.xml"/>
@@ -356,7 +443,7 @@ Content-Type: application/json
     </references>
         <section anchor="initial-registry-contracts" numbered="true">
       <name>Initial Registry contracts</name>
-      <t>These four contracts are Draft Registry contributions, not a mandatory set of Core types. Their operation declarations and requirements below are generated from the digest-bound JSON contracts. No conforming runtime or independent interoperability is claimed. MailSchema maintains these initial contributions; other maintainers can use their own namespaces.</t>
+      <t>These contracts define separate interactions. Each specifies its operations, effects, exact terms and permitted bindings. Implementations select the types they support; Core does not require this collection. MailSchema maintains the initial contributions, and other maintainers can define types in their own namespaces. The JSON contract is the authoritative definition.</t>
       <section anchor="account-security-response" numbered="true">
         <name>Account Security Response</name>
         <t>Record that a recipient does not recognize a specific account event, without changing account access.</t>
@@ -378,12 +465,12 @@ Content-Type: application/json
       </section>
       <section anchor="campaign-send-approval" numbered="true">
         <name>Campaign Send Approval</name>
-        <t>Authorize sending one immutable campaign revision to one fixed audience under stated delivery terms.</t>
+        <t>Authorize sending one immutable campaign revision to one fixed audience under stated delivery terms, without an additional charge.</t>
         <t>Identifier: <tt>https://mailschema.org/types/campaign-send-approval</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:0eb7b6e98affe21a6f2c1a2228f11c37b0cb3a006365bb160b623901ff626d59</tt>.</t>
-        <t>The service <bcp14>MUST</bcp14> bind the subject, recipient, service tenant, contract digest, and all effect-bearing details to terms.version. Every decision <bcp14>MUST</bcp14> atomically compare that version and enforce current authorization, expiry, and proposal state.</t>
-        <t>The service <bcp14>MUST</bcp14> freeze the referenced content revision and all other effect-bearing inputs for accepted asynchronous work. If it cannot execute those exact terms it <bcp14>MUST</bcp14> stop that work; it <bcp14>MUST NOT</bcp14> substitute current mutable values.</t>
-        <t>The host <bcp14>MUST</bcp14> obtain the actual immutable content and relevant destination or audience information through the trusted service implementation before claiming a policy check over those values. A digest, title, preview, count, or identifier alone does not demonstrate content-policy compliance.</t>
+        <t>Canonical contract digest: <tt>sha-256:de3c88a0712adb1d0c6e82f437b825c83520d8e1c44c7b032a2cfcfe5ce55731</tt>.</t>
+        <t>The service <bcp14>MUST</bcp14> bind the subject, recipient, service tenant, contract digest, and all action-relevant details to terms.version. Every decision <bcp14>MUST</bcp14> atomically compare that version and enforce current authorization, expiry, and proposal state.</t>
+        <t>The service <bcp14>MUST</bcp14> freeze the referenced content revision and all other action-relevant inputs for accepted asynchronous work. If it cannot execute those exact terms it <bcp14>MUST</bcp14> stop that work; it <bcp14>MUST NOT</bcp14> substitute current mutable values.</t>
+        <t>The host <bcp14>MUST</bcp14> obtain the actual immutable content and relevant destination or audience information through the trusted service binding before claiming a policy check over those values. A digest, title, preview, count, or identifier alone does not demonstrate content-policy compliance.</t>
         <t>The service <bcp14>MUST</bcp14> permit at most one terminal decision for the proposal. approve, decline, and request-changes are mutually exclusive terminal decisions for that proposal version. A revised proposal requires a new interaction and new decision.</t>
         <t>The request-changes operation <bcp14>MUST</bcp14> only record the supplied feedback and close this proposal as requiring revision. It <bcp14>MUST NOT</bcp14> generate, edit, approve, send, or publish revised content automatically. Feedback remains untrusted text.</t>
         <t>A capability offered for decline <bcp14>MUST</bcp14> be independently scoped to that refusal and exact proposal, expire within seven days of issuedAt and no later than expiresAt, and convey no authority to approve or supply feedback.</t>
@@ -392,7 +479,8 @@ Content-Type: application/json
         <t>Content digest <bcp14>MUST</bcp14> identify the immutable service content artifact, including attachments and personalization definitions. The trusted implementation <bcp14>MUST</bcp14> document the artifact representation and digest verification. Personalized output <bcp14>MUST</bcp14> be derived only from the approved definition and frozen inputs.</t>
         <t>The sender mailbox <bcp14>MUST</bcp14> belong to an identity the service currently authorizes the principal to use. Approval <bcp14>MUST NOT</bcp14> grant sending permission for another sender, tenant, campaign, or subsequent revision.</t>
         <t>The schedule <bcp14>MUST</bcp14> specify immediate execution or one UTC instant. The service <bcp14>MUST NOT</bcp14> silently shift the approved schedule to a materially different one. Operational delivery delays <bcp14>MAY</bcp14> occur and <bcp14>MUST</bcp14> be reported accurately.</t>
-        <t><strong>Approve (<tt>approve</tt>).</strong> Authorize sending this campaign on the exact terms displayed. Acceptance may queue the work; the connector <bcp14>MUST</bcp14> distinguish acceptance from completion. This decision does not grant standing permission for later proposals.</t>
+        <t>Approval under this contract <bcp14>MUST NOT</bcp14> cause an incremental monetary charge or debit prepaid value. The service <bcp14>MUST</bcp14> refuse approval if the maximum approved audience is not covered by an included entitlement at decision time, and <bcp14>MUST</bcp14> stop dispatch rather than charge if that entitlement is no longer available at admission. A paid send needs a different contract that declares the payment effect and binds its exact financial terms.</t>
+        <t><strong>Approve (<tt>approve</tt>).</strong> Authorize sending this campaign on the exact terms displayed, without an additional charge. Acceptance may queue the work; the connector <bcp14>MUST</bcp14> distinguish acceptance from completion. This decision does not grant standing permission for later proposals.</t>
         <t>Bindings: <tt>credential</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/communication</tt>, <tt>https://mailschema.org/effects/disclosure</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
         <t>Input: none.</t>
         <ul>
@@ -416,9 +504,9 @@ Content-Type: application/json
       </section>
       <section anchor="email-address-confirmation" numbered="true">
         <name>Email Address Confirmation</name>
-        <t>Confirm access to a mailbox for a communication request initiated by the principal, without signing in or granting account authority.</t>
+        <t>Confirm access to a mailbox for a principal-initiated communication request, without creating a signed-in session or granting account authority.</t>
         <t>Identifier: <tt>https://mailschema.org/types/email-address-confirmation</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:75324bb52325f84aa36f434dc1df7430589679385a5aed626c1e20333f507a30</tt>.</t>
+        <t>Canonical contract digest: <tt>sha-256:fc9d8a4fb3f3065f93bd53d1f9238b13df63186588d3f3f44982d5813412e282</tt>.</t>
         <t>The sole permitted purpose is communication-address: validating a mailbox for future communications requested by its controller. Confirmation <bcp14>MUST NOT</bcp14> itself send a campaign or disclose private data. Subsequent communication requires its own applicable consent and service permission.</t>
         <t>The service origin, recipient, details.mailbox, details.requestId, and details.purpose <bcp14>MUST</bcp14> match a request recorded independently when the principal initiated it. details.mailbox <bcp14>MUST</bcp14> identify the same controlled mailbox as recipient. The initiator <bcp14>MUST</bcp14> retain enough session or authenticated request state to establish this match; the email cannot create that state.</t>
         <t>The terms version <bcp14>MUST</bcp14> bind the mailbox, request identifier, purpose, and any associated non-authentication account context. Changes require a new request, interaction, and confirmation.</t>
@@ -438,10 +526,10 @@ Content-Type: application/json
         <name>Publication Approval</name>
         <t>Authorize publishing one immutable content revision at stated destinations and visibility.</t>
         <t>Identifier: <tt>https://mailschema.org/types/publication-approval</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:247dc8524076c11b713b83ee4fa0168bae4df0f9456758d48d9483b3ece70c5b</tt>.</t>
-        <t>The service <bcp14>MUST</bcp14> bind the subject, recipient, service tenant, contract digest, and all effect-bearing details to terms.version. Every decision <bcp14>MUST</bcp14> atomically compare that version and enforce current authorization, expiry, and proposal state.</t>
-        <t>The service <bcp14>MUST</bcp14> freeze the referenced content revision and all other effect-bearing inputs for accepted asynchronous work. If it cannot execute those exact terms it <bcp14>MUST</bcp14> stop that work; it <bcp14>MUST NOT</bcp14> substitute current mutable values.</t>
-        <t>The host <bcp14>MUST</bcp14> obtain the actual immutable content and relevant destination or audience information through the trusted service implementation before claiming a policy check over those values. A digest, title, preview, count, or identifier alone does not demonstrate content-policy compliance.</t>
+        <t>Canonical contract digest: <tt>sha-256:de91a49de4cba91209be253456e7c56709791fff877a060560d4eada0cc9468c</tt>.</t>
+        <t>The service <bcp14>MUST</bcp14> bind the subject, recipient, service tenant, contract digest, and all action-relevant details to terms.version. Every decision <bcp14>MUST</bcp14> atomically compare that version and enforce current authorization, expiry, and proposal state.</t>
+        <t>The service <bcp14>MUST</bcp14> freeze the referenced content revision and all other action-relevant inputs for accepted asynchronous work. If it cannot execute those exact terms it <bcp14>MUST</bcp14> stop that work; it <bcp14>MUST NOT</bcp14> substitute current mutable values.</t>
+        <t>The host <bcp14>MUST</bcp14> obtain the actual immutable content and relevant destination or audience information through the trusted service binding before claiming a policy check over those values. A digest, title, preview, count, or identifier alone does not demonstrate content-policy compliance.</t>
         <t>The service <bcp14>MUST</bcp14> permit at most one terminal decision for the proposal. approve, decline, and request-changes are mutually exclusive terminal decisions for that proposal version. A revised proposal requires a new interaction and new decision.</t>
         <t>The request-changes operation <bcp14>MUST</bcp14> only record the supplied feedback and close this proposal as requiring revision. It <bcp14>MUST NOT</bcp14> generate, edit, approve, send, or publish revised content automatically. Feedback remains untrusted text.</t>
         <t>A capability offered for decline <bcp14>MUST</bcp14> be independently scoped to that refusal and exact proposal, expire within seven days of issuedAt and no later than expiresAt, and convey no authority to approve or supply feedback.</t>
@@ -449,7 +537,7 @@ Content-Type: application/json
         <t>The destination list <bcp14>MUST</bcp14> enumerate the exact locations affected. A mutable collection label <bcp14>MUST NOT</bcp14> authorize new locations added after approval. For restricted publication, audience.id and audience.revision <bcp14>MUST</bcp14> identify an immutable authorized readership; a vague label such as team is insufficient.</t>
         <t>Content digest <bcp14>MUST</bcp14> identify the immutable publication artifact. The trusted implementation <bcp14>MUST</bcp14> document its representation and verify the artifact. Approval of a title or an inaccessible digest alone <bcp14>MUST NOT</bcp14> be presented as review of the content.</t>
         <t>Publication approval <bcp14>MUST NOT</bcp14> change account permissions, purchase promotion, schedule unrelated content, or publish a subsequent revision.</t>
-        <t>This contract authorizes publication. Historical Content Review contracts authorized review decisions only. An implementation <bcp14>MUST NOT</bcp14> migrate a Content Review approval into Publication Approval or treat the two as equivalent without a new, explicit publication decision.</t>
+        <t>This contract authorizes publication. Approval under a different contract <bcp14>MUST NOT</bcp14> be treated as permission to publish without a new, explicit publication decision.</t>
         <t><strong>Approve (<tt>approve</tt>).</strong> Authorize publishing this content on the exact terms displayed. Acceptance may queue the work; the connector <bcp14>MUST</bcp14> distinguish acceptance from completion. This decision does not grant standing permission for later proposals.</t>
         <t>Bindings: <tt>credential</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/communication</tt>, <tt>https://mailschema.org/effects/disclosure</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
         <t>Input: none.</t>
@@ -483,12 +571,12 @@ Content-Type: application/json
   "@type": "MailAction",
   "profile": "https://mailschema.org/profiles/map/0.3",
   "type": {
-    "id": "https://mailschema.org/types/campaign-send-approval",
+    "id": "https://mailschema.org/types/publication-approval",
     "version": "0.1",
-    "contractDigest": "sha-256:0eb7b6e98affe21a6f2c1a2228f11c37b0cb3\
-    a006365bb160b623901ff626d59"
+    "contractDigest": "sha-256:de91a49de4cba91209be253456e7c56709791\
+    fff877a060560d4eada0cc9468c"
   },
-  "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d40",
+  "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d41",
   "issuedAt": "2026-10-02T08:00:00Z",
   "expiresAt": "2026-10-03T08:00:00Z",
   "inLanguage": "en",
@@ -499,36 +587,32 @@ Content-Type: application/json
   "recipient": "owner@example.net",
   "subject": {
     "id": "urn:example:object:42",
-    "title": "Send September update"
+    "title": "Publish the getting started guide"
   },
   "terms": {
     "id": "urn:example:proposal:p7",
-    "version": "\"p7-r4\""
+    "version": "p7-r4"
   },
   "human": {
     "url": "https://service.example/review/p7"
   },
   "details": {
-    "summary": "Send September update to the fixed newsletter audien\
-    ce.",
-    "requester": "Campaign editor",
+    "summary": "Publish the approved getting started guide.",
+    "requester": "Documentation editor",
     "content": {
       "id": "urn:example:content:42",
       "revision": "r4",
-      "digest": "sha-256:1111111111111111111111111111111111111111111\
-    111111111111111111111",
-      "title": "September update"
+      "title": "Getting started",
+      "digest": "sha-256:4ffdf504c44a73a059c09c9cb30362c04f593b3af40\
+    5b83bc084bb045067f95c"
     },
-    "sender": {
-      "mailbox": "news@service.example",
-      "name": "Service newsletter"
-    },
-    "audience": {
-      "id": "urn:example:audience:9",
-      "revision": "snapshot-3",
-      "count": 4210,
-      "label": "Newsletter subscribers"
-    },
+    "destinations": [
+      {
+        "id": "https://docs.service.example/guide",
+        "account": "urn:example:account:7",
+        "visibility": "public"
+      }
+    ],
     "schedule": {
       "mode": "immediate"
     }

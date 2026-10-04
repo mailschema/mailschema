@@ -1,0 +1,53 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { typeContracts } from '../../../data/legacy-types';
+import '../../../styles/catalog.css';
+import '../../../styles/prose.css';
+---
+
+<Base title="MAP 0.2 archive" theme="light">
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Historical material</span>
+      <h1>MAP 0.2 archive</h1>
+      <p class="lead">
+        MAP 0.2 is superseded for new work. Its published artifacts remain available for
+        implementations that depend on them. <a href="/specification">MAP 0.3</a> is the current
+        working draft.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>Profile and packages</h2>
+      <p>
+        <a href="/profiles/map/0.2.json">Published profile record</a>
+        {' · '}
+        <a href="/schemas/map-0.2.schema.json">Core schema</a>
+        {' · '}
+        <a href="/archive/map-0.2/tools">Package documentation</a>
+      </p>
+      <p>
+        <a href="https://github.com/mailschema/mailschema/blob/main/docs/specification/profile.md">
+          Historical specification source
+        </a>
+      </p>
+      <h2 id="types">Type contracts</h2>
+      <ul>
+        {typeContracts.map((entry) => (
+          <li>
+            <a href={entry.contract.url}>
+              {entry.type} · {entry.version}
+            </a>
+            {' · '}
+            <a href={entry.requestSchema.url}>Request schema</a>
+          </li>
+        ))}
+      </ul>
+      <p>
+        <a href="/registry/catalog.json">Historical Registry catalogue</a>
+      </p>
+      <p>
+        Earlier profile: <a href="/archive/map-0.1">MAP 0.1 archive</a>.
+      </p>
+    </article>
+  </main>
+</Base>

@@ -27,6 +27,8 @@ export default {
       canonical.hostname = canonicalHost;
     }
     canonical.pathname = canonical.pathname.replace(/(?<=.)\/+$/, '');
+    if (canonical.pathname === '/types' || canonical.pathname.startsWith('/types/'))
+      canonical.pathname = `/registry${canonical.pathname.slice('/types'.length)}`;
     if (canonical.href !== url.href) return Response.redirect(canonical, 308);
 
     const response = await env.ASSETS.fetch(request);

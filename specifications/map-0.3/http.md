@@ -1,3 +1,7 @@
+---
+description: "Bind a MAP operation to an existing service API through a trusted connector."
+---
+
 # MAP HTTP binding 0.3
 
 ## HTTP binding
@@ -12,7 +16,7 @@ For the read, the mapping MUST identify the existing resource lookup and the ser
 
 For each action, the mapping MUST specify the existing method and resource selection; the placement and encoding of the expected version; the sources of request values; authentication and tenant context; permitted success and pending-work responses; terminal and nonterminal error interpretation; and retry or idempotency behavior. Each semantic value MUST come from validated authoritative readback, a validated principal input, or trusted configuration. Email-provided identifiers MAY select records only within the independently authorized service and tenant. They MUST NOT provide request templates, method names, credentials, headers, or executable expressions.
 
-The mapping MAY be ordinary connector code. If distributed as an implementation manifest, its immutable contents MUST be addressed by digest and accepted through the host's installation policy. MAP does not define a second manifest language or require services to publish a discovery endpoint.
+The mapping MAY be ordinary connector code. If distributed as an implementation manifest, its immutable contents MUST be addressed by digest and accepted through the host's installation policy. Native API descriptions can identify the operations and their schemas; this draft defines no general mapping language. [Service bindings](/specification/bindings) gives implementation guidance. Services need no MAP discovery endpoint.
 
 ### HTTP origin and credential protection
 
@@ -43,6 +47,8 @@ If the API has an idempotency mechanism, the connector MUST follow its scope, li
 Services MAY use [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem details, ordinary status codes, or existing domain responses. This binding requires no new problem type. The mapping MUST distinguish an accepted decline from an error, an already recorded decision from permission to repeat its effect, and stale terms from retryable transport failure. It MUST NOT expose unauthorized resource existence or details while interpreting those responses.
 
 ### HTTP example
+
+The [MIME-to-service walkthrough](/examples) uses an existing API described by OpenAPI and a native `expected_revision` argument. The following smaller example shows the alternative: an API that already supports HTTP conditional requests.
 
 Suppose an installed connector reads `GET /v1/proposals/p7` at its configured service origin and receives an authorized proposal with the strong tag `"p7-r4"`. The API documents `PATCH /v1/proposals/p7` as a conditional update of that same representation. The host displays the current typed terms and obtains a decision. The connector then uses the API's existing update format:
 

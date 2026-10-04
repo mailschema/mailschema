@@ -1,3 +1,7 @@
+---
+description: "An experimental binding for narrowly scoped actions without sign-in."
+---
+
 # MAP capability binding 0.3
 
 ## Experimental capability binding

@@ -3,7 +3,7 @@
   "version": "0.1",
   "profile": "https://mailschema.org/profiles/map/0.3",
   "name": "Email Address Confirmation",
-  "summary": "Confirm access to a mailbox for a communication request initiated by the principal, without signing in or granting account authority.",
+  "summary": "Confirm access to a mailbox for a principal-initiated communication request, without creating a signed-in session or granting account authority.",
   "requirements": [
     "The sole permitted purpose is communication-address: validating a mailbox for future communications requested by its controller. Confirmation MUST NOT itself send a campaign or disclose private data. Subsequent communication requires its own applicable consent and service permission.",
     "The service origin, recipient, details.mailbox, details.requestId, and details.purpose MUST match a request recorded independently when the principal initiated it. details.mailbox MUST identify the same controlled mailbox as recipient. The initiator MUST retain enough session or authenticated request state to establish this match; the email cannot create that state.",

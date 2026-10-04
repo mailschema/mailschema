@@ -8,11 +8,15 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
+import { walkthroughArtifacts } from './map-walkthrough.mjs';
+import { interfaceResearch, interfaceLandscape } from './interface-research.mjs';
+import { parseContractText } from '../src/specification/contracts.ts';
+import { parseMapJson } from '../src/specification/strict-json.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const directory = 'specifications/map-0.3';
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const json = (path) => JSON.parse(read(path));
+const json = (path) => parseMapJson(readFileSync(resolve(root, path)), 262144);
 const encode = (value) => JSON.stringify(value, null, 2) + '\n';
 const sha = (value) => createHash('sha256').update(value).digest('hex');
 const contractDigest = (value) => `sha-256:${sha(canonicalize(value))}`;
@@ -22,15 +26,8 @@ const contextId = 'https://mailschema.org/contexts/map-0.3.jsonld';
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
 addFormats(ajv);
 const core = ajv.compile(json(`${directory}/schemas/core.schema.json`));
-const format = ajv.compile(json(`${directory}/schemas/contract.schema.json`));
 const assertValid = (validate, value, label) =>
   assert(validate(value), `${label}: ${JSON.stringify(validate.errors)}`);
-
-const kinds = {
-  refusal: { effects: ['refusal', 'state'], maximum: 604800 },
-  'protective-report': { effects: ['protection', 'state'], maximum: 259200 },
-  'address-confirmation': { effects: ['assertion', 'state'], maximum: 86400 },
-};
 
 function checkSchema(schema) {
   const walk = (value) => {
@@ -50,22 +47,7 @@ export const contracts = readdirSync(resolve(root, directory, 'contracts'))
   .sort()
   .map((name) => {
     const path = `${directory}/contracts/${name}`;
-    const contract = json(path);
-    assertValid(format, contract, path);
-    assert.equal(contract.profile, profile);
-    assert.equal(new Set(contract.operations.map((op) => op.id)).size, contract.operations.length);
-    assert(Buffer.byteLength(read(path)) <= 262144, 'Contract exceeds Core limit');
-    for (const operation of contract.operations) {
-      if (operation.inputSchema) checkSchema(operation.inputSchema);
-      if (!operation.capability) continue;
-      const kind = kinds[operation.capability.kind];
-      assert.deepEqual(
-        [...operation.effects].sort(),
-        kind.effects.map((effect) => `https://mailschema.org/effects/${effect}`).sort(),
-        `${path} ${operation.id}: disallowed capability effect`,
-      );
-      assert(operation.capability.maxLifetimeSeconds <= kind.maximum);
-    }
+    const contract = parseContractText(readFileSync(resolve(root, path)));
     return {
       slug: name.slice(0, -5),
       path,
@@ -75,24 +57,27 @@ export const contracts = readdirSync(resolve(root, directory, 'contracts'))
     };
   });
 
-export function contractText({ schemas = true } = {}) {
+export function contractText({ schemas = true, reader = false } = {}) {
   const out = [
     '## Initial Registry contracts',
     '',
-    'These four contracts are Draft Registry contributions, not a mandatory set of Core types. Their operation declarations and requirements below are generated from the digest-bound JSON contracts. No conforming runtime or independent interoperability is claimed. MailSchema maintains these initial contributions; other maintainers can use their own namespaces.',
+    'These contracts define separate interactions. Each specifies its operations, effects, exact terms and permitted bindings. Implementations select the types they support; Core does not require this collection. MailSchema maintains the initial contributions, and other maintainers can define types in their own namespaces. The JSON contract is the authoritative definition.',
     '',
   ];
-  for (const { contract: c, digest } of contracts) {
+  for (const { contract: c, digest, slug } of contracts) {
     out.push(
-      `### ${c.name}`,
+      `${reader ? '##' : '###'} ${c.name}`,
       '',
       c.summary,
       '',
-      `Identifier: \`${c.id}\`. Version: \`${c.version}\`. Profile: \`${c.profile}\`.`,
+      reader
+        ? `[Contract and schemas](/registry/${slug}) · [JSON definition](/artifacts/map-0.3/contracts/${slug}.json)`
+        : `Identifier: \`${c.id}\`. Version: \`${c.version}\`. Profile: \`${c.profile}\`.`,
       '',
-      `Canonical contract digest: \`${digest}\`.`,
-      '',
-      ...c.requirements.flatMap((r) => [r, '']),
+      ...(reader ? [] : [`Canonical contract digest: \`${digest}\`.`, '']),
+      ...(reader
+        ? ['### Requirements', '', ...c.requirements.map((requirement, index) => `${index + 1}. ${requirement}`), '', '### Operations', '']
+        : c.requirements.flatMap((requirement) => [requirement, ''])),
     );
     for (const op of c.operations) {
       out.push(
@@ -134,7 +119,22 @@ export async function draftArtifacts(check) {
     else writeFileSync(resolve(root, path), value);
   };
   const source = json(`${directory}/examples/source.json`);
+  const interfaces = json('docs/research/map-interfaces.json');
+  write('docs/research/MAP-INTERFACES.md', interfaceResearch(interfaces));
+  const interfaceChapter = read(`${directory}/interfaces.md`);
+  const landscape = /<!-- interfaces:table -->[\s\S]*?<!-- \/interfaces:table -->/;
+  assert(landscape.test(interfaceChapter), 'Interface chapter is missing its generated landscape');
+  write(
+    `${directory}/interfaces.md`,
+    interfaceChapter.replace(
+      landscape,
+      `<!-- interfaces:table -->\n${interfaceLandscape(interfaces)}\n<!-- /interfaces:table -->`,
+    ),
+  );
   assert.deepEqual(Object.keys(source).sort(), contracts.map((c) => c.slug).sort());
+  const content = read(`${directory}/examples/publication.md`);
+  source['publication-approval'].details.content.title = content.split('\n')[0].replace(/^# /, '');
+  source['publication-approval'].details.content.digest = `sha-256:${sha(content)}`;
   const examples = new Map();
   for (const item of contracts) {
     const example = {
@@ -144,6 +144,7 @@ export async function draftArtifacts(check) {
       type: { id: item.contract.id, version: item.contract.version, contractDigest: item.digest },
       ...source[item.slug],
     };
+    parseMapJson(encode(example), 65536);
     assertValid(core, example, item.slug);
     assertValid(item.validateDetails, example.details, item.slug);
     assert(Date.parse(example.expiresAt) > Date.parse(example.issuedAt));
@@ -179,6 +180,34 @@ export async function draftArtifacts(check) {
     examples.set(item.slug, example);
     write(`${directory}/examples/${item.slug}.json`, encode(example));
   }
+
+  // One authored native API description; type identity and service example are projections.
+  const api = json(`${directory}/bindings/publication.source.json`);
+  const publication = examples.get('publication-approval');
+  api.paths['/reviews'].get.responses['200'].content['application/json'].example = {
+    review_id: 'p7',
+    interaction: publication['@id'],
+    service: publication.service,
+    addressed_to: publication.recipient,
+    subject: publication.subject,
+    contract: publication.type,
+    reference: publication.terms.id,
+    revision: publication.terms.version,
+    expires_at: publication.expiresAt,
+    allowed_actions: publication.operations.map((operation) => operation.id),
+    publication: publication.details,
+    state: 'awaiting_review',
+  };
+  walkthroughArtifacts({
+    publication,
+    api,
+    coreSchema: json(`${directory}/schemas/core.schema.json`),
+    content,
+    write,
+    directory,
+    encode,
+  });
+  write(`${directory}/bindings/publication.openapi.json`, encode(api));
 
   const vectors = json('conformance/map-0.3/shape-vectors.json');
   for (const vector of vectors) {
@@ -230,11 +259,20 @@ export async function draftArtifacts(check) {
     }
   }
   const artifacts = [
+    'overview.md',
+    'interfaces.md',
     'core.md',
     'http.md',
+    'bindings.md',
+    'registry.md',
     'capability.md',
     'schemas/core.schema.json',
     'schemas/contract.schema.json',
+    'schemas/implementation.schema.json',
+    'bindings/publication.openapi.json',
+    'bindings/publication.mcp.json',
+    'examples/publication.eml',
+    'examples/publication-exchange.json',
     'context.jsonld',
   ].map((name) => ({ path: `${directory}/${name}`, sha256: sha(read(`${directory}/${name}`)) }));
   write(
@@ -257,8 +295,8 @@ export async function draftArtifacts(check) {
   );
   write(
     `${directory}/contracts.md`,
-    '# MAP 0.3 initial contracts\n\nGenerated by `npm run spec:generate` from `contracts/*.json`. Edit those JSON documents; do not edit this projection.\n\n' +
-      contractText(),
+    '---\ndescription: "Operation semantics, effects and schemas for the initial type contracts."\n---\n\n# Type contracts\n\n' +
+      contractText({ schemas: false, reader: true }),
   );
   console.log(
     `MAP 0.3 draft: ${contracts.length} contracts, ${examples.size} offline JSON-LD examples, ${vectors.length} executable shape vectors; ${scenarios.length} runtime scenarios remain unimplemented.`,

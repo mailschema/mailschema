@@ -33,7 +33,7 @@ import '../styles/catalog.css';
         <a
           class="search-result"
           href={entry.href}
-          data-search={`${entry.title} ${entry.description} ${entry.group}`.toLowerCase()}
+          data-search={`${entry.title} ${entry.description} ${entry.group} ${'text' in entry ? entry.text : ''}`.toLowerCase()}
         >
           <span class="eyebrow">{entry.group}</span>
           <h2>

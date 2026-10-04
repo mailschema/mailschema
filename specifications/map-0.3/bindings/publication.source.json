@@ -1,0 +1,169 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "Illustrative publishing service",
+    "version": "1.0",
+    "description": "An example API, not an implementation claim. Authenticated reads are limited to reviews offered to the acting account. The service binds every action-relevant publication term to revision and atomically enforces expected_revision, permission, recipient relationship, expiry and state on decision. A 409 or 410 commits no effect for that request. Accepted publication preserves its immutable content and destination snapshot. The read includes content_artifact.text: its exact UTF-8 bytes, including the final newline, are the publication artifact covered by the content digest. Clients verify those bytes and apply content policy or present them for review."
+  },
+  "servers": [
+    {
+      "url": "https://service.example"
+    }
+  ],
+  "security": [
+    {
+      "accountToken": []
+    }
+  ],
+  "paths": {
+    "/reviews": {
+      "get": {
+        "operationId": "readReview",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The offered review for this authenticated account. Fields and example are generated from the canonical type and description.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {}
+              }
+            }
+          },
+          "403": {
+            "description": "The account cannot inspect this review."
+          }
+        }
+      }
+    },
+    "/reviews/{id}/decision": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ],
+      "post": {
+        "operationId": "decideReview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "decision",
+                  "expected_revision"
+                ],
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "publish",
+                      "decline",
+                      "revise"
+                    ]
+                  },
+                  "expected_revision": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "decision": {
+                          "const": "revise"
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "comment"
+                      ]
+                    },
+                    "else": {
+                      "not": {
+                        "required": [
+                          "comment"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The decline or change request is recorded; publication is not authorized."
+          },
+          "202": {
+            "description": "Publication was accepted and is queued; it has not necessarily completed."
+          },
+          "403": {
+            "description": "Current permission is insufficient; no decision was recorded."
+          },
+          "409": {
+            "description": "No decision recorded: stale_revision, already_decided or withdrawn.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "stale_revision",
+                        "already_decided",
+                        "withdrawn"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "The review expired; no decision recorded."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "accountToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

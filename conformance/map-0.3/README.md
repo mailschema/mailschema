@@ -1,9 +1,13 @@
-# MAP 0.3 conformance material
+---
+description: "Test document structure, then demonstrate service and consumer behaviour."
+---
 
-This is a drafting bundle, not an executable runtime conformance suite. It makes the intended assertions reviewable before product adapters are written. It does not relabel MAP 0.2 evidence as 0.3 evidence.
+# Conformance
 
-- `shape-vectors.json` contains executable valid and invalid mutations of the four generated examples. `npm run spec:check` runs them against the draft Core shape and concrete details schemas. Paths are JSON Pointers; `replace` sets a member, including an unknown member used in a negative case, and `remove` removes it. These checks establish shape only.
-- `scenarios.json` contains runtime skeletons with stable IDs, role labels, source-section links, preconditions, actions, and expected observations. Every entry is explicitly `unimplemented`. The draft check verifies the structure and requirement links; it does not execute the scenario or report it as passed.
+Conformance depends on observable implementation behaviour: which messages a consumer accepts, which service it calls, and which effects the service commits. Schema validation checks document shape; it cannot establish those properties.
+
+- [Shape vectors](/artifacts/map-0.3/conformance/shape-vectors.json) contains executable valid and invalid mutations of the four generated examples. `npm run spec:check` runs them against the draft Core shape and concrete details schemas. Paths are JSON Pointers; `replace` sets a member, including an unknown member used in a negative case, and `remove` removes it. These checks establish shape only.
+- [Runtime scenarios](/artifacts/map-0.3/conformance/scenarios.json) contains runtime skeletons with stable IDs, role labels, source-section links, preconditions, actions, and expected observations. Every entry is explicitly `unimplemented`. The draft check verifies the structure and requirement links; it does not execute the scenario or report it as passed.
 
 Each runtime adapter must supply synthetic messages, receiver evidence, service state, recorded network requests, and an observable effect ledger as applicable. Use independent barriers around read and commit for race cases. A negative decision case must show zero committed effects, not just a returned error. A timeout case must distinguish client observation from actual service state.
 

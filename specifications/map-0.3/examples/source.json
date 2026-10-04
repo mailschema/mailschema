@@ -67,23 +67,21 @@
     "recipient": "owner@example.net",
     "subject": {
       "id": "urn:example:object:42",
-      "title": "Publish the documentation revision"
+      "title": "Publish the getting started guide"
     },
     "terms": {
       "id": "urn:example:proposal:p7",
-      "version": "\"p7-r4\""
+      "version": "p7-r4"
     },
     "human": {
       "url": "https://service.example/review/p7"
     },
     "details": {
-      "summary": "Publish the approved documentation revision.",
+      "summary": "Publish the approved getting started guide.",
       "requester": "Documentation editor",
       "content": {
         "id": "urn:example:content:42",
-        "revision": "r4",
-        "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
-        "title": "September update"
+        "revision": "r4"
       },
       "destinations": [
         {
@@ -93,8 +91,7 @@
         }
       ],
       "schedule": {
-        "mode": "scheduled",
-        "at": "2026-10-02T10:00:00Z"
+        "mode": "immediate"
       }
     },
     "operations": [

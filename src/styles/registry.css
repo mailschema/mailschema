@@ -132,6 +132,39 @@
 .type-operations dd {
   margin: 0;
 }
+.type-code-disclosure {
+  border-block: 1px solid var(--line-light);
+  margin: 22px 0 48px;
+}
+.type-code-disclosure summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  color: var(--blue-ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+}
+.type-code-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+.type-code-disclosure summary:focus-visible {
+  outline: 2px solid var(--blue-ink);
+  outline-offset: 3px;
+}
+.type-code-disclosure summary svg {
+  flex: none;
+  transition: transform 160ms ease;
+}
+.type-code-disclosure[open] summary svg {
+  transform: rotate(90deg);
+}
+.type-code-disclosure .tool-code {
+  margin-bottom: 20px;
+}
 .type-references p {
   margin-top: 6px;
 }

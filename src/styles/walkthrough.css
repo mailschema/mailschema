@@ -1,0 +1,358 @@
+.mapping-demo {
+  border: 1px solid var(--line-light);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+.mapping-bar {
+  min-height: 76px;
+  padding: 16px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line-light);
+}
+.mapping-bar > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.mapping-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.mapping-switch {
+  display: flex;
+  border: 1px solid var(--line-light);
+  padding: 4px;
+  border-radius: 5px;
+  background: var(--mist);
+  gap: 4px;
+}
+.mapping-switch button {
+  min-height: 36px;
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 3px;
+  background: transparent;
+  font-size: 11px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.mapping-switch button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--text-light);
+}
+.mapping-switch button span {
+  opacity: 0.7;
+}
+.mapping-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.8fr) minmax(0, 1.4fr);
+}
+.mapping-proposal {
+  padding: 32px;
+  border-right: 1px solid var(--line-light);
+  background: white;
+}
+.mapping-mail-meta,
+.mapping-document > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.mapping-mail-meta {
+  margin-bottom: 30px;
+  color: #676472;
+}
+.mapping-mail-meta > span:last-child {
+  font: 10px var(--mono);
+  letter-spacing: 0.05em;
+}
+.mapping-sender {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.mapping-avatar {
+  height: 34px;
+  width: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--lavender);
+  font-weight: 600;
+  font-size: 13px;
+}
+.mapping-sender > div {
+  display: grid;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.mapping-sender > div > span {
+  color: #77727e;
+  font-size: 10px;
+}
+.mapping-proposal h3 {
+  font-size: 23px;
+  line-height: 1.3;
+  letter-spacing: -0.045em;
+  margin-bottom: 12px;
+  max-width: 18ch;
+}
+.mapping-proposal > p {
+  font-size: 12px;
+  line-height: 1.85;
+  color: #6b6773;
+  margin-bottom: 20px;
+}
+.mapping-document {
+  margin-top: 24px;
+  border: 1px solid var(--line-light);
+  padding: 17px;
+  border-radius: 3px;
+}
+.mapping-document > div {
+  color: #787180;
+  margin-bottom: 16px;
+}
+.mapping-document > div .eyebrow {
+  font-size: 8px;
+  letter-spacing: 0.07em;
+}
+.mapping-document > div > span:last-child {
+  font: 10px var(--mono);
+}
+.mapping-document > strong {
+  font-size: 14px;
+}
+.mapping-document p {
+  font-size: 11px;
+  line-height: 1.85;
+  margin: 9px 0 0;
+  color: #6b6773;
+}
+.mapping-terms {
+  margin: 22px 0;
+  font-size: 10px;
+}
+.mapping-terms > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+}
+.mapping-terms dt {
+  color: #787180;
+}
+.mapping-terms dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.mapping-terms code {
+  background: var(--lavender);
+  color: var(--blue-ink);
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+.mapping-confirmation {
+  padding: 13px;
+  background: #f2f7e6;
+  color: #364424;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #dce7c8;
+  border-radius: 4px;
+}
+.mapping-confirmation > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.mapping-confirmation > span {
+  display: grid;
+  gap: 3px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.mapping-confirmation strong {
+  font-size: 11px;
+}
+.mapping-proposal .mapping-caption {
+  font-size: 9px;
+  margin: 10px 0 0;
+  color: #827b89;
+}
+.mapping-execution {
+  min-width: 0;
+  padding: 26px 30px;
+}
+.mapping-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line-light);
+  margin-bottom: 30px;
+}
+.mapping-steps button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  min-height: 44px;
+  padding: 4px 3px 12px;
+  color: #7b7584;
+  font-size: 10px;
+}
+.mapping-steps button > span {
+  font: 9px var(--mono);
+  opacity: 0.6;
+}
+.mapping-steps button > svg {
+  margin-left: auto;
+  opacity: 0.5;
+}
+.mapping-steps button:last-child > svg {
+  visibility: hidden;
+}
+.mapping-steps button[aria-current='step'] {
+  color: var(--blue-ink);
+  border-bottom-color: var(--blue);
+}
+.mapping-steps button:hover {
+  color: var(--blue-ink);
+}
+.mapping-panel-copy h3 {
+  font-size: 23px;
+  letter-spacing: -0.045em;
+  margin-bottom: 13px;
+  line-height: 1.3;
+}
+.mapping-panel-copy p {
+  font-size: 12px;
+  color: #736d7c;
+  line-height: 1.85;
+  margin-bottom: 23px;
+  min-height: 67px;
+}
+.mapping-panel .tool-code {
+  border: 1px solid var(--line-dark);
+}
+.mapping-panel .tool-code pre.astro-code {
+  height: 273px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.8;
+  padding: 18px;
+}
+.mapping-panel-bottom p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #746d7e;
+  margin: 18px 0 12px;
+  min-height: 39px;
+}
+.mapping-panel-bottom a,
+.mapping-open a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--blue-ink);
+  font-weight: 600;
+}
+.mapping-panel-bottom a:hover,
+.mapping-open a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.mapping-open {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 20px 26px;
+  border-top: 1px solid var(--line-light);
+  font-size: 10px;
+}
+.mapping-open > span {
+  color: #79717f;
+}
+.mapping-open > div {
+  display: flex;
+  gap: 17px;
+  flex-wrap: wrap;
+}
+.mapping-open a {
+  margin-left: auto;
+}
+@media (max-width: 1000px) {
+  .mapping-proposal {
+    padding: 24px;
+  }
+  .mapping-execution {
+    padding: 22px;
+  }
+  .mapping-steps button > span {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .mapping-bar {
+    flex-wrap: wrap;
+    padding: 18px;
+    gap: 12px;
+  }
+  .mapping-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mapping-proposal {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-light);
+    padding: 25px;
+  }
+  .mapping-proposal h3 {
+    max-width: none;
+  }
+  .mapping-mail-meta {
+    margin-bottom: 20px;
+  }
+  .mapping-terms {
+    display: grid;
+    gap: 4px;
+    margin: 16px 0;
+  }
+  .mapping-execution {
+    padding: 25px 18px;
+  }
+  .mapping-steps {
+    margin-bottom: 24px;
+  }
+  .mapping-panel-copy p {
+    min-height: 0;
+  }
+  .mapping-open {
+    padding: 18px;
+    gap: 12px;
+  }
+  .mapping-open a {
+    margin-left: 0;
+    width: 100%;
+  }
+  .mapping-panel .tool-code pre.astro-code {
+    height: 290px;
+    font-size: 10px;
+  }
+}

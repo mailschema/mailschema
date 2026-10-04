@@ -2,215 +2,183 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import CodeBlock from '../components/CodeBlock.astro';
-import { tooling, packageSetLabel, recordCheckCommands } from '../data/tooling';
+import { typeRecords, specification } from '../data/types';
+import vectors from '../../conformance/map-0.3/shape-vectors.json';
+import scenarios from '../../conformance/map-0.3/scenarios.json';
+import '../styles/catalog.css';
 import '../styles/tools.css';
-
-const names = (list: { name: string }[]) =>
-  list.length > 1
-    ? `${list
-        .slice(0, -1)
-        .map((tool) => tool.name)
-        .join(', ')} and ${list.at(-1)!.name}`
-    : (list[0]?.name ?? '');
-const python = tooling.find((tool) => tool.registry === 'PyPI');
+const artifacts = [
+  [
+    'Publication email',
+    'examples/publication.eml',
+    'The complete unsigned MIME illustration, with the generated MAP description.',
+  ],
+  [
+    'Native OpenAPI example',
+    'bindings/publication.openapi.json',
+    'The illustrative publishing service’s native read and decision operations.',
+  ],
+  [
+    'MCP exchange',
+    'bindings/publication.mcp.json',
+    'Illustrative tool schemas, reads, decisions and results for the same proposal.',
+  ],
+  [
+    'Implementation record schema',
+    'schemas/implementation.schema.json',
+    'Service identity, exact type, binding artifact and implementation evidence.',
+  ],
+  [
+    'Core schema',
+    'schemas/core.schema.json',
+    'Common description fields, types and structural constraints.',
+  ],
+  [
+    'Contract schema',
+    'schemas/contract.schema.json',
+    'Type identity, requirements, operation semantics, effects and bindings.',
+  ],
+  [
+    'JSON-LD context',
+    'context.jsonld',
+    'The fixed context for offline processing of MAP descriptions.',
+  ],
+  [
+    'Shape vectors',
+    'conformance/shape-vectors.json',
+    `${vectors.length} executable valid and invalid cases against the Core and details schemas.`,
+  ],
+  [
+    'Runtime scenarios',
+    'conformance/scenarios.json',
+    `${scenarios.length} scenario skeletons for service and consumer adapters. These are not executable runtime tests.`,
+  ],
+  [
+    'Internet-Draft source',
+    'draft-mailschema-mail-action-protocol-00.xml',
+    'The generated individual -00 candidate in RFCXML. No IETF submission or adoption is claimed.',
+  ],
+];
 ---
 
 <Base
-  title="MailSchema tools"
+  title="Schemas and tools"
   theme="light"
-  description={`Install MailSchema for ${names(tooling).replace(/ and ([^,]+)$/, ' or $1')}. Validate MAP documents, bundle the exact schemas and prepare Registry contributions.`}
+  description="MAP 0.3 schemas, type contracts, examples and conformance material, from the same sources as the specification."
 >
-  <main id="main" class="container tools-page">
-    <header class="page-hero tools-hero">
-      <div>
-        <span class="eyebrow eyebrow-line">Tools</span>
-        <h1>Build against the same contract.</h1>
-        <p class="lead">
-          Validate MAP documents, bundle the exact schemas and prepare Registry contributions with
-          one versioned source.
-        </p>
-      </div>
-      <div class="tools-hero-aside">
-        <span class="pill soft">{packageSetLabel}</span>
-        <p>
-          The complete contract bytes,
-          <br />
-          verified in every selected release.
-        </p>
-        <a href="/specification/profile" class="text-link">
-          Read the MAP 0.2 profile <Icon size={16} />
-        </a>
-      </div>
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Build with MAP</span>
+      <h1>Schemas and tools</h1>
+      <p class="lead">
+        Start with a complete email example and its contract. The schemas and checks are here when
+        you're ready to connect your service.
+      </p>
     </header>
-
-    <div class="tool-selector">
-      <nav class="tool-tabs" data-tool-tabs aria-label="Package language">
-        {tooling.map((tool) => (
-          <a id={`tab-${tool.id}`} href={`#${tool.id}`}>
-            <span>{tool.name}</span>
-            <small>{tool.registry}</small>
-          </a>
-        ))}
-      </nav>
-      <a class="tool-schema-link" href="/schemas/contribution.schema.json" download>
-        JSON Schema <Icon name="file" size={15} />
-      </a>
-    </div>
-
-    {tooling.map((tool) => (
-      <section id={tool.id} class="tool-panel" aria-label={tool.name}>
-        <div class="tool-start">
-          <div class="tool-setup">
-            <div class="tool-runtime">
-              <span>
-                {tool.runtime} · MAP {tool.map}
-              </span>
-              <a href={tool.release.url}>
-                {tool.registry} · {tool.release.version}
-                <Icon name="northeast" size={13} />
-              </a>
-            </div>
-            <h2>{tool.title}</h2>
-            <p>{tool.description}</p>
-            <CodeBlock
-              label={tool.id === 'rust' ? 'Cargo.toml' : 'Install'}
-              code={tool.install}
-              lang={tool.installLanguage}
-            />
-            {tool.command && <CodeBlock label="Check a contribution" code={tool.command} />}
-            {tool.command ? (
-              <a
-                class="text-link"
-                href="/contribution-examples/new-type.json"
-                download="contribution.json"
-              >
-                Download an example <Icon name="file" size={15} />
-              </a>
-            ) : (
-              tool.note && <p class="tool-small">{tool.note}</p>
-            )}
-          </div>
-          <div class="tool-example">
-            <CodeBlock label={tool.filename} code={tool.example} lang={tool.language} />
-            <p>{tool.exampleNote}</p>
-          </div>
-        </div>
-        <div class="tool-api">
-          <div>
-            <span class="eyebrow">API reference</span>
-            <p>{tool.exports}</p>
-          </div>
-          <dl>
-            {tool.api.map((entry) => (
-              <div>
-                <dt>
-                  <code>{entry.name}</code>
-                </dt>
-                <dd>{entry.description}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-    ))}
-
-    <section class="tools-section" id="records" aria-labelledby="records-title">
-      <div class="tools-section-copy">
-        <span class="eyebrow eyebrow-line">Registry records</span>
-        <h2 id="records-title">Check the record, too.</h2>
+    <section class="catalog-note catalog-rule">
+      <h2>Draft artifacts</h2>
+      <div>
         <p>
-          A contribution proposes a change. A record is the resulting definition, with its
-          contributors, maintainers and history.
+          These downloads come from the same sources as the reader and Registry. They are working
+          drafts; a shape check does not establish message authenticity, permission or safe
+          execution.
         </p>
+        <ul class="artifact-list">
+          {artifacts.map(([label, path, description]) => (
+            <li>
+              <a href={`${specification.artifacts}/${path}`} download>
+                {label}
+                <Icon size={15} />
+              </a>
+              <p>{description}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+    <section class="catalog-note">
+      <h2>Contracts and examples</h2>
+      <div>
         <p>
-          Choose <strong>Download record</strong> on any type page, then check it with{' '}
-          <code>--record</code>. Start with Content Review:
+          Each type has its own contract version and canonical digest. The Registry publishes types
+          independently of packages.
         </p>
-        <a
-          href="/registry/records/content-review.record.json"
-          download="content-review.json"
-          class="text-link"
-        >
-          Download Content Review <Icon name="file" size={15} />
+        <ul class="artifact-list">
+          {typeRecords.map((type) => (
+            <li>
+              <a href={`/registry/${type.slug}`}>
+                {type.name}
+                <Icon size={15} />
+              </a>
+              <p>
+                <a href={type.contractHref} download>
+                  JSON contract
+                </a>
+                {' · '}
+                <a href={type.exampleHref} download>
+                  Complete description
+                </a>
+              </p>
+            </li>
+          ))}
+        </ul>
+        <a class="text-link" href={specification.catalog}>
+          Machine-readable catalogue <Icon size={15} />
         </a>
       </div>
-      <div class="tools-section-code">
-        <CodeBlock label="JavaScript" code={recordCheckCommands.javascript} />
+    </section>
+    <section class="catalog-note" id="validation">
+      <h2>Validate the sources</h2>
+      <div>
+        <p>
+          In a checkout of the repository, the specification check validates contracts, checks
+          example digests, expands JSON-LD offline and runs the shape vectors. It also checks that
+          runtime scenario references point to real requirements.
+        </p>
         <CodeBlock
-          label={`Python · after ${python?.install ?? 'installation'}`}
-          code={recordCheckCommands.python}
+          label="Node.js 24 or later"
+          code={'npm ci\nnpm run spec:check\nnpm run draft:check'}
         />
         <p>
-          In Rust or Go, load the bundled Registry schema into your validator. For amendments and
-          implementation declarations, the <a href="/registry/catalog.json">Registry catalogue</a>{' '}
-          also provides exact record digests.
+          After editing a contract or source example, run <code>npm run spec:generate</code> to
+          update its projections. <a href="/specification/conformance">Runtime conformance</a>{' '}
+          requires service and consumer adapters with observable evidence.
         </p>
       </div>
     </section>
-
-    <section class="tools-section tools-checks" aria-labelledby="checks-title">
-      <div class="tools-section-copy">
-        <span class="eyebrow eyebrow-line">From a file to a contribution</span>
-        <h2 id="checks-title">What passing means.</h2>
-        <p>Each check answers a different question. A valid file is ready for the next step.</p>
-      </div>
-      <ol class="tool-check-list">
-        <li>
-          <span>01</span>
-          <div>
-            <h3>Structure</h3>
-            <p>
-              Required fields, exact identifiers, allowed values and URI formats. The JavaScript and
-              Python validators check these locally against the shared schemas.
-            </p>
-          </div>
-        </li>
-        <li>
-          <span>02</span>
-          <div>
-            <h3>Registry references</h3>
-            <p>
-              Does the target exist? Is the amendment current? Are the operations supported? Use the
-              browser checker, or JavaScript’s <code>referenceErrors</code> with a supplied
-              catalogue.
-            </p>
-          </div>
-        </li>
-        <li>
-          <span>03</span>
-          <div>
-            <h3>Review</h3>
-            <p>
-              The repository checks conflicting changes. Review considers the definition,
-              attribution and evidence. Passing validation does not establish acceptance or product
-              compatibility.
-            </p>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <aside class="tools-next">
+    <section class="catalog-note">
+      <h2>Language packages</h2>
       <div>
-        <span class="eyebrow">Contribute to MailSchema</span>
-        <h2>See how your contribution will appear.</h2>
-        <p>Load your file in the browser to check its references and preview the record.</p>
+        <p>
+          The published JavaScript, Python, Ruby, Rust and Go packages target an earlier MAP
+          profile. They do not implement this draft. Use the schemas and contracts above when
+          preparing a MAP 0.3 integration.
+        </p>
+        <a class="text-link" href="/archive/map-0.2/tools">
+          Historical package releases <Icon size={15} />
+        </a>
       </div>
-      <a class="button primary" href="/contribute#check-a-contribution">
-        Preview a contribution <Icon size={17} />
-      </a>
-    </aside>
-    <p class="tools-scope">
-      {`The ${names(tooling)} packages carry the MAP 0.2 core artifacts exactly as published, and the JavaScript and Ruby packages also process MAP documents. `}
-      Public artifact readback verifies every contract bundled in the selected releases. Registry
-      types are published independently; adding a type does not require releases in every language.
-      Clients obtain the exact type versions they act on from the Registry catalogue by digest, or
-      vendor them. The packages validate documents; they do not establish endpoint trust, grant
-      authorization or send email. Read the <a href="/specification/profile">MAP 0.2 profile</a>{' '}
-      before acting on a message. Package and specification versions are independent.
-    </p>
+    </section>
   </main>
 </Base>
-<script>
-  import '../scripts/tool-tabs';
-</script>
+<style>
+  .artifact-list {
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+  }
+  .artifact-list li {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line-light);
+  }
+  .artifact-list li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    font-weight: 600;
+  }
+  .artifact-list p {
+    margin: 8px 0 0;
+  }
+</style>

@@ -15,7 +15,18 @@ const MARKER = '    <!-- profile -->';
 
 // The draft is ASCII, as RFC 7997 expects of body text; these are the only other characters the
 // specification uses, and anything else stops the build.
-const ASCII = { '±': 'plus or minus ', '−': '-', '…': '...', '–': '-', '’': "'" };
+const ASCII = {
+  '±': 'plus or minus ',
+  '−': '-',
+  '…': '...',
+  '–': '-',
+  '’': "'",
+  '‘': "'",
+  '“': '"',
+  '”': '"',
+  '—': '--',
+  '·': ';',
+};
 const ascii = (text) =>
   text.replace(/[^\x09\x0a\x20-\x7e]/g, (character) => {
     if (character in ASCII) return ASCII[character];
@@ -133,6 +144,7 @@ function blocks(markdown, depth, fold = false) {
       for (; /^(?:- |\d+\. | {3}- )/.test(lines[i] ?? ''); i += 1) items.push(lines[i]);
       out.push(...list(items, indent()));
     } else if (line.trim()) {
+      if (line.startsWith('#')) throw new Error(`Unsupported heading: ${line}`);
       const paragraph = [];
       for (; lines[i]?.trim() && !/^(?:#|- |\d+\. |\||```)/.test(lines[i]); i += 1)
         paragraph.push(lines[i].trim());
@@ -233,14 +245,19 @@ output(DRAFT, draft);
 cited.clear();
 currentProfile = true;
 const base = 'specifications/map-0.3';
-const section = (name) => read(`${base}/${name}.md`).replace(/^# [^\n]+\n/, '');
+const section = (name) => body(`${base}/${name}.md`).replace(/^\s*# [^\n]+\n/, '');
 const core03 = section('core');
 // Bindings precede security/privacy/conformance without duplicating the source prose.
 const split = core03.indexOf('## Security considerations');
 if (split < 0) throw new Error('Core security section is missing');
-const main = core03.slice(0, split) + section('http') + section('capability') + core03.slice(split);
+const main =
+  core03.slice(0, split) +
+  section('http') +
+  section('capability') +
+  section('registry') +
+  core03.slice(split);
 const context = read(`${base}/context.jsonld`).trim();
-const example = read(`${base}/examples/campaign-send-approval.json`).trim();
+const example = read(`${base}/examples/publication-approval.json`).trim();
 const appendix =
   contractText({ schemas: false }) +
   '\n## Description example\n\n' +

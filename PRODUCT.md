@@ -14,7 +14,7 @@ MailSchema is building an open standard for agents to work with services through
 
 The browser contribution path validates and previews the same versioned JSON used by the repository, then hands the checked file to GitHub for review. Git remains the only source of accepted Registry state. MailSchema does not maintain a second submission queue or contributor account system. Language packages remain maintained implementation surfaces and release when their contracts or APIs change.
 
-The first type is Content Review bound to an exact revision. The first product proof runs through Nitrosend; an independently operated implementation remains a separate adoption milestone. Sourcey renders the specification and is not counted as an action service. The site must explain the practical opportunity and invite participation without implying independent adoption or IETF status.
+The initial contracts describe campaign send approval, publication approval, address confirmation and account security responses. Real service integrations and independently operated implementations remain separate evidence milestones. Sourcey renders the specification and is not counted as an action service. The site must explain the practical opportunity and invite participation without implying independent adoption or IETF status.
 
 ## Brand Personality
 
@@ -32,7 +32,7 @@ Earlier A-Mail identity explorations and unselected MailSchema concepts are hist
 - One coherent family: MailSchema, MAP, Types, Registry.
 - Organise the Registry around submitted types. Record product support and evidence within the applicable type and version.
 - Develop a useful collection with clear maturity labels and reuse of existing standards. Proposed additions require a definition and examples before being presented as usable types.
-- Teach through a usable Content Review example.
+- Teach through a concrete exact-terms decision.
 - Distinguish the working draft and planned implementation evidence honestly.
 - Respect existing standards and existing service authorization.
 - Give long-form reading as much attention as the homepage.

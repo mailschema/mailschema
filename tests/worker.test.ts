@@ -19,6 +19,11 @@ test('redirects every non-canonical address in one permanent hop', async () => {
       'https://mailschema.org/registry/content-review',
     ],
     ['http://mailschema.org/', 'https://mailschema.org/'],
+    ['https://mailschema.org/types', 'https://mailschema.org/registry'],
+    [
+      'http://www.mailschema.org/types/campaign-send-approval/?from=email',
+      'https://mailschema.org/registry/campaign-send-approval?from=email',
+    ],
   ]) {
     const response = await serve(requested);
     expect(response.status, requested).toBe(308);

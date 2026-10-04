@@ -1,0 +1,168 @@
+---
+import Icon from './Icon.astro';
+import type campaign from '../../specifications/map-0.3/examples/campaign-send-approval.json';
+import { typeRecords } from '../data/types';
+import '../styles/demo.css';
+const type = typeRecords.find((type) => type.slug === 'campaign-send-approval')!;
+const message = type.example as typeof campaign;
+const details = message.details;
+const scheduledAt = 'at' in details.schedule ? details.schedule.at : null;
+---
+
+<div class="review-demo" data-action-demo data-version={message.terms.version}>
+  <div class="demo-toolbar">
+    <span class="eyebrow">Campaign Send Approval</span>
+    <span class="demo-local">
+      <span class="small-dot"></span> Local illustration
+    </span>
+  </div>
+  <div class="demo-body">
+    <div class="demo-message">
+      <div class="message-sender">
+        <span class="sender-avatar">
+          m<span>↗</span>
+        </span>
+        <div>
+          <strong>Example campaign service</strong>
+          <span>To {message.recipient}</span>
+        </div>
+      </div>
+      <h3>{message.subject.title}</h3>
+      <p class="message-intro">
+        {details.summary} Approval authorizes this send; it does not grant permission for future
+        campaigns.
+      </p>
+      <dl class="interaction-fields">
+        <div>
+          <dt>Sender</dt>
+          <dd>{details.sender.mailbox}</dd>
+        </div>
+        <div>
+          <dt>Content revision</dt>
+          <dd>{details.content.revision}</dd>
+        </div>
+        <div>
+          <dt>Audience</dt>
+          <dd>
+            {details.audience.count.toLocaleString('en')} · {details.audience.label}
+          </dd>
+        </div>
+        <div>
+          <dt>Audience snapshot</dt>
+          <dd>{details.audience.revision}</dd>
+        </div>
+        <div>
+          <dt>Schedule</dt>
+          <dd>
+            {details.schedule.mode === 'immediate' ? 'Send when approved' : scheduledAt || 'Schedule not specified'}
+          </dd>
+        </div>
+      </dl>
+      <div class="demo-action-area">
+        <button class="button primary compact" data-read disabled>
+          Check with the service <Icon size={15} />
+        </button>
+        <div data-confirmation hidden>
+          <h4>Confirm this send</h4>
+          <p class="message-intro">
+            The installed connector has read the proposal from the service. The host asks you to
+            authorize sending revision {details.content.revision} to the displayed audience and
+            sender.
+          </p>
+          <button class="button primary compact" data-confirm>
+            Authorize this send <Icon name="check" size={15} />
+          </button>
+          <button class="demo-cancel" data-cancel>
+            Cancel
+          </button>
+        </div>
+        <p class="action-footnote">
+          The email describes the decision. Your installed connector supplies the service connection
+          and credentials.
+        </p>
+      </div>
+      <details class="demo-description">
+        <summary>Read the MAP description</summary>
+        <pre><code>{JSON.stringify(message, null, 2)}</code></pre>
+      </details>
+    </div>
+    <aside class="demo-inspector" aria-label="Decision walkthrough">
+      <div class="inspector-heading">
+        <span class="eyebrow">At the service</span>
+        <span class="pill">MAP 0.3</span>
+      </div>
+      <div class="inspector-state">
+        <span class="state-symbol">↗</span>
+        <span class="eyebrow" data-stage>
+          Email received
+        </span>
+        <h4 data-title>The email is a starting point.</h4>
+        <p data-explanation>
+          The connector checks the current proposal, recipient, tenant and permission with the
+          service before offering a decision.
+        </p>
+      </div>
+      <div class="demo-result" role="status" aria-live="polite" aria-atomic="true">
+        <span class="eyebrow">Service result</span>
+        <p data-result>No request made. No send queued.</p>
+      </div>
+      <div class="demo-scenarios">
+        <label for="approval-scenario">At the moment of approval</label>
+        <select id="approval-scenario" data-scenario disabled>
+          <option value="current">Terms and permission still valid</option>
+          <option value="stale">The audience has changed</option>
+          <option value="revoked">Sending permission was revoked</option>
+          <option value="decided">Someone else declined first</option>
+          <option value="expired">The proposal has expired</option>
+        </select>
+        <div class="demo-utilities">
+          <button data-reset disabled>
+            Reset example <Icon name="reset" size={14} />
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <div class="demo-caption">
+    <span>
+      Runs locally; no email is sent. This illustrates the decision, not runtime conformance.
+    </span>
+    <a href={type.contractHref}>
+      JSON contract <Icon size={13} />
+    </a>
+  </div>
+  <noscript>
+    <p class="demo-noscript">
+      Enable JavaScript to step through the approval. The description and contract remain readable
+      without it.
+    </p>
+  </noscript>
+</div>
+<script src="../scripts/action-demo.ts"></script>
+<style>
+  .demo-description {
+    margin-top: 25px;
+    font-size: 11px;
+  }
+  .demo-description summary {
+    cursor: pointer;
+    color: var(--blue-ink);
+  }
+  .demo-description pre {
+    max-height: 360px;
+    overflow: auto;
+    background: var(--mist);
+    padding: 16px;
+    font-size: 10px;
+  }
+  [data-confirmation] {
+    border-left: 3px solid var(--blue);
+    padding-left: 18px;
+  }
+  [data-confirmation] h4 {
+    margin: 0 0 12px;
+  }
+  [data-confirmation] .demo-cancel {
+    margin-left: 12px;
+  }
+</style>

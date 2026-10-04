@@ -123,13 +123,14 @@ const core = [
       let next = 1;
       const client = new ReferenceMapClient(() => uuid(9000 + next++));
       const reference = service();
-      const first = client.prepare(reviewDescription(), 'approve', {}, { instruction: 'approve' });
+      const first = client.prepare(reviewDescription(), 'approve', {}, { instruction: 'approve', now: clock() });
       const redelivered = client.prepare(
         structuredClone(reviewDescription()),
         'approve',
         {},
         {
           instruction: 'approve',
+          now: clock(),
         },
       );
       assert.deepEqual(redelivered, first);
@@ -143,6 +144,7 @@ const core = [
             { feedback: 'x' },
             {
               instruction: 'approve',
+              now: clock(),
             },
           ),
         /same request/,

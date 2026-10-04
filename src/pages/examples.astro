@@ -1,45 +1,117 @@
 ---
 import Base from '../layouts/Base.astro';
-import ReviewDemo from '../components/ReviewDemo.astro';
-import Icon from '../components/Icon.astro';
+import MappingDemo from '../components/MappingDemo.astro';
+import ActionDemo from '../components/ActionDemo.astro';
+import InterfaceMap from '../components/InterfaceMap.astro';
 import '../styles/catalog.css';
 ---
 
 <Base
-  title="Try Content Review"
+  title="From email to service"
   theme="light"
-  description="A browser example of a draft review, from feedback and editing to approval."
+  description="Explore the service interfaces around MAP, then follow a publication decision through worked HTTP and MCP exchanges."
 >
   <main id="main" class="container example-page">
     <header class="page-hero">
-      <span class="eyebrow eyebrow-line">Interactive example</span>
-      <h1>Try Content Review</h1>
+      <span class="eyebrow eyebrow-line">The protocol at work</span>
+      <h1>From email to service.</h1>
       <p class="lead">
-        Review a draft from the inbox. Switch between the email and the structured interaction to
-        see what a person reads and what an agent needs to know.
+        The email describes the decision. A connection you approved reads the current proposal from
+        the service and submits your choice through the interface the service already provides.
       </p>
     </header>
-    <ReviewDemo />
+    <InterfaceMap />
     <section class="example-notes">
       <div>
-        <h2>Try the exchange</h2>
+        <h2>Different paths. The same decision.</h2>
         <p>
-          Request a change and submit the suggested feedback. Switch to the editor to create the
-          example’s next revision, then return to the reviewer to approve it. The example uses a
-          predetermined edit so you can follow the whole review.
+          A service may expose an HTTP operation, a tool or another authenticated interface. In
+          every case, it must know who is acting, which proposal they saw and whether they are still
+          allowed to make that choice.
         </p>
+        <a class="text-link" href="/interfaces">
+          Read the full sourced assessment →
+        </a>
       </div>
       <div>
-        <h2>Check the permissions</h2>
+        <h2>Reuse what the service already has.</h2>
         <p>
-          The reviewer can record a decision. The editor can create a revision. A read-only viewer
-          can do neither. You can also submit an approval for an old revision to see how the service
-          responds.
+          Keep the service's existing operations, authentication and result format. An installed
+          binding identifies which operation matches the type. A description cannot make an unsafe
+          operation safe: the service must check permission and the proposal version when it acts.
         </p>
-        <a href="/registry/content-review" class="text-link">
-          Read the Content Review definition <Icon size={16} />
+        <a class="text-link" href="/specification/bindings">
+          How to document a binding →
         </a>
       </div>
     </section>
+    <section class="worked-examples" id="worked-examples">
+      <span class="eyebrow eyebrow-line">Worked exchanges</span>
+      <h2>Inspect one publication decision.</h2>
+      <p>
+        These HTTP and MCP illustrations use the same proposal, service read and exact revision.
+        They show the steps in code. The wider research catalogue records the requirements for other
+        interfaces.
+      </p>
+      <MappingDemo />
+    </section>
+    <section class="example-notes">
+      <div>
+        <h2>About the artifacts</h2>
+        <p>
+          The description, content, native API example and MCP exchange are generated from one set
+          of source artifacts. Changing the contract regenerates their identity and digest together.
+          The OpenAPI document describes the illustrative service, with no custom MAP mapping
+          language.
+        </p>
+      </div>
+      <div>
+        <h2>What they establish</h2>
+        <p>
+          These exchanges explain the design; they make no live service calls or interoperability
+          claim. The MIME download is unsigned. MCP initialization and account setup are omitted.
+          Actual implementations need evidence for the service's authorization, version check and
+          result interpretation.
+        </p>
+      </div>
+    </section>
+    <section class="example-guardrails">
+      <h2>Try a decision after the terms change.</h2>
+      <p>
+        For a campaign approval, change the audience, revoke permission or expire the proposal
+        between the service read and confirmation. This local model shows why the service must check
+        again when it acts.
+      </p>
+      <ActionDemo />
+    </section>
   </main>
 </Base>
+<style>
+  .worked-examples {
+    padding: 25px 0 0;
+    scroll-margin-top: 110px;
+  }
+  .worked-examples > h2 {
+    font-size: clamp(26px, 3vw, 36px);
+    letter-spacing: -0.04em;
+    margin: 18px 0;
+  }
+  .worked-examples > p {
+    font-size: 14px;
+    color: oklch(43% 0.014 275);
+    margin-bottom: 30px;
+  }
+  .example-guardrails {
+    border-top: 1px solid var(--line-light);
+    padding: 60px 0 80px;
+  }
+  .example-guardrails > h2 {
+    font-size: clamp(24px, 3vw, 36px);
+    letter-spacing: -0.04em;
+  }
+  .example-guardrails > p {
+    color: #746d7e;
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+</style>

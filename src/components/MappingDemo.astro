@@ -1,0 +1,138 @@
+---
+import CodeBlock from './CodeBlock.astro';
+import Icon from './Icon.astro';
+import { publication, article, steps, panels } from '../data/walkthrough';
+import '../styles/walkthrough.css';
+const origin = new URL(publication.service.id).host;
+const scheduledAt = 'at' in publication.details.schedule ? publication.details.schedule.at : null;
+---
+
+<div class="mapping-demo" data-mapping-demo>
+  <div class="mapping-bar">
+    <div>
+      <span class="mapping-dot"></span>
+      <strong>Publication Approval · worked exchanges</strong>
+    </div>
+    <div class="mapping-switch" role="group" aria-label="Service interface" data-enhance hidden>
+      <button type="button" data-transport="http" aria-pressed="true">
+        HTTP <span>/ OpenAPI</span>
+      </button>
+      <button type="button" data-transport="mcp" aria-pressed="false">
+        MCP <span>tools</span>
+      </button>
+    </div>
+  </div>
+  <div class="mapping-layout">
+    <aside class="mapping-proposal" aria-label="The publication proposal">
+      <div class="mapping-mail-meta">
+        <span class="eyebrow">In the inbox</span>
+        <span>MIME</span>
+      </div>
+      <div class="mapping-sender">
+        <span class="mapping-avatar">D</span>
+        <div>
+          <strong>Documentation</strong>
+          <span>review@{origin}</span>
+        </div>
+      </div>
+      <h3>{publication.subject.title}</h3>
+      <p>
+        Please review revision {publication.details.content.revision}. Approval will publish this
+        content to the public guide.
+      </p>
+      <div class="mapping-document">
+        <div>
+          <span class="eyebrow">Content from the service</span>
+          <span>{publication.details.content.revision}</span>
+        </div>
+        <strong>{publication.details.content.title}</strong>
+        <p>{article.replace(/^# [^\n]+\n/, '').trim()}</p>
+      </div>
+      <dl class="mapping-terms">
+        <div>
+          <dt>Destination</dt>
+          <dd>
+            {new URL(publication.details.destinations[0].id).host}
+            {new URL(publication.details.destinations[0].id).pathname}
+          </dd>
+        </div>
+        <div>
+          <dt>Visibility</dt>
+          <dd>{publication.details.destinations[0].visibility}</dd>
+        </div>
+        <div>
+          <dt>Schedule</dt>
+          <dd>
+            {publication.details.schedule.mode === 'scheduled' && typeof scheduledAt === 'string'
+              ? scheduledAt.replace('T', ' · ').replace('Z', ' UTC')
+              : 'Immediate'}
+          </dd>
+        </div>
+        <div>
+          <dt>Acting account</dt>
+          <dd>{publication.recipient}</dd>
+        </div>
+        <div>
+          <dt>Terms version</dt>
+          <dd>
+            <code>{publication.terms.version}</code>
+          </dd>
+        </div>
+      </dl>
+      <div class="mapping-confirmation">
+        <Icon name="check" size={17} />
+        <span>
+          <strong>Host confirmation</strong>
+          <span>Approve this content, destination and schedule.</span>
+        </span>
+      </div>
+      <p class="mapping-caption">Illustrated approval. No service is called.</p>
+    </aside>
+    <div class="mapping-execution">
+      <nav class="mapping-steps" aria-label="Walkthrough steps" data-enhance hidden>
+        {steps.map((step, i) => (
+          <button
+            type="button"
+            data-step={step.id}
+            aria-current={step.id === 'act' ? 'step' : undefined}
+          >
+            <span>{String(i + 1).padStart(2, '0')}</span>
+            {step.label}
+            <Icon size={12} />
+          </button>
+        ))}
+      </nav>
+      {panels.map((panel) => (
+        <section
+          class="mapping-panel"
+          data-panel-step={panel.step}
+          data-panel-transport={panel.transport}
+          hidden={panel.step !== 'act' || panel.transport !== 'http'}
+          aria-label={`${panel.title} ${panel.transport === 'any' ? '' : panel.transport}`}
+        >
+          <div class="mapping-panel-copy">
+            <h3>{panel.title}</h3>
+            <p>{panel.description}</p>
+          </div>
+          <CodeBlock code={panel.code} label={panel.label} lang={panel.lang} />
+          <div class="mapping-panel-bottom">
+            <p>{panel.note}</p>
+            <a href={panel.link}>
+              {panel.download}
+              <Icon size={14} />
+            </a>
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+  <div class="mapping-open">
+    <span>These exchanges illustrate the same service decision.</span>
+    <a href="/interfaces">
+      See the wider interface research <Icon size={14} />
+    </a>
+  </div>
+</div>
+<script>
+  import '../scripts/mapping-demo';
+</script>

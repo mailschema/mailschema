@@ -1,0 +1,61 @@
+---
+import Base from '../../../layouts/Base.astro';
+import '../../../styles/catalog.css';
+import '../../../styles/prose.css';
+---
+
+<Base title="MAP 0.1 archive" theme="light">
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">Historical material</span>
+      <h1>MAP 0.1 archive</h1>
+      <p class="lead">
+        MAP 0.1 is superseded. Its published files remain available to interpret older messages.
+        <a href="/archive/map-0.2">MAP 0.2</a> followed it; <a href="/specification">MAP 0.3</a>
+        is the current working draft for new implementations.
+      </p>
+    </header>
+    <article class="prose">
+      <h2>Published profile</h2>
+      <p>
+        These files retain their original bytes. The archive status does not alter the profile
+        record or an old message's meaning.
+      </p>
+      <ul>
+        <li><a href="/profiles/map/0.1.json">Profile record</a></li>
+        <li><a href="/contexts/map-0.1.jsonld">JSON-LD context</a></li>
+        <li><a href="/schemas/map-0.1.schema.json">Core schema</a></li>
+        <li><a href="/schemas/type-contract-0.1.schema.json">Type contract format</a></li>
+        <li><a href="/schemas/forms-0.1.schema.json">Form schema</a></li>
+        <li>
+          <a href="https://github.com/mailschema/mailschema/blob/dd079bc/conformance/map-0.1/manifest.json">
+            Conformance manifest
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/mailschema/mailschema/blob/dd079bc/docs/specification/profile.md">
+            Historical specification source
+          </a>
+        </li>
+      </ul>
+      <h2>Content Review</h2>
+      <p>
+        Content Review 0.1 was superseded by 0.2. Both contracts and their schemas remain
+        available. Content Review 0.2 has no direct successor in MAP 0.3: campaign sending and
+        publication have distinct effects and require their own explicit decisions.
+      </p>
+      <ul>
+        <li>
+          <a href="/contracts/content-review-0.1.json">Content Review 0.1</a>
+          {' · '}
+          <a href="/schemas/content-review-0.1.schema.json">Schema</a>
+        </li>
+        <li>
+          <a href="/contracts/content-review-0.2.json">Content Review 0.2</a>
+          {' · '}
+          <a href="/schemas/content-review-0.2.schema.json">Schema</a>
+        </li>
+      </ul>
+    </article>
+  </main>
+</Base>

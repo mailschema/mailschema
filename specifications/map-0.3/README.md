@@ -1,55 +1,44 @@
-# MAP 0.3 specification bundle
+# MAP 0.3 specification sources
 
-Status: specification draft, 2 October 2026. The architecture baseline is [MAP-0.3-DESIGN.md](../../docs/MAP-0.3-DESIGN.md). This directory is the source for the new text. The published site, Registry, runtime, packages, and historical artifacts still describe their existing versions.
+Working draft. Start with [the overview](overview.md), then [Core](core.md). The same Markdown and JSON documents supply the Sourcey reader, site, Registry, downloads and generated Internet-Draft.
 
-Read in this order:
+## Documents
 
-1. [MAP Core 0.3](core.md): description, contracts, trust, service readback, exact terms, human route, security, privacy, and conformance.
-2. [HTTP binding](http.md): mapping to an existing API, credential protection, conditional decisions, retries, and native outcomes.
-3. [Experimental capability binding](capability.md): limited bearer operations, delivery, fixed POST, correlation, lifetime, and replay limits.
-4. [Four initial contracts](contracts.md): generated readable projection of the complete JSON contracts in [contracts/](contracts/).
-5. [Conformance skeletons](../../conformance/map-0.3/README.md).
-6. [Generated Internet-Draft](../../ietf/draft-mailschema-mail-action-protocol-00.xml).
+- [Core](core.md): description, contracts, trust, permission and exact terms.
+- [HTTP binding](http.md): existing service APIs, credentials and native outcomes.
+- [Service bindings](bindings.md): informative guidance for native descriptions and existing integrations.
+- [Service interfaces](interfaces.md): the wider architecture and sourced research.
+- [Capability binding](capability.md): an optional experiment for narrowly limited bearer actions.
+- [Type contracts](contracts.md): generated from the four complete contracts in `contracts/`.
+- [Registry and discovery](registry.md): types, implementations, setup and version lifecycle.
+- [Conformance](../../conformance/map-0.3/README.md): executable shape vectors and unimplemented runtime scenarios.
+- [Standards references](SOURCES.md): primary sources and their roles.
 
-## Source ownership and generation
+## Source ownership
 
-Edit `core.md`, `http.md`, and `capability.md` for normative prose. Edit `contracts/*.json` for a type's semantics, schemas, operations, effects, inputs, and outcomes. All normative type requirements are inside that contract's canonical digest. The readable contract chapter and the draft's contract appendix are projections; they are never separate authorities.
+Edit the Markdown chapters for common requirements. Edit `contracts/*.json` for type semantics, schemas and operations. All normative type requirements belong inside the digest-bound contract. The contract chapter and Internet-Draft appendix are generated projections.
 
-`schemas/` and `context.jsonld` are draft companion artifacts. Schema success checks shape only: it does not prove MIME, authentication, recipient control, lexical limits, authorization, or atomic execution. Core prose governs processing; the schema is not a shortcut around it. `catalogue.json` is a generated draft inventory, not the active public Registry or a published profile record. Its byte hashes bind drafting sources; contract identities separately use RFC 8785 canonical SHA-256.
+`examples/source.json` supplies instance values. `examples/publication.md` supplies the actual example content; generation computes its digest. `bindings/publication.source.json` supplies the native OpenAPI description. Generation derives the full MAP description, MIME email, OpenAPI read response and MCP exchange from those sources. The website imports those outputs; it does not maintain a second set of example values.
 
-`examples/source.json` supplies illustrative instance values. Generation adds the fixed context, profile, and current contract digest to each standalone example, validates their shape, and expands their JSON-LD with an offline loader. The inert `.example` destinations and illustrative content digests are not implementation evidence.
+`registry.json` owns category, maintainers and evidence. Contract identity, names, schemas and semantics come from the contract. New types require those three source records: contract, metadata and example. They do not require a Core or package release.
+
+`schemas/` and `context.jsonld` are companion artifacts. Schema validity does not establish authenticity, authority or atomic service behaviour. `catalogue.json` is the generated source inventory, not a published profile record. Its hashes cover exact file bytes; contract identities use canonical JSON digests as specified.
+
+`docs/research/map-interfaces.json` owns the interface assessments and primary-source evidence. Its readable report and the interface chapter’s landscape table are generated with the other draft artifacts; the research explorer and interface diagram read the same catalogue. The binding guide is informative and is not included in the Internet-Draft. No universal declarative mapping language is selected.
+
+## Generate and preview
 
 ```sh
 npm run spec:generate
-npm run spec:check
-npm run draft:check
-npm run verify
+npm run dev -- --port 4325
 ```
 
-The 0.2 draft projection remains reproducible from the existing site text in `ietf/archive/`. Its historical contents are retained unchanged. The new `-00` describes 0.3; neither file is evidence that an Internet-Draft was submitted.
+Open `http://127.0.0.1:4325/specification/overview` or `/examples`. Generated files are committed with their sources. `npm run spec:check` and `npm run draft:check` detect stale outputs; `npm run verify` is the repository's broader pre-publication check.
 
-For the local Sourcey reader, run `npm run dev -- --port 4325` and open `http://127.0.0.1:4325/specification/core`. Development reads the files in this bundle directly; production builds continue using the published 0.2 reader until the new profile is deliberately activated.
+The MIME example is unsigned, its endpoints are inert, and the interactive views make no network calls. The MCP exchange is illustrative; no normative MAP MCP binding or runtime interoperability is claimed. Existing published artifacts remain available with their original bytes and actual supported versions.
 
-## Drafting clarifications
+## Delivery order
 
-- A qualifying DKIM signature must satisfy all coverage rules itself. A trusted `dkim=pass` alone does not establish those facts or bind rewritten machine data.
-- Recipient control and trusted delivery evidence govern forwarded copies. There is no invented test for detecting automatic forwarding.
-- Canonical contract bytes, including normative prose, are hashed. Lifecycle metadata stays outside that immutable definition.
-- Opaque tokens and mailbox local parts are preserved; Unicode display defenses do not rewrite identity.
-- Publication Approval authorizes publication. It cannot silently inherit historical Content Review's review-only decisions.
-- Capability limits are seven days for refusal, three days for a protective report, and one day for address confirmation. They are explicit MAP choices. The last adopts NIST's email-confirmation limit without extending NIST's scope to every mailbox-validation use case.
-- The first two approval types close a proposal on approve, decline, or request-changes. New terms require a new interaction and decision. Neither an approval nor feedback creates standing authorization.
+Nitrosend's first-party sender and inbox have exercised a controlled request through signed receipt, an owner decision and SES campaign delivery. Reconcile those findings with the canonical text before publishing the 0.3 working draft, and state the limits of that proof. Independent interoperability, full runtime conformance, private financial dogfood and language-package releases remain separate milestones. Product code and evidence stay in their owning repositories. The publication gate is owned by [the project plan](../../docs/ROADMAP.md#next). A schema example does not establish a running implementation.
 
-## Implementation handoff
-
-The next product step is Campaign Send Approval against the existing service hold/approval operation. Use the canonical contract, not the illustrative API in the HTTP chapter. Document how the existing API establishes the proposal, principal, recipient, tenant, exact contract digest, immutable content, fixed audience, schedule, and current operation set. Demonstrate an intervening terms change, a permission revocation, and a competing decision at the atomic boundary. Queueing must preserve the accepted snapshot.
-
-Do not update dogfood examples by renaming a 0.2 request. The new description has no action endpoint, request envelope, or result protocol. A connector maps to the service's existing read and operation. Where the service cannot establish a required fact or enforce a version atomically, record that implementation gap rather than infer it from email.
-
-MCP, new package APIs, package version choices, Registry activation, and production deployment remain subsequent work. Adding these four draft contracts does not require a package release. No Nitrosend example or product code is changed by this delivery.
-
-## Submission preparation
-
-The draft is an individual-submission candidate, not an adopted standard. [IETF 127's cutoff](https://datatracker.ietf.org/meeting/127/important-dates/) is 2 November 2026 at 23:59 UTC, including `-00` submissions. The MAP profile version and Internet-Draft revision are independent.
-
-Before upload, review implementation feedback, confirm author details and the submission date, make the cited artifact location durable, and rerun generation and `xml2rfc`. Consult SML on the container and receiver trust assumptions and DISPATCH on venue. Preparation and rendering do not submit the document or send those communications.
+The [generated individual Internet-Draft candidate](../../ietf/draft-mailschema-mail-action-protocol-00.xml) is not an IETF submission or an adopted standard. Before submission, confirm author details, document date, durable artifact URLs and venue, incorporate review, and render with `xml2rfc`. The source text and generated candidate remain one document. See [the project plan](../../docs/ROADMAP.md) for the wider delivery queue.

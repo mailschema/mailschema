@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
-     category="std" consensus="true"
+     category="std"
      docName="draft-mailschema-mail-action-protocol-00"
      ipr="trust200902" submissionType="IETF" version="3">
   <front>
@@ -15,18 +15,18 @@
     <workgroup>Individual Submission</workgroup>
     <keyword>email</keyword><keyword>agents</keyword><keyword>structured email</keyword>
     <abstract>
-      <t>The Mail Action Protocol (MAP) describes a service proposal in email
-      so a recipient or an agent acting for that recipient can evaluate it
-      and use the service's existing operations. Versioned contracts define
-      the proposal's data, operations, and effects. A trusted service
-      implementation resolves those operations independently of the email;
-      authoritative readback and an atomic terms-version check bind a
-      credentialed decision to the current proposal. MAP uses Structured
-      Email's JSON-LD and MIME representation. It defines no general action
-      endpoint, execution envelope, identity provider, or permission language.
-      This document specifies Core 0.3, an HTTP binding, and an optional
-      experimental bearer-capability binding limited to refusal, protective
-      reports, and confirmation of an initiated address-validation request.</t>
+      <t>Mail Action Protocol (MAP) describes actions offered by email, such
+      as approval to publish an article. A type contract defines each
+      decision and its effects. A trusted service binding connects that
+      decision to an existing service operation. Before acting, a client
+      reads the current proposal and applies the user's policy. The service
+      checks permission and the exact terms when it records the decision.
+      MAP uses Structured Email's MIME and JSON-LD representation. Core is
+      independent of the interface used to call the service. This document
+      specifies an HTTP binding, Registry
+      discovery rules and an experimental capability binding for a limited
+      set of actions without a service account connection. It defines no
+      general action endpoint or replacement authentication system.</t>
     </abstract>
   </front>
   <middle>
@@ -36,16 +36,16 @@
       <t>This section follows <xref target="RFC7942"/> and is to be removed
       before publication as an RFC. The specification source, four Draft
       Registry contracts, schemas, examples, and conformance scenarios are at
-      <eref target="https://github.com/mailschema/mailschema/tree/docs/map-0-3-specification/specifications/map-0.3"/>.
+      <eref target="https://github.com/mailschema/mailschema/tree/main/specifications/map-0.3"/>.
       Artifact checks establish shape, digest consistency, and offline
       JSON-LD interpretation. Runtime scenarios are unimplemented skeletons.
       No MAP 0.3 runtime conformance or independent interoperability is claimed.
-      Existing MAP 0.2 implementations do not establish MAP 0.3 conformance.</t>
+      Schema checks alone do not establish service behaviour.</t>
       <t>Feedback is sought on receiver authentication evidence, existing API
       readback mappings, atomic version enforcement, and the limited
       capability binding. The latter requires explicit opt-in and remains
       experimental pending implementation evidence. No MCP binding is
-      specified here. This document is prepared as an individual submission;
+      specified here; the companion MCP walkthrough is illustrative. This document is prepared as an individual submission;
       it does not assert adoption by the Structured Email working group.</t>
     </section>
   </middle>
@@ -60,6 +60,7 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5890.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6234.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6376.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6454.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6531.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7493.xml"/>

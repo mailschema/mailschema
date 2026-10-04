@@ -959,6 +959,26 @@
     ]
   },
   {
+    "id": "human-unverified-route",
+    "status": "unimplemented",
+    "roles": [
+      "consumer",
+      "human"
+    ],
+    "requirements": [
+      "specifications/map-0.3/core.md#human-route"
+    ],
+    "given": [
+      "A valid DKIM-signed message names a familiar service but points its human URL at an unrelated HTTPS origin. The client has no trusted binding for that route."
+    ],
+    "when": [
+      "Render the message and offer its ordinary review link."
+    ],
+    "then": [
+      "Show the link's actual origin; do not label it a verified service route or promote it into a MAP control. Make no MAP-driven request to that origin."
+    ]
+  },
+  {
     "id": "human-csrf-and-stale-form",
     "status": "unimplemented",
     "roles": [

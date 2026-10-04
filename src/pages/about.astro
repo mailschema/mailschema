@@ -11,7 +11,8 @@ import '../styles/prose.css';
       <span class="eyebrow eyebrow-line">The project</span>
       <h1>About MailSchema</h1>
       <p class="lead">
-        MailSchema is building an open standard for agents to work with services through email.
+        MailSchema publishes a working draft for actions described in email and a Registry of
+        shared type definitions.
       </p>
     </header>
     <div class="longform">
@@ -19,8 +20,6 @@ import '../styles/prose.css';
         <span class="eyebrow">MailSchema</span>
         <p>
           Mail Action Protocol
-          <br />
-          Interaction types
           <br />
           Type registry
         </p>
@@ -32,15 +31,20 @@ import '../styles/prose.css';
           context an agent needs, but each service describes the next step in its own way.
         </p>
         <p>
-          MailSchema provides a place to define those interactions together. The aim is for a
-          service to describe an action in a form that different agents and inboxes can understand.
+          An email address lets a service reach someone across organizations without knowing which
+          agent or app they use. The readable message still works in an ordinary mailbox. MAP adds a
+          description a connected client can use without treating arrival as permission to act.
+        </p>
+        <p>
+          MAP gives a request a common shape. An agent or inbox can tell what is being asked, then
+          check the current proposal with the service before offering a decision.
         </p>
         <h2>The project</h2>
         <p>
-          <a href="/specification">Mail Action Protocol</a> defines the common exchange between
-          service and client. <a href="/types">Interaction types</a> describe particular kinds of
-          work. The <a href="/registry">Registry</a> collects submitted definitions and their
-          history.
+          <a href="/specification">Mail Action Protocol</a> defines how an email describes an action
+          and what the client and service must check before acting. <a href="/specification/contracts">Type contracts</a>{' '}
+          define particular kinds of work. The <a href="/registry">Registry</a> publishes those
+          definitions, versions and maintainers, with implementation evidence when available.
         </p>
         <p>
           Services retain their own permissions and business operations. People can continue to read
@@ -48,12 +52,14 @@ import '../styles/prose.css';
         </p>
         <h2>Current work</h2>
         <p>
-          MAP 0.2 is a working draft: a type-agnostic core whose types are published in the Registry
-          as executable drafts, each with a contract, schemas, fixtures and conformance tests. The
-          browser example shows Content Review feedback, revisions and approval. An independent
-          implementation remains an open milestone.
+          MAP 0.3 is a working draft. It defines what goes in the email, how a connected client checks
+          the current proposal, and what the service must check before acting. An experimental
+          binding allows a few limited responses without signing in, such as declining a proposal;
+          it does not authorize consequential approvals. The four initial contracts are drafts. The
+          Registry has no implementation evidence for them yet, and independent interoperability has
+          not been demonstrated.
         </p>
-        <p>The type collection currently includes:</p>
+        <p>The initial contracts are:</p>
         <ul>
           {typeGroups.map((group) => (
             <li>
@@ -67,12 +73,15 @@ import '../styles/prose.css';
             </li>
           ))}
         </ul>
-        <h2>Existing standards</h2>
+        <h2>Standards and drafts</h2>
         <p>
-          MailSchema should adopt existing formats and protocols where they fit. Each type proposal
-          identifies related work and explains what it adds. The
-          <a href="/specification/interoperability">interoperability chapter</a> records the
-          specifications under consideration.
+          MAP uses the proposed Structured Email message structure, DKIM with DMARC alignment for
+          message trust, and JSON-LD and JSON Schema for descriptions. It can connect to existing
+          service interfaces; HTTP is one specified binding. Structured Email is still a draft, so
+          MAP's use of its container needs coordination before RFC publication. Each type proposal
+          identifies related work and explains what it adds. The{' '}
+          <a href="/specification/sources">standards references</a> explain the role and limits of
+          each dependency.
         </p>
         <p>
           <a href="/contribute">Contribute a proposal →</a>

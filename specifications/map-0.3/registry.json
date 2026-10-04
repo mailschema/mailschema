@@ -1,0 +1,42 @@
+{
+  "account-security-response": {
+    "category": "Account security",
+    "maintainers": [
+      {
+        "name": "MailSchema",
+        "href": "https://github.com/mailschema"
+      }
+    ],
+    "implementationEvidence": []
+  },
+  "campaign-send-approval": {
+    "category": "Communication",
+    "maintainers": [
+      {
+        "name": "MailSchema",
+        "href": "https://github.com/mailschema"
+      }
+    ],
+    "implementationEvidence": []
+  },
+  "email-address-confirmation": {
+    "category": "Address confirmation",
+    "maintainers": [
+      {
+        "name": "MailSchema",
+        "href": "https://github.com/mailschema"
+      }
+    ],
+    "implementationEvidence": []
+  },
+  "publication-approval": {
+    "category": "Publishing",
+    "maintainers": [
+      {
+        "name": "MailSchema",
+        "href": "https://github.com/mailschema"
+      }
+    ],
+    "implementationEvidence": []
+  }
+}

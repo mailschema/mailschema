@@ -5,7 +5,7 @@
   "type": {
     "id": "https://mailschema.org/types/email-address-confirmation",
     "version": "0.1",
-    "contractDigest": "sha-256:75324bb52325f84aa36f434dc1df7430589679385a5aed626c1e20333f507a30"
+    "contractDigest": "sha-256:fc9d8a4fb3f3065f93bd53d1f9238b13df63186588d3f3f44982d5813412e282"
   },
   "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d42",
   "issuedAt": "2026-10-02T08:00:00Z",

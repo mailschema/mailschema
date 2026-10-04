@@ -1,9 +1,22 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import sourcey from 'sourcey/astro';
+import { readdirSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { specNavigation } from './docs/specification/navigation.ts';
+const currentTypes = new Set(
+  readdirSync('specifications/map-0.3/contracts').map((name) => name.replace(/\.json$/, '')),
+);
+const historicalPages = [
+  ...readdirSync('docs/specification')
+    .filter((name) => name.endsWith('.md') && name !== 'index.md')
+    .map((name) => `/specification/${name.slice(0, -3)}`),
+  ...readdirSync('registry/types')
+    .filter((name) => name.endsWith('.json') && !currentTypes.has(name.slice(0, -5)))
+    .map((name) => `/registry/${name.slice(0, -5)}`),
+];
 export default defineConfig({
+  redirects: Object.fromEntries(historicalPages.map((path) => [path, '/archive/map-0.2'])),
   site: 'https://mailschema.org',
   output: 'static',
   trailingSlash: 'never',
@@ -16,11 +29,11 @@ export default defineConfig({
         enforce: 'pre',
         apply: 'serve',
         configureServer(server) {
-          // Give the draft a chapter URL so relative reader assets resolve correctly.
+          // Give the reader a chapter URL so relative reader assets resolve correctly.
           server.middlewares.use((req, res, next) => {
             if (req.url?.split('?')[0] !== '/specification') return next();
             res.writeHead(307, {
-              Location: req.url.replace('/specification', '/specification/core'),
+              Location: req.url.replace('/specification', '/specification/overview'),
             });
             res.end();
           });
@@ -30,6 +43,10 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
+      filter: (url) => {
+        const path = new URL(url).pathname;
+        return !path.startsWith('/archive/') && path !== '/types' && !path.startsWith('/types/');
+      },
       customPages: specNavigation.map(
         (page) => `https://mailschema.org/specification${page.slug ? `/${page.slug}` : ''}`,
       ),
@@ -38,11 +55,17 @@ export default defineConfig({
       name: 'mailschema-registry-watch',
       hooks: {
         'astro:server:setup': ({ server }) => {
-          const root = resolve('registry');
-          server.watcher.add(root);
+          const roots = ['registry', 'specifications/map-0.3', 'conformance/map-0.3', 'docs/research'].map((path) =>
+            resolve(path),
+          );
+          server.watcher.add(roots);
           let restart;
           const changed = (path) => {
-            if (!resolve(path).startsWith(root + sep) || !path.endsWith('.json')) return;
+            if (
+              !roots.some((root) => resolve(path).startsWith(root + sep)) ||
+              !/\.(json|md)$/.test(path)
+            )
+              return;
             clearTimeout(restart);
             restart = setTimeout(() => server.restart(), 150);
           };
@@ -58,13 +81,6 @@ export default defineConfig({
       config: './docs/specification/sourcey.config.ts',
       routeBase: '/specification',
       prettyUrls: 'strip',
-      dev: false,
-    }),
-    sourcey({
-      config: './docs/specification/draft.config.ts',
-      routeBase: '/specification',
-      prettyUrls: 'strip',
-      build: false,
     }),
   ],
 });
