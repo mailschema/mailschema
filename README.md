@@ -26,7 +26,7 @@ npm run verify
 ## Site structure
 
 - `/specification`: Sourcey reader for Core, the bindings, type contracts, conformance and standards references.
-- `/registry`, `/registry/<type>`: the current type collection and full definitions. `/types` and its detail URLs redirect there for existing links.
+- `/registry`, `/registry/<type>`: the current type collection and full definitions. `/types` and its detail URLs redirect there for existing links. Contract identifiers remain `https://mailschema.org/types/<type>`; a browser redirect does not change their exact identity or digest.
 - `/registry/map-0.3.json`: current draft catalogue, with canonical contract digests and source download URLs.
 - `/artifacts/map-0.3/`: byte-for-byte downloads from the canonical draft files, generated at build time.
 - `/interfaces`: searchable primary-source research across execution, descriptions, delivery, discovery, identity and domain workflows.
