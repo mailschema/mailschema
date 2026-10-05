@@ -46,7 +46,7 @@ The [Registry and discovery rules](/specification/registry) explain how type def
 
 ## What can be described
 
-The current [type collection](/types) covers sending a campaign, publishing an article, confirming an address and reporting unfamiliar account activity. A type defines a specific effect: approving a review does not also authorize publishing or sending it.
+The current [Registry](/registry) includes draft contracts for sending a campaign, publishing an article, confirming an address and reporting unfamiliar account activity. A type defines a specific effect: approving a review does not also authorize publishing or sending it.
 
 Types can also define operations that collect input, such as a response to an information request. A new type needs precise terms, permissions and service behaviour, not a change to Core. Existing standards should be used where they already describe the interaction.
 

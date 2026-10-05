@@ -13,6 +13,8 @@ const names = (list: { name: string }[]) =>
         .join(', ')} and ${list.at(-1)!.name}`
     : (list[0]?.name ?? '');
 const python = tooling.find((tool) => tool.registry === 'PyPI');
+const historicalProfile =
+  'https://github.com/mailschema/mailschema/blob/c1b64de71b5d3caf56bcbd4cc6f95d00f7e87efc/docs/specification/profile.md';
 ---
 
 <Base
@@ -37,10 +39,7 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
           <br />
           verified in every selected release.
         </p>
-        <a
-          href="https://github.com/mailschema/mailschema/blob/main/docs/specification/profile.md"
-          class="text-link"
-        >
+        <a href={historicalProfile} class="text-link">
           Read the MAP 0.2 profile <Icon size={16} />
         </a>
       </div>
@@ -199,11 +198,8 @@ const python = tooling.find((tool) => tool.registry === 'PyPI');
       types are published independently; adding a type does not require releases in every language.
       Clients obtain the exact type versions they act on from the Registry catalogue by digest, or
       vendor them. The packages validate documents; they do not establish endpoint trust, grant
-      authorization or send email. Read the{' '}
-      <a href="https://github.com/mailschema/mailschema/blob/main/docs/specification/profile.md">
-        MAP 0.2 profile
-      </a>{' '}
-      before acting on a message. Package and specification versions are independent.
+      authorization or send email. Read the <a href={historicalProfile}>MAP 0.2 profile</a> before
+      acting on a message. Package and specification versions are independent.
     </p>
   </main>
 </Base>

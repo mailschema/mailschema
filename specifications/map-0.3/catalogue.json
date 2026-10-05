@@ -6,7 +6,7 @@
   "artifacts": [
     {
       "path": "specifications/map-0.3/overview.md",
-      "sha256": "c9ac46c1ff4f3b74d12ca12ab8487629f3853086b44ab495152893f397d680c5"
+      "sha256": "86f3c514ab222293cf8fe5b6c7880913610e67c19eeb49167a5872b02e9ef1c3"
     },
     {
       "path": "specifications/map-0.3/interfaces.md",
