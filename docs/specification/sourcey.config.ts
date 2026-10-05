@@ -1,6 +1,7 @@
 import { defineConfig, type SourceAdapter } from 'sourcey';
 import { specNavigation } from './navigation';
 import { mainNavigation } from '../../src/data/navigation';
+import { specification } from '../../src/data/specification';
 
 const sections = [...new Set(specNavigation.map((page) => page.section))];
 const source: SourceAdapter = {
@@ -47,9 +48,9 @@ export default defineConfig({
       document: {
         label: 'MAP',
         title: 'Mail Action\nProtocol',
-        version: '0.3',
-        status: 'Working draft',
-        badge: 'Draft',
+        version: specification.version,
+        status: specification.status,
+        badge: specification.badge,
       },
       searchHref: '/search',
       sidebar: {
@@ -85,7 +86,7 @@ export default defineConfig({
         },
       },
       footer: {
-        text: 'MailSchema · MAP 0.3',
+        text: 'MailSchema · Mail Action Protocol',
         links: [{ label: 'Improve this specification', href: '/contribute' }],
       },
     },

@@ -8,9 +8,9 @@ description: "Email describes the action. Your client checks it. The service car
 
 An email asks you to approve an article for publication. You can open the publisher's website and decide there. Your agent should be able to handle the same request, with your permission, without guessing what an “Approve” button will do.
 
-Mail Action Protocol gives that request a shared structure. It identifies the service, the article, the exact revision and the available decisions. A type contract defines what each decision means. A configured binding maps those decisions to the service's existing interface.
+Mail Action Protocol gives that request a shared structure. It identifies the service, the article, the exact revision and the available decisions. A type contract defines what each decision means. A connection you have chosen tells the client how to use the service's existing interface for those decisions.
 
-The email is a description of the work. For an account-backed decision, permission comes from your account and policy. The service checks both the permission and the revision when it records the decision. The optional capability binding covers only narrow responses without a service sign-in; possession of its URL is bearer authority.
+The email is a description of the work. For an account-backed decision, permission comes from your account and policy. The service checks both the permission and the revision when it records the decision. A separate, optional binding permits only narrow responses without sign-in, such as declining. Anyone with its one-click URL could use it, so it cannot authorize a consequential approval.
 
 ## Follow one action
 
@@ -64,4 +64,4 @@ A service can keep a longer workflow behind its API. MAP describes a decision wi
 - [Registry and discovery](/specification/registry) covers publication, connection and version changes.
 - [Conformance](/specification/conformance) identifies the evidence an implementation must provide.
 
-MAP 0.3 is a working draft. The specification, schemas and examples are available for implementation; runtime interoperability has not yet been demonstrated.
+This profile is a working draft. The specification, schemas and examples are available for implementation; runtime interoperability has not yet been demonstrated.

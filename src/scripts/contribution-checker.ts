@@ -4,6 +4,7 @@ import {
   type ImplementationRecord,
 } from '../specification/implementations';
 import { decodeMapUtf8 } from '../specification/strict-json.ts';
+import { specification } from '../data/specification';
 
 const form = document.querySelector<HTMLFormElement>('#contribution-form')!;
 const editor = document.querySelector<HTMLTextAreaElement>('#contribution-json')!;
@@ -191,7 +192,7 @@ form.addEventListener('submit', (event) => {
             ]),
       );
     const base = 'https://github.com/mailschema/mailschema';
-    const path = `specifications/map-0.3/${'service' in input ? 'implementations' : 'contracts'}`;
+    const path = `${specification.source}/${'service' in input ? 'implementations' : 'contracts'}`;
     const url = `${base}/new/main/${path}?filename=${encodeURIComponent(filename(input))}&value=${encodeURIComponent(JSON.stringify(input, null, 2) + '\n')}`;
     const prefill = url.length <= 7000;
     submit.href = prefill ? url : `${base}/upload/main/${path}`;

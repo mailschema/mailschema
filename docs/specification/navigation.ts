@@ -1,66 +1,69 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { specification } from '../../src/data/specification';
+
+const currentSource = `../../${specification.source}`;
 
 export const specNavigation = [
   {
     slug: 'overview',
     label: 'Overview',
     section: 'Start here',
-    file: '../../specifications/map-0.3/overview.md',
+    file: `${currentSource}/overview.md`,
   },
   {
     slug: 'interfaces',
     label: 'Service interfaces',
     section: 'Start here',
-    file: '../../specifications/map-0.3/interfaces.md',
+    file: `${currentSource}/interfaces.md`,
   },
   {
     slug: 'core',
     label: 'Core',
     section: 'Specification',
-    file: '../../specifications/map-0.3/core.md',
+    file: `${currentSource}/core.md`,
   },
   {
     slug: 'http',
     label: 'HTTP binding',
     section: 'Specification',
-    file: '../../specifications/map-0.3/http.md',
+    file: `${currentSource}/http.md`,
   },
   {
     slug: 'capability',
     label: 'Capability binding',
     section: 'Specification',
-    file: '../../specifications/map-0.3/capability.md',
+    file: `${currentSource}/capability.md`,
   },
   {
     slug: 'contracts',
     label: 'Type contracts',
     section: 'Types',
-    file: '../../specifications/map-0.3/contracts.md',
+    file: `${currentSource}/contracts.md`,
   },
   {
     slug: 'bindings',
     label: 'Service bindings',
     section: 'Implementation',
-    file: '../../specifications/map-0.3/bindings.md',
+    file: `${currentSource}/bindings.md`,
   },
   {
     slug: 'registry',
     label: 'Registry and discovery',
     section: 'Implementation',
-    file: '../../specifications/map-0.3/registry.md',
+    file: `${currentSource}/registry.md`,
   },
   {
     slug: 'conformance',
     label: 'Conformance',
     section: 'Implementation',
-    file: '../../conformance/map-0.3/README.md',
+    file: `../../conformance/map-${specification.version}/README.md`,
   },
   {
     slug: 'sources',
     label: 'Standards references',
     section: 'Implementation',
-    file: '../../specifications/map-0.3/SOURCES.md',
+    file: `${currentSource}/SOURCES.md`,
   },
 ].map((page) => {
   const markdown = readFileSync(resolve('docs/specification', page.file), 'utf8');

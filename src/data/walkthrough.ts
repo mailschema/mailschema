@@ -3,11 +3,12 @@ import { resolve } from 'node:path';
 import publication from '../../specifications/map-0.3/examples/publication-approval.json';
 import mcp from '../../specifications/map-0.3/bindings/publication.mcp.json';
 import exchange from '../../specifications/map-0.3/examples/publication-exchange.json';
+import { specification } from './specification';
 const json = (value: unknown) => JSON.stringify(value, null, 2);
-const base = '/artifacts/map-0.3';
+const base = specification.artifacts;
 export { publication };
 export const article = readFileSync(
-  resolve('specifications/map-0.3/examples/publication.md'),
+  resolve(specification.source, 'examples/publication.md'),
   'utf8',
 );
 export const steps = [
@@ -26,7 +27,7 @@ export const panels = [
       'The readable message and MAP description travel together. The client checks the signed original and recipient before reading from a connected service.',
     label: 'MIME message · unsigned illustration',
     lang: 'text' as const,
-    code: readFileSync(resolve('specifications/map-0.3/examples/publication.eml'), 'utf8'),
+    code: readFileSync(resolve(specification.source, 'examples/publication.eml'), 'utf8'),
     link: `${base}/examples/publication.eml`,
     download: 'Download the .eml',
     note: 'This download is deliberately unsigned. A real producer must sign it; this file does not pass MAP authentication.',

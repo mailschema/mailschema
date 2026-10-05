@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { specification } from './specification';
 
 // Core defines the vocabulary. The site projects its definitions without
 // maintaining a second copy of their meaning.
-const core = readFileSync('specifications/map-0.3/core.md', 'utf8');
+const core = readFileSync(`${specification.source}/core.md`, 'utf8');
 const section = core.split('### Initial effect vocabulary\n')[1]?.split('\n## ')[0];
 if (!section) throw new Error('MAP Core has no effect vocabulary section.');
 

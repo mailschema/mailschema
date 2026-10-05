@@ -20,7 +20,8 @@ export const searchEntries = [
   })),
   {
     title: 'Schemas and tools',
-    description: 'Core schema, type contracts, examples and conformance material for MAP 0.3.',
+    description:
+      'Core schema, type contracts, examples and conformance material for the current MAP draft.',
     href: '/tools',
     group: 'Tools',
   },

@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ContributionChecker from '../components/ContributionChecker.astro';
 import CodeBlock from '../components/CodeBlock.astro';
+import { specification } from '../data/specification';
 import '../styles/catalog.css';
 import '../styles/prose.css';
 ---
@@ -48,7 +49,7 @@ import '../styles/prose.css';
         <h2 id="review-the-draft">Submit for review</h2>
         <p>
           The browser checker validates and previews the contract locally. Continue in GitHub to
-          propose the JSON file under <code>specifications/map-0.3/contracts/</code>. Include these
+          propose the JSON file under <code>{specification.source}/contracts/</code>. Include these
           companion changes in the same pull request:
         </p>
         <ul>
@@ -88,7 +89,7 @@ import '../styles/prose.css';
         <p>
           A service can implement an existing type without creating a new one. Select Service
           support in the checker, choose the exact contract and prepare a record under
-          <code>specifications/map-0.3/implementations/</code>. Name the service, maintainer,
+          <code>{specification.source}/implementations/</code>. Name the service, maintainer,
           binding, supported operations and source of the support claim. A built-in service does not
           need a downloadable connector. If you offer an installable integration, include its format
           and verified artifact digest. Reuse the service's existing authorization. The

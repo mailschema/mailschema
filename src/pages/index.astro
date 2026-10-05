@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import Structure from '../components/Structure.astro';
 import InterfaceMap from '../components/InterfaceMap.astro';
+import { specification } from '../data/specification';
 import '../styles/home.css';
 ---
 
@@ -30,7 +31,7 @@ import '../styles/home.css';
         </div>
         <a href="/specification" class="protocol-kicker">
           <span class="small-dot"></span>
-          <span>Mail Action Protocol · Working Draft 0.3</span>
+          <span>Mail Action Protocol · {specification.status}</span>
           <Icon size={13} />
         </a>
       </div>
@@ -59,7 +60,7 @@ import '../styles/home.css';
           <h3>A request arrives</h3>
           <p>
             The message identifies the service, what needs a decision and the choices available. A
-            type says what each choice will do.
+            shared type says what each choice will do.
           </p>
           <span class="flow-example">Campaign Send Approval · Exact terms</span>
         </div>
@@ -96,14 +97,14 @@ import '../styles/home.css';
         </div>
         <div class="map-feature-meta">
           <span>MAIL ACTION PROTOCOL</span>
-          <span class="pill">0.3 · Draft</span>
+          <span class="pill">{specification.status}</span>
         </div>
       </div>
       <div class="map-feature-copy">
         <span class="eyebrow">Mail Action Protocol</span>
         <h2 id="map-title">Describe it once.</h2>
         <p>
-          A type gives an operation the same meaning across services. Campaign approval names what
+          A type gives a decision the same meaning across services. Campaign approval names what
           will be sent, by whom, to which audience and when. Each service keeps its own interface
           and permissions.
         </p>
@@ -112,7 +113,7 @@ import '../styles/home.css';
           you approved uses the service's existing operations.
         </p>
         <a href="/specification" class="button dark-button">
-          Read MAP 0.3 <Icon size={17} />
+          Read MAP <Icon size={17} />
         </a>
       </div>
     </section>
@@ -171,8 +172,8 @@ import '../styles/home.css';
           <span class="eyebrow">Find a definition</span>
           <h3>Registry</h3>
           <p>
-            Browse type contracts and examples, with versions, maintainers and listed service
-            support when available.
+            Browse shared definitions for real decisions, inspect examples, and see whether a
+            service supports them.
           </p>
           <span class="text-link">
             Browse type definitions <Icon size={17} />

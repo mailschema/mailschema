@@ -8,15 +8,11 @@ import {
   type ImplementationRecord,
 } from '../specification/implementations';
 import metadata from '../../specifications/map-0.3/registry.json';
+import { specification } from './specification';
 
-export const specification = {
-  version: '0.3',
-  profile: 'https://mailschema.org/profiles/map/0.3',
-  artifacts: '/artifacts/map-0.3',
-  catalog: '/registry/map-0.3.json',
-};
+export { specification };
 export const typeHref = (slug: string) => `/registry/${slug}`;
-const source = resolve('specifications/map-0.3');
+const source = resolve(specification.source);
 const read = (path: string) => readFileSync(resolve(source, path), 'utf8');
 const digest = (value: unknown) =>
   `sha-256:${createHash('sha256').update(canonicalize(value)!).digest('hex')}`;
