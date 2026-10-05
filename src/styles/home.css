@@ -106,9 +106,12 @@
     opacity: 1;
   }
 }
+.protocol-section {
+  padding-top: 105px;
+  padding-bottom: 100px;
+}
 .decision-section {
-  padding-top: 56px;
-  padding-bottom: 96px;
+  padding-bottom: 100px;
   scroll-margin-top: 100px;
 }
 .section-intro {
@@ -134,6 +137,43 @@
 }
 .section-intro .text-link {
   margin-top: 20px;
+}
+.protocol-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 45px;
+}
+.protocol-flow > div {
+  border-top: 1px solid var(--line-dark);
+  padding-top: 24px;
+}
+.flow-number {
+  display: flex;
+  justify-content: space-between;
+  color: var(--lime);
+  font-family: var(--mono);
+  font-size: 10px;
+  margin-bottom: 33px;
+}
+.flow-number svg {
+  color: var(--muted-dark);
+}
+.protocol-flow h3 {
+  font-size: 20px;
+  letter-spacing: -0.035em;
+  font-weight: 550;
+  margin-bottom: 15px;
+}
+.protocol-flow p {
+  font-size: 12px;
+  color: var(--muted-dark);
+  line-height: 1.85;
+  max-width: 290px;
+  margin-bottom: 21px;
+}
+.flow-example {
+  font-size: 10px;
+  color: oklch(82% 0.015 275);
 }
 .map-feature {
   display: grid;
@@ -305,6 +345,9 @@
   .map-feature-copy h2 {
     font-size: 31px;
   }
+  .protocol-flow {
+    gap: 30px;
+  }
 }
 @media (max-width: 900px) {
   .hero {
@@ -337,9 +380,12 @@
   .section-intro p {
     font-size: 13px;
   }
+  .protocol-section {
+    padding-top: 75px;
+    padding-bottom: 75px;
+  }
   .decision-section {
-    padding-top: 48px;
-    padding-bottom: 72px;
+    padding-bottom: 75px;
   }
   .map-feature {
     min-height: 330px;
@@ -418,8 +464,35 @@
   .section-intro p {
     font-size: 13px;
   }
-  .decision-section {
+  .protocol-section {
     padding-block: 58px;
+  }
+  .decision-section {
+    padding-bottom: 55px;
+  }
+  .protocol-flow {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .protocol-flow > div {
+    position: relative;
+    padding: 22px 0 0 42px;
+  }
+  .flow-number {
+    position: absolute;
+    left: 0;
+    top: 24px;
+  }
+  .flow-number svg {
+    display: none;
+  }
+  .protocol-flow h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  .protocol-flow p {
+    max-width: none;
+    margin-bottom: 12px;
   }
   .map-feature {
     grid-template-columns: 1fr;
@@ -479,6 +552,12 @@
   .open-section p {
     margin-top: 0;
   }
+}
+.protocol-flow p {
+  font-size: 14px;
+}
+.flow-example {
+  font-size: 11px;
 }
 .map-feature-copy p {
   font-size: 14px;

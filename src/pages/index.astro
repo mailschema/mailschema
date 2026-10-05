@@ -38,26 +38,57 @@ import '../styles/home.css';
       </div>
       <Structure />
     </section>
-    <section
-      class="decision-section container"
-      id="decision-example"
-      aria-labelledby="decision-heading"
-    >
+    <section class="protocol-section container">
       <div class="section-intro">
         <div>
           <span class="eyebrow eyebrow-line">From message to action</span>
-          <h2 class="section-title" id="decision-heading">
+          <h2 class="section-title">
             There’s work
             <br />
             in your inbox.
           </h2>
         </div>
         <p>
-          A campaign is ready to send. Review the email and audience, then decide. Your inbox checks
-          the current request with the service.
+          A campaign is ready to send. An article needs permission to go live. The request arrives
+          in the email you already read, with a description an agent can understand.
         </p>
       </div>
-      <ActionDemo />
+      <div class="protocol-flow">
+        <div>
+          <span class="flow-number">
+            01 <Icon size={18} />
+          </span>
+          <h3>A request arrives</h3>
+          <p>
+            The message identifies the service, what needs a decision and the choices available. A
+            shared type says what each choice will do.
+          </p>
+          <span class="flow-example">Campaign Send Approval · Exact terms</span>
+        </div>
+        <div>
+          <span class="flow-number">
+            02 <Icon size={18} />
+          </span>
+          <h3>Your rules come first</h3>
+          <p>
+            A connection you approved reads the current proposal. A campaign send still needs your
+            account permission. Your agent or inbox follows your rules and asks you when a decision
+            needs approval.
+          </p>
+          <span class="flow-example">Connected account · Current proposal · Your policy</span>
+        </div>
+        <div>
+          <span class="flow-number">
+            03 <Icon name="check" size={18} />
+          </span>
+          <h3>The service checks again</h3>
+          <p>
+            The service checks the terms and your permission as it records the decision. A changed
+            audience, revoked permission or earlier decision stops the action.
+          </p>
+          <span class="flow-example">Same terms · Permission checked · Decision recorded</span>
+        </div>
+      </div>
     </section>
     <section class="map-feature container" aria-labelledby="map-title">
       <div class="map-feature-mark">
@@ -150,6 +181,25 @@ import '../styles/home.css';
           </span>
         </a>
       </div>
+    </section>
+    <section
+      class="decision-section container"
+      id="decision-example"
+      aria-labelledby="decision-heading"
+    >
+      <div class="section-intro">
+        <div>
+          <span class="eyebrow eyebrow-line">Try a decision</span>
+          <h2 class="section-title" id="decision-heading">
+            Follow a decision.
+          </h2>
+        </div>
+        <p>
+          Review the campaign and its audience, then approve or decline. See what happens if the
+          audience changes before your decision reaches the service.
+        </p>
+      </div>
+      <ActionDemo />
     </section>
     <section class="open-section container">
       <div>
