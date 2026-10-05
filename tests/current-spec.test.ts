@@ -5,7 +5,7 @@ import canonicalize from 'canonicalize';
 import { typeRecords, currentCatalog } from '../src/data/types';
 import { assertContract } from '../src/specification/contracts';
 import { parseImplementationText } from '../src/specification/implementations';
-import { approve, type Proposal } from '../src/examples/approval';
+import { decide, type Proposal } from '../src/examples/approval';
 
 test('current catalogue binds every rendered contract and example to its canonical source', () => {
   for (const record of typeRecords) {
@@ -88,13 +88,17 @@ test('approval illustration commits once and cannot bypass confirmation or chang
     { decision: 'declined' as const },
   ]) {
     const proposal = { ...fresh(), ...mutation };
-    expect(approve(proposal, 'original', true)).not.toBe('accepted');
+    expect(decide(proposal, 'original', 'approve', true)).not.toBe('accepted');
     expect(proposal.queued).toBe(0);
   }
   const proposal = fresh();
-  expect(approve(proposal, 'original', false)).toBe('confirmation-required');
+  expect(decide(proposal, 'original', 'approve', false)).toBe('confirmation-required');
   expect(proposal.queued).toBe(0);
-  expect(approve(proposal, 'original', true)).toBe('accepted');
-  expect(approve(proposal, 'original', true)).toBe('already-decided');
+  expect(decide(proposal, 'original', 'approve', true)).toBe('accepted');
+  expect(decide(proposal, 'original', 'approve', true)).toBe('already-decided');
   expect(proposal.queued).toBe(1);
+  const declined = fresh();
+  expect(decide(declined, 'original', 'decline', true)).toBe('declined');
+  expect(decide(declined, 'original', 'approve', true)).toBe('already-decided');
+  expect(declined.queued).toBe(0);
 });

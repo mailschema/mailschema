@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import Structure from '../components/Structure.astro';
 import InterfaceMap from '../components/InterfaceMap.astro';
+import ActionDemo from '../components/ActionDemo.astro';
 import { specification } from '../data/specification';
 import '../styles/home.css';
 ---
@@ -25,7 +26,7 @@ import '../styles/home.css';
           <a class="button primary" href="/specification">
             Read the specification <Icon size={17} />
           </a>
-          <a class="hero-secondary" href="/examples">
+          <a class="hero-secondary" href="#decision-example">
             Follow a decision <span>↗</span>
           </a>
         </div>
@@ -37,57 +38,26 @@ import '../styles/home.css';
       </div>
       <Structure />
     </section>
-    <section class="protocol-section container">
+    <section
+      class="decision-section container"
+      id="decision-example"
+      aria-labelledby="decision-heading"
+    >
       <div class="section-intro">
         <div>
           <span class="eyebrow eyebrow-line">From message to action</span>
-          <h2 class="section-title">
+          <h2 class="section-title" id="decision-heading">
             There’s work
             <br />
             in your inbox.
           </h2>
         </div>
         <p>
-          A campaign is ready to send. An article needs permission to go live. The request arrives
-          in the email you already read, with a description an agent can understand.
+          A campaign is ready to send. Review the email and audience, then decide. Your inbox checks
+          the current request with the service.
         </p>
       </div>
-      <div class="protocol-flow">
-        <div>
-          <span class="flow-number">
-            01 <Icon size={18} />
-          </span>
-          <h3>A request arrives</h3>
-          <p>
-            The message identifies the service, what needs a decision and the choices available. A
-            shared type says what each choice will do.
-          </p>
-          <span class="flow-example">Campaign Send Approval · Exact terms</span>
-        </div>
-        <div>
-          <span class="flow-number">
-            02 <Icon size={18} />
-          </span>
-          <h3>Your rules come first</h3>
-          <p>
-            A connection you approved reads the current proposal. A campaign send still needs your
-            account permission. Your agent or inbox follows your rules and asks you when a decision
-            needs approval.
-          </p>
-          <span class="flow-example">Connected account · Current proposal · Your policy</span>
-        </div>
-        <div>
-          <span class="flow-number">
-            03 <Icon name="check" size={18} />
-          </span>
-          <h3>The service checks again</h3>
-          <p>
-            The service checks the terms and your permission as it records the decision. A changed
-            audience, revoked permission or earlier decision stops the action.
-          </p>
-          <span class="flow-example">Same terms · Permission checked · Decision recorded</span>
-        </div>
-      </div>
+      <ActionDemo />
     </section>
     <section class="map-feature container" aria-labelledby="map-title">
       <div class="map-feature-mark">

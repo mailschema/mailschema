@@ -184,9 +184,14 @@ export async function draftArtifacts(check) {
     ),
   );
   assert.deepEqual(Object.keys(source).sort(), currentContracts.map((c) => c.slug).sort());
-  const content = read(`${directory}/examples/publication.md`);
-  source['publication-approval'].details.content.title = content.split('\n')[0].replace(/^# /, '');
-  source['publication-approval'].details.content.digest = `sha-256:${sha(content)}`;
+  for (const [slug, filename] of [
+    ['publication-approval', 'publication'],
+    ['campaign-send-approval', 'campaign'],
+  ]) {
+    const content = read(`${directory}/examples/${filename}.md`);
+    source[slug].details.content.title = content.split('\n')[0].replace(/^# /, '');
+    source[slug].details.content.digest = `sha-256:${sha(content)}`;
+  }
   const examples = new Map();
   for (const item of currentContracts) {
     const example = {
@@ -254,7 +259,7 @@ export async function draftArtifacts(check) {
     publication,
     api,
     coreSchema: json(`${directory}/schemas/core.schema.json`),
-    content,
+    content: read(`${directory}/examples/publication.md`),
     write,
     directory,
     encode,
@@ -325,6 +330,7 @@ export async function draftArtifacts(check) {
     'bindings/publication.mcp.json',
     'examples/publication.eml',
     'examples/publication-exchange.json',
+    'examples/campaign.md',
     'context.jsonld',
   ].map((name) => ({ path: `${directory}/${name}`, sha256: sha(read(`${directory}/${name}`)) }));
   write(

@@ -61,6 +61,10 @@
       "sha256": "ea02c218fcf2c37a043e3184e449170a0c23892cd7c3b007dabf474bebaa064a"
     },
     {
+      "path": "specifications/map-0.3/examples/campaign.md",
+      "sha256": "86d8e5d2331a2c3bd211a71adb79149b644104ccbb7a4425b7ac5b26e94ef06d"
+    },
+    {
       "path": "specifications/map-0.3/context.jsonld",
       "sha256": "a51490d1fe8af695c14ea508aad88fd0429d18564791b6b52f3ab07d5c51aab3"
     }

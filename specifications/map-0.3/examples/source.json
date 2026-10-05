@@ -11,7 +11,7 @@
     "recipient": "owner@example.net",
     "subject": {
       "id": "urn:example:object:42",
-      "title": "Send September update"
+      "title": "Send product update"
     },
     "terms": {
       "id": "urn:example:proposal:p7",
@@ -21,13 +21,13 @@
       "url": "https://service.example/review/p7"
     },
     "details": {
-      "summary": "Send September update to the fixed newsletter audience.",
+      "summary": "The product update is ready to send to the newsletter audience. Please review the email and approve this send.",
       "requester": "Campaign editor",
       "content": {
         "id": "urn:example:content:42",
         "revision": "r4",
         "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
-        "title": "September update"
+        "title": "Product update"
       },
       "sender": {
         "mailbox": "news@service.example",

@@ -20,6 +20,14 @@ import '../styles/catalog.css';
         the service and submits your choice through the interface the service already provides.
       </p>
     </header>
+    <section class="example-guardrails" id="decision-example">
+      <h2>Review one send.</h2>
+      <p>
+        Read the current campaign, then approve or decline. Try changing the audience or permission
+        after review to see what happens when the service checks again.
+      </p>
+      <ActionDemo expanded />
+    </section>
     <InterfaceMap />
     <section class="example-notes">
       <div>
@@ -74,15 +82,6 @@ import '../styles/catalog.css';
           result interpretation.
         </p>
       </div>
-    </section>
-    <section class="example-guardrails">
-      <h2>Try a decision after the terms change.</h2>
-      <p>
-        For a campaign approval, change the audience, revoke permission or expire the proposal
-        between the service read and confirmation. This local model shows why the service must check
-        again when it acts.
-      </p>
-      <ActionDemo />
     </section>
   </main>
 </Base>

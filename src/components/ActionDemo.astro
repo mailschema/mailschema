@@ -1,168 +1,247 @@
 ---
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { resolve } from 'node:path';
 import Icon from './Icon.astro';
 import type campaign from '../../specifications/map-0.3/examples/campaign-send-approval.json';
 import { typeRecords } from '../data/types';
+import { specification } from '../data/specification';
 import '../styles/demo.css';
-const type = typeRecords.find((type) => type.slug === 'campaign-send-approval')!;
+
+interface Props {
+  expanded?: boolean;
+  id?: string;
+}
+const { expanded = false, id = 'campaign-decision' } = Astro.props;
+const type = typeRecords.find((record) => record.slug === 'campaign-send-approval')!;
 const message = type.example as typeof campaign;
 const details = message.details;
+const content = readFileSync(resolve(specification.source, 'examples/campaign.md'), 'utf8');
+if (`sha-256:${createHash('sha256').update(content).digest('hex')}` !== details.content.digest)
+  throw new Error('Campaign preview differs from its example content digest.');
+const paragraphs = content.trim().split(/\n\n+/).slice(1);
 const scheduledAt = 'at' in details.schedule ? details.schedule.at : null;
+const timing = details.schedule.mode === 'immediate' ? 'When approved' : scheduledAt;
 ---
 
-<div class="review-demo" data-action-demo data-version={message.terms.version}>
+<div
+  class="review-demo"
+  data-action-demo
+  data-version={message.terms.version}
+  data-audience={details.audience.count}
+  data-state="email"
+>
   <div class="demo-toolbar">
-    <span class="eyebrow">Campaign Send Approval</span>
+    <span class="demo-mailbox">
+      <Icon name="mail" size={18} /> Example inbox
+    </span>
     <span class="demo-local">
-      <span class="small-dot"></span> Local illustration
+      <span class="small-dot"></span> Interactive illustration
     </span>
   </div>
   <div class="demo-body">
     <div class="demo-message">
-      <div class="message-sender">
-        <span class="sender-avatar">
-          m<span>↗</span>
-        </span>
-        <div>
-          <strong>Example campaign service</strong>
-          <span>To {message.recipient}</span>
+      <article class="demo-email" aria-label="Email request">
+        <div class="message-sender">
+          <span class="sender-avatar" aria-hidden="true">
+            <Icon name="mail" size={20} />
+          </span>
+          <div>
+            <strong>Example campaign service</strong>
+            <span>To {message.recipient}</span>
+          </div>
         </div>
-      </div>
-      <h3>{message.subject.title}</h3>
-      <p class="message-intro">
-        {details.summary} Approval authorizes this send; it does not grant permission for future
-        campaigns.
-      </p>
-      <dl class="interaction-fields">
-        <div>
-          <dt>Sender</dt>
-          <dd>{details.sender.mailbox}</dd>
+        <h3>{message.subject.title}</h3>
+        <p class="message-intro">{details.summary}</p>
+        <dl class="message-facts">
+          <div>
+            <dt>Requested by</dt>
+            <dd>{details.requester}</dd>
+          </div>
+          <div>
+            <dt>Audience</dt>
+            <dd>{details.audience.count.toLocaleString('en')} newsletter subscribers</dd>
+          </div>
+          <div>
+            <dt>Timing</dt>
+            <dd>{timing}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <section class="demo-inbox-actions" aria-label="Inbox decision controls">
+        <div class="inbox-actions-heading">
+          <span>
+            <Icon name="layers" size={16} /> Inbox actions
+          </span>
+          <span class="demo-connection">{new URL(message.service.id).hostname}</span>
         </div>
-        <div>
-          <dt>Content revision</dt>
-          <dd>{details.content.revision}</dd>
+        <div data-start>
+          <p class="action-intro">Read the current campaign through your connected account.</p>
+          <button class="button primary" data-read disabled>
+            <span data-read-label>Review request</span> <Icon size={16} />
+          </button>
         </div>
-        <div>
-          <dt>Audience</dt>
-          <dd>
-            {details.audience.count.toLocaleString('en')} · {details.audience.label}
-          </dd>
-        </div>
-        <div>
-          <dt>Audience snapshot</dt>
-          <dd>{details.audience.revision}</dd>
-        </div>
-        <div>
-          <dt>Schedule</dt>
-          <dd>
-            {details.schedule.mode === 'immediate' ? 'Send when approved' : scheduledAt || 'Schedule not specified'}
-          </dd>
-        </div>
-      </dl>
-      <div class="demo-action-area">
-        <button class="button primary compact" data-read disabled>
-          Check with the service <Icon size={15} />
-        </button>
+
         <div data-confirmation hidden>
-          <h4>Confirm this send</h4>
-          <p class="message-intro">
-            The installed connector has read the proposal from the service. The host asks you to
-            authorize sending revision {details.content.revision} to the displayed audience and
-            sender.
+          <h4 tabindex="-1" data-review-heading>
+            Review this send
+          </h4>
+          <div class="campaign-preview">
+            <span class="preview-label">Email to send</span>
+            <h5>{details.content.title}</h5>
+            {paragraphs.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+          <dl class="proposal-facts">
+            <div>
+              <dt>From</dt>
+              <dd>
+                {details.sender.name} &lt;{details.sender.mailbox}&gt;
+              </dd>
+            </div>
+            <div>
+              <dt>To</dt>
+              <dd>
+                <span data-reviewed-audience>{details.audience.count.toLocaleString('en')}</span>{' '}
+                newsletter subscribers
+              </dd>
+            </div>
+            <div>
+              <dt>Send</dt>
+              <dd>{timing}</dd>
+            </div>
+          </dl>
+          <div class="demo-main-actions">
+            <button class="button primary" data-confirm>
+              Approve send <Icon name="check" size={16} />
+            </button>
+            <button class="button demo-decline" data-decline>
+              Decline
+            </button>
+          </div>
+          <p class="action-footnote">
+            Approving authorizes this one send, with the content and audience shown here.
           </p>
-          <button class="button primary compact" data-confirm>
-            Authorize this send <Icon name="check" size={15} />
-          </button>
-          <button class="demo-cancel" data-cancel>
-            Cancel
+          <button class="demo-text-button" data-back>
+            Back to email
           </button>
         </div>
-        <p class="action-footnote">
-          The email describes the decision. Your installed connector supplies the service connection
-          and credentials.
-        </p>
-      </div>
-      <details class="demo-description">
-        <summary>Read the MAP description</summary>
-        <pre><code>{JSON.stringify(message, null, 2)}</code></pre>
-      </details>
+
+        <div class="demo-outcome" data-outcome hidden>
+          <span class="outcome-mark" data-outcome-mark aria-hidden="true">
+            ✓
+          </span>
+          <h4 tabindex="-1" data-outcome-title>
+            Approval recorded
+          </h4>
+          <p data-outcome-body></p>
+          <button class="button primary" data-review-again hidden>
+            Review updated request <Icon size={16} />
+          </button>
+        </div>
+      </section>
     </div>
-    <aside class="demo-inspector" aria-label="Decision walkthrough">
+
+    <aside class="demo-inspector" aria-label="Service activity">
       <div class="inspector-heading">
-        <span class="eyebrow">At the service</span>
-        <span class="pill">Example</span>
+        <span class="eyebrow">Service activity</span>
+        <Icon name="layers" size={17} />
       </div>
-      <div class="inspector-state">
-        <span class="state-symbol">↗</span>
-        <span class="eyebrow" data-stage>
-          Email received
-        </span>
-        <h4 data-title>The email is a starting point.</h4>
-        <p data-explanation>
-          The connector checks the current proposal, recipient, tenant and permission with the
-          service before offering a decision.
-        </p>
-      </div>
+      <ol class="demo-activity">
+        <li data-step="received" data-state="done">
+          <span class="activity-marker" aria-hidden="true">
+            ✓
+          </span>
+          <div>
+            <strong>Email received</strong>
+            <p>The message asks for a decision.</p>
+          </div>
+        </li>
+        <li data-step="review" data-state="waiting">
+          <span class="activity-marker" aria-hidden="true">
+            2
+          </span>
+          <div>
+            <strong>Current proposal</strong>
+            <p data-review-activity>Ready to check with the service.</p>
+          </div>
+        </li>
+        <li data-step="decision" data-state="waiting">
+          <span class="activity-marker" aria-hidden="true">
+            3
+          </span>
+          <div>
+            <strong>Service decision</strong>
+            <p data-decision-activity>Waiting for your choice.</p>
+          </div>
+        </li>
+      </ol>
       <div class="demo-result" role="status" aria-live="polite" aria-atomic="true">
-        <span class="eyebrow">Service result</span>
-        <p data-result>No request made. No send queued.</p>
+        <span class="eyebrow">Result</span>
+        <p data-result>Nothing has been approved or queued.</p>
       </div>
-      <div class="demo-scenarios">
-        <label for="approval-scenario">At the moment of approval</label>
-        <select id="approval-scenario" data-scenario disabled>
-          <option value="current">Terms and permission still valid</option>
-          <option value="stale">The audience has changed</option>
-          <option value="revoked">Sending permission was revoked</option>
-          <option value="decided">Someone else declined first</option>
-          <option value="expired">The proposal has expired</option>
-        </select>
-        <div class="demo-utilities">
-          <button data-reset disabled>
-            Reset example <Icon name="reset" size={14} />
-          </button>
-        </div>
+      <div class="demo-utilities">
+        <button class="demo-text-button demo-change" data-change hidden>
+          What if the audience changes? <Icon size={15} />
+        </button>
+        <button class="demo-text-button" data-reset disabled>
+          <Icon name="reset" size={15} /> Start again
+        </button>
       </div>
     </aside>
   </div>
+
+  <details class="demo-inspection" open={expanded}>
+    <summary>
+      Inspect the exchange <Icon name="chevron" size={17} />
+    </summary>
+    <div class="inspection-content">
+      <div class="demo-scenarios">
+        <label for={`${id}-scenario`}>What changes after review?</label>
+        <select id={`${id}-scenario`} data-scenario disabled>
+          <option value="current">The proposal is still current</option>
+          <option value="stale">The audience changes</option>
+          <option value="revoked">Sending permission is revoked</option>
+          <option value="decided">Someone else declines first</option>
+          <option value="expired">The proposal expires</option>
+        </select>
+        <p>The simulated service checks again when you decide. These cases run locally.</p>
+      </div>
+      <div class="inspection-call">
+        <span class="eyebrow">Local service model · TypeScript</span>
+        <pre><code data-local-call>Review the request, then choose an action to inspect the local call.</code></pre>
+        <p>
+          The service owns its request and result format.{' '}
+          <a href="/examples#worked-examples">Inspect the worked HTTP and MCP exchanges →</a>
+        </p>
+      </div>
+      <details class="demo-description">
+        <summary>Read the email's MAP description</summary>
+        <pre><code>{JSON.stringify(message, null, 2)}</code></pre>
+      </details>
+      <div class="inspection-links">
+        <a href={type.contractHref}>
+          JSON contract <Icon size={14} />
+        </a>
+        <a href={`${specification.artifacts}/examples/campaign.md`}>
+          Campaign content <Icon size={14} />
+        </a>
+      </div>
+    </div>
+  </details>
   <div class="demo-caption">
-    <span>
-      Runs locally; no email is sent. This illustrates the decision, not runtime conformance.
-    </span>
-    <a href={type.contractHref}>
-      JSON contract <Icon size={13} />
+    <span>Simulated inbox and service. No email is sent.</span>
+    <a href={`/registry/${type.slug}`}>
+      How this type works <Icon size={14} />
     </a>
   </div>
   <noscript>
     <p class="demo-noscript">
-      Enable JavaScript to step through the approval. The description and contract remain readable
-      without it.
+      Enable JavaScript to review and decide. You can still inspect the description, contract and
+      campaign content.
     </p>
   </noscript>
 </div>
 <script src="../scripts/action-demo.ts"></script>
-<style>
-  .demo-description {
-    margin-top: 25px;
-    font-size: 11px;
-  }
-  .demo-description summary {
-    cursor: pointer;
-    color: var(--blue-ink);
-  }
-  .demo-description pre {
-    max-height: 360px;
-    overflow: auto;
-    background: var(--mist);
-    padding: 16px;
-    font-size: 10px;
-  }
-  [data-confirmation] {
-    border-left: 3px solid var(--blue);
-    padding-left: 18px;
-  }
-  [data-confirmation] h4 {
-    margin: 0 0 12px;
-  }
-  [data-confirmation] .demo-cancel {
-    margin-left: 12px;
-  }
-</style>
