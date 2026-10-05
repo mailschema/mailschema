@@ -304,12 +304,11 @@ Content-Type: application/json
           <li>the exact contract identifier, version and digest;</li>
           <li>the operation identifiers it supports;</li>
           <li>the binding it implements;</li>
-          <li>the integration artifact's location and digest and the exact digest procedure;</li>
-          <li>the supported host interface or declarative format;</li>
-          <li>its lifecycle status, documentation and available evidence.</li>
+          <li>its lifecycle status, documentation and a support declaration or report.</li>
         </ul>
+        <t>If a record distributes an installable integration, it <bcp14>MUST</bcp14> also identify the artifact's location and digest, the exact digest procedure, and the supported host interface or declarative format. Built-in service support does not require a downloadable connector or public source code. A service listing describes support; it does not itself supply an executable connection.</t>
         <t>The <tt>binding</tt> value is an HTTPS identifier for its binding specification or documented service binding, not a closed transport enumeration. A client must explicitly support that binding; the identifier does not trigger a fetch. A declarative integration names the specific description or workflow format and profile it uses. A code integration names its actual host interface and version. Clients <bcp14>MUST NOT</bcp14> assume either form supports an unlisted contract version, operation or host.</t>
-        <t>Records <bcp14>MUST</bcp14> distinguish a publisher's support declaration from a reproducible implementation report. A report identifies the implementation revision, tested roles and operations, setup, observations and missing coverage. The record <bcp14>MUST</bcp14> disclose common ownership when making an interoperability claim. A listing is not certification.</t>
+        <t>Records <bcp14>MUST</bcp14> distinguish a publisher's support declaration from an implementation report. A declaration states the scope claimed by the maintainer. A report identifies the implementation revision, tested roles and operations, setup, observations and missing coverage so others can reproduce it. The record <bcp14>MUST</bcp14> disclose common ownership when making an interoperability claim. A listing is not certification. A consumer-only report states its actual role; it is not a service implementation record.</t>
       </section>
       <section anchor="first-connection" numbered="true">
         <name>First connection</name>
@@ -342,7 +341,7 @@ Content-Type: application/json
       <section anchor="separate-identities" numbered="true">
         <name>Separate identities</name>
         <t>Core, contracts and service bindings have separate identities. Adding a type does not change Core. Adding a service binding does not change the type. An implementation <bcp14>MUST</bcp14> list the exact contract digests it supports; support for a name or a numeric version range is insufficient.</t>
-        <t>A published contract version fixes all its canonical bytes, including normative prose. Changing those bytes requires a new version and digest. A published binding revision likewise retains its original artifact. The implementation record's <tt>artifact.digestMode</tt> is <tt>canonical-json</tt> for an RFC 8785 representation or <tt>bytes</tt> for the exact downloaded artifact; both use SHA-256. The declared format determines which procedure applies; a JSON artifact is not implicitly canonicalized. Code artifacts use <tt>bytes</tt>. Consumers <bcp14>MUST</bcp14> verify the declared digest before installation and <bcp14>MUST NOT</bcp14> infer a different procedure to make it match. Lifecycle metadata, evidence and successor references can change without changing those definitions.</t>
+        <t>A published contract version fixes all its canonical bytes, including normative prose. Changing those bytes requires a new version and digest. A published binding revision likewise retains its original artifact. A record that offers an installable integration uses <tt>artifact.digestMode</tt>: <tt>canonical-json</tt> for an RFC 8785 representation or <tt>bytes</tt> for the exact downloaded artifact; both use SHA-256. The declared format determines which procedure applies; a JSON artifact is not implicitly canonicalized. Code artifacts use <tt>bytes</tt>. Consumers <bcp14>MUST</bcp14> verify the declared digest before installation and <bcp14>MUST NOT</bcp14> infer a different procedure to make it match. Lifecycle metadata, evidence and successor references can change without changing those definitions.</t>
         <t>Development previews <bcp14>MUST</bcp14> be labelled as drafts. A catalogue <bcp14>MUST</bcp14> distinguish a mutable preview from an immutable published revision. Clients <bcp14>MUST</bcp14> pin exact artifacts before execution, including when evaluating a draft. A publisher <bcp14>MUST NOT</bcp14> replace an immutable revision with a changed preview under the same identity.</t>
       </section>
       <section anchor="moving-to-a-new-version" numbered="true">
@@ -441,87 +440,9 @@ Content-Type: application/json
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8058.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8792.xml"/>
     </references>
-        <section anchor="initial-registry-contracts" numbered="true">
-      <name>Initial Registry contracts</name>
-      <t>These contracts define separate interactions. Each specifies its operations, effects, exact terms and permitted bindings. Implementations select the types they support; Core does not require this collection. MailSchema maintains the initial contributions, and other maintainers can define types in their own namespaces. The JSON contract is the authoritative definition.</t>
-      <section anchor="account-security-response" numbered="true">
-        <name>Account Security Response</name>
-        <t>Record that a recipient does not recognize a specific account event, without changing account access.</t>
-        <t>Identifier: <tt>https://mailschema.org/types/account-security-response</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:ec7c85eb9415914a59be29496f6b50ea77839a579420155f17b39a5968a4e611</tt>.</t>
-        <t>The event <bcp14>MUST</bcp14> be a concrete event in the addressed principal's service account. The terms version <bcp14>MUST</bcp14> bind that account, event identifier, occurrence time, activity description, and presented device or location information.</t>
-        <t>The report <bcp14>MUST</bcp14> be recorded as the recipient's unverified protective signal. It <bcp14>MUST NOT</bcp14> claim that fraud occurred or that a device or location was verified merely because the recipient submitted the report.</t>
-        <t>The report <bcp14>MUST NOT</bcp14> by itself lock or delete the account, revoke sessions or credentials, change recovery settings, transfer assets, disclose protected data, or execute another consequential action. Any such response requires a separate authenticated service process and its own authorization.</t>
-        <t>The contract <bcp14>MUST NOT</bcp14> offer a recognize, authorize-login, or approve-device operation. Recognizing an event is not authorization for a new session.</t>
-        <t>For capability use, the event report <bcp14>MUST</bcp14> expire within 259200 seconds of issuedAt and no later than expiresAt. A copied capability can submit only the same report for the same event. It cannot supply a message or identify another event.</t>
-        <t>The email <bcp14>SHOULD</bcp14> minimize device and location information. The human route <bcp14>MUST</bcp14> authenticate the principal before disclosing protected event details beyond the minimal email preview.</t>
-        <t><strong>Report unrecognized activity (<tt>report-unrecognized</tt>).</strong> Record that the recipient reports this event as unrecognized, without executing account remediation or making a verified fraud assertion.</t>
-        <t>Bindings: <tt>credential</tt>, <tt>capability</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/protection</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
-        <t>Input: none.</t>
-        <t>Capability kind: <tt>protective-report</tt>; maximum lifetime: 259200 seconds.</t>
-        <ul>
-          <li><tt>reported</tt>: The service recorded the protective report; no account remediation is implied.</li>
-        </ul>
-      </section>
-      <section anchor="campaign-send-approval" numbered="true">
-        <name>Campaign Send Approval</name>
-        <t>Authorize sending one immutable campaign revision to one fixed audience under stated delivery terms, without an additional charge.</t>
-        <t>Identifier: <tt>https://mailschema.org/types/campaign-send-approval</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:de3c88a0712adb1d0c6e82f437b825c83520d8e1c44c7b032a2cfcfe5ce55731</tt>.</t>
-        <t>The service <bcp14>MUST</bcp14> bind the subject, recipient, service tenant, contract digest, and all action-relevant details to terms.version. Every decision <bcp14>MUST</bcp14> atomically compare that version and enforce current authorization, expiry, and proposal state.</t>
-        <t>The service <bcp14>MUST</bcp14> freeze the referenced content revision and all other action-relevant inputs for accepted asynchronous work. If it cannot execute those exact terms it <bcp14>MUST</bcp14> stop that work; it <bcp14>MUST NOT</bcp14> substitute current mutable values.</t>
-        <t>The host <bcp14>MUST</bcp14> obtain the actual immutable content and relevant destination or audience information through the trusted service binding before claiming a policy check over those values. A digest, title, preview, count, or identifier alone does not demonstrate content-policy compliance.</t>
-        <t>The service <bcp14>MUST</bcp14> permit at most one terminal decision for the proposal. approve, decline, and request-changes are mutually exclusive terminal decisions for that proposal version. A revised proposal requires a new interaction and new decision.</t>
-        <t>The request-changes operation <bcp14>MUST</bcp14> only record the supplied feedback and close this proposal as requiring revision. It <bcp14>MUST NOT</bcp14> generate, edit, approve, send, or publish revised content automatically. Feedback remains untrusted text.</t>
-        <t>A capability offered for decline <bcp14>MUST</bcp14> be independently scoped to that refusal and exact proposal, expire within seven days of issuedAt and no later than expiresAt, and convey no authority to approve or supply feedback.</t>
-        <t>Exact terms <bcp14>MUST</bcp14> include sender mailbox and display name, reply destination when present, message subject and all content variants, personalization rules and their input snapshot, audience membership and exclusions, attachments, link destinations, and schedule. Changed audience membership invalidates the version even if its label and count are unchanged.</t>
-        <t>The audience snapshot <bcp14>MUST</bcp14> identify the effective recipient set after exclusions. Its count <bcp14>MUST</bcp14> equal that set's size. The service <bcp14>MUST</bcp14> preserve that snapshot for execution and <bcp14>MUST NOT</bcp14> expand a live segment at send time. Normal suppression to respect a later opt-out or a new safety restriction <bcp14>MAY</bcp14> reduce delivery; it <bcp14>MUST NOT</bcp14> add or substitute recipients.</t>
-        <t>Content digest <bcp14>MUST</bcp14> identify the immutable service content artifact, including attachments and personalization definitions. The trusted implementation <bcp14>MUST</bcp14> document the artifact representation and digest verification. Personalized output <bcp14>MUST</bcp14> be derived only from the approved definition and frozen inputs.</t>
-        <t>The sender mailbox <bcp14>MUST</bcp14> belong to an identity the service currently authorizes the principal to use. Approval <bcp14>MUST NOT</bcp14> grant sending permission for another sender, tenant, campaign, or subsequent revision.</t>
-        <t>The schedule <bcp14>MUST</bcp14> specify immediate execution or one UTC instant. The service <bcp14>MUST NOT</bcp14> silently shift the approved schedule to a materially different one. Operational delivery delays <bcp14>MAY</bcp14> occur and <bcp14>MUST</bcp14> be reported accurately.</t>
-        <t>Approval under this contract <bcp14>MUST NOT</bcp14> cause an incremental monetary charge or debit prepaid value. The service <bcp14>MUST</bcp14> refuse approval if the maximum approved audience is not covered by an included entitlement at decision time, and <bcp14>MUST</bcp14> stop dispatch rather than charge if that entitlement is no longer available at admission. A paid send needs a different contract that declares the payment effect and binds its exact financial terms.</t>
-        <t><strong>Approve (<tt>approve</tt>).</strong> Authorize sending this campaign on the exact terms displayed, without an additional charge. Acceptance may queue the work; the connector <bcp14>MUST</bcp14> distinguish acceptance from completion. This decision does not grant standing permission for later proposals.</t>
-        <t>Bindings: <tt>credential</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/communication</tt>, <tt>https://mailschema.org/effects/disclosure</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
-        <t>Input: none.</t>
-        <ul>
-          <li><tt>accepted</tt>: The service accepted the exact decision; the authorized work may still be pending.</li>
-          <li><tt>completed</tt>: The service confirms sending this campaign completed under the accepted terms.</li>
-          <li><tt>failed</tt>: The authorized work failed; the connector preserves the service's partial-progress information and <bcp14>MUST NOT</bcp14> claim that no external effect occurred.</li>
-        </ul>
-        <t><strong>Decline (<tt>decline</tt>).</strong> Refuse this exact proposal and close it without authorizing the requested work. The service <bcp14>MUST NOT</bcp14> execute the proposed work as a consequence of refusal.</t>
-        <t>Bindings: <tt>credential</tt>, <tt>capability</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/refusal</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
-        <t>Input: none.</t>
-        <t>Capability kind: <tt>refusal</tt>; maximum lifetime: 604800 seconds.</t>
-        <ul>
-          <li><tt>declined</tt>: The service recorded refusal of this proposal.</li>
-        </ul>
-        <t><strong>Request changes (<tt>request-changes</tt>).</strong> Record specific feedback and close this proposal as requiring revision, without authorizing the proposed work or a future revision.</t>
-        <t>Bindings: <tt>credential</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/state</tt>.</t>
-        <t>Input: an object validated by the contract's input schema.</t>
-        <ul>
-          <li><tt>changes-requested</tt>: The service recorded the feedback; a revised proposal requires a new decision.</li>
-        </ul>
-      </section>
-      <section anchor="email-address-confirmation" numbered="true">
-        <name>Email Address Confirmation</name>
-        <t>Confirm access to a mailbox for a principal-initiated communication request, without creating a signed-in session or granting account authority.</t>
-        <t>Identifier: <tt>https://mailschema.org/types/email-address-confirmation</tt>. Version: <tt>0.1</tt>. Profile: <tt>https://mailschema.org/profiles/map/0.3</tt>.</t>
-        <t>Canonical contract digest: <tt>sha-256:fc9d8a4fb3f3065f93bd53d1f9238b13df63186588d3f3f44982d5813412e282</tt>.</t>
-        <t>The sole permitted purpose is communication-address: validating a mailbox for future communications requested by its controller. Confirmation <bcp14>MUST NOT</bcp14> itself send a campaign or disclose private data. Subsequent communication requires its own applicable consent and service permission.</t>
-        <t>The service origin, recipient, details.mailbox, details.requestId, and details.purpose <bcp14>MUST</bcp14> match a request recorded independently when the principal initiated it. details.mailbox <bcp14>MUST</bcp14> identify the same controlled mailbox as recipient. The initiator <bcp14>MUST</bcp14> retain enough session or authenticated request state to establish this match; the email cannot create that state.</t>
-        <t>The terms version <bcp14>MUST</bcp14> bind the mailbox, request identifier, purpose, and any associated non-authentication account context. Changes require a new request, interaction, and confirmation.</t>
-        <t>Confirmation <bcp14>MUST NOT</bcp14> authenticate a session, reset a password, link or take over an account, add a recovery address, grant access, or serve as an authentication factor. Those flows require their own established security mechanisms.</t>
-        <t>The interaction and capability <bcp14>MUST</bcp14> expire within 86400 seconds of issuedAt. The service <bcp14>MUST</bcp14> invalidate confirmation authority on first successful use. A duplicate <bcp14>MAY</bcp14> acknowledge prior processing but <bcp14>MUST NOT</bcp14> revalidate or extend confirmation.</t>
-        <t>The human route <bcp14>MUST</bcp14> establish the independently recorded initiation context and require an explicit unsafe-method submission. Fetching the email link <bcp14>MUST NOT</bcp14> confirm the mailbox or consume confirmation authority.</t>
-        <t>The 24-hour and invalidation-on-use limits adopt the design of NIST SP 800-63A-4 section 3.8 for email confirmation codes. This contract does not assert that every email validation use case falls within that publication's identity-proofing scope.</t>
-        <t><strong>Confirm address (<tt>confirm</tt>).</strong> Confirm that the principal controls the addressed mailbox for the independently matched communication request, once only. This is not a login or grant of account access.</t>
-        <t>Bindings: <tt>credential</tt>, <tt>capability</tt>. Actors: human, agent. Exact terms: required. Effects: <tt>https://mailschema.org/effects/assertion</tt>, <tt>https://mailschema.org/effects/state</tt>.</t>
-        <t>Input: none.</t>
-        <t>Capability kind: <tt>address-confirmation</tt>; maximum lifetime: 86400 seconds.</t>
-        <ul>
-          <li><tt>confirmed</tt>: The service recorded the requested mailbox confirmation.</li>
-        </ul>
-      </section>
+        <section anchor="illustrative-type-contract" numbered="true">
+      <name>Illustrative type contract</name>
+      <t>This pinned contract revision illustrates how a type defines operations, effects, exact terms and permitted bindings. It is an example, not a required MAP type. The versioned JSON contract is its authoritative definition.</t>
       <section anchor="publication-approval" numbered="true">
         <name>Publication Approval</name>
         <t>Authorize publishing one immutable content revision at stated destinations and visibility.</t>

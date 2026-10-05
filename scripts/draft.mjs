@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { contractText } from './map-0.3.mjs';
+import { contractText, contracts } from './map-0.3.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
@@ -258,8 +258,24 @@ const main =
   core03.slice(split);
 const context = read(`${base}/context.jsonld`).trim();
 const example = read(`${base}/examples/publication-approval.json`).trim();
+const pinned = contracts.find(
+  (item) => item.slug === 'publication-approval' && item.contract.version === '0.1',
+);
+if (
+  !pinned ||
+  JSON.parse(example).type.contractDigest !== pinned.digest ||
+  JSON.parse(example).type.version !== '0.1'
+)
+  throw new Error(
+    'The draft example no longer matches its pinned Publication Approval 0.1 contract.',
+  );
 const appendix =
-  contractText({ schemas: false }) +
+  contractText({
+    schemas: false,
+    only: 'publication-approval',
+    onlyVersion: '0.1',
+    title: 'Illustrative type contract',
+  }) +
   '\n## Description example\n\n' +
   'This generated example uses synthetic identities and an inert service. The content digest is illustrative. Long code lines are folded as described in [RFC 8792](https://www.rfc-editor.org/rfc/rfc8792); unfold them before parsing. The complete contract documents and schemas are maintained alongside the specification source.\n\n```json\n' +
   example +

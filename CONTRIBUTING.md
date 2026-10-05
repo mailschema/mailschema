@@ -1,28 +1,24 @@
 # Contributing to MailSchema
 
-MailSchema develops Mail Action Protocol, shared interaction types and the Registry in public. Contributions should improve interoperability between independently configured clients and services.
+MailSchema develops Mail Action Protocol (MAP), type contracts and the Registry in public. Start with the [0.3 contribution guide](https://mailschema.org/contribute) and check existing types and standards before proposing a new definition.
 
-## Start with the right contribution
+## What to submit
 
-- **Protocol change:** open an issue describing the interoperability problem, existing standards considered and the behavior two implementations need to share.
-- **New type:** use `registry/examples/new-type.json` and include operations, permission boundaries, results, a complete example and related work.
-- **Amendment:** bind the change to the current record digest so concurrent or stale changes are visible.
-- **Implementation evidence:** identify the exact type version, execution profile, record digest, supported operations and reproducible evidence.
+- **Protocol change:** open an issue with the concrete interoperability problem, existing standards considered and the common behavior needed.
+- **New type:** add a versioned contract at `specifications/map-0.3/contracts/<slug>-<version>.json`, an example keyed by `<slug>` in `examples/source.json`, and category, maintainers, current version and lifecycle status in `registry.json`. The contract owns its identifier and meaning; the Registry record references it.
+- **Contract revision:** preserve the published file and add a new versioned file. Update the current selection and status in `registry.json` only after reviewing the change. Earlier contract bytes and URLs remain available.
+- **Service support:** add a record under `specifications/map-0.3/implementations/` naming the exact contract ID, version and digest, supported operations, binding, maintainer and source of the claim. Include artifact format and digest when distributing an installable integration. A declaration can describe built-in service support; a test report identifies observed behavior and how to reproduce it.
 - **Code or documentation:** open a focused pull request with the relevant checks.
 
-The browser checker at `https://mailschema.org/contribute/` prepares and validates contribution files locally. The repository importer can validate the same file:
+The browser checker at `https://mailschema.org/contribute/` uses the same contract and service-record parsers as the repository. It prepares JSON for GitHub; the reviewed repository is the source of accepted contributions. The older `registry:ingest` command maintains the MAP 0.2 archive and is not the 0.3 submission path.
 
 ```sh
-npm run registry:ingest -- contribution.json
-npm run registry:ingest -- contribution.json --write
+npm ci
+npm run spec:generate
 npm run verify
 ```
 
-## Review
-
-Passing validation establishes that a contribution has the required structure and consistent references. It does not establish acceptance, compatibility or conformance. Review considers scope, overlap with existing standards, security and privacy, attribution, maintenance and implementation evidence.
-
-Normative behavior requires at least one complete example and testable acceptance criteria. Stable status requires evidence from interoperable implementations; two services under common ownership are useful implementation evidence but are not independent adoption.
+A new type does not require another deployed service or a package release. A support declaration is not an interoperability result, and a Registry listing does not connect an account. Review considers meaning, overlap with existing standards, security, privacy, ownership, maintenance and the evidence actually claimed. New normative behavior needs a complete example and clear acceptance criteria. Stable status needs evidence under the published governance criteria.
 
 ## Rights and attribution
 

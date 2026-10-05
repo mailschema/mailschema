@@ -26,13 +26,13 @@ npm run verify
 ## Site structure
 
 - `/specification`: Sourcey reader for Core, the bindings, type contracts, conformance and standards references.
-- `/registry`, `/registry/<type>`: the current type collection and full definitions. `/types` and its detail URLs redirect there for existing links. Contract identifiers remain `https://mailschema.org/types/<type>`; a browser redirect does not change their exact identity or digest.
+- `/registry`, `/registry/<type>`: the type collection, current definitions, version history and listed service support. `/types` and its detail URLs redirect there for existing links. Contract identifiers remain `https://mailschema.org/types/<type>`; a browser redirect does not change their exact identity or digest.
 - `/registry/map-0.3.json`: current draft catalogue, with canonical contract digests and source download URLs.
 - `/artifacts/map-0.3/`: byte-for-byte downloads from the canonical draft files, generated at build time.
 - `/interfaces`: searchable primary-source research across execution, descriptions, delivery, discovery, identity and domain workflows.
 - `/examples`: the interface-family overview, worked MIME → MAP → service exchanges and an interactive exact-terms illustration. These are generated local examples, not live integrations.
 - `/tools`: current schemas, contracts, examples and conformance material.
-- `/contribute`: local contract checks and preview, followed by GitHub review. No additional submission service.
+- `/contribute`: local contract and service-record checks and preview, followed by GitHub review. No additional submission service.
 - `/search`, `/about`: current chapter/type search and project explanation.
 - `/archive/map-0.1` and `/archive/map-0.2`: superseded profiles, type history and package documentation, unlisted in the current navigation. Published artifact bytes remain unchanged.
 
@@ -49,8 +49,9 @@ Type contracts define semantics independently of Core. The four initial types ar
 | Source                                                                               | Owns                                                           | Consumers                                                                                     |
 | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `specifications/map-0.3/core.md`, `http.md`, `registry.md`, `capability.md`          | Normative protocol text                                        | Sourcey reader, generated Internet-Draft                                                      |
-| `specifications/map-0.3/contracts/*.json`                                            | Complete type semantics, schemas and operations                | Generated contract chapter, I-D appendix, Types, Registry, downloads and contribution checker |
-| `specifications/map-0.3/registry.json`                                               | Category, maintainers and implementation evidence              | Current site projection                                                                       |
+| `specifications/map-0.3/contracts/<slug>-<version>.json`                              | Complete versioned type semantics, schemas and operations      | Generated contract chapter, selected I-D example, Registry, downloads and contribution checker |
+| `specifications/map-0.3/registry.json`                                               | Category, maintainers, version status and current selection    | Current site projection                                                                       |
+| `specifications/map-0.3/implementations/*.json`                                      | Exact service support declarations and reports                 | Registry type pages and catalogue                                                              |
 | `specifications/map-0.3/examples/source.json`                                        | Illustrative instance values                                   | Generated digest-bound examples and local demonstration                                       |
 | `specifications/map-0.3/bindings/publication.source.json`, `examples/publication.md` | Native API description and example content                     | Generated MIME, OpenAPI and MCP artifacts, primary walkthrough                                |
 | `docs/research/map-interfaces.json`                                                  | Public interface capabilities, source evidence and design assessments | Generated research report and landscape, research explorer, interface diagram and search                    |
@@ -60,7 +61,7 @@ Type contracts define semantics independently of Core. The four initial types ar
 | `src/data/navigation.ts`                                                             | Main navigation                                                | Astro and Sourcey headers                                                                     |
 | `docs/releases/current.json`                                                         | Verified package selections                                    | Historical package documentation                                                              |
 
-Run `npm run spec:generate` after editing draft sources, then `npm run verify`. Generation validates contracts, binds example digests, runs shape vectors and refreshes the type chapter, research report and Internet-Draft. Verification rejects stale projections. New types require their contract, Registry metadata and complete source example; all current surfaces discover that collection, without per-page lists. Repository review owns acceptance and contributor attribution.
+Run `npm run spec:generate` after editing draft sources, then `npm run verify`. Generation validates contracts, binds example digests, runs shape vectors and refreshes the type chapter, research report and Internet-Draft. The draft uses one explicitly selected illustrative contract; Registry growth does not change its normative content. Verification rejects stale projections. New types require a versioned contract, Registry metadata and complete source example; all current surfaces discover that collection, without per-page lists. Repository review owns acceptance and contributor attribution.
 
 The prior Registry compiler, runtime and package checks remain compatibility maintenance. `src/data/legacy-types.ts` supplies historical record/snapshot URLs and `/registry/catalog.json`, whose existing format is retained for released clients and marked superseded with a link to the current catalogue. Those files never supply current pages. Published profile, schema and contract bytes remain unchanged. Adding a current type never triggers a package release.
 

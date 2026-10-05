@@ -2,7 +2,7 @@
 
 `draft-mailschema-mail-action-protocol-00.xml` is the generated individual-submission candidate for MAP 0.3. It describes an email action description, existing-service HTTP mappings, and an optional experimental capability binding. It defines no universal execution API. It is not submitted or adopted.
 
-The canonical text and four contracts are in [specifications/map-0.3](../specifications/map-0.3/README.md). `npm run spec:generate` validates and regenerates the examples, contract projection, draft inventory, and RFCXML. `npm run spec:check` and `npm run draft:check` detect drift. Do not edit generated XML.
+The canonical text and type contracts are in [specifications/map-0.3](../specifications/map-0.3/README.md). The draft illustrates one pinned Publication Approval contract revision and its exchange; the wider Registry collection evolves separately. `npm run spec:generate` validates and regenerates the examples, contract projection, draft inventory, and RFCXML. `npm run spec:check` and `npm run draft:check` detect drift. Do not edit generated XML.
 
 Build locally with the IETF `xml2rfc` author tool:
 

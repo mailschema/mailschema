@@ -26,13 +26,17 @@ An implementation record MUST identify:
 - the exact contract identifier, version and digest;
 - the operation identifiers it supports;
 - the binding it implements;
-- the integration artifact's location and digest and the exact digest procedure;
-- the supported host interface or declarative format;
-- its lifecycle status, documentation and available evidence.
+- its lifecycle status, documentation and a support declaration or report.
+
+If a record distributes an installable integration, it MUST also identify the
+artifact's location and digest, the exact digest procedure, and the supported
+host interface or declarative format. Built-in service support does not require
+a downloadable connector or public source code. A service listing describes
+support; it does not itself supply an executable connection.
 
 The `binding` value is an HTTPS identifier for its binding specification or documented service binding, not a closed transport enumeration. A client must explicitly support that binding; the identifier does not trigger a fetch. A declarative integration names the specific description or workflow format and profile it uses. A code integration names its actual host interface and version. Clients MUST NOT assume either form supports an unlisted contract version, operation or host.
 
-Records MUST distinguish a publisher's support declaration from a reproducible implementation report. A report identifies the implementation revision, tested roles and operations, setup, observations and missing coverage. The record MUST disclose common ownership when making an interoperability claim. A listing is not certification.
+Records MUST distinguish a publisher's support declaration from an implementation report. A declaration states the scope claimed by the maintainer. A report identifies the implementation revision, tested roles and operations, setup, observations and missing coverage so others can reproduce it. The record MUST disclose common ownership when making an interoperability claim. A listing is not certification. A consumer-only report states its actual role; it is not a service implementation record.
 
 ### First connection
 
@@ -67,7 +71,7 @@ A human route remains a separate service interaction. Its page must enforce Core
 
 Core, contracts and service bindings have separate identities. Adding a type does not change Core. Adding a service binding does not change the type. An implementation MUST list the exact contract digests it supports; support for a name or a numeric version range is insufficient.
 
-A published contract version fixes all its canonical bytes, including normative prose. Changing those bytes requires a new version and digest. A published binding revision likewise retains its original artifact. The implementation record's `artifact.digestMode` is `canonical-json` for an RFC 8785 representation or `bytes` for the exact downloaded artifact; both use SHA-256. The declared format determines which procedure applies; a JSON artifact is not implicitly canonicalized. Code artifacts use `bytes`. Consumers MUST verify the declared digest before installation and MUST NOT infer a different procedure to make it match. Lifecycle metadata, evidence and successor references can change without changing those definitions.
+A published contract version fixes all its canonical bytes, including normative prose. Changing those bytes requires a new version and digest. A published binding revision likewise retains its original artifact. A record that offers an installable integration uses `artifact.digestMode`: `canonical-json` for an RFC 8785 representation or `bytes` for the exact downloaded artifact; both use SHA-256. The declared format determines which procedure applies; a JSON artifact is not implicitly canonicalized. Code artifacts use `bytes`. Consumers MUST verify the declared digest before installation and MUST NOT infer a different procedure to make it match. Lifecycle metadata, evidence and successor references can change without changing those definitions.
 
 Development previews MUST be labelled as drafts. A catalogue MUST distinguish a mutable preview from an immutable published revision. Clients MUST pin exact artifacts before execution, including when evaluating a draft. A publisher MUST NOT replace an immutable revision with a changed preview under the same identity.
 

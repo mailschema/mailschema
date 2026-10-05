@@ -7,7 +7,12 @@
         "href": "https://github.com/mailschema"
       }
     ],
-    "implementationEvidence": []
+    "current": "0.1",
+    "versions": {
+      "0.1": {
+        "status": "Draft"
+      }
+    }
   },
   "campaign-send-approval": {
     "category": "Communication",
@@ -17,7 +22,12 @@
         "href": "https://github.com/mailschema"
       }
     ],
-    "implementationEvidence": []
+    "current": "0.1",
+    "versions": {
+      "0.1": {
+        "status": "Draft"
+      }
+    }
   },
   "email-address-confirmation": {
     "category": "Address confirmation",
@@ -27,7 +37,12 @@
         "href": "https://github.com/mailschema"
       }
     ],
-    "implementationEvidence": []
+    "current": "0.1",
+    "versions": {
+      "0.1": {
+        "status": "Draft"
+      }
+    }
   },
   "publication-approval": {
     "category": "Publishing",
@@ -37,6 +52,11 @@
         "href": "https://github.com/mailschema"
       }
     ],
-    "implementationEvidence": []
+    "current": "0.1",
+    "versions": {
+      "0.1": {
+        "status": "Draft"
+      }
+    }
   }
 }

@@ -4,9 +4,8 @@ import sourcey from 'sourcey/astro';
 import { readdirSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { specNavigation } from './docs/specification/navigation.ts';
-const currentTypes = new Set(
-  readdirSync('specifications/map-0.3/contracts').map((name) => name.replace(/\.json$/, '')),
-);
+import currentRegistry from './specifications/map-0.3/registry.json' with { type: 'json' };
+const currentTypes = new Set(Object.keys(currentRegistry));
 const historicalPages = [
   ...readdirSync('docs/specification')
     .filter((name) => name.endsWith('.md') && name !== 'index.md')
@@ -55,9 +54,12 @@ export default defineConfig({
       name: 'mailschema-registry-watch',
       hooks: {
         'astro:server:setup': ({ server }) => {
-          const roots = ['registry', 'specifications/map-0.3', 'conformance/map-0.3', 'docs/research'].map((path) =>
-            resolve(path),
-          );
+          const roots = [
+            'registry',
+            'specifications/map-0.3',
+            'conformance/map-0.3',
+            'docs/research',
+          ].map((path) => resolve(path));
           server.watcher.add(roots);
           let restart;
           const changed = (path) => {

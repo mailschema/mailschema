@@ -74,6 +74,9 @@
   gap: 8px;
   color: var(--blue-ink);
 }
+.contribution-checker [hidden] {
+  display: none !important;
+}
 .contribution-editor-heading {
   display: flex;
   justify-content: space-between;
@@ -81,6 +84,19 @@
   gap: 20px;
   font-size: 12px;
   margin-bottom: 14px;
+}
+.contribution-editor-heading select,
+.contribution-editor-heading button {
+  max-width: 100%;
+  padding: 7px 10px;
+  color: var(--blue-ink);
+  background: var(--mist);
+  border: 1px solid oklch(73% 0.016 275);
+  border-radius: 4px;
+  font: inherit;
+}
+.contribution-editor-heading button {
+  cursor: pointer;
 }
 .contribution-file {
   display: flex;

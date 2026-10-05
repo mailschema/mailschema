@@ -48,35 +48,87 @@ export const contracts = readdirSync(resolve(root, directory, 'contracts'))
   .map((name) => {
     const path = `${directory}/contracts/${name}`;
     const contract = parseContractText(readFileSync(resolve(root, path)));
+    const suffix = `-${contract.version}.json`;
+    assert(name.endsWith(suffix), `${name}: filename must end with its contract version`);
+    const slug = name.slice(0, -suffix.length);
+    assert(/^[a-z][a-z0-9-]*$/.test(slug), `${name}: invalid page slug`);
     return {
-      slug: name.slice(0, -5),
+      slug,
       path,
       contract,
       digest: contractDigest(contract),
       validateDetails: checkSchema(contract.detailsSchema),
     };
   });
+const registryMetadata = json(`${directory}/registry.json`);
+assert.equal(
+  new Set(contracts.map((item) => `${item.contract.id}\n${item.contract.version}`)).size,
+  contracts.length,
+  'Duplicate contract identifier and version',
+);
+const currentContracts = contracts.filter(
+  (item) => registryMetadata[item.slug]?.current === item.contract.version,
+);
+assert.deepEqual(
+  Object.keys(registryMetadata).sort(),
+  [...new Set(contracts.map((item) => item.slug))].sort(),
+);
+for (const [slug, record] of Object.entries(registryMetadata)) {
+  assert.deepEqual(
+    Object.keys(record.versions).sort(),
+    contracts
+      .filter((item) => item.slug === slug)
+      .map((item) => item.contract.version)
+      .sort(),
+    `${slug}: each contract version needs Registry metadata`,
+  );
+  assert(
+    currentContracts.some((item) => item.slug === slug),
+    `${slug}: no current contract version`,
+  );
+}
 
-export function contractText({ schemas = true, reader = false } = {}) {
+export function contractText({
+  schemas = true,
+  reader = false,
+  only,
+  onlyVersion,
+  title = 'Initial Registry contracts',
+} = {}) {
+  const selected = contracts.filter(
+    (item) =>
+      (!only || item.slug === only) && (!onlyVersion || item.contract.version === onlyVersion),
+  );
+  if (only && selected.length !== 1)
+    throw new Error(`Missing or ambiguous draft example contract: ${only} ${onlyVersion || ''}`);
   const out = [
-    '## Initial Registry contracts',
+    `## ${title}`,
     '',
-    'These contracts define separate interactions. Each specifies its operations, effects, exact terms and permitted bindings. Implementations select the types they support; Core does not require this collection. MailSchema maintains the initial contributions, and other maintainers can define types in their own namespaces. The JSON contract is the authoritative definition.',
+    only
+      ? 'This pinned contract revision illustrates how a type defines operations, effects, exact terms and permitted bindings. It is an example, not a required MAP type. The versioned JSON contract is its authoritative definition.'
+      : 'These contracts define separate interactions. Each specifies its operations, effects, exact terms and permitted bindings. Implementations select the types they support; Core does not require this collection. MailSchema maintains the initial contributions, and other maintainers can define types in their own namespaces. The JSON contract is the authoritative definition.',
     '',
   ];
-  for (const { contract: c, digest, slug } of contracts) {
+  for (const { contract: c, digest, slug } of selected) {
     out.push(
       `${reader ? '##' : '###'} ${c.name}`,
       '',
       c.summary,
       '',
       reader
-        ? `[Contract and schemas](/registry/${slug}) · [JSON definition](/artifacts/map-0.3/contracts/${slug}.json)`
+        ? `[Contract and schemas](/registry/${slug}) · [JSON definition](/artifacts/map-0.3/contracts/${slug}-${c.version}.json)`
         : `Identifier: \`${c.id}\`. Version: \`${c.version}\`. Profile: \`${c.profile}\`.`,
       '',
       ...(reader ? [] : [`Canonical contract digest: \`${digest}\`.`, '']),
       ...(reader
-        ? ['### Requirements', '', ...c.requirements.map((requirement, index) => `${index + 1}. ${requirement}`), '', '### Operations', '']
+        ? [
+            '### Requirements',
+            '',
+            ...c.requirements.map((requirement, index) => `${index + 1}. ${requirement}`),
+            '',
+            '### Operations',
+            '',
+          ]
         : c.requirements.flatMap((requirement) => [requirement, ''])),
     );
     for (const op of c.operations) {
@@ -131,12 +183,12 @@ export async function draftArtifacts(check) {
       `<!-- interfaces:table -->\n${interfaceLandscape(interfaces)}\n<!-- /interfaces:table -->`,
     ),
   );
-  assert.deepEqual(Object.keys(source).sort(), contracts.map((c) => c.slug).sort());
+  assert.deepEqual(Object.keys(source).sort(), currentContracts.map((c) => c.slug).sort());
   const content = read(`${directory}/examples/publication.md`);
   source['publication-approval'].details.content.title = content.split('\n')[0].replace(/^# /, '');
   source['publication-approval'].details.content.digest = `sha-256:${sha(content)}`;
   const examples = new Map();
-  for (const item of contracts) {
+  for (const item of currentContracts) {
     const example = {
       '@context': contextId,
       '@type': 'MailAction',
@@ -226,7 +278,7 @@ export async function draftArtifacts(check) {
         target[key] = edit.value;
       }
     }
-    const item = contracts.find((c) => c.slug === vector.example);
+    const item = currentContracts.find((c) => c.slug === vector.example);
     const valid = Boolean(core(value) && item.validateDetails(value.details));
     assert.equal(valid, vector.valid, vector.id);
   }
@@ -288,8 +340,6 @@ export async function draftArtifacts(check) {
         version: c.contract.version,
         contractDigest: c.digest,
         path: c.path,
-        status: 'draft',
-        implementationEvidence: [],
       })),
     }),
   );

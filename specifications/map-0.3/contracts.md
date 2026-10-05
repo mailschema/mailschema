@@ -12,7 +12,7 @@ These contracts define separate interactions. Each specifies its operations, eff
 
 Record that a recipient does not recognize a specific account event, without changing account access.
 
-[Contract and schemas](/registry/account-security-response) · [JSON definition](/artifacts/map-0.3/contracts/account-security-response.json)
+[Contract and schemas](/registry/account-security-response) · [JSON definition](/artifacts/map-0.3/contracts/account-security-response-0.1.json)
 
 ### Requirements
 
@@ -39,7 +39,7 @@ Capability kind: `protective-report`; maximum lifetime: 259200 seconds.
 
 Authorize sending one immutable campaign revision to one fixed audience under stated delivery terms, without an additional charge.
 
-[Contract and schemas](/registry/campaign-send-approval) · [JSON definition](/artifacts/map-0.3/contracts/campaign-send-approval.json)
+[Contract and schemas](/registry/campaign-send-approval) · [JSON definition](/artifacts/map-0.3/contracts/campaign-send-approval-0.1.json)
 
 ### Requirements
 
@@ -90,7 +90,7 @@ Input: an object validated by the contract's input schema.
 
 Confirm access to a mailbox for a principal-initiated communication request, without creating a signed-in session or granting account authority.
 
-[Contract and schemas](/registry/email-address-confirmation) · [JSON definition](/artifacts/map-0.3/contracts/email-address-confirmation.json)
+[Contract and schemas](/registry/email-address-confirmation) · [JSON definition](/artifacts/map-0.3/contracts/email-address-confirmation-0.1.json)
 
 ### Requirements
 
@@ -118,7 +118,7 @@ Capability kind: `address-confirmation`; maximum lifetime: 86400 seconds.
 
 Authorize publishing one immutable content revision at stated destinations and visibility.
 
-[Contract and schemas](/registry/publication-approval) · [JSON definition](/artifacts/map-0.3/contracts/publication-approval.json)
+[Contract and schemas](/registry/publication-approval) · [JSON definition](/artifacts/map-0.3/contracts/publication-approval-0.1.json)
 
 ### Requirements
 

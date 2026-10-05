@@ -45,12 +45,15 @@ The branch updates the site to MAP 0.3 in development and production builds. Bro
 
 ## Next
 
-**MAP 0.3 release gate:** Nitrosend's controlled product send, signed receipt,
-native review, service decision and resulting SES delivery have been observed.
-The next build follows the [release plan](#map-03-release-plan) below. Publish
-implementation evidence only when its sources are available, with its limits.
-The observations below also contain Nitrosend deployment checks and later
-milestones; they are not all prerequisites for the first working draft.
+**MAP 0.3 working-draft candidate:** The canonical sources, Registry and site
+are reconciled in the local branch. Nitrosend's controlled product send, signed
+receipt, native review, service decision and resulting SES delivery have been
+observed. The candidate has passed repository verification and the generated
+Internet-Draft renders cleanly; these observations support a first working
+draft, not full runtime conformance or independent interoperability. Publish
+implementation reports only when their exact sources and limits can be linked.
+The table also tracks Nitrosend deployment and later milestones, which have
+separate release decisions.
 
 | Area | Current state | Next check or follow-on |
 | --- | --- | --- |
@@ -63,7 +66,7 @@ milestones; they are not all prerequisites for the first working draft.
 | Private financial dogfood | The owner approved a local 500-contact order capped at $5; it awaits funding and has queued no work. Its first Stripe test Checkout attempt failed because automatic tax lacked a head-office address. The owner supplied the address; the test-mode Tax setting now reads `active`, but Checkout has not been retried. The local Prospeo profile rate and rate-card version are absent, leaving no supported enrichment route. The saved quote is stale, so the MCP host offers no decision. | Configure the real provider rate and version, then create a fresh exact-terms proposal. Prove verified funding or existing balance, bounded holds, accepted outcomes, charges, unused credit, and failed or abandoned funding without presenting a Checkout session as payment. Keep this contract private until those observations exist. |
 | Draft reconciliation | The site, generated draft and shape checks build from the current sources. Contract and other authored JSON now pass the 0.3 lexical I-JSON limits before generation; the browser contribution checker rejects the same invalid contract bytes. Generated examples are checked against the message byte limit. Runtime scenarios remain unimplemented. | Resolve dogfood findings in the canonical text or an explicit support limit, then regenerate and review examples, schemas, contracts and the Internet-Draft together. Link the bounded Nitrosend evidence; keep unimplemented runtime scenarios marked as such. |
 | Architecture and threat review | Core delegates execution to existing service interfaces and confines email to signed description plus optional narrow bearer capabilities. The reference receiver accepts original SES S3 MIME from strictly DKIM-aligned senders; its installed action bindings remain first-party. Its extractor rejects duplicate machine-part MIME headers and parameters, unsupported transfer encoding, and a non-readable related root, including an empty `multipart/alternative` root; the stored Mailgun-to-SES original still parses. The first-party inbox bindings now match saved-object, message and inbox brands; a focused cross-brand campaign case exposed no action. MAP human decisions reject ambient cookie-session authentication and require the app's explicit token. A configured local inbound rehearsal now checks SNS signature, exact topic and S3 bucket instead of taking the ordinary development bypass; 20 focused controller/normalizer checks pass. A running local server with the expected topic and bucket returned 403 for an unsigned notification without admitting an inbox job. An original signed SNS callback for a real SES delivery passed the isolated inbound controller and stored a verified MAP message. A read-only cloud check found a broad SES publish statement; the local provisioner now repairs it to the receiving account and receipt rule, but the live policy remains unchanged. | Review the actual boundary for forwarded mail, replay, gateways, lookalike origins, prompt injection, URL leakage, sender/recipient changes, tenant isolation, role revocation, scanner GETs and capability misuse. Configure the inbound ARN and bucket, apply and verify the scoped topic policy through the reviewed setup path, and retain signed-callback evidence. Remove unsupported normative scope instead of adding speculative machinery. |
-| Content and UX | The 0.3 reader and catalogue are built from canonical sources. A local browser pass of 19 key routes at 390px and 1440px found no HTTP error, horizontal overflow, duplicate/missing H1 or page-script exception; the built site's internal links resolved. Home, reader, Types and Registry were visually inspected at both sizes. About, Examples, Interfaces, Tools, Contribute, a Registry detail, Payment effect and Search were also inspected at both sizes, at the top and end of each page. A middle-page check of Core, type contracts and a Registry detail found the full Registry JSON schema obscuring the example and implementation status; complete schema and description now sit behind keyboard-accessible disclosures. Both widths opened and closed the schema with Enter without overflow or page errors. The MCP tab, stale-terms demo and contract checker responded correctly in the browser, including rejection of duplicate JSON members. A 5 October source review reread the current public page copy, Core, bindings, Registry rules and four contract sources. It corrected two stale Types references, pinned the MAP 0.2 historical source links and marked older design notes as historical. The site verification and current draft render pass. | Complete the source and rendered-page review in the release plan; keep public claims matched to the recorded implementation evidence. |
+| Content and UX | The 0.3 reader and catalogue are built from canonical sources. A local browser pass of 19 key routes at 390px and 1440px found no HTTP error, horizontal overflow, duplicate/missing H1 or page-script exception; the built site's internal links resolved. Home, reader, Types and Registry were visually inspected at both sizes. About, Examples, Interfaces, Tools, Contribute, a Registry detail, Payment effect and Search were also inspected at both sizes, at the top and end of each page. A middle-page check of Core, type contracts and a Registry detail found the full Registry JSON schema obscuring the example and implementation status; complete schema and description now sit behind keyboard-accessible disclosures. Both widths opened and closed the schema with Enter without overflow or page errors. The MCP tab, stale-terms demo and contract checker responded correctly in the browser, including rejection of duplicate JSON members. A 5 October source review reread the current public page copy, Core, bindings, Registry rules and four contract sources. It corrected two stale Types references, pinned the MAP 0.2 historical source links and marked older design notes as historical. The site verification and current draft render pass. | Source and rendered routes reviewed for the working-draft candidate. Read back the public pages after deployment and keep claims matched to recorded evidence. |
 | Packages | Published language packages implement 0.2. No 0.3 package version has been selected or published. | Keep the site clear that these packages implement 0.2. Later, extract only demonstrated shared processing, review compatibility and versions, verify each package, publish deliberately and read back public artifacts. A new Registry type alone triggers no package release. |
 | IETF submission | The generated individual `-00` candidate has a 5 October document date. It renders to text and HTML with pinned `xml2rfc`; the only renderer warning is its automatic consensus value for the Standards Track category. Offline `idnits` 3.1.0 submission mode reports zero errors, warnings and comments. No venue consultation, author confirmation or submission has occurred. | Confirm author metadata, final submission date and stable URLs; review the rendered draft; consult SML about the email container and DISPATCH about venue; submit only the reviewed candidate and record the public readback. |
 
@@ -177,127 +180,41 @@ packages currently implement MAP 0.2; this boundary describes forthcoming 0.3
 work. Package development continues; select versions from reviewed compatibility
 diffs, and keep catalogue additions independent of Core package releases.
 
-## MAP 0.3 release plan
+## MAP 0.3 candidate
 
-This is the next pass's build order, not a description of work already finished.
-Keep the existing description, trust boundary and service-owned execution model.
-Correct actual inconsistencies; do not reshape Core around a particular dogfood
-example or turn the specification into a conversation history.
+The specification keeps four separate responsibilities:
 
 | Part | Responsibility |
 | --- | --- |
 | Core | The email description, contract selection, trust, permission and exact-terms processing. |
 | Type contract | The interaction's identity, details, operations, inputs, effects and obligations. |
 | Service binding | Mapping those semantics to existing service operations through an independently enabled integration. |
-| Registry | Optional discovery of exact contracts and declared service support, with maintainers, lifecycle and evidence. |
+| Registry | Discovery of exact contracts and declared service support, with maintainers, lifecycle and evidence. |
 
-### 1. Reconcile scope and terminology
+The release preparation is in the local branch. Contract source filenames and
+public downloads carry their version, while contract JSON owns identity and
+meaning. Registry metadata selects the current version and records lifecycle;
+older versions remain downloadable. Service support is stored in one collection,
+associated with exact contract versions on type pages and in the catalogue.
+Support declarations and observed reports are distinct; built-in services need
+no downloadable connector. The site and repository use the same parsers for
+contract and service-record contributions. Current contributor, versioning,
+governance, security and product guidance matches that shape. The generated
+Internet-Draft pins one illustrative contract revision instead of tracking the
+changing type collection. Public pages have had a source and rendered-route
+language pass; the approved hero remains unchanged.
 
-Read `core.md`, `http.md`, `registry.md`, `capability.md` and `overview.md`
-together. Preserve the current wire shape and security rules unless a concrete
-contradiction requires correction. Types can describe inputs and service actions
-beyond approval; they are not limited to Nitrosend's workflows. Explain extension
-once: new meanings use contracts, new interfaces use bindings, and changes to
-common wire or authority rules need a new profile. A client still needs to
-understand the contract's semantics. Keep the capability binding explicitly
-optional and experimental. Catalogue editorial policy belongs outside Core.
-
-Finish with one clear account of what the email describes, what the client
-checks and what the service enforces. Do not add an exhaustive list of future
-use cases or exclusions to the introduction.
-
-### 2. Make contract publication durable
-
-Use versioned contract filenames and download URLs, following the existing
-project convention: for example,
-`/artifacts/map-0.3/contracts/campaign-send-approval-0.1.json`. The canonical
-digest belongs in the record; no additional digest-based URL system is needed.
-Contract JSON owns identity and semantics. Registry metadata references it and
-owns status, maintainers, selected version and successor. Preserve each published
-version; the friendly type page can select the current one and link its history.
-
-Before publication, local drafts remain editable. After publication, even a
-Draft contract revision is fixed: any canonical-content change requires a new
-contract version. Metadata and explanatory pages can evolve separately. Update
-contract sources, `registry.json`, `src/data/types.ts`, the artifact route and
-`scripts/map-0.3.mjs` together. Keep historical URLs intact. Moving an unpublished
-file alone changes neither its contract version nor its digest.
-
-### 3. Complete the type-centred Registry
-
-Keep one type catalogue, with service records displayed within each applicable
-type and version. A service record names its maintainer, exact contract,
-operations, binding documentation, status and support declaration or report.
-A declaration states claimed support; a report records observations. Neither
-implies certification or supplies an executable connection by itself.
-
-Revise `schemas/implementation.schema.json` and the matching Registry prose:
-require the artifact, host format and digest only when a record distributes an
-installable integration. Built-in support must not require publishing a connector
-package or service source code. Scope these as service records; consumer-only
-reports must retain their actual conformance role rather than masquerade as
-service connections.
-
-Use one canonical service-record collection and derive associations with types.
-Replace hard-coded Draft status with per-version metadata. Pages and the public
-catalogue use the same assembled data. Keep `catalogue.json` a file inventory;
-remove its duplicated lifecycle fields and invented empty evidence arrays.
-Show support on type pages without adding a separate marketplace. List the
-Nitrosend observations only when their exact evidence can be publicly referenced.
-
-### 4. Align contribution and versioning instructions
-
-Extend the existing browser checker and GitHub flow to prepare a contract or
-service record, using the same parsers as the repository. Document the exact
-source files and companion example required. Anyone can propose a contribution;
-maintainers review meaning, overlap, identifier ownership and maintenance.
-Preserve external contract namespaces. A page slug is not protocol identity.
-A Draft type does not need two deployed services, and a support declaration is
-not a verified interoperability report.
-
-Update `/contribute`, `CONTRIBUTING.md` and the PR template together: the root
-guide currently points at the 0.2 importer. Retain that importer for historical
-maintenance. Rewrite current guidance in `VERSIONING.md`, whose shared-block
-model and same-digest clarification rule conflict with 0.3. Reconcile terminology
-in `GOVERNANCE.md`, `SECURITY.md` and `PRODUCT.md`. Do not create a submission
-backend, new review lifecycle or new package-release requirement.
-
-### 5. Decouple the protocol document from the collection
-
-Change `scripts/draft.mjs` to select one explicit illustrative contract revision
-and exchange instead of inserting every Registry contract or its changing count.
-Keep its values derived from the canonical contract and example sources. A new
-type must not change the generated protocol document. The website can continue
-to regenerate its catalogue and useful contract reference material.
-
-Keep the reader's type chapter useful; remove duplication only where it harms
-navigation or reading. It need not disappear to establish independent versions.
-Update source-ownership descriptions in `README.md`, the specification README
-and `ietf/README.md` to match what lands. Contract rules remain authored once.
-
-### 6. Edit and review the complete reading journey
-
-Read home, overview, specification, Registry and type pages, contributions,
-examples, interfaces, tools and About in order. Preserve the approved hero and
-visual hierarchy. Explain familiar work first. Define contract and binding once,
-and use them consistently. Put full trust requirements in the specification and
-maturity information beside the claims it qualifies; avoid repetitive caveats
-and implementation bookkeeping throughout the site.
-
-Check the initial contracts on their own semantics. Preserve Core's existing
-support for typed input and asynchronous work. Financial requests and multiple
-approvers can have their own contracts and service rules; do not invent types or
-broaden existing ones to imply demonstrated support. Keep protocol capability
-distinct from implementation evidence. Correct stale references and conflicting instructions.
-Regenerate after the source work, inspect dev pages and use the existing
-artifact/build checks. No new test programme or external adopter is required by
-this release plan. Finish with a clean candidate and an accurate publication
-queue, without claiming completion of later milestones.
+For the website working-draft release: review the local diff, merge it through
+the normal repository path, deploy the verified build, then read back the home,
+overview, one versioned contract, Registry catalogue, contribution page and
+historical archive on the public domain. The local development preview is
+`http://127.0.0.1:4325/`. No package version changes with this release.
 
 Nitrosend production deployment, independent interoperability, the private $5
 enrichment workflow, full runtime conformance, package releases and IETF
-submission remain separate follow-ons. The individual IETF candidate still
-needs author confirmation, venue consultation and a reviewed date before upload.
+submission are separate follow-ons. The individual IETF candidate needs author
+confirmation and venue consultation before upload. The 54 runtime scenarios
+remain labelled unimplemented; do not present shape checks as runtime proof.
 
 ## Gates
 

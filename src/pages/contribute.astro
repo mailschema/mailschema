@@ -9,7 +9,7 @@ import '../styles/prose.css';
 <Base
   title="Contribute to MailSchema"
   theme="light"
-  description="Propose a type contract, improve MAP or contribute reproducible implementation evidence."
+  description="Propose a type contract, list service support or improve MAP."
 >
   <main id="main" class="container">
     <header class="page-hero">
@@ -29,7 +29,7 @@ import '../styles/prose.css';
           <br />
           Specification changes
           <br />
-          Implementation evidence
+          Service support
         </p>
       </aside>
       <article class="prose">
@@ -53,18 +53,22 @@ import '../styles/prose.css';
         </p>
         <ul>
           <li>
-            A complete description in <code>examples/source.json</code>, keyed by the contract’s
-            filename. Generation supplies the profile, context and contract digest.
+            A complete description in <code>examples/source.json</code>, keyed by the type slug.
+            Generation supplies the profile, context and contract digest.
           </li>
           <li>
-            A record in <code>registry.json</code> naming its category and maintainers. Names,
-            summaries and operations come directly from the contract.
+            A record in <code>registry.json</code> naming its category, maintainers, current version
+            and status. Names, summaries and operations come directly from the contract.
           </li>
           <li>
             Relevant standards, motivation and implementation details in the pull-request
             description. Identify what an existing definition cannot express.
           </li>
         </ul>
+        <p>
+          The suggested filename is for the site. Choose a distinct page slug if another contract
+          already uses it; the identifier inside the contract stays the protocol identity.
+        </p>
         <p>
           Generate and check the projections before review. On merge, the contract appears in the
           Registry, search, downloads and the reader’s type chapter. Adding a type does not require
@@ -76,29 +80,31 @@ import '../styles/prose.css';
           code={'npm ci\nnpm run spec:generate\nnpm run verify'}
         />
         <p>
-          The browser and generator use the same contract parser and structural checks. Repository
-          verification also checks examples, digests and generated artifacts. Passing those checks
-          does not establish semantics, authority or compatibility with existing standards; review
-          the contract and its example as well.
+          The browser and repository use the same contract and service-record parsers. Repository
+          verification also checks examples, digests and generated artifacts. Review still decides
+          whether a definition is clear, safe and distinct from existing standards.
         </p>
         <h2 id="service-bindings">Connect an existing service</h2>
         <p>
-          A service can implement an existing type without creating a new one. Supply its binding,
-          exact supported contract digest, supported operations and host interface. Reuse the
-          service's existing description and authorization. The
+          A service can implement an existing type without creating a new one. Select Service
+          support in the checker, choose the exact contract and prepare a record under
+          <code>specifications/map-0.3/implementations/</code>. Name the service, maintainer,
+          binding, supported operations and source of the support claim. A built-in service does not
+          need a downloadable connector. If you offer an installable integration, include its format
+          and verified artifact digest. Reuse the service's existing authorization. The
           <a href="/specification/bindings">binding guide</a> explains the required association; the{' '}
           <a href="/interfaces">interface research</a> covers existing standards and their gaps.
         </p>
         <p>
-          Follow the <a href="/specification/registry">implementation record requirements</a> and
-          include evidence with the contribution. An example mapping can show the idea; a Registry
-          implementation claim needs a working service and steps another person can repeat. Listing
-          an integration never installs it or grants account access.
+          Follow the <a href="/specification/registry">implementation record requirements</a>. A
+          declaration states support claimed by the maintainer. A report records observed behavior
+          and how another person can repeat the checks. Registry listing does not connect an account
+          or certify the service.
         </p>
         <h2 id="implementation-evidence">Show what works</h2>
         <p>
-          Submit a report with the exact contract ID, version and digest; implementation revision;
-          service API mapping; supported operations; and reproduction instructions. Record actual
+          For a report, give the exact contract ID, version and digest; implementation revision;
+          tested roles and operations; setup; and reproduction instructions. Record actual
           observations for the <a href="/specification/conformance">conformance scenarios</a>,
           including failed checks and missing coverage.
         </p>

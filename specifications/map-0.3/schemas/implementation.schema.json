@@ -10,12 +10,14 @@
     "type",
     "operations",
     "binding",
-    "artifact",
-    "format",
     "status",
     "documentation",
     "evidence"
   ],
+  "dependentRequired": {
+    "artifact": ["format"],
+    "format": ["artifact"]
+  },
   "properties": {
     "service": {
       "type": "string",
@@ -132,6 +134,7 @@
     },
     "evidence": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,

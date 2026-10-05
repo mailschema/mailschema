@@ -158,7 +158,9 @@ const { record } = Astro.props;
           requirements.
         </p>
         <details class="type-code-disclosure">
-          <summary>View complete JSON Schema <Icon name="chevron" size={14} /></summary>
+          <summary>
+            View complete JSON Schema <Icon name="chevron" size={14} />
+          </summary>
           <CodeBlock
             lang="json"
             label="JSON Schema 2020-12"
@@ -171,7 +173,9 @@ const { record } = Astro.props;
           digests do not identify a live integration.
         </p>
         <details class="type-code-disclosure">
-          <summary>View complete MAP description <Icon name="chevron" size={14} /></summary>
+          <summary>
+            View complete MAP description <Icon name="chevron" size={14} />
+          </summary>
           <CodeBlock
             lang="json"
             label="MAP description"
@@ -190,31 +194,54 @@ const { record } = Astro.props;
         <p>
           <a href={specification.catalog}>Machine-readable catalogue →</a>
         </p>
+        {record.history.length > 0 && (
+          <section>
+            <h3>Earlier versions</h3>
+            <ul>
+              {record.history.map((version) => (
+                <li>
+                  <a href={version.contractHref}>Version {version.version}</a> · {version.status}
+                  {version.successor && <> · successor: {version.successor}</>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <h2 id="implementations">Implementations</h2>
-        {record.implementationEvidence.length === 0 ? (
-          <p>
-            No implementation evidence is recorded for this draft contract. The{' '}
-            <a href="/specification/conformance">conformance material</a> distinguishes executable
-            shape checks from runtime scenarios awaiting adapters.
-          </p>
+        {record.implementations.length === 0 ? (
+          <p>No service support is listed for this contract version yet.</p>
         ) : (
-          record.implementationEvidence.map((evidence) => (
+          record.implementations.map((implementation) => (
             <section class="type-implementation">
               <span class="pill soft">
-                {evidence.kind === 'declaration' ? 'Support declaration' : 'Submitted test report'}
+                {implementation.evidence.some((item) => item.kind === 'test-report')
+                  ? 'Implementation report'
+                  : 'Support declaration'}
               </span>
               <h3>
-                <a href={evidence.href}>{evidence.name}</a>
+                <a href={implementation.documentation}>{implementation.maintainer.name}</a>
               </h3>
-              <p>{evidence.summary}</p>
               <p>
-                Targets this exact contract digest. Listing evidence does not certify compatibility.
+                Service: <a href={implementation.service}>{implementation.service}</a>
+              </p>
+              <p>
+                Operations: {implementation.operations.join(', ')} · {implementation.status}
+              </p>
+              {implementation.evidence.map((item) => (
+                <p>
+                  <a href={item.url}>{item.kind === 'test-report' ? 'Report' : 'Declaration'}</a>:{' '}
+                  {item.summary}
+                </p>
+              ))}
+              <p>
+                This listing describes the stated support; it does not connect an account or certify
+                the service.
               </p>
             </section>
           ))
         )}
         <p>
-          <a href="/contribute#implementation-evidence">Contribute implementation evidence →</a>
+          <a href="/contribute#service-bindings">List service support →</a>
         </p>
       </article>
     </div>
