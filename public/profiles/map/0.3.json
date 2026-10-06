@@ -1,0 +1,27 @@
+{
+  "id": "https://mailschema.org/profiles/map/0.3",
+  "name": "Mail Action Protocol 0.3",
+  "status": "working-draft",
+  "description": "An action description carried in Structured Email. A trusted service binding maps each decision to the service's existing operations, and the service enforces permission and exact terms. Types are defined by digest-bound contracts.",
+  "context": "https://mailschema.org/contexts/map-0.3.jsonld",
+  "schema": "https://mailschema.org/artifacts/map-0.3/schemas/core.schema.json",
+  "contractFormat": "https://mailschema.org/artifacts/map-0.3/schemas/contract.schema.json",
+  "specification": "https://mailschema.org/specification/core",
+  "artifacts": {
+    "context": {
+      "url": "https://mailschema.org/contexts/map-0.3.jsonld",
+      "sha256": "a51490d1fe8af695c14ea508aad88fd0429d18564791b6b52f3ab07d5c51aab3"
+    },
+    "schema": {
+      "url": "https://mailschema.org/artifacts/map-0.3/schemas/core.schema.json",
+      "sha256": "50261ee405f7aaf7eefafff1e8592136958a8842ba3e9beb672a6204b4ab0e88"
+    },
+    "contractFormat": {
+      "url": "https://mailschema.org/artifacts/map-0.3/schemas/contract.schema.json",
+      "sha256": "144da61c8d7236e64b91b738509b3ccf085a4f79984c6cd8a7fd1fb34efad0b6"
+    },
+    "conformance": {
+      "url": "https://github.com/mailschema/mailschema/blob/main/conformance/map-0.3/README.md"
+    }
+  }
+}

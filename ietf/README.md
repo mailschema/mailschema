@@ -18,4 +18,4 @@ CI renders both formats with the pinned tool. Output lives under `.release/`, ou
 
 `archive/map-0.2.xml` preserves the previous unsubmitted candidate byte for byte. Its template and generation from the live 0.2 specification remain checked so current-profile validation stays intact. This is an archive of a drafting candidate, not a second `-00` submission.
 
-The [IETF 127 submission cutoff](https://datatracker.ietf.org/meeting/127/important-dates/) is 2 November 2026 at 23:59 UTC. Before upload, review the author details, date, durable artifact link, latest SML dependency, and implementation feedback, then rerun the checks. Rendering does not submit the document or establish interoperability.
+The [IETF 127 submission cutoff](https://datatracker.ietf.org/meeting/127/important-dates/) is 2 November 2026 at 23:59 UTC. The authors are Kam Low and George Hartley of Nitrosend. Before upload, deploy the site so the profile record, context and artifact links resolve, set the submission date, confirm the latest SML revision, and rerun the checks. Rendering does not submit the document or establish interoperability.

@@ -170,6 +170,23 @@ export async function draftArtifacts(check) {
     if (check) assert.equal(read(path), value, `${path} is stale; run npm run spec:generate`);
     else writeFileSync(resolve(root, path), value);
   };
+  // The published profile record binds these bytes; changing them requires a new profile.
+  const record = json('public/profiles/map/0.3.json');
+  const schemas = 'https://mailschema.org/artifacts/map-0.3/schemas';
+  assert.equal(record.id, profile);
+  for (const [name, url, file] of [
+    ['context', contextId, 'context.jsonld'],
+    ['schema', `${schemas}/core.schema.json`, 'schemas/core.schema.json'],
+    ['contractFormat', `${schemas}/contract.schema.json`, 'schemas/contract.schema.json'],
+  ]) {
+    assert.equal(record[name], url, `The profile record names another ${name}`);
+    assert.equal(record.artifacts[name].url, url, `The profile record binds another ${name}`);
+    assert.equal(
+      record.artifacts[name].sha256,
+      sha(read(`${directory}/${file}`)),
+      `${directory}/${file} differs from the bytes the published 0.3 profile record binds`,
+    );
+  }
   const source = json(`${directory}/examples/source.json`);
   const interfaces = json('docs/research/map-interfaces.json');
   write('docs/research/MAP-INTERFACES.md', interfaceResearch(interfaces));

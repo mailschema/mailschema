@@ -2,13 +2,17 @@
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
      category="std"
      docName="draft-mailschema-mail-action-protocol-00"
-     ipr="trust200902" submissionType="IETF" version="3">
+     ipr="trust200902" submissionType="IETF" sortRefs="true" version="3">
   <front>
     <title abbrev="Mail Action Protocol">Mail Action Protocol (MAP)</title>
     <seriesInfo name="Internet-Draft" value="draft-mailschema-mail-action-protocol-00"/>
     <author fullname="Kam Low" initials="K." surname="Low">
-      <organization>MailSchema</organization>
-      <address><email>oss@0state.com</email><uri>https://mailschema.org/</uri></address>
+      <organization>Nitrosend</organization>
+      <address><email>kam@nitrosend.com</email></address>
+    </author>
+    <author fullname="George Hartley" initials="G." surname="Hartley">
+      <organization>Nitrosend</organization>
+      <address><email>george@nitrosend.com</email></address>
     </author>
     <date year="2026" month="October" day="5"/>
     <area>Applications and Real-Time</area>
@@ -40,8 +44,7 @@
       Artifact checks establish shape, digest consistency, and offline
       JSON-LD interpretation. Runtime scenarios are unimplemented skeletons.
       No MAP 0.3 runtime conformance or independent interoperability is claimed.
-      Schema checks alone do not establish service behaviour.</t>
-      <t>Feedback is sought on receiver authentication evidence, existing API
+      Schema checks alone do not establish service behaviour.</t>      <t>Feedback is sought on receiver authentication evidence, existing API
       readback mappings, atomic version enforcement, and the limited
       capability binding. The latter requires explicit opt-in and remains
       experimental pending implementation evidence. No MCP binding is
@@ -60,7 +63,6 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5890.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6234.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6376.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6454.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6531.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7493.xml"/>
@@ -71,16 +73,15 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8707.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9110.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9562.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9700.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9989.xml"/>
       <reference anchor="JSON-LD11" target="https://www.w3.org/TR/2020/REC-json-ld11-20200716/">
-        <front><title>JSON-LD 1.1</title><author fullname="W3C JSON-LD Working Group"/><date year="2020" month="July" day="16"/></front>
+        <front><title>JSON-LD 1.1</title><author fullname="Gregg Kellogg" initials="G." surname="Kellogg" role="editor"/><author fullname="Pierre-Antoine Champin" initials="P.-A." surname="Champin" role="editor"/><author fullname="Dave Longley" initials="D." surname="Longley" role="editor"/><date year="2020" month="July" day="16"/></front>
         <seriesInfo name="W3C Recommendation" value="REC-json-ld11-20200716"/>
       </reference>
       <reference anchor="JSON-SCHEMA" target="https://json-schema.org/draft/2020-12/json-schema-validation">
-        <front><title>JSON Schema Validation: A Vocabulary for Structural Validation of JSON</title><author fullname="JSON Schema Authors"/><date year="2022" month="June" day="16"/></front>
+        <front><title>JSON Schema Validation: A Vocabulary for Structural Validation of JSON</title><author fullname="Austin Wright" initials="A." surname="Wright" role="editor"/><author fullname="Henry Andrews" initials="H." surname="Andrews" role="editor"/><author fullname="Ben Hutton" initials="B." surname="Hutton" role="editor"/><date year="2022" month="June" day="16"/></front>
         <seriesInfo name="Specification" value="Draft 2020-12"/>
       </reference>
       <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06">
@@ -92,6 +93,8 @@
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8058.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8792.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
     </references>
     <!-- appendices -->
   </back>
