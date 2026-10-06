@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mailschema.org/schemas/map-0.3.schema.json",
+  "$id": "https://mailschema.org/artifacts/map-0.3/schemas/core.schema.json",
   "title": "MAP 0.3 description shape; semantic checks in Core are additionally required",
   "type": "object",
   "additionalProperties": false,
@@ -69,13 +69,13 @@
       "type": "string",
       "minLength": 1,
       "format": "date-time",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\dZ$"
     },
     "expiresAt": {
       "type": "string",
       "minLength": 1,
       "format": "date-time",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\dZ$"
     },
     "inLanguage": {
       "type": "string",
@@ -93,7 +93,7 @@
           "type": "string",
           "minLength": 1,
           "format": "uri",
-          "pattern": "^https://[^/?#@]+$",
+          "pattern": "^https://(?![0-9.]+(:[0-9]+)?$)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?$",
           "maxLength": 2048
         },
         "tenant": {
@@ -180,7 +180,7 @@
                 "type": "string",
                 "minLength": 1,
                 "format": "uri",
-                "pattern": "^https://",
+                "pattern": "^https://[^/?#@]+([/?][^#]*)?$",
                 "maxLength": 4096
               }
             }
@@ -201,7 +201,7 @@
           "type": "string",
           "minLength": 1,
           "format": "uri",
-          "pattern": "^https://",
+          "pattern": "^https://[^/?#@]+([/?][^#]*)?$",
           "maxLength": 4096
         }
       }

@@ -14,11 +14,11 @@
     },
     "schema": {
       "url": "https://mailschema.org/artifacts/map-0.3/schemas/core.schema.json",
-      "sha256": "50261ee405f7aaf7eefafff1e8592136958a8842ba3e9beb672a6204b4ab0e88"
+      "sha256": "0ad09a6955a47e7a2c1c1eec0747a3e0b15c08a79860e90ce4e65da11983aeb3"
     },
     "contractFormat": {
       "url": "https://mailschema.org/artifacts/map-0.3/schemas/contract.schema.json",
-      "sha256": "144da61c8d7236e64b91b738509b3ccf085a4f79984c6cd8a7fd1fb34efad0b6"
+      "sha256": "86bf057529c4fd2c7f0a880825774afeed31e9f7ba1d99760858a585fe28d18d"
     },
     "conformance": {
       "url": "https://github.com/mailschema/mailschema/blob/main/conformance/map-0.3/README.md"

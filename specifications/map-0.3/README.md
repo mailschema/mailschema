@@ -39,6 +39,6 @@ The MIME example is unsigned, its endpoints are inert, and the interactive views
 
 ## Delivery order
 
-Nitrosend's first-party sender and inbox have exercised a controlled request through a signed receipt, a decision and campaign delivery. The working-draft candidate records those findings and their limits. Independent interoperability, full runtime conformance, payment-bearing actions and language-package releases remain separate milestones. Product code and evidence stay in their owning repositories. The release status is in [the project roadmap](../../docs/ROADMAP.md#next). A schema example does not establish a running implementation.
+Nitrosend's first-party sender and inbox have exercised a controlled request through a signed receipt, a decision and campaign delivery. Independent interoperability, full runtime conformance, payment-bearing actions and language-package releases remain separate milestones. Product code and evidence stay in their owning repositories. The release status is in [the project roadmap](../../docs/ROADMAP.md#next). A schema example does not establish a running implementation.
 
 The [generated individual Internet-Draft candidate](../../ietf/draft-mailschema-mail-action-protocol-00.xml) is not an IETF submission or an adopted standard. Before submission, deploy so its artifact URLs resolve, set the document date, incorporate review, and render with `xml2rfc`. The source text and generated candidate remain one document. See [the project plan](../../docs/ROADMAP.md) for the wider delivery queue.

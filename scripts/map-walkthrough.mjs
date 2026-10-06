@@ -50,7 +50,7 @@ export function walkthroughArtifacts({
   };
 
   // This service's illustrative request shape, not a portable mapping language.
-  const body = { decision: 'publish', expected_revision: native.example.revision };
+  const body = { decision: 'approve', expected_revision: native.example.revision };
   const reviewId = native.example.review_id;
   const readQuery = new URLSearchParams({ reference: publication.terms.id });
   const host = new URL(publication.service.id).host;
@@ -97,7 +97,7 @@ export function walkthroughArtifacts({
       {
         name: 'decide_review',
         description:
-          'Record a publication decision. Enforce expected_revision, current permission, recipient relationship, expiry and state atomically. Publish queues the exact approved snapshot. Decline and revise close this review without publication.',
+          'Record a publication decision. Enforce expected_revision, current permission, recipient relationship, expiry and state atomically. Approve queues the exact approved snapshot. Decline and request-changes close this review without publication.',
         inputSchema: decisionSchema,
       },
     ],

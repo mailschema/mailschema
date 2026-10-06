@@ -17,15 +17,15 @@
   },
   "recipient": "owner@example.net",
   "subject": {
-    "id": "urn:example:object:42",
+    "id": "urn:example:request:17",
     "title": "Confirm the requested communication address"
   },
   "terms": {
-    "id": "urn:example:proposal:p7",
-    "version": "\"p7-r4\""
+    "id": "urn:example:confirmation:e17",
+    "version": "e17-r1"
   },
   "human": {
-    "url": "https://service.example/review/p7"
+    "url": "https://service.example/confirm/e17"
   },
   "details": {
     "mailbox": "owner@example.net",

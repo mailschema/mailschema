@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mailschema.org/schemas/type-contract-0.3.schema.json",
+  "$id": "https://mailschema.org/artifacts/map-0.3/schemas/contract.schema.json",
   "type": "object",
   "additionalProperties": false,
   "required": [

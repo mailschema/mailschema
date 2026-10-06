@@ -271,5 +271,41 @@
       }
     ],
     "valid": false
+  },
+  {
+    "id": "ip-literal-service-origin",
+    "example": "publication-approval",
+    "edits": [
+      {
+        "op": "replace",
+        "path": "/service/id",
+        "value": "https://192.0.2.10"
+      }
+    ],
+    "valid": false
+  },
+  {
+    "id": "human-url-fragment",
+    "example": "publication-approval",
+    "edits": [
+      {
+        "op": "replace",
+        "path": "/human/url",
+        "value": "https://service.example/review/p7#approve"
+      }
+    ],
+    "valid": false
+  },
+  {
+    "id": "issued-at-leap-second",
+    "example": "publication-approval",
+    "edits": [
+      {
+        "op": "replace",
+        "path": "/issuedAt",
+        "value": "2026-12-31T23:59:60Z"
+      }
+    ],
+    "valid": false
   }
 ]

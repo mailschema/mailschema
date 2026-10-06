@@ -75,7 +75,7 @@
                           "type": "string",
                           "minLength": 1,
                           "format": "uri",
-                          "pattern": "^https://[^/?#@]+$",
+                          "pattern": "^https://(?![0-9.]+(:[0-9]+)?$)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?$",
                           "maxLength": 2048
                         },
                         "tenant": {
@@ -152,7 +152,7 @@
                       "type": "string",
                       "minLength": 1,
                       "format": "date-time",
-                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\dZ$"
                     },
                     "allowed_actions": {
                       "type": "array",
@@ -273,9 +273,9 @@
                 "properties": {
                   "decision": {
                     "enum": [
-                      "publish",
+                      "approve",
                       "decline",
-                      "revise"
+                      "request-changes"
                     ]
                   },
                   "expected_revision": {
@@ -293,7 +293,7 @@
                     "if": {
                       "properties": {
                         "decision": {
-                          "const": "revise"
+                          "const": "request-changes"
                         }
                       }
                     },

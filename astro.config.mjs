@@ -6,14 +6,9 @@ import { resolve, sep } from 'node:path';
 import { specNavigation } from './docs/specification/navigation.ts';
 import currentRegistry from './specifications/map-0.3/registry.json' with { type: 'json' };
 const currentTypes = new Set(Object.keys(currentRegistry));
-const historicalPages = [
-  ...readdirSync('docs/specification')
-    .filter((name) => name.endsWith('.md') && name !== 'index.md')
-    .map((name) => `/specification/${name.slice(0, -3)}`),
-  ...readdirSync('registry/types')
-    .filter((name) => name.endsWith('.json') && !currentTypes.has(name.slice(0, -5)))
-    .map((name) => `/registry/${name.slice(0, -5)}`),
-];
+const historicalPages = readdirSync('registry/types')
+  .filter((name) => name.endsWith('.json') && !currentTypes.has(name.slice(0, -5)))
+  .map((name) => `/registry/${name.slice(0, -5)}`);
 export default defineConfig({
   redirects: Object.fromEntries(historicalPages.map((path) => [path, '/archive/map-0.2'])),
   site: 'https://mailschema.org',

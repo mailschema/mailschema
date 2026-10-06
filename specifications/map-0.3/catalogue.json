@@ -34,23 +34,23 @@
     },
     {
       "path": "specifications/map-0.3/schemas/core.schema.json",
-      "sha256": "50261ee405f7aaf7eefafff1e8592136958a8842ba3e9beb672a6204b4ab0e88"
+      "sha256": "0ad09a6955a47e7a2c1c1eec0747a3e0b15c08a79860e90ce4e65da11983aeb3"
     },
     {
       "path": "specifications/map-0.3/schemas/contract.schema.json",
-      "sha256": "144da61c8d7236e64b91b738509b3ccf085a4f79984c6cd8a7fd1fb34efad0b6"
+      "sha256": "86bf057529c4fd2c7f0a880825774afeed31e9f7ba1d99760858a585fe28d18d"
     },
     {
       "path": "specifications/map-0.3/schemas/implementation.schema.json",
-      "sha256": "a53e5281ff2d866300780b63c0e41e401f856d4a72a4a5d1f874af49127e2e8d"
+      "sha256": "c62acc3ebb9f384c8fba7be353ab1905b65883ac2b16b147fd98485eec643396"
     },
     {
       "path": "specifications/map-0.3/bindings/publication.openapi.json",
-      "sha256": "28e27cc84f004a0e6cf82206ef030140cb5566322d84cdb08407c8a1711e835e"
+      "sha256": "a10ad7885e2109da25739622a1bd5a237700680effa8f4d858c75faf63a5ff22"
     },
     {
       "path": "specifications/map-0.3/bindings/publication.mcp.json",
-      "sha256": "87a25364bec9bcbd3b580281308e4676c2a2cbc1f0c0c5b1137b66c4bd198c6a"
+      "sha256": "7fab697ad04dce0c8c9da700432c9d4377b0d00f4849ecb2166ba03f390127fc"
     },
     {
       "path": "specifications/map-0.3/examples/publication.eml",
@@ -58,7 +58,7 @@
     },
     {
       "path": "specifications/map-0.3/examples/publication-exchange.json",
-      "sha256": "ea02c218fcf2c37a043e3184e449170a0c23892cd7c3b007dabf474bebaa064a"
+      "sha256": "f8730083db1fe06c799a05454745ca0f0a5718e6e1b946b6126cce0f69e8b029"
     },
     {
       "path": "specifications/map-0.3/examples/campaign.md",

@@ -76,9 +76,9 @@
                 "properties": {
                   "decision": {
                     "enum": [
-                      "publish",
+                      "approve",
                       "decline",
-                      "revise"
+                      "request-changes"
                     ]
                   },
                   "expected_revision": {
@@ -96,7 +96,7 @@
                     "if": {
                       "properties": {
                         "decision": {
-                          "const": "revise"
+                          "const": "request-changes"
                         }
                       }
                     },

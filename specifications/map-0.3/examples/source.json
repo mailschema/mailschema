@@ -10,22 +10,22 @@
     },
     "recipient": "owner@example.net",
     "subject": {
-      "id": "urn:example:object:42",
+      "id": "urn:example:campaign:18",
       "title": "Send product update"
     },
     "terms": {
-      "id": "urn:example:proposal:p7",
-      "version": "\"p7-r4\""
+      "id": "urn:example:proposal:c18",
+      "version": "c18-r2"
     },
     "human": {
-      "url": "https://service.example/review/p7"
+      "url": "https://service.example/review/c18"
     },
     "details": {
       "summary": "The product update is ready to send to the newsletter audience. Please review the email and approve this send.",
       "requester": "Campaign editor",
       "content": {
-        "id": "urn:example:content:42",
-        "revision": "r4",
+        "id": "urn:example:content:18",
+        "revision": "r2",
         "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
         "title": "Product update"
       },
@@ -117,15 +117,15 @@
     },
     "recipient": "owner@example.net",
     "subject": {
-      "id": "urn:example:object:42",
+      "id": "urn:example:request:17",
       "title": "Confirm the requested communication address"
     },
     "terms": {
-      "id": "urn:example:proposal:p7",
-      "version": "\"p7-r4\""
+      "id": "urn:example:confirmation:e17",
+      "version": "e17-r1"
     },
     "human": {
-      "url": "https://service.example/review/p7"
+      "url": "https://service.example/confirm/e17"
     },
     "details": {
       "mailbox": "owner@example.net",
@@ -154,15 +154,15 @@
     },
     "recipient": "owner@example.net",
     "subject": {
-      "id": "urn:example:object:42",
+      "id": "urn:example:event:23",
       "title": "Review a sign-in from a new device"
     },
     "terms": {
-      "id": "urn:example:proposal:p7",
-      "version": "\"p7-r4\""
+      "id": "urn:example:security-alert:s23",
+      "version": "s23-r1"
     },
     "human": {
-      "url": "https://service.example/review/p7"
+      "url": "https://service.example/security/s23"
     },
     "details": {
       "account": {

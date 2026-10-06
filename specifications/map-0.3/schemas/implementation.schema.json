@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mailschema.org/schemas/map-implementation-0.3.schema.json",
+  "$id": "https://mailschema.org/artifacts/map-0.3/schemas/implementation.schema.json",
   "title": "MAP implementation record",
   "type": "object",
   "additionalProperties": false,
