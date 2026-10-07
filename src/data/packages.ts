@@ -23,27 +23,32 @@ const selected = assertPackageSet(selection, evidence, artifacts);
 
 const languages = {
   npm: {
+    source: 'npm',
     language: 'JavaScript',
     summary: 'MAP 0.3 processing, TypeScript definitions, the artifacts and a local CLI.',
     install: (version: string) => `npm install mailschema@${version}`,
   },
   RubyGems: {
+    source: 'RubyGems',
     language: 'Ruby',
     summary:
       'MAP 0.3 processing, the artifacts, and helpers for the description part and qualifying signatures.',
     install: (version: string) => `gem install mailschema -v ${version}`,
   },
   PyPI: {
+    source: 'PyPI',
     language: 'Python',
     summary: 'The profile record, context and schemas.',
     install: (version: string) => `pip install mailschema==${version}`,
   },
   'crates.io': {
+    source: 'crates.io',
     language: 'Rust',
     summary: 'The profile record, context and schemas, embedded.',
     install: (version: string) => `cargo add mailschema@${version}`,
   },
   Go: {
+    source: 'Go modules',
     language: 'Go',
     summary: 'The profile record, context and schemas, embedded.',
     install: (version: string) => `go get github.com/mailschema/go@v${version}`,
@@ -53,11 +58,12 @@ const languages = {
 export const packages = packageRegistries.flatMap((registry) => {
   const release = selected.get(registry);
   if (!release) return [];
-  const { language, summary, install } = languages[registry];
+  const { language, source, summary, install } = languages[registry];
   return [
     {
       registry,
       language,
+      source,
       summary,
       version: release.version,
       url: release.url,

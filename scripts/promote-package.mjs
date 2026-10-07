@@ -72,19 +72,22 @@ function command(command, args, input) {
   return execFileSync(command, args, { encoding: 'buffer', maxBuffer: 20 * 1024 * 1024, input });
 }
 
-function tarEntry(archive, suffix) {
+// The one entry at the path, at the archive's top level or under its single root directory.
+const at = (entries, path) => entries.filter((entry) => entry === path || entry.endsWith(`/${path}`));
+
+function tarEntry(archive, path) {
   const entries = command('tar', ['-tzf', archive]).toString('utf8').split('\n').filter(Boolean);
-  const matches = entries.filter((entry) => entry.endsWith(suffix));
+  const matches = at(entries, path);
   if (matches.length !== 1)
-    throw new Error(`Expected one ${suffix} in ${basename(archive)}, found ${matches.length}.`);
+    throw new Error(`Expected one ${path} in ${basename(archive)}, found ${matches.length}.`);
   return command('tar', ['-xOzf', archive, matches[0]]);
 }
 
-function zipEntry(archive, suffix) {
+function zipEntry(archive, path) {
   const entries = command('unzip', ['-Z1', archive]).toString('utf8').split('\n').filter(Boolean);
-  const matches = entries.filter((entry) => entry.endsWith(suffix));
+  const matches = at(entries, path);
   if (matches.length !== 1)
-    throw new Error(`Expected one ${suffix} in ${basename(archive)}, found ${matches.length}.`);
+    throw new Error(`Expected one ${path} in ${basename(archive)}, found ${matches.length}.`);
   return command('unzip', ['-p', archive, matches[0]]);
 }
 
@@ -201,8 +204,8 @@ async function verify(registry, version) {
         artifact.archive === 'gem'
           ? gemEntry(archive, expected.path)
           : artifact.archive === 'zip'
-            ? zipEntry(archive, `/${expected.path}`)
-            : tarEntry(archive, `/${expected.path}`);
+            ? zipEntry(archive, expected.path)
+            : tarEntry(archive, expected.path);
       if (!packaged.equals(expected.bytes))
         throw new Error(`${registry} ${version} does not contain the canonical ${expected.name} bytes.`);
     }

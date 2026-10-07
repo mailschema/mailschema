@@ -1,0 +1,44 @@
+{
+  "format": "mailschema-package-release/3",
+  "checkedAt": "2026-10-07T04:05:09.981Z",
+  "version": "0.3.0",
+  "profileSha256": "d9481627f855c127a4f5d6ddb7f3b699f66f6475bc8672d609f5b499f83d1a0f",
+  "artifacts": [
+    {
+      "name": "profile",
+      "sha256": "d9481627f855c127a4f5d6ddb7f3b699f66f6475bc8672d609f5b499f83d1a0f"
+    },
+    {
+      "name": "context",
+      "sha256": "a51490d1fe8af695c14ea508aad88fd0429d18564791b6b52f3ab07d5c51aab3"
+    },
+    {
+      "name": "core-schema",
+      "sha256": "0ad09a6955a47e7a2c1c1eec0747a3e0b15c08a79860e90ce4e65da11983aeb3"
+    },
+    {
+      "name": "contract-schema",
+      "sha256": "86bf057529c4fd2c7f0a880825774afeed31e9f7ba1d99760858a585fe28d18d"
+    },
+    {
+      "name": "implementation-schema",
+      "sha256": "c62acc3ebb9f384c8fba7be353ab1905b65883ac2b16b147fd98485eec643396"
+    }
+  ],
+  "verification": "Public registry metadata, artifact integrity where published, and an independent download matched every MAP 0.3 artifact this package carries.",
+  "channels": [
+    {
+      "registry": "PyPI",
+      "name": "mailschema",
+      "version": "0.3.0",
+      "url": "https://pypi.org/project/mailschema/0.3.0/",
+      "artifacts": [
+        {
+          "name": "mailschema-0.3.0-py3-none-any.whl",
+          "sha256": "3acd1d860af41315a382b0e33d359da0779592188204c02b39c7ec0a6ad3faec"
+        }
+      ],
+      "status": "verified"
+    }
+  ]
+}
