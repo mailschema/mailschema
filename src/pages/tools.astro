@@ -4,7 +4,10 @@ import Icon from '../components/Icon.astro';
 import CodeBlock from '../components/CodeBlock.astro';
 import { typeRecords, specification } from '../data/types';
 import { packages } from '../data/packages';
-import vectors from '../../conformance/map-0.3/shape-vectors.json';
+import { digest } from '../map/core';
+import shapeVectors from '../../conformance/map-0.3/shape-vectors.json';
+import jsonVectors from '../../conformance/map-0.3/json-vectors.json';
+import jcsVectors from '../../conformance/map-0.3/jcs-vectors.json';
 import scenarios from '../../conformance/map-0.3/scenarios.json';
 import '../styles/catalog.css';
 import '../styles/tools.css';
@@ -47,7 +50,17 @@ const artifacts = [
   [
     'Shape vectors',
     'conformance/shape-vectors.json',
-    `${vectors.length} executable valid and invalid cases against the Core and details schemas.`,
+    `${shapeVectors.length} executable valid and invalid cases against the Core and details schemas.`,
+  ],
+  [
+    'JSON vectors',
+    'conformance/json-vectors.json',
+    `${jsonVectors.length} MAP JSON texts parsed within the 64 KiB description limit: each is refused, or accepted with its RFC 8785 canonical form.`,
+  ],
+  [
+    'RFC 8785 vectors',
+    'conformance/jcs-vectors.json',
+    `${jcsVectors.length} JSON values with their canonical form and digest, including the Publication Approval example description.`,
   ],
   [
     'Runtime scenarios',
@@ -60,6 +73,29 @@ const artifacts = [
     'The generated individual -00 candidate in RFCXML. No IETF submission or adoption is claimed.',
   ],
 ];
+// The command-line example checks a published contract and its example, so the output shown is
+// exactly what the selected npm release prints for them.
+const npm = packages.find((item) => item.registry === 'npm');
+const cli = typeRecords.find((type) => type.slug === 'campaign-send-approval');
+if (!cli) throw new Error('The command-line example needs the Campaign Send Approval type.');
+const [contractFile, descriptionFile] = [cli.contractHref, cli.exampleHref].map((href) =>
+  href.split('/').pop(),
+);
+const cliCommands =
+  npm &&
+  [
+    `npm install mailschema@${npm.version}`,
+    `curl -O ${new URL(cli.contractHref, Astro.site)}`,
+    `curl -O ${new URL(cli.exampleHref, Astro.site)}`,
+    `npx mailschema contract ${contractFile}`,
+    `npx mailschema description ${descriptionFile} --contract ${contractFile}`,
+  ].join('\n');
+const cliOutput = [
+  `Valid type contract ${cli.id} ${cli.version}`,
+  cli.digest,
+  `Valid MAP 0.3 description ${cli.example['@id']}`,
+  digest(cli.example),
+].join('\n');
 ---
 
 <Base
@@ -128,6 +164,34 @@ const artifacts = [
         </a>
       </div>
     </section>
+    {cliCommands && (
+      <section class="catalog-note" id="command-line">
+        <h2>Check files from the command line</h2>
+        <div>
+          <p>
+            The npm package includes a <code>mailschema</code> command for local files. This example
+            downloads the {cli.name} contract and its complete description, then checks each.
+            Nothing is uploaded or changed.
+          </p>
+          <CodeBlock label="Node.js 22 or later" code={cliCommands} />
+          <p>
+            <code>contract</code> prints the contract’s identifier and version, then its digest. A
+            description names that digest in <code>type.contractDigest</code>, and implementations
+            pin contracts by it. <code>description</code> prints the description’s <code>@id</code>,
+            then the digest of the description itself; with <code>--contract</code>, it first checks
+            that the description uses that contract as it allows. Each digest is the SHA-256 of the
+            document’s RFC 8785 canonical JSON.
+          </p>
+          <CodeBlock label="Output" lang="text" code={cliOutput} />
+          <p>
+            An invalid file prints every reason on standard error and exits with status 1.{' '}
+            <code>mailschema implementation</code> checks a Registry implementation record, and{' '}
+            <code>mailschema --help</code> lists the commands. Checking does not authenticate a
+            message, establish a service’s authority or perform an action.
+          </p>
+        </div>
+      </section>
+    )}
     <section class="catalog-note" id="validation">
       <h2>Validate the sources</h2>
       <div>
@@ -191,5 +255,13 @@ const artifacts = [
   }
   .artifact-list p {
     margin: 8px 0 0;
+  }
+  /* Command output keeps its lines and scrolls inside its block instead of widening the page. */
+  .catalog-note > div {
+    min-width: 0;
+  }
+  /* Keep command names and flags such as --contract whole. */
+  #command-line p code {
+    white-space: nowrap;
   }
 </style>
