@@ -1,6 +1,6 @@
 export const mainNavigation = [
   { label: 'Specification', href: '/specification' },
-  { label: 'Types', href: '/types' },
+  { label: 'Examples', href: '/examples' },
   { label: 'Registry', href: '/registry' },
   { label: 'Tools', href: '/tools' },
   { label: 'About', href: '/about' },

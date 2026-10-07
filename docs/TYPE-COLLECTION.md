@@ -1,5 +1,8 @@
 # Interaction type collection
 
+Historical MAP 0.2 type rationale. The current draft contracts and Registry
+source are in [MAP 0.3](../specifications/map-0.3/README.md).
+
 Design record, 25 September 2026. It explains which interaction types the Registry holds, why each exists, which standards each reuses and how the MAP 0.2 core carries them. The records in [`registry/types/`](../registry/types/) and the contracts in [`public/contracts/`](../public/contracts/) are the source of truth; this document is their rationale. Every standard cited was checked at its link on this date.
 
 ## The problem

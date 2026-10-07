@@ -1,0 +1,73 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { effects } from '../../data/effects';
+import { typeHref, typeRecords } from '../../data/types';
+import '../../styles/catalog.css';
+import '../../styles/prose.css';
+
+export function getStaticPaths() {
+  return effects.map((effect) => ({
+    params: { effect: effect.id },
+    props: { effect },
+  }));
+}
+
+const { effect } = Astro.props;
+const title = `${effect.id[0].toUpperCase()}${effect.id.slice(1)}`;
+const effectUri = `https://mailschema.org${effect.href}`;
+const declaringTypes = typeRecords.flatMap((record) => {
+  const operations = record.operations.filter((operation) => operation.effects.includes(effectUri));
+  return operations.length ? [{ record, operations }] : [];
+});
+---
+
+<Base title={`${title} effect`} description={effect.definition} theme="light">
+  <main id="main" class="container">
+    <header class="page-hero">
+      <span class="eyebrow eyebrow-line">MAP Core</span>
+      <h1>{title}</h1>
+      <p class="lead">{effect.definition}</p>
+    </header>
+    <div class="longform">
+      <aside class="longform-aside effect-identifier">
+        <span class="eyebrow">Effect identifier</span>
+        <p><code>{effectUri}</code></p>
+      </aside>
+      <article class="prose">
+        <h2>What this tells a client</h2>
+        <p>
+          A type declares this effect so an agent or inbox can apply the user's rules before
+          offering the action. The type's contract must also define the exact terms and limits.
+          This label alone never grants permission.
+        </p>
+        <h2>Types using this effect</h2>
+        {declaringTypes.length ? (
+          <ul>
+            {declaringTypes.map(({ record, operations }) => (
+              <li>
+                <a href={typeHref(record.slug)}>{record.name}</a>: {' '}
+                {operations.map((operation) => operation.name).join(', ')}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No current type declares this effect.</p>
+        )}
+        <p>
+          <a href="/specification/core#initial-effect-vocabulary">
+            Read the effect rules in MAP Core <Icon size={16} />
+          </a>
+        </p>
+      </article>
+    </div>
+  </main>
+</Base>
+<style>
+  .effect-identifier {
+    min-width: 0;
+  }
+  .effect-identifier code {
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -11,7 +11,7 @@ interface Props {
 }
 const {
   title,
-  description = 'MailSchema is building an open standard for agents to work with services through email. Read Mail Action Protocol and explore shared interaction types.',
+  description = 'MailSchema publishes Mail Action Protocol, a working draft for actions described in email, and a Registry of shared type definitions.',
   theme = 'dark',
   reader = false,
 } = Astro.props;
@@ -30,6 +30,7 @@ const socialImageUrl = new URL('/og/mailschema-v1.png', Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {Astro.url.pathname.startsWith('/archive/') && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#111217" />
     <meta property="og:title" content={`${title} · MailSchema`} />
     <meta property="og:description" content={description} />

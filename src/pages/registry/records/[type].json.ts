@@ -1,4 +1,4 @@
-import { registry } from '../../../data/types';
+import { registry } from '../../../data/legacy-types';
 import { recordDigest } from '../../../registry/catalog';
 import type { APIContext } from 'astro';
 import type { TypeRecord } from '../../../registry/model';

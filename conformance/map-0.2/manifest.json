@@ -641,7 +641,7 @@
     },
     {
       "path": "conformance/map-0.2/cases.mjs",
-      "sha256": "21b1f6128b513aa683f70eb838346b9b5da3d2aa697eb7c3f6f39a5425f6e299"
+      "sha256": "adb6b2bfeb03f558ef7b24ab63b4f1823175904e487880f19a43cd366eac5c3c"
     },
     {
       "path": "conformance/map-0.2/requirements.json",

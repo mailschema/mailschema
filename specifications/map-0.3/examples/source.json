@@ -1,0 +1,188 @@
+{
+  "campaign-send-approval": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d40",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:campaign:18",
+      "title": "Send product update"
+    },
+    "terms": {
+      "id": "urn:example:proposal:c18",
+      "version": "c18-r2"
+    },
+    "human": {
+      "url": "https://service.example/review/c18"
+    },
+    "details": {
+      "summary": "The product update is ready to send to the newsletter audience. Please review the email and approve this send.",
+      "requester": "Campaign editor",
+      "content": {
+        "id": "urn:example:content:18",
+        "revision": "r2",
+        "digest": "sha-256:1111111111111111111111111111111111111111111111111111111111111111",
+        "title": "Product update"
+      },
+      "sender": {
+        "mailbox": "news@service.example",
+        "name": "Service newsletter"
+      },
+      "audience": {
+        "id": "urn:example:audience:9",
+        "revision": "snapshot-3",
+        "count": 4210,
+        "label": "Newsletter subscribers"
+      },
+      "schedule": {
+        "mode": "immediate"
+      }
+    },
+    "operations": [
+      {
+        "id": "approve"
+      },
+      {
+        "id": "decline"
+      },
+      {
+        "id": "request-changes"
+      }
+    ]
+  },
+  "publication-approval": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d41",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:object:42",
+      "title": "Publish the getting started guide"
+    },
+    "terms": {
+      "id": "urn:example:proposal:p7",
+      "version": "p7-r4"
+    },
+    "human": {
+      "url": "https://service.example/review/p7"
+    },
+    "details": {
+      "summary": "Publish the approved getting started guide.",
+      "requester": "Documentation editor",
+      "content": {
+        "id": "urn:example:content:42",
+        "revision": "r4"
+      },
+      "destinations": [
+        {
+          "id": "https://docs.service.example/guide",
+          "account": "urn:example:account:7",
+          "visibility": "public"
+        }
+      ],
+      "schedule": {
+        "mode": "immediate"
+      }
+    },
+    "operations": [
+      {
+        "id": "approve"
+      },
+      {
+        "id": "decline"
+      },
+      {
+        "id": "request-changes"
+      }
+    ]
+  },
+  "email-address-confirmation": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d42",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:request:17",
+      "title": "Confirm the requested communication address"
+    },
+    "terms": {
+      "id": "urn:example:confirmation:e17",
+      "version": "e17-r1"
+    },
+    "human": {
+      "url": "https://service.example/confirm/e17"
+    },
+    "details": {
+      "mailbox": "owner@example.net",
+      "requestId": "urn:example:request:17",
+      "requestedAt": "2026-10-02T07:59:00Z",
+      "purpose": "communication-address",
+      "serviceName": "Example Service"
+    },
+    "operations": [
+      {
+        "id": "confirm",
+        "capability": {
+          "url": "https://service.example/c/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      }
+    ]
+  },
+  "account-security-response": {
+    "@id": "urn:uuid:0199a6c2-4b1e-7c3a-9d2e-5f8a1b2c3d43",
+    "issuedAt": "2026-10-02T08:00:00Z",
+    "expiresAt": "2026-10-03T08:00:00Z",
+    "inLanguage": "en",
+    "service": {
+      "id": "https://service.example",
+      "tenant": "urn:example:tenant:7"
+    },
+    "recipient": "owner@example.net",
+    "subject": {
+      "id": "urn:example:event:23",
+      "title": "Review a sign-in from a new device"
+    },
+    "terms": {
+      "id": "urn:example:security-alert:s23",
+      "version": "s23-r1"
+    },
+    "human": {
+      "url": "https://service.example/security/s23"
+    },
+    "details": {
+      "account": {
+        "id": "urn:example:account:7",
+        "label": "Example account"
+      },
+      "event": {
+        "id": "urn:example:event:23",
+        "occurredAt": "2026-10-02T07:50:00Z",
+        "activity": "Sign-in from a new device",
+        "device": "Example browser"
+      }
+    },
+    "operations": [
+      {
+        "id": "report-unrecognized",
+        "capability": {
+          "url": "https://service.example/c/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      }
+    ]
+  }
+}

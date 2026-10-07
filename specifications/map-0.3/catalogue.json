@@ -1,0 +1,98 @@
+{
+  "profile": "https://mailschema.org/profiles/map/0.3",
+  "status": "draft",
+  "published": false,
+  "notice": "Draft build inventory, not a published profile or an active runtime catalogue.",
+  "artifacts": [
+    {
+      "path": "specifications/map-0.3/overview.md",
+      "sha256": "8e9593f667a879d9911721178a9c2220f920fd291244cc311099991fd3f9d72d"
+    },
+    {
+      "path": "specifications/map-0.3/interfaces.md",
+      "sha256": "3d3295001c51c27826cb9cdcd3fa9edb4995949dd60a7a91be5fec01bffbfe80"
+    },
+    {
+      "path": "specifications/map-0.3/core.md",
+      "sha256": "a519b8c9f8c4715a343aec0fec5b62ae84d1fa53696cc51c8c3353cdf50990c6"
+    },
+    {
+      "path": "specifications/map-0.3/http.md",
+      "sha256": "ed7865e3e8b7988d5e786030f92f5b08b210088d7c9bf7e4ec7045a52ac77a4a"
+    },
+    {
+      "path": "specifications/map-0.3/bindings.md",
+      "sha256": "809504cffe339381c6abed8ea71b8178c1246e3c561ee17b9321733cdfd624d6"
+    },
+    {
+      "path": "specifications/map-0.3/registry.md",
+      "sha256": "654b8e220396d6ec82395fc219861eefc775a488d4e32abb3c83253c02eaa144"
+    },
+    {
+      "path": "specifications/map-0.3/capability.md",
+      "sha256": "5cc7a9c96cc49e044e7f59841dbd7bb143ad11fcc1352d33ae83f8a76fd7bfeb"
+    },
+    {
+      "path": "specifications/map-0.3/schemas/core.schema.json",
+      "sha256": "0ad09a6955a47e7a2c1c1eec0747a3e0b15c08a79860e90ce4e65da11983aeb3"
+    },
+    {
+      "path": "specifications/map-0.3/schemas/contract.schema.json",
+      "sha256": "86bf057529c4fd2c7f0a880825774afeed31e9f7ba1d99760858a585fe28d18d"
+    },
+    {
+      "path": "specifications/map-0.3/schemas/implementation.schema.json",
+      "sha256": "c62acc3ebb9f384c8fba7be353ab1905b65883ac2b16b147fd98485eec643396"
+    },
+    {
+      "path": "specifications/map-0.3/bindings/publication.openapi.json",
+      "sha256": "a10ad7885e2109da25739622a1bd5a237700680effa8f4d858c75faf63a5ff22"
+    },
+    {
+      "path": "specifications/map-0.3/bindings/publication.mcp.json",
+      "sha256": "7fab697ad04dce0c8c9da700432c9d4377b0d00f4849ecb2166ba03f390127fc"
+    },
+    {
+      "path": "specifications/map-0.3/examples/publication.eml",
+      "sha256": "31b9e7ec3fd61b87a89deb539719aee53db23c200c1ac8ed6f12efafce9739d5"
+    },
+    {
+      "path": "specifications/map-0.3/examples/publication-exchange.json",
+      "sha256": "f8730083db1fe06c799a05454745ca0f0a5718e6e1b946b6126cce0f69e8b029"
+    },
+    {
+      "path": "specifications/map-0.3/examples/campaign.md",
+      "sha256": "86d8e5d2331a2c3bd211a71adb79149b644104ccbb7a4425b7ac5b26e94ef06d"
+    },
+    {
+      "path": "specifications/map-0.3/context.jsonld",
+      "sha256": "a51490d1fe8af695c14ea508aad88fd0429d18564791b6b52f3ab07d5c51aab3"
+    }
+  ],
+  "types": [
+    {
+      "id": "https://mailschema.org/types/account-security-response",
+      "version": "0.1",
+      "contractDigest": "sha-256:ec7c85eb9415914a59be29496f6b50ea77839a579420155f17b39a5968a4e611",
+      "path": "specifications/map-0.3/contracts/account-security-response-0.1.json"
+    },
+    {
+      "id": "https://mailschema.org/types/campaign-send-approval",
+      "version": "0.1",
+      "contractDigest": "sha-256:de3c88a0712adb1d0c6e82f437b825c83520d8e1c44c7b032a2cfcfe5ce55731",
+      "path": "specifications/map-0.3/contracts/campaign-send-approval-0.1.json"
+    },
+    {
+      "id": "https://mailschema.org/types/email-address-confirmation",
+      "version": "0.1",
+      "contractDigest": "sha-256:fc9d8a4fb3f3065f93bd53d1f9238b13df63186588d3f3f44982d5813412e282",
+      "path": "specifications/map-0.3/contracts/email-address-confirmation-0.1.json"
+    },
+    {
+      "id": "https://mailschema.org/types/publication-approval",
+      "version": "0.1",
+      "contractDigest": "sha-256:de91a49de4cba91209be253456e7c56709791fff877a060560d4eada0cc9468c",
+      "path": "specifications/map-0.3/contracts/publication-approval-0.1.json"
+    }
+  ]
+}

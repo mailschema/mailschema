@@ -1,221 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
      category="std"
-     consensus="true"
      docName="draft-mailschema-mail-action-protocol-00"
-     ipr="trust200902"
-     submissionType="IETF"
-     version="3">
+     ipr="trust200902" submissionType="IETF" sortRefs="true" version="3">
   <front>
     <title abbrev="Mail Action Protocol">Mail Action Protocol (MAP)</title>
     <seriesInfo name="Internet-Draft" value="draft-mailschema-mail-action-protocol-00"/>
     <author fullname="Kam Low" initials="K." surname="Low">
-      <organization>MailSchema</organization>
-      <address>
-        <email>oss@0state.com</email>
-        <uri>https://mailschema.org/</uri>
-      </address>
+      <organization>Nitrosend</organization>
+      <address><email>kam@nitrosend.com</email></address>
     </author>
-    <date year="2026" month="September" day="25"/>
+    <author fullname="George Hartley" initials="G." surname="Hartley">
+      <organization>Nitrosend</organization>
+      <address><email>george@nitrosend.com</email></address>
+    </author>
+    <date year="2026" month="October" day="7"/>
     <area>Applications and Real-Time</area>
     <workgroup>Individual Submission</workgroup>
-    <keyword>email</keyword>
-    <keyword>agents</keyword>
-    <keyword>structured email</keyword>
+    <keyword>email</keyword><keyword>agents</keyword><keyword>structured email</keyword>
     <abstract>
-      <t>The Mail Action Protocol (MAP) defines how a service describes an
-      action in email, how a client requests that action over HTTPS, and how
-      the service reports and retains the result. A request is bound to the
-      exact description by its digest. A request is authorized either by the
-      client's existing service credential or, for operations whose contract
-      permits it, by a capability the message itself carries. MAP reuses the
-      JSON-LD representation and MIME structure of the Structured Email work.
-      Interaction types are defined by digest-bound contracts, so adding a type
-      does not change this protocol. MAP does not replace email transport or
-      define an agent identity system.</t>
+      <t>Mail Action Protocol (MAP) describes actions offered by email, such
+      as approval to publish an article. A type contract defines each
+      decision and its effects. A trusted service binding connects that
+      decision to an existing service operation. Before acting, a client
+      reads the current proposal and applies the user's policy. The service
+      checks permission and the exact terms when it records the decision.
+      MAP uses Structured Email's MIME and JSON-LD representation. Core is
+      independent of the interface used to call the service. This document
+      specifies an HTTP binding, Registry
+      discovery rules and an experimental capability binding for a limited
+      set of actions without a service account connection. It defines no
+      general action endpoint or replacement authentication system.</t>
     </abstract>
   </front>
-
   <middle>
-    <section anchor="introduction" numbered="true">
-      <name>Introduction</name>
-      <t>Email routinely asks a recipient to act in another service: approve
-      terms, supply information, respond to an event, confirm an address or
-      change a preference. A person can interpret the message and follow a
-      link. An automated client needs more: a stable description of the
-      operation, the exact object and terms on which it acts, the authority the
-      action rests on, what completing it gives away, and the possible
-      outcomes.</t>
-      <t>MAP defines that interaction without moving business authority into
-      email. The service remains authoritative for identity, permission,
-      target state, approvals and the operation's effect. The readable email
-      and normal service interface remain available to a person.</t>
-      <t>The key words <bcp14>MUST</bcp14>, <bcp14>MUST NOT</bcp14>,
-      <bcp14>SHOULD</bcp14>, and <bcp14>MAY</bcp14> in this document are to be
-      interpreted as described in BCP 14 <xref target="RFC2119"/> <xref
-      target="RFC8174"/> when, and only when, they appear in all capitals.</t>
-    </section>
-
-    <section anchor="scope" numbered="true">
-      <name>Scope and Relationship to Existing Work</name>
-      <t>MAP descriptions are JSON-LD documents carried in an
-      <tt>application/ld+json</tt> MIME part designated by Structured Email
-      <xref target="I-D.ietf-sml-structured-email"/>. SMTP, Internet Message
-      Format, MIME, mailbox access and provider APIs continue to perform their
-      existing roles <xref target="RFC5322"/> <xref target="RFC2046"/>.</t>
-      <t>MAP 0.2 uses HTTPS, the service's existing authentication, and
-      existing email authentication <xref target="RFC6376"/> <xref
-      target="RFC9989"/>. It defines no custom DNS record, new media type,
-      global identity provider, mandatory online registry lookup or general
-      permission-policy language. Its authority for message-carried actions
-      follows the pattern of one-click unsubscribe <xref target="RFC8058"/>.</t>
-    </section>
-
-    <section anchor="terms" numbered="true">
-      <name>Terminology</name>
-      <dl>
-        <dt>Service</dt>
-        <dd>The authority that owns an operation, checks permission, performs
-        the effect and records its result.</dd>
-        <dt>Client</dt>
-        <dd>An agent, inbox or application that reads a description and may
-        submit a request on behalf of a principal.</dd>
-        <dt>Interaction Type</dt>
-        <dd>A versioned contract defining the details, operations, inputs,
-        results, authority and consequences of a class of interaction.</dd>
-        <dt>Details</dt>
-        <dd>Type-defined data in a description, such as terms to approve,
-        fields to complete or times on offer.</dd>
-        <dt>Description Digest</dt>
-        <dd>The SHA-256 digest of the canonical form of a description, which
-        binds a request to it.</dd>
-        <dt>Capability</dt>
-        <dd>An unguessable value in a service URL that authorizes the
-        operations one message offers, for one recipient.</dd>
-        <dt>Consequence</dt>
-        <dd>What completing an operation gives away: refusal, protection,
-        record, disclosure, commitment, authorization or assertion.</dd>
-        <dt>Human Route</dt>
-        <dd>A service interface through which a person can inspect and complete
-        the interaction.</dd>
-      </dl>
-    </section>
-
-    <!-- Generated from docs/specification by scripts/draft.mjs. Do not edit between the markers. -->
-    <!-- profile -->
-
-
-    <section anchor="security" numbered="true">
-      <name>Security Considerations</name>
-      <t>Implementations treat structured content as attacker-controlled. The
-      credential checks in <xref target="credential-authority"/> prevent an email from
-      redirecting a service credential. The description digest prevents a
-      forged or altered description from being acted on. Schema validation
-      establishes neither trust nor permission.</t>
-      <t>Possession authority transfers with every copy of a message. The
-      rules in <xref target="possession-authority"/> limit it as follows:</t>
-      <ul>
-        <li>recipient binding stops replay to other recipients;</li>
-        <li>strict DKIM verification stops forgery and appended content;</li>
-        <li>the organizational domain rule stops redirection to another
-        organization;</li>
-        <li>consequences, and type rules such as confirming only a request the
-        client recorded, stop assertions a principal did not make.</li>
-      </ul>
-      <t>A lookalike domain can pass authentication; it cannot satisfy a
-      recorded-request rule. The rules in <xref target="possession-authority"/> keep
-      capabilities out of logs, referrers and human routes.</t>
-      <t>Services protect result resources with current authorization and
-      disclose no token, private content or permission information beyond what
-      the caller may know. A service can grant a caller no authority, proposal
-      authority that produces <tt>approval-required</tt>, or delegated
-      authority that can produce <tt>completed</tt>. MAP does not infer
-      authority from whether the caller is automated.</t>
-    </section>
-
-    <section anchor="privacy" numbered="true">
-      <name>Privacy Considerations</name>
-      <t>Descriptions travel through email systems and may be retained or
-      forwarded. They should carry the minimum details needed to act, and
-      sensitive material should stay behind an authorized service route. Form
-      fields cannot request passwords, one-time codes or payment card data.
-      Results should not be retained longer than the service's stated purpose
-      requires.</t>
-    </section>
-
-    <section anchor="iana" numbered="true">
-      <name>IANA Considerations</name>
-      <t>MAP uses existing media types, HTTPS and the existing OAuth protected
-      resource metadata document. It requests no new media type or well-known
-      URI.</t>
-      <t>IANA is requested to register the following parameter in the "OAuth
-      Protected Resource Metadata" registry established by
-      <xref target="RFC9728"/>:</t>
-      <dl>
-        <dt>Metadata Name:</dt><dd><tt>map_services</tt></dd>
-        <dt>Metadata Description:</dt><dd>Mail Action Protocol services at the
-        protected resource, with their profiles and exact execution and result
-        URLs</dd>
-        <dt>Change Controller:</dt><dd>IETF</dd>
-        <dt>Specification Document(s):</dt><dd><xref target="credential-authority"/> of
-        this document</dd>
-      </dl>
-    </section>
-
-    <section anchor="implementations" numbered="true">
-      <name>Implementation Status</name>
-      <t>This section follows <xref target="RFC7942"/> and may be removed before
-      publication as an RFC.</t>
-      <t>The MailSchema repository at
-      <eref target="https://github.com/mailschema/mailschema"/> publishes MAP
-      0.2's digest-bound schemas and a Registry of type contracts. It also publishes a
-      contract-driven reference service and client, and a conformance suite of
-      100 cases mapped to 39 requirements. The suite includes DKIM-signed
-      genuine and forged messages and shared RFC 8785, I-JSON, lexical and
-      media type vectors, which a Ruby implementation also passes.</t>
-      <t>Nitrosend's production API implements Content Review 0.3 on this
-      profile. No independent implementation is claimed, and MailSchema and
-      Nitrosend share ownership.</t>
+    <!-- Generated from specifications/map-0.3. Edit its sources, not this projection. -->
+    <!-- specification -->
+    <section anchor="implementation-status"><name>Implementation Status</name>
+      <t>This section follows <xref target="RFC7942"/> and is to be removed
+      before publication as an RFC. The specification source, four Draft
+      Registry contracts, schemas, examples, and conformance scenarios are at
+      <eref target="https://github.com/mailschema/mailschema/tree/main/specifications/map-0.3"/>.
+      Artifact checks establish shape, digest consistency, and offline
+      JSON-LD interpretation. Runtime scenarios are unimplemented skeletons.
+      No MAP 0.3 runtime conformance or independent interoperability is claimed.
+      Schema checks alone do not establish service behaviour.</t>      <t>Feedback is sought on receiver authentication evidence, existing API
+      readback mappings, atomic version enforcement, and the limited
+      capability binding. The latter requires explicit opt-in and remains
+      experimental pending implementation evidence. No MCP binding is
+      specified here; the companion MCP walkthrough is illustrative. This document is prepared as an individual submission;
+      it does not assert adoption by the Structured Email working group.</t>
     </section>
   </middle>
-
   <back>
-    <references>
-      <name>Normative References</name>
+    <references><name>Normative References</name>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2045.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2387.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4648.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5322.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5646.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5890.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6901.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6234.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6376.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6454.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6531.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7493.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8301.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8463.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8601.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8707.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9110.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9562.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9700.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9989.xml"/>
       <reference anchor="JSON-LD11" target="https://www.w3.org/TR/2020/REC-json-ld11-20200716/">
-        <front><title>JSON-LD 1.1</title><author fullname="W3C JSON-LD Working Group"/><date year="2020" month="July" day="16"/></front>
+        <front><title>JSON-LD 1.1</title><author fullname="Gregg Kellogg" initials="G." surname="Kellogg" role="editor"/><author fullname="Pierre-Antoine Champin" initials="P.-A." surname="Champin" role="editor"/><author fullname="Dave Longley" initials="D." surname="Longley" role="editor"/><date year="2020" month="July" day="16"/></front>
         <seriesInfo name="W3C Recommendation" value="REC-json-ld11-20200716"/>
       </reference>
-      <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/draft-ietf-sml-structured-email/">
-        <front><title>Structured Email</title><author fullname="IETF SML Working Group"/><date year="2026"/></front>
+      <reference anchor="JSON-SCHEMA" target="https://json-schema.org/draft/2020-12/json-schema-validation">
+        <front><title>JSON Schema Validation: A Vocabulary for Structural Validation of JSON</title><author fullname="Austin Wright" initials="A." surname="Wright" role="editor"/><author fullname="Henry Andrews" initials="H." surname="Andrews" role="editor"/><author fullname="Ben Hutton" initials="B." surname="Hutton" role="editor"/><date year="2022" month="June" day="16"/></front>
+        <seriesInfo name="Specification" value="Draft 2020-12"/>
+      </reference>
+      <reference anchor="I-D.ietf-sml-structured-email" target="https://datatracker.ietf.org/doc/html/draft-ietf-sml-structured-email-06">
+        <front><title>Structured Email</title><author fullname="Hans-Joerg Happel" initials="H.-J." surname="Happel"/><date year="2026" month="June" day="1"/></front>
         <seriesInfo name="Internet-Draft" value="draft-ietf-sml-structured-email-06"/>
       </reference>
     </references>
-    <references>
-      <name>Informative References</name>
+    <references><name>Informative References</name>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
       <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8058.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8601.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8693.xml"/>
-      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9421.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8792.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9457.xml"/>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9728.xml"/>
     </references>
+    <!-- appendices -->
   </back>
 </rfc>

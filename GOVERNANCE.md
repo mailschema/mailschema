@@ -24,17 +24,17 @@ The maintainers aim for rough consensus grounded in interoperable behavior. The 
 ## Versions
 
 - Specification profiles use explicit versioned identifiers.
-- Type definitions have their own versions and immutable record digests.
+- Type contracts have their own versions and immutable canonical digests; Registry metadata has a separate lifecycle.
 - Registry tooling packages have independent release versions.
 - A newer specification or package does not silently change an older type record.
 
-Deprecated profiles remain documented long enough for implementations to migrate. Breaking normative changes require a new profile identifier.
+Published versioned artifacts remain available after supersession. Changes to common wire or authority interpretation require a new profile identifier.
 
 ## Implementations and conformance
 
 An implementation declaration identifies what a product claims to support. Reproduced evidence records what a named test actually observed. Neither grants authority to execute actions or implies endorsement.
 
-Conformance claims must name the exact MAP profile, type version, operations and conformance-suite version. Draft profiles may publish test results but do not use “certified” or “fully compliant” language.
+Implementation reports name the exact MAP profile, contract ID, version and digest, tested roles and operations, implementation revision, setup, observations and missing coverage. Draft profiles may publish results but do not use “certified” or “fully compliant” language. A support declaration is identified as a claim, not a reproduced test.
 
 ## Standards organizations
 

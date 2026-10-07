@@ -5,7 +5,7 @@ The specification is rendered by Sourcey's built-in `reader` theme. The Astro ho
 ## Ownership
 
 - Sourcey OSS: the generic theme contract, layout, styles, client controls, Markdown, navigation, URL handling and indexes.
-- MailSchema: sixteen authored chapters, navigation order, brand assets, document metadata, sidebar links and notes, right-aside links, pagination edges and footer content in `docs/specification/`.
+- MailSchema: canonical MAP 0.3 text, generated type chapter, navigation order, brand assets, document metadata, sidebar links and notes, right-aside links, pagination edges and footer content in `docs/specification/`.
 - Astro/Cloudflare: host routing and static-asset delivery. The Sourcey integration consumes Astro's client output directory and base prefix.
 
 The reusable theme contains no MailSchema or MAP names. Optional project-content areas are host-authored arrays and disappear when they are not configured. Sourcey's own “Docs by Sourcey” attribution remains part of the renderer. The host's `brand.css` contains brand tokens only. Fonts are self-hosted through the same public asset as the rest of the site.

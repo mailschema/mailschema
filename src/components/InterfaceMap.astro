@@ -1,0 +1,257 @@
+---
+import Icon from './Icon.astro';
+import { research, interfaceHref } from '../data/interfaces';
+import { typeRecords } from '../data/types';
+const contract = typeRecords.find((type) => type.slug === 'publication-approval')!;
+const families = [
+  {
+    name: 'APIs & RPC',
+    action: 'Call an existing operation',
+    group: 'Service APIs',
+  },
+  {
+    name: 'Agents & tools',
+    action: 'Use a connected service',
+    group: 'Agent protocols',
+  },
+  {
+    name: 'Messaging',
+    action: 'Deliver a decision',
+    group: 'Messaging',
+    disposition: 'Binding candidate',
+  },
+  {
+    name: 'Channels & federation',
+    action: 'Carry calls, progress and results',
+    group: 'Streams and federation',
+  },
+]
+  .map((family) => ({
+    ...family,
+    entries: research.entries.filter(
+      (entry) =>
+        entry.group === family.group &&
+        (!family.disposition || entry.disposition === family.disposition),
+    ),
+  }))
+  .filter((family) => family.entries.length);
+---
+
+<div class="interface-map">
+  <div class="interface-origin">
+    <span class="eyebrow">In the email</span>
+    <h3>Publish this revision.</h3>
+    <p>A proposal, its exact terms and the decisions you can make.</p>
+    <div class="interface-contract">
+      <span>Type contract</span>
+      <strong>{contract.name}</strong>
+      <span>{contract.operations.map((operation) => operation.name).join(' · ')}</span>
+    </div>
+    <div class="interface-gate">
+      <span class="eyebrow">At the host</span>
+      <strong>Trusted binding</strong>
+      <p>Read the current proposal. Check policy. Obtain confirmation when required.</p>
+    </div>
+    <a href="/specification/bindings">
+      What a binding establishes <Icon size={15} />
+    </a>
+  </div>
+  <div class="interface-destinations">
+    <div class="interface-map-label">
+      <span class="eyebrow">At the service</span>
+      <span>Researched interface families</span>
+    </div>
+    {families.map((family) => (
+      <div class="interface-family">
+        <div>
+          <h4>{family.name}</h4>
+          <p>{family.action}</p>
+        </div>
+        <ul>
+          {family.entries.map((entry) => (
+            <li>
+              <a href={interfaceHref(entry.id)}>{entry.name}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    <div class="interface-enforcement">
+      <Icon name="check" size={18} />
+      <p>The service checks permission and exact terms when it records the decision.</p>
+    </div>
+  </div>
+  <div class="interface-map-foot">
+    <p>
+      MAP can use existing service descriptions, account access and discovery. The interfaces shown
+      here have been researched, not implemented as MAP integrations.
+    </p>
+    <a href="/interfaces">
+      Explore the full research <Icon size={16} />
+    </a>
+  </div>
+</div>
+<style>
+  .interface-map {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.6fr);
+    border: 1px solid var(--line-light);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .interface-origin {
+    background: var(--lavender);
+    padding: clamp(25px, 3vw, 42px);
+  }
+  .interface-origin h3 {
+    font-size: clamp(25px, 3vw, 35px);
+    letter-spacing: -0.045em;
+    margin: 24px 0 16px;
+  }
+  .interface-origin p {
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .interface-contract {
+    display: grid;
+    gap: 8px;
+    padding: 23px 0;
+    margin: 24px 0;
+    border-block: 1px solid oklch(73% 0.07 286);
+  }
+  .interface-contract span {
+    font-size: 11px;
+  }
+  .interface-contract strong {
+    font-size: 17px;
+  }
+  .interface-gate strong {
+    display: block;
+    margin: 12px 0 8px;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+  }
+  .interface-origin a,
+  .interface-map-foot a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .interface-origin a {
+    margin-top: 12px;
+  }
+  .interface-destinations {
+    padding: 28px 34px 0;
+    min-width: 0;
+  }
+  .interface-map-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 8px;
+  }
+  .interface-map-label > span:last-child {
+    font-size: 10px;
+    color: oklch(44% 0.02 275);
+  }
+  .interface-family {
+    display: grid;
+    grid-template-columns: minmax(140px, 0.9fr) minmax(0, 1.3fr);
+    gap: 25px;
+    padding: 23px 0;
+    border-bottom: 1px solid var(--line-light);
+  }
+  .interface-family h4 {
+    font-size: 18px;
+    letter-spacing: -0.035em;
+    margin: 0 0 9px;
+  }
+  .interface-family p {
+    font-size: 11px;
+    line-height: 1.6;
+    margin: 0;
+    color: oklch(44% 0.02 275);
+  }
+  .interface-family ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 4px 13px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .interface-family a {
+    text-decoration: underline;
+    text-decoration-color: var(--line-light);
+    text-underline-offset: 4px;
+  }
+  .interface-family a:hover {
+    color: var(--blue-ink);
+    text-decoration-color: currentColor;
+  }
+  .interface-enforcement {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 21px 0;
+  }
+  .interface-enforcement svg {
+    flex-shrink: 0;
+    color: var(--blue-ink);
+  }
+  .interface-enforcement p {
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 0;
+  }
+  .interface-map-foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 21px 32px;
+    border-top: 1px solid var(--line-light);
+  }
+  .interface-map-foot p {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 11px;
+    line-height: 1.7;
+    color: oklch(44% 0.02 275);
+  }
+  .interface-map-foot a {
+    flex-shrink: 0;
+    color: var(--blue-ink);
+  }
+  @media (max-width: 780px) {
+    .interface-map {
+      grid-template-columns: 1fr;
+    }
+    .interface-destinations {
+      padding: 26px 24px 0;
+    }
+    .interface-map-foot {
+      align-items: start;
+      flex-direction: column;
+      padding: 24px;
+      gap: 14px;
+    }
+  }
+  @media (max-width: 440px) {
+    .interface-family {
+      grid-template-columns: 1fr;
+      gap: 13px;
+    }
+    .interface-map-label {
+      align-items: start;
+      flex-direction: column;
+      gap: 3px;
+    }
+  }
+</style>

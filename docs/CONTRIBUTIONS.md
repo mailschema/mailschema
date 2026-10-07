@@ -1,5 +1,10 @@
 # Vendor contributions and ingestion
 
+Historical MAP 0.2 intake design. For MAP 0.3 contributions, use the current
+[contribution page](../src/pages/contribute.astro) and
+[specification sources](../specifications/map-0.3/README.md). The paths and
+contract rules below describe the earlier profile.
+
 24 September 2026. Public source and pull-request intake are open at [mailschema/mailschema](https://github.com/mailschema/mailschema). The browser prepares and checks a contribution locally, then opens the exact file in GitHub for review.
 
 ## Channel decision

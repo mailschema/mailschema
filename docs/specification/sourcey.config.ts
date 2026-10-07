@@ -1,8 +1,34 @@
-import { defineConfig } from 'sourcey';
+import { defineConfig, type SourceAdapter } from 'sourcey';
 import { specNavigation } from './navigation';
 import { mainNavigation } from '../../src/data/navigation';
+import { specification } from '../../src/data/specification';
 
 const sections = [...new Set(specNavigation.map((page) => page.section))];
+const source: SourceAdapter = {
+  name: 'map-specification',
+  async resolve(context) {
+    return {
+      kind: 'markdown',
+      groups: sections.map((label) => ({
+        label,
+        pages: specNavigation
+          .filter((page) => page.section === label)
+          .map((page) => ({
+            slug: page.slug,
+            label: page.label,
+            file: context.resolvePath(page.file),
+            preprocess: [
+              (body: string) =>
+                body.replace(
+                  '](#experimental-capability-binding)',
+                  '](/specification/capability#experimental-capability-binding)',
+                ),
+            ],
+          })),
+      })),
+    };
+  },
+};
 
 export default defineConfig({
   name: 'MailSchema',
@@ -22,17 +48,17 @@ export default defineConfig({
       document: {
         label: 'MAP',
         title: 'Mail Action\nProtocol',
-        version: '0.2',
-        status: 'Working draft',
-        badge: 'Draft',
-        updated: '25 September 2026',
+        version: specification.version,
+        status: specification.status,
+        badge: specification.badge,
       },
       searchHref: '/search',
       sidebar: {
         links: [
           { label: 'Try the example', href: '/examples', icon: 'code' },
+          { label: 'Interface research', href: '/interfaces', icon: 'code' },
           { label: 'Type registry', href: '/registry', icon: 'layers' },
-          { label: 'Registry tools', href: '/tools', icon: 'code' },
+          { label: 'Schemas and tools', href: '/tools', icon: 'code' },
           { label: 'Contribute a type', href: '/contribute', icon: 'layers' },
         ],
         note: 'For agents and services\nworking through email.',
@@ -40,8 +66,8 @@ export default defineConfig({
       aside: {
         links: [
           {
-            label: 'Try Content Review',
-            description: 'Review a draft\nfrom the inbox.',
+            label: 'From email to service',
+            description: 'APIs, agents\nand messaging.',
             href: '/examples',
             icon: 'code',
           },
@@ -49,7 +75,7 @@ export default defineConfig({
       },
       pagination: {
         before: {
-          label: 'Try Content Review',
+          label: 'From email to service',
           description: 'Explore the workflow',
           href: '/examples',
         },
@@ -60,7 +86,7 @@ export default defineConfig({
         },
       },
       footer: {
-        text: 'MailSchema · MAP 0.2',
+        text: 'MailSchema · Mail Action Protocol',
         links: [{ label: 'Improve this specification', href: '/contribute' }],
       },
     },
@@ -70,12 +96,7 @@ export default defineConfig({
       {
         tab: 'Specification',
         slug: '',
-        groups: sections.map((group) => ({
-          group,
-          pages: specNavigation
-            .filter((page) => page.section === group)
-            .map((page) => page.slug || 'index'),
-        })),
+        source,
       },
     ],
   },

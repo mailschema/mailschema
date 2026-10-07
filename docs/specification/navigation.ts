@@ -1,62 +1,74 @@
-import { typeRecords } from '../../src/data/types';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { specification } from '../../src/data/specification';
 
-// Every type with a maintained definition has a chapter; the Registry record supplies its title.
-const typeChapters = typeRecords
-  .filter((type) => type.definition)
-  .map((type) => ({
-    slug: type.slug,
-    label: type.name,
-    section: 'Types',
-    description: type.summary,
-  }));
+const currentSource = `../../${specification.source}`;
 
 export const specNavigation = [
   {
-    slug: '',
+    slug: 'overview',
     label: 'Overview',
-    section: 'Getting started',
-    description: 'The purpose, scope and status of Mail Action Protocol.',
+    section: 'Start here',
+    file: `${currentSource}/overview.md`,
   },
   {
-    slug: 'interaction-model',
-    label: 'Interaction model',
-    section: 'The protocol',
-    description:
-      'How an email describes an action, a client requests it and a service returns the result.',
+    slug: 'interfaces',
+    label: 'Service interfaces',
+    section: 'Start here',
+    file: `${currentSource}/interfaces.md`,
   },
   {
-    slug: 'profile',
-    label: 'MAP 0.2 profile',
-    section: 'The protocol',
-    description: 'The core: descriptions, requests, results, authority modes and type contracts.',
+    slug: 'core',
+    label: 'Core',
+    section: 'Specification',
+    file: `${currentSource}/core.md`,
   },
   {
-    slug: 'authorization',
-    label: 'Authorization',
-    section: 'The protocol',
-    description:
-      'Credential and possession authority, consequences, human approvals and trust boundaries.',
+    slug: 'http',
+    label: 'HTTP binding',
+    section: 'Specification',
+    file: `${currentSource}/http.md`,
   },
   {
-    slug: 'outcomes',
-    label: 'Results and retries',
-    section: 'The protocol',
-    description:
-      'Distinguish accepted, completed, failed, refused, stale and decided outcomes. Retry without duplicate effects.',
+    slug: 'capability',
+    label: 'Capability binding',
+    section: 'Specification',
+    file: `${currentSource}/capability.md`,
   },
   {
-    slug: 'type-contracts',
+    slug: 'contracts',
     label: 'Type contracts',
-    section: 'The protocol',
-    description:
-      'How a type is defined, reviewed and published, and the rules every contract meets.',
+    section: 'Types',
+    file: `${currentSource}/contracts.md`,
   },
-  ...typeChapters,
   {
-    slug: 'interoperability',
-    label: 'Interoperability',
+    slug: 'bindings',
+    label: 'Service bindings',
     section: 'Implementation',
-    description: 'Reusing existing standards and testing an interaction across services.',
+    file: `${currentSource}/bindings.md`,
   },
-];
-export const specHref = (slug: string) => (slug ? `/specification/${slug}` : '/specification');
+  {
+    slug: 'registry',
+    label: 'Registry and discovery',
+    section: 'Implementation',
+    file: `${currentSource}/registry.md`,
+  },
+  {
+    slug: 'conformance',
+    label: 'Conformance',
+    section: 'Implementation',
+    file: `../../conformance/map-${specification.version}/README.md`,
+  },
+  {
+    slug: 'sources',
+    label: 'Standards references',
+    section: 'Implementation',
+    file: `${currentSource}/SOURCES.md`,
+  },
+].map((page) => {
+  const markdown = readFileSync(resolve('docs/specification', page.file), 'utf8');
+  const match = /^---\n[\s\S]*?^description: (".*")$/m.exec(markdown);
+  if (!match) throw new Error(`${page.file}: missing page description`);
+  return { ...page, description: JSON.parse(match[1]) as string };
+});
+export const specHref = (slug: string) => `/specification/${slug || 'overview'}`;

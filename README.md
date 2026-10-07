@@ -1,8 +1,10 @@
 # MailSchema
 
-The public specification site for **MailSchema** and **Mail Action Protocol (MAP)**. A standalone static Astro project using the selected charcoal, yellow and blue Direction 03 identity.
+The public specification site for **MailSchema** and **Mail Action Protocol (MAP)**. A static Astro site with a Sourcey specification reader.
 
 The dependency-ordered project plan is maintained in [docs/ROADMAP.md](docs/ROADMAP.md). Project governance, contribution terms, security reporting and versioning are documented at the repository root.
+
+[MAP 0.3](specifications/map-0.3/README.md) is the current specification: Core, HTTP and experimental capability bindings, independent type contracts, conformance material, and a generated individual Internet-Draft. Development and production builds use the same sources. Published historical artifacts and package support retain their actual versions; presenting this draft does not release new packages or claim runtime conformance.
 
 ## Run locally
 
@@ -19,50 +21,52 @@ Open http://127.0.0.1:4325. Astro 7 may start the development server in the back
 npm run verify
 ```
 
-`verify` validates the Registry, the MAP 0.2 profile, fixtures and conformance manifest, runs the conformance suite, type-checks, builds the site, and runs the Registry, release-evidence and worker tests with Vitest.
+`verify` validates the Registry, the MAP 0.2 profile, fixtures and conformance manifest, checks the separate 0.3 draft artifacts and both draft projections, runs the existing conformance suite, type-checks, builds the site, and runs the Registry, release-evidence and worker tests with Vitest.
 
 ## Site structure
 
-- `/`: identity, protocol explanation and local review demonstration.
-- `/specification`: MAP 0.2 draft reader: the core profile, authorization, results and a chapter for each type.
-- `/types`: the complete interaction collection, with operations, examples, maturity labels and guidance on using or proposing a type.
-- `/registry`: the type records, searchable by name and description and filterable by category and status.
-- `/registry/<type>`: definition brief, operations, example, existing standards, open questions and implementation evidence.
-- `/examples`: interactive local Content Review simulation.
-- `/tools`: verified JavaScript, Python, Rust and Go releases, installation, runnable examples and API reference.
-- `/about`, `/contribute`, `/search`: project, browser contribution intake and guide, and local search.
-- `/registry/catalog.json`, `/registry/records/<type>.json`, `/registry/snapshots/<digest>.json`: generated Registry data and exact record snapshots.
-- `/registry/records/<type>.record.json`: a raw record accepted directly by the package validators; used by each type page's download link.
+- `/specification`: Sourcey reader for Core, the bindings, type contracts, conformance and standards references.
+- `/registry`, `/registry/<type>`: the type collection, current definitions, version history and listed service support. `/types` and its detail URLs redirect there for existing links. Contract identifiers remain `https://mailschema.org/types/<type>`; a browser redirect does not change their exact identity or digest.
+- `/registry/map-0.3.json`: current draft catalogue, with canonical contract digests and source download URLs.
+- `/artifacts/map-0.3/`: byte-for-byte downloads from the canonical draft files, generated at build time.
+- `/interfaces`: searchable primary-source research across execution, descriptions, delivery, discovery, identity and domain workflows.
+- `/examples`: the interface-family overview, worked MIME → MAP → service exchanges and an interactive exact-terms illustration. These are generated local examples, not live integrations.
+- `/tools`: current schemas, contracts, examples and conformance material.
+- `/contribute`: local contract and service-record checks and preview, followed by GitHub review. No additional submission service.
+- `/search`, `/about`: current chapter/type search and project explanation.
+- `/archive/map-0.1` and `/archive/map-0.2`: superseded profiles, type history and package documentation, unlisted in the current navigation. Published artifact bytes remain unchanged.
 
-Specification content and Sourcey configuration live in `docs/specification/`. Sourcey owns the reader theme, rendering, chapter navigation and machine-readable specification output. `sourcey/astro` mounts it at `/specification` in development and production. The rest of the site uses Astro components and small native TypeScript modules. Shared chapter metadata is authored once in `docs/specification/navigation.ts`. Fonts are self-hosted and shared across the Astro and Sourcey surfaces. There are no runtime account, analytics, AI, email or registry services.
+Sourcey owns the reader theme and its rendering. The same adapter reads the canonical Markdown in development and production. No preview copy or alternate production specification exists. Fonts and main navigation are shared with the Astro pages; there are no runtime account, analytics, AI, email or Registry services.
 
 ## Content and implementation boundaries
 
-MAP 0.2 is a type-agnostic core: a JSON-LD description in Structured Email, a request bound to that exact description by its digest, credential or possession authority over HTTPS, and recoverable results. Types are digest-bound contracts published through the Registry, and clients can obtain a new one from the Registry catalogue by its digest, so adding a type changes neither the core nor the clients. Nitrosend runs Content Review 0.3 on MAP 0.2 in production: an agent can propose approval of an exact flow revision, a signed-in person decides it, and both paths resolve through the same retained result. An independently operated implementation remains outstanding, so the project does not claim interoperability or IETF adoption. [The type collection record](docs/TYPE-COLLECTION.md) explains why each type exists and which standards it reuses.
+MAP describes actions carried by email. A trusted connector maps operations to the service's existing interface. The email names no execution endpoint and supplies no universal request/result envelope. The service establishes current authority and checks exact terms atomically with the decision. The capability binding is an experiment with narrower scope.
 
-The Registry centres on submitted types. Product support belongs to a type version and execution profile, with evidence. Types helps readers choose an interaction; the Registry holds its maintained record.
-
-The example runs in the browser and never sends email. It illustrates revision binding, feedback acceptance, a predetermined edit, separate approval, permission refusal and stale requests. Sourcey renders the documentation; it is not presented as a MAP implementation.
-
-The contribution page validates and previews new types, amendments and implementation declarations locally in the browser, then opens the checked file in GitHub for repository review. GitHub owns contributor identity, forks, branches and pull requests; MailSchema does not maintain a second submission queue. The CLI imports the same JSON format into a local checkout. See [Contributions](docs/CONTRIBUTIONS.md) for the format and operating process.
+Type contracts define semantics independently of Core. The four initial types are Campaign Send Approval, Publication Approval, Email Address Confirmation and Account Security Response. Draft schemas and local illustrations do not establish an implementation or independent interoperability result.
 
 ## Keeping content in sync
 
-| Source                             | Owns                                                              | Used by                                                                               |
-| ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `registry/types/*.json`            | Base type definitions, contributors and maintainers               | Registry compiler                                                                     |
-| `registry/contributions/*.json`    | Vendor type proposals, amendments and implementation declarations | Registry compiler, history and evidence sections                                      |
-| `src/data/types.ts`                | Validated projection of the Registry files                        | Types, Registry, detail pages, site search, About and linked type navigation metadata |
-| `docs/specification/*.md`          | Authored protocol and type semantics                              | Sourcey's specification reader and specification indexes                              |
-| `docs/specification/navigation.ts` | Chapter order and grouping                                        | Sourcey navigation and site search                                                    |
-| `src/data/navigation.ts`           | Main site navigation                                              | Astro header and MailSchema's Sourcey configuration                                   |
-| `packages/versions.json`           | Source version for each package registry                          | Distribution preparation and package checks                                           |
-| `docs/releases/*.json`             | Verified package versions, registry links and artifact hashes     | Selected release in `src/data/tooling.ts`, Tools, Contribute and site search          |
-| `src/data/review.ts`               | The example email and predetermined edit                          | Static demonstration and browser interaction                                          |
+| Source                                                                               | Owns                                                                  | Consumers                                                                                      |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `specifications/map-0.3/core.md`, `http.md`, `registry.md`, `capability.md`          | Normative protocol text                                               | Sourcey reader, generated Internet-Draft                                                       |
+| `specifications/map-0.3/contracts/<slug>-<version>.json`                             | Complete versioned type semantics, schemas and operations             | Generated contract chapter, selected I-D example, Registry, downloads and contribution checker |
+| `specifications/map-0.3/registry.json`                                               | Category, maintainers, version status and current selection           | Current site projection                                                                        |
+| `specifications/map-0.3/implementations/*.json`                                      | Exact service support declarations and reports                        | Registry type pages and catalogue                                                              |
+| `specifications/map-0.3/examples/source.json`                                        | Illustrative instance values                                          | Generated digest-bound examples and local demonstration                                        |
+| `specifications/map-0.3/examples/campaign.md`                                        | Campaign content and its generated digest                             | Shared homepage and Examples inbox walkthrough, content download                               |
+| `specifications/map-0.3/bindings/publication.source.json`, `examples/publication.md` | Native API description and example content                            | Generated MIME, OpenAPI and MCP artifacts, primary walkthrough                                 |
+| `docs/research/map-interfaces.json`                                                  | Public interface capabilities, source evidence and design assessments | Generated research report and landscape, research explorer, interface diagram and search       |
+| `specifications/map-0.3/bindings.md`, `interfaces.md`                                | Informative implementation and reuse guidance                         | Sourcey reader                                                                                 |
+| `src/data/types.ts`                                                                  | Validated projection, never a second authored definition              | Registry, About, search, contribution examples and download links                              |
+| `docs/specification/navigation.ts`                                                   | Chapter order, source paths and descriptions                          | Reader, sitemap and search                                                                     |
+| `src/data/navigation.ts`                                                             | Main navigation                                                       | Astro and Sourcey headers                                                                      |
+| `docs/releases/current.json`                                                         | Verified package selections                                           | Historical package documentation                                                               |
 
-Contribute data files rather than editing application TypeScript. `npm run registry:ingest -- contribution.json` validates without writing; add `--write` to create a contribution under `registry/contributions/`. The importer never overwrites another payload with the same identifier. Amendments reference the current record digest and are applied in dependency order; conflicting or stale changes fail. Counts, groups, routes and views are derived. Keep type identifiers stable when changing display names. Registry JSON edits restart the development server so all projections reload together.
+Run `npm run spec:generate` after editing draft sources, then `npm run verify`. Generation validates contracts, binds example digests, runs shape vectors and refreshes the type chapter, research report and Internet-Draft. The draft uses one explicitly selected illustrative contract; Registry growth does not change its normative content. Verification rejects stale projections. New types require a versioned contract, Registry metadata and complete source example; all current surfaces discover that collection, without per-page lists. Repository review owns acceptance and contributor attribution.
 
-`tests/registry.test.ts` exercises schema validation, references, amendments and CLI imports with illustrative vendor contributions, generated with current record digests and kept out of the public collection. `npm run verify` must pass after a content change. A change to the meaning of an operation still requires reviewing its Markdown definition, record and demonstration together; matching metadata cannot prove semantic agreement. GitHub Actions runs verification on pull requests before protected `main` deploys to Cloudflare.
+The homepage and Examples use the same `ActionDemo` component and local decision model. The inbox reads its request from the current catalogue and its campaign content from the canonical Markdown; the build rejects a mismatched content digest. Approval queues one simulated send, decline queues none, and changed terms require a fresh review. The illustration makes no network request and is not runtime conformance evidence.
+
+The prior Registry compiler, runtime and package checks remain compatibility maintenance. `src/data/legacy-types.ts` supplies historical record/snapshot URLs and `/registry/catalog.json`, whose existing format is retained for released clients and marked superseded with a link to the current catalogue. Those files never supply current pages. Published profile, schema and contract bytes remain unchanged. Adding a current type never triggers a package release.
 
 ## Design and provenance
 
@@ -78,11 +82,11 @@ The specification reader uses the exact public `sourcey@3.6.10` release. See `do
 
 ## Published packages
 
-Every package carries the MAP 0.2 core artifacts exactly as published, and none bundles a type contract. The Ruby package also processes MAP documents, and the JavaScript and Python packages check Registry files. Each is published from its maintained language repository. The exact releases currently recommended by the site come only from [`docs/releases/current.json`](docs/releases/current.json) and appear on [Tools](https://mailschema.org/tools/). Public readback verifies every artifact bundled in each selected release. The packages do not establish endpoint trust or grant authorization.
+Every package carries the MAP 0.2 core artifacts exactly as published, and none bundles a type contract. The Ruby package also processes MAP documents, and the JavaScript and Python packages check Registry files. Each is published from its maintained language repository. The exact releases currently recommended by the archive come only from [`docs/releases/current.json`](docs/releases/current.json) and appear in the [package archive](https://mailschema.org/archive/map-0.2/tools). Public readback verifies every artifact bundled in each selected release. The packages do not establish endpoint trust or grant authorization.
 
 `npm run packages:prepare` builds distribution sources from the canonical schemas, shared validation code and [`packages/artifacts.json`](packages/artifacts.json). `npm run packages:test` checks the compiled JavaScript package and every selected artifact byte. See [package instructions](packages/README.md) for all language checks and `docs/releases/` for registry readback and artifact hashes. Packages are versioned snapshots of core tooling and compatibility assets; they are not mirrors of the Registry. Publishing or amending a Registry type does not require package releases unless a package API or one of its declared artifacts changes.
 
-The Tools page reads each advertised channel from `docs/releases/current.json`. That package-set manifest points to independently verified release evidence and may select different versions for different ecosystems. The site build refuses an unverified selection, a missing version, incorrect registry identity or any package built from different canonical schema bytes.
+The package archive reads each advertised channel from `docs/releases/current.json`. That package-set manifest points to independently verified release evidence and may select different versions for different ecosystems. The site build refuses an unverified selection, a missing version, incorrect registry identity or any package built from different canonical schema bytes.
 
 Publishing to a registry does not change the website. After an artifact is published, independent readback records its evidence under `docs/releases/`; promotion updates `current.json`; the normal verified site deployment then publishes the new installation command. This two-phase release prevents a partial or compromised registry publication from silently becoming the recommended version. Package versions may move independently, while the shared schema digest identifies the contribution format they implement. Package versions and MAP specification versions are also independent.
 

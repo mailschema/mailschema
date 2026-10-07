@@ -1,41 +1,55 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { specNavigation, specHref } from './spec';
 import { typeRecords, typeHref, typeStatusLabel } from './types';
-import { tooling } from './tooling';
+import { research, interfaceHref } from './interfaces';
 
 export const searchEntries = [
-  ...tooling.map((tool) => ({
-    title: `${tool.name} package`,
-    description: `MailSchema ${tool.release.version} on ${tool.registry}. ${tool.description}`,
-    href: `/tools#${tool.id}`,
-    group: 'Tools',
+  {
+    title: 'Service interface research',
+    description: 'APIs, agent protocols, messaging, discovery, identity and existing workflows.',
+    href: '/interfaces',
+    group: 'Research',
+  },
+  ...research.entries.map((entry) => ({
+    title: entry.name,
+    description: `${entry.status}. ${entry.disposition}.`,
+    text: `${entry.provides} ${entry.mapping} ${entry.gap}`,
+    href: interfaceHref(entry.id),
+    group: 'Research',
   })),
+  {
+    title: 'Schemas and tools',
+    description:
+      'Core schema, type contracts, examples and conformance material for the current MAP draft.',
+    href: '/tools',
+    group: 'Tools',
+  },
   ...typeRecords.map((type) => ({
     title: type.name,
     description: `${type.summary} ${typeStatusLabel(type)}.`,
+    text: [...type.requirements, ...type.operations.map((operation) => operation.semantics)].join(
+      ' ',
+    ),
     href: typeHref(type.slug),
     group: 'Registry',
   })),
   ...specNavigation.map((item) => ({
     title: item.slug ? item.label : 'Mail Action Protocol',
     description: item.description,
+    text: readFileSync(resolve('docs/specification', item.file), 'utf8'),
     href: specHref(item.slug),
     group: 'Specification',
   })),
   {
-    title: 'Interaction types',
-    description: 'How to use and propose a shared interaction definition.',
-    href: '/types',
-    group: 'Types',
-  },
-  {
     title: 'Type registry',
-    description: 'Browse type definitions, versions and examples.',
+    description: 'Browse type definitions, versions, examples and implementation evidence.',
     href: '/registry',
     group: 'Registry',
   },
   {
-    title: 'Try Content Review',
-    description: 'A browser example of feedback, editing and approval.',
+    title: 'From email to service',
+    description: 'Explore interface families and follow a publication decision through worked exchanges.',
     href: '/examples',
     group: 'Example',
   },
@@ -47,7 +61,7 @@ export const searchEntries = [
   },
   {
     title: 'About MailSchema',
-    description: 'An open standard for agents to work with services through email.',
+    description: 'The project behind the Mail Action Protocol working draft.',
     href: '/about',
     group: 'About',
   },

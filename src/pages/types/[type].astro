@@ -1,0 +1,10 @@
+---
+import { typeRecords, typeHref } from '../../data/types';
+export function getStaticPaths() {
+  return typeRecords.map((record) => ({
+    params: { type: record.slug },
+    props: { slug: record.slug },
+  }));
+}
+return Astro.redirect(typeHref(Astro.props.slug), 301);
+---

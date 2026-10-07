@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import { typeRecords, typeVersions } from '../data/types';
 import '../styles/contribution.css';
 ---
 
@@ -7,32 +8,56 @@ import '../styles/contribution.css';
   <div class="contribution-intro">
     <div>
       <span class="eyebrow eyebrow-line">Prepare a contribution</span>
-      <h2 id="check-a-contribution">Check the file. See the record.</h2>
+      <h2 id="check-a-contribution">Check a contribution.</h2>
     </div>
     <p>
-      Start from an example or load your JSON file. Check its fields and references, then preview
-      how the contribution will appear. When it passes, continue to GitHub with the checked file
-      already prepared.
+      Start from a contract or a service record, then check the JSON and preview what you are
+      proposing. The file stays in your browser until you choose to continue in GitHub.
       <a href="#local-validation" class="contribution-local-link">
         Prefer to validate locally? <Icon size={14} />
       </a>
     </p>
   </div>
   <div class="contribution-examples">
-    <span>Example files</span>
-    <a href="/contribution-examples/new-type.json" data-example="new-type">
-      New type <Icon size={13} />
-    </a>
-    <a href="/contribution-examples/amendment.json" data-example="amendment">
-      Amendment <Icon size={13} />
-    </a>
-    <a href="/contribution-examples/implementation.json" data-example="implementation">
-      Implementation <Icon size={13} />
-    </a>
+    <span>Start from a contract</span>
+    {typeRecords.map((type) => (
+      <a href={type.contractHref} data-example={type.slug}>
+        {type.name}
+        <Icon size={13} />
+      </a>
+    ))}
   </div>
   <form id="contribution-form" hidden>
     <div class="contribution-editor-heading">
-      <label for="contribution-json">Contribution JSON</label>
+      <label for="contribution-kind">Contribution</label>
+      <select id="contribution-kind">
+        <option value="contract">Type contract</option>
+        <option value="implementation">Service support</option>
+      </select>
+    </div>
+    <div class="contribution-editor-heading" data-service-target hidden>
+      <label for="contribution-target">Contract supported</label>
+      <select id="contribution-target">
+        {typeVersions.map((type) => (
+          <option
+            value={type.slug}
+            data-id={type.id}
+            data-version={type.version}
+            data-digest={type.digest}
+            data-operations={type.operations.map((op) => op.id).join(',')}
+          >
+            {type.name} · {type.version}
+          </option>
+        ))}
+      </select>
+      <button type="button" data-service-starter>
+        Start a service record
+      </button>
+    </div>
+    <div class="contribution-editor-heading">
+      <label for="contribution-json" data-editor-label>
+        Contract JSON
+      </label>
       <label class="contribution-file">
         Load a file <input id="contribution-file" type="file" accept=".json,application/json" />
       </label>
@@ -42,7 +67,7 @@ import '../styles/contribution.css';
       rows="12"
       spellcheck="false"
       autocomplete="off"
-      placeholder="Paste a contribution file, or choose an example above."
+      placeholder="Paste a contract, or choose one above."
       required
     ></textarea>
     <div class="contribution-actions">
@@ -60,21 +85,21 @@ import '../styles/contribution.css';
     <p>Download an example and run the command below to validate it locally.</p>
   </noscript>
   <div class="contribution-preview" data-preview hidden>
-    <span class="eyebrow">Contribution preview</span>
+    <span class="eyebrow">Contract preview</span>
     <h3 data-preview-title></h3>
     <p data-preview-summary></p>
     <dl data-preview-facts></dl>
     <p class="contribution-preview-note">
-      The file checks passed. Inclusion, scope and contributor details still need review. This
-      preview is not a published Registry record.
+      Structural checks passed. Meaning, ownership and any support claims still need review. Add the
+      companion files described below when opening the pull request.
     </p>
     <div class="contribution-submit">
       <div>
         <span class="eyebrow">Ready for review</span>
-        <h4>Send this file to the Registry.</h4>
+        <h4>Propose this contribution.</h4>
         <p>
-          GitHub handles your identity, branch and pull request. MailSchema publishes the
-          contribution only after repository review and merge.
+          GitHub handles your identity, branch and pull request. MailSchema publishes accepted
+          contributions after repository review and merge.
         </p>
         <p class="contribution-submit-note" data-submit-note>
           The checked JSON will be prefilled in GitHub.

@@ -2,7 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import Structure from '../components/Structure.astro';
-import ReviewDemo from '../components/ReviewDemo.astro';
+import InterfaceMap from '../components/InterfaceMap.astro';
+import ActionDemo from '../components/ActionDemo.astro';
+import { specification } from '../data/specification';
 import '../styles/home.css';
 ---
 
@@ -16,21 +18,21 @@ import '../styles/home.css';
           can <span>act on.</span>
         </h1>
         <p class="hero-description">
-          MailSchema is building an open standard for agents to work with services through email.
-          Messages describe the available actions, so compatible agents and inboxes can take the
-          next step.
+          Services already ask people to make decisions by email. Mail Action Protocol describes
+          those requests so an agent or inbox can understand them, check the current proposal and
+          help you act.
         </p>
         <div class="hero-buttons">
           <a class="button primary" href="/specification">
             Read the specification <Icon size={17} />
           </a>
-          <a class="hero-secondary" href="/examples">
-            Try a review <span>↗</span>
+          <a class="hero-secondary" href="#decision-example">
+            Follow a decision <span>↗</span>
           </a>
         </div>
         <a href="/specification" class="protocol-kicker">
           <span class="small-dot"></span>
-          <span>Mail Action Protocol · Working Draft 0.2</span>
+          <span>Mail Action Protocol · {specification.status}</span>
           <Icon size={13} />
         </a>
       </div>
@@ -47,8 +49,8 @@ import '../styles/home.css';
           </h2>
         </div>
         <p>
-          A draft needs feedback. A service needs an answer before it can proceed. MAP gives those
-          requests a structure that agents can recognise, alongside the email people already read.
+          A campaign is ready to send. An article needs permission to go live. The request arrives
+          in the email you already read, with a description an agent can understand.
         </p>
       </div>
       <div class="protocol-flow">
@@ -58,32 +60,33 @@ import '../styles/home.css';
           </span>
           <h3>A request arrives</h3>
           <p>
-            The message identifies the work and the actions available. For a draft, that might mean
-            requesting changes or approving a particular revision.
+            The message identifies the service, what needs a decision and the choices available. A
+            shared type says what each choice will do.
           </p>
-          <span class="flow-example">Content Review · Revision 3</span>
+          <span class="flow-example">Campaign Send Approval · Exact terms</span>
         </div>
         <div>
           <span class="flow-number">
             02 <Icon size={18} />
           </span>
-          <h3>Your agent responds</h3>
+          <h3>Your rules come first</h3>
           <p>
-            A compatible agent submits the request to the service, using the permissions you have
-            given it. You can also follow the link and handle the review yourself.
+            A connection you approved reads the current proposal. A campaign send still needs your
+            account permission. Your agent or inbox follows your rules and asks you when a decision
+            needs approval.
           </p>
-          <span class="flow-example">Request changes on revision 3</span>
+          <span class="flow-example">Connected account · Current proposal · Your policy</span>
         </div>
         <div>
           <span class="flow-number">
             03 <Icon name="check" size={18} />
           </span>
-          <h3>The service confirms</h3>
+          <h3>The service checks again</h3>
           <p>
-            The result tells the agent what happened. Feedback might have been recorded, approval
-            might still be needed, or the draft might have changed since the email arrived.
+            The service checks the terms and your permission as it records the decision. A changed
+            audience, revoked permission or earlier decision stops the action.
           </p>
-          <span class="flow-example">Feedback recorded for revision 3</span>
+          <span class="flow-example">Same terms · Permission checked · Decision recorded</span>
         </div>
       </div>
     </section>
@@ -95,48 +98,48 @@ import '../styles/home.css';
         </div>
         <div class="map-feature-meta">
           <span>MAIL ACTION PROTOCOL</span>
-          <span class="pill">0.2 · Draft</span>
+          <span class="pill">{specification.status}</span>
         </div>
       </div>
       <div class="map-feature-copy">
         <span class="eyebrow">Mail Action Protocol</span>
         <h2 id="map-title">Describe it once.</h2>
         <p>
-          With a shared type, a review request has the same meaning across services. Agent and inbox
-          developers can build support for that interaction while each service handles its own
-          permissions and underlying work.
+          A type gives a decision the same meaning across services. Campaign approval names what
+          will be sent, by whom, to which audience and when. Each service keeps its own interface
+          and permissions.
         </p>
         <p>
-          MAP defines how the message describes the action, how a client requests it and what the
-          result means.
+          MAP defines what the email says and what must be checked before anyone acts. A connection
+          you approved uses the service's existing operations.
         </p>
         <a href="/specification" class="button dark-button">
-          Read MAP 0.2 <Icon size={17} />
+          Read MAP <Icon size={17} />
         </a>
       </div>
     </section>
     <section class="demo-section container" aria-labelledby="demo-heading">
       <div class="section-intro">
         <div>
-          <span class="eyebrow eyebrow-line">Content Review</span>
+          <span class="eyebrow eyebrow-line">The service keeps its interface</span>
           <h2 class="section-title" id="demo-heading">
-            Take a draft
+            An email.
             <br />
-            through review.
+            Your existing service.
           </h2>
         </div>
         <div>
           <p>
-            A campaign test email arrives for review. Request a change, create the next revision and
-            approve it. Try the exchange below to see what the person reads and what the agent
-            receives.
+            A request arrives by email. MAP says what the decision means. The service can keep its
+            existing API, tool or messaging system, provided it can check permission and the exact
+            proposal when the decision is made.
           </p>
-          <a class="text-link" href="/registry/content-review">
-            Read the type definition <Icon size={16} />
+          <a class="text-link" href="/interfaces">
+            Explore the interface research <Icon size={16} />
           </a>
         </div>
       </div>
-      <ReviewDemo />
+      <InterfaceMap />
     </section>
     <section class="ecosystem container" aria-labelledby="ecosystem-heading">
       <div class="ecosystem-heading">
@@ -145,25 +148,21 @@ import '../styles/home.css';
           A type gives the request its meaning.
         </h2>
         <p class="ecosystem-description">
-          Content Review tells a client how to handle feedback and approval. Other types can
-          describe other kinds of work. Each definition sets out the actions, the information they
-          need and the results a client can expect.
+          Sending a campaign, publishing an article, confirming an address and reporting unfamiliar
+          account activity are different decisions. Each type says exactly what its choices mean.
         </p>
       </div>
       <div class="ecosystem-links">
-        <a class="ecosystem-types" href="/types">
+        <a class="ecosystem-types" href="/specification/contracts">
           <div class="ecosystem-link-top">
             <Icon name="layers" size={33} />
             <Icon name="northeast" size={24} />
           </div>
-          <span class="eyebrow">Understand types</span>
-          <h3>Types</h3>
-          <p>
-            Learn how a type describes an interaction, how it relates to MAP and when an existing
-            definition fits your workflow.
-          </p>
+          <span class="eyebrow">Read the rules</span>
+          <h3>Type contracts</h3>
+          <p>See how a type defines an action's choices, exact terms and outcomes under MAP.</p>
           <span class="text-link">
-            About interaction types <Icon size={17} />
+            How types work <Icon size={17} />
           </span>
         </a>
         <a class="ecosystem-registry" href="/registry">
@@ -171,17 +170,36 @@ import '../styles/home.css';
             <Icon name="grid" size={33} />
             <Icon name="northeast" size={24} />
           </div>
-          <span class="eyebrow">Browse the Registry</span>
+          <span class="eyebrow">Find a definition</span>
           <h3>Registry</h3>
           <p>
-            Read type definitions and examples, follow their revisions and see the proposals under
-            discussion. Implementation details belong with the type they support.
+            Browse shared definitions for real decisions, inspect examples, and see whether a
+            service supports them.
           </p>
           <span class="text-link">
             Browse type definitions <Icon size={17} />
           </span>
         </a>
       </div>
+    </section>
+    <section
+      class="decision-section container"
+      id="decision-example"
+      aria-labelledby="decision-heading"
+    >
+      <div class="section-intro">
+        <div>
+          <span class="eyebrow eyebrow-line">Try a decision</span>
+          <h2 class="section-title" id="decision-heading">
+            Follow a decision.
+          </h2>
+        </div>
+        <p>
+          Review the campaign and its audience, then approve or decline. See what happens if the
+          audience changes before your decision reaches the service.
+        </p>
+      </div>
+      <ActionDemo />
     </section>
     <section class="open-section container">
       <div>
@@ -194,9 +212,8 @@ import '../styles/home.css';
       </div>
       <div>
         <p>
-          If your service asks people to do something by email, describe the exchange. A useful
-          proposal shows what a client needs to know and how the same interaction could work in
-          another service.
+          If your service asks people to decide something by email, show the request and what each
+          choice does. A useful type should work for more than one service.
         </p>
         <a href="/contribute" class="button outline">
           Prepare a type proposal <Icon size={17} />

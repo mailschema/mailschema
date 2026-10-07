@@ -1,0 +1,1020 @@
+{
+  "scope": "Common service interfaces, descriptions, discovery, delivery, identity and established email workflows relevant to MAP. This catalogue does not enumerate every protocol or vendor SDK.",
+  "method": "Primary specifications and project/provider documentation were retrieved and relevant sections inspected. Existing capabilities are source-backed; possible MAP uses, remaining requirements and assessments are design judgments. No entry claims a tested MAP implementation.",
+  "decision": "Keep the email action contract and its safety invariants independent of service interface. Reuse native descriptions, identity, tasks, results and established domain workflows. Do not standardize a second generic mapping language before the reuse comparison is resolved.",
+  "questions": [
+    "How is a trusted service and operation discovered?",
+    "How is the acting principal authorized?",
+    "How is the current proposal read?",
+    "Where is the expected version enforced atomically?",
+    "What proves acceptance or completion?",
+    "How are duplicates, retries and uncertain outcomes handled?",
+    "What authority survives delegation or queued delivery?"
+  ],
+  "sources": {
+    "a2a": {
+      "url": "https://a2a-protocol.org/latest/specification/",
+      "finalUrl": "https://a2a-protocol.org/latest/specification/",
+      "retrievedAt": "2026-10-02T01:45:31.872016+00:00",
+      "sha256": "574235117ec67ef37e30fe6776ae9258728bd05eb863695bcaf0d3984865c557",
+      "bytes": 617262
+    },
+    "activitypub": {
+      "url": "https://www.w3.org/TR/activitypub/",
+      "finalUrl": "https://www.w3.org/TR/activitypub/",
+      "retrievedAt": "2026-10-02T01:45:31.812183+00:00",
+      "sha256": "a909bcb86559b6412ae993569f2790a23b7ac4f393f8b96fbff09b9453c65109",
+      "bytes": 155172
+    },
+    "amqp": {
+      "url": "https://docs.oasis-open.org/amqp/core/v1.0/amqp-core-messaging-v1.0.html",
+      "finalUrl": "https://docs.oasis-open.org/amqp/core/v1.0/amqp-core-messaging-v1.0.html",
+      "retrievedAt": "2026-10-02T01:45:30.344023+00:00",
+      "sha256": "73a62bb4a602a1386b7f977782b726711a4c69d2998e98647402e8d3c4a8c932",
+      "bytes": 122786
+    },
+    "arazzo": {
+      "url": "https://spec.openapis.org/arazzo/v1.1.0.html",
+      "finalUrl": "https://spec.openapis.org/arazzo/v1.1.0.html",
+      "retrievedAt": "2026-10-02T01:49:19.813848+00:00",
+      "sha256": "8e2ea7d20accaef846080bca77d349b137414e66c94f015a002b290cbf79b538",
+      "bytes": 237808
+    },
+    "asyncapi": {
+      "url": "https://www.asyncapi.com/docs/reference/specification/v3.0.0",
+      "finalUrl": "https://www.asyncapi.com/docs/reference/specification/v3.0.0",
+      "retrievedAt": "2026-10-02T01:45:32.643706+00:00",
+      "sha256": "82b5261204d8d8f62097b096d6bdb66c8a02cb293efe190a475ef60e05162b4f",
+      "bytes": 1121101
+    },
+    "cloudevents": {
+      "url": "https://raw.githubusercontent.com/cloudevents/spec/v1.0.2/cloudevents/spec.md",
+      "finalUrl": "https://raw.githubusercontent.com/cloudevents/spec/v1.0.2/cloudevents/spec.md",
+      "retrievedAt": "2026-10-02T01:45:30.810128+00:00",
+      "sha256": "e327435c858d19fd171e4ab9781a01fc22dfa949d23c4220976529ebd16a1aa3",
+      "bytes": 25542
+    },
+    "coap": {
+      "url": "https://www.rfc-editor.org/rfc/rfc7252.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc7252.txt",
+      "retrievedAt": "2026-10-02T01:45:31.485147+00:00",
+      "sha256": "abfe8cce3370b5b32487421b35725eb6eaf962ea454cad008b5a5cd052e27c5f",
+      "bytes": 258789
+    },
+    "gnap": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9635.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9635.txt",
+      "retrievedAt": "2026-10-02T01:45:34.445797+00:00",
+      "sha256": "81ca9f4d23204c63c27e6364fa31250b5f7e0f3b9a03a1bba5ae29182b07fab7",
+      "bytes": 467934
+    },
+    "graphql": {
+      "url": "https://spec.graphql.org/September2025/",
+      "finalUrl": "https://spec.graphql.org/September2025/",
+      "retrievedAt": "2026-10-02T01:45:28.937003+00:00",
+      "sha256": "39fb3aeffd9b5acebb0830ddc6dcc243c1280a9f0e977897ae59c5cc165511d6",
+      "bytes": 1112753
+    },
+    "grpc": {
+      "url": "https://grpc.io/docs/guides/status-codes/",
+      "finalUrl": "https://grpc.io/docs/guides/status-codes/",
+      "retrievedAt": "2026-10-02T01:45:28.418705+00:00",
+      "sha256": "e3efba6fee633637e6faa5b2eca7e809381dbc3ff2c8eccbb00d7aeae233c4cd",
+      "bytes": 74091
+    },
+    "http": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+      "retrievedAt": "2026-10-02T01:45:28.820573+00:00",
+      "sha256": "21c1cdce6ab0e5509b04d84a28000836c7a087cf786efe6f04877ebfff47232a",
+      "bytes": 502941
+    },
+    "http-signatures": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9421.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9421.txt",
+      "retrievedAt": "2026-10-02T01:45:34.208252+00:00",
+      "sha256": "612655786bf4293bfc486e4177571467fbb3de6e6f0eea90cb74c346a34fdf3c",
+      "bytes": 241160
+    },
+    "http3": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9114.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9114.txt",
+      "retrievedAt": "2026-10-02T01:50:49.379953+00:00",
+      "sha256": "6b84555c88eeebcf5d2b2e1d9d7b58630abc97ab877b2cf62dee4cd635db34e4",
+      "bytes": 155206
+    },
+    "imap": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9051.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9051.txt",
+      "retrievedAt": "2026-10-02T01:45:32.807338+00:00",
+      "sha256": "acf52a50eb748ea21b5ffdcb31c761d3fbba6242d53d4f53c2555de039c5c3cf",
+      "bytes": 367391
+    },
+    "imip": {
+      "url": "https://www.rfc-editor.org/rfc/rfc6047.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc6047.txt",
+      "retrievedAt": "2026-10-02T01:45:32.792694+00:00",
+      "sha256": "79d66621adbef4ad5cead0a84b4952fe931e935ad12a50adad4694579711d579",
+      "bytes": 40697
+    },
+    "itip": {
+      "url": "https://www.rfc-editor.org/rfc/rfc5546.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc5546.txt",
+      "retrievedAt": "2026-10-02T01:45:32.691285+00:00",
+      "sha256": "a7aad5fd02f4e226e09f5092f0e985131c66af530400b097a6c35bbba01b558a",
+      "bytes": 318143
+    },
+    "jetstream": {
+      "url": "https://docs.nats.io/learn/jetstream/",
+      "finalUrl": "https://docs.nats.io/learn/jetstream/",
+      "retrievedAt": "2026-10-02T01:49:20.003901+00:00",
+      "sha256": "ef431d27ddbd622310b0aee3ed89bd71ad3ee65b5269f0ee29e2afd8b9d5b517",
+      "bytes": 34915
+    },
+    "jmap": {
+      "url": "https://www.rfc-editor.org/rfc/rfc8620.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc8620.txt",
+      "retrievedAt": "2026-10-02T01:45:32.238091+00:00",
+      "sha256": "2faef52947b75a4a624154ae6bde930688c1a2f122f05925273c7d8a9a85cd25",
+      "bytes": 180653
+    },
+    "jsonrpc": {
+      "url": "https://www.jsonrpc.org/specification",
+      "finalUrl": "https://www.jsonrpc.org/specification",
+      "retrievedAt": "2026-10-02T01:45:28.991826+00:00",
+      "sha256": "8fe1edfdca511d309e712e47447457ea5159b728ec02071a84593aed692aefeb",
+      "bytes": 24512
+    },
+    "kafka": {
+      "url": "https://kafka.apache.org/41/design/design/",
+      "finalUrl": "https://kafka.apache.org/41/design/design/",
+      "retrievedAt": "2026-10-02T01:45:31.096075+00:00",
+      "sha256": "6039a9926e28c03e10ae4a6307ddc382f5631d17f1f65735d0d165f57022337b",
+      "bytes": 143074
+    },
+    "mcp-current": {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "finalUrl": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "retrievedAt": "2026-10-02T01:46:33.643216+00:00",
+      "sha256": "800a73a40e5ce130b243f06f92c2dcf5d2229a7d65352d10f75a098909093714",
+      "bytes": 889923
+    },
+    "mcp-tasks": {
+      "url": "https://tasks.extensions.modelcontextprotocol.io/specification/draft/tasks",
+      "finalUrl": "https://tasks.extensions.modelcontextprotocol.io/specification/draft/tasks",
+      "retrievedAt": "2026-10-02T01:46:33.230938+00:00",
+      "sha256": "6c23c121abf6c36fc2ce4c6b0680a8aa24b6d479327a59409ac0648719f96735",
+      "bytes": 166719
+    },
+    "mcp-transport": {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports",
+      "finalUrl": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports",
+      "retrievedAt": "2026-10-02T01:46:33.230863+00:00",
+      "sha256": "6bb1a450eec7fbae13bc1f3062a2192bc1d662de23e48528095a18fc167ec28f",
+      "bytes": 300742
+    },
+    "mqtt": {
+      "url": "https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html",
+      "finalUrl": "https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html",
+      "retrievedAt": "2026-10-02T01:45:30.790595+00:00",
+      "sha256": "c6bb3ad48ed8e3409756f900087ccd2ee91f5a241d111e7f913a14065499436e",
+      "bytes": 1436832
+    },
+    "nats": {
+      "url": "https://docs.nats.io/learn/core-nats/",
+      "finalUrl": "https://docs.nats.io/learn/core-nats/",
+      "retrievedAt": "2026-10-02T01:46:32.836047+00:00",
+      "sha256": "a50c94837d4f02bfd4fb85be9a3e3c5010c0633a2a5bf26a096e8fbebf9eacbd",
+      "bytes": 39987
+    },
+    "oauth": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+      "retrievedAt": "2026-10-02T01:45:33.439021+00:00",
+      "sha256": "9919d061d40a97886ca866b51c69389b6c81c65cd4b979056c14fdbebfcf622a",
+      "bytes": 124673
+    },
+    "oauth-metadata": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9728.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9728.txt",
+      "retrievedAt": "2026-10-02T01:45:33.270974+00:00",
+      "sha256": "b65bcd0d9daf90fd7006a42cf48e0ac3ba24b7f5637d5197f2de41c6b91c8a89",
+      "bytes": 60352
+    },
+    "odata": {
+      "url": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html",
+      "finalUrl": "https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html",
+      "retrievedAt": "2026-10-02T01:45:28.782101+00:00",
+      "sha256": "48633c66f737163a80397c4c54b5a49e0880bbb1834a856d9ef17d7e62bf5c77",
+      "bytes": 765582
+    },
+    "oidc": {
+      "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+      "finalUrl": "https://openid.net/specs/openid-connect-core-1_0.html",
+      "retrievedAt": "2026-10-02T01:49:20.592874+00:00",
+      "sha256": "4d016752a645e8a3c259baa4173b5a90cb6c82898ce868fc8444adde262a5aed",
+      "bytes": 437508
+    },
+    "openapi": {
+      "url": "https://spec.openapis.org/oas/v3.1.2.html",
+      "finalUrl": "https://spec.openapis.org/oas/v3.1.2.html",
+      "retrievedAt": "2026-10-02T01:45:31.910897+00:00",
+      "sha256": "841a0159f85f9eef53af691c6ef1f8714961564aefd72ed338eccb9bb145b143",
+      "bytes": 594687
+    },
+    "openrpc": {
+      "url": "https://spec.open-rpc.org/",
+      "finalUrl": "https://spec.open-rpc.org/",
+      "retrievedAt": "2026-10-02T01:45:33.453684+00:00",
+      "sha256": "0b9bdbacbf07303b4a4347d576744a41e76650831959dbe78378e64b0462db7e",
+      "bytes": 58085
+    },
+    "posix-exec": {
+      "url": "https://pubs.opengroup.org/onlinepubs/9799919799/functions/exec.html",
+      "finalUrl": "https://pubs.opengroup.org/onlinepubs/9799919799/functions/exec.html",
+      "retrievedAt": "2026-10-02T01:49:21.311504+00:00",
+      "sha256": "48155c576661c580a239e2291190244a8e3145b0493cdcae62dc7a58b2d6b938",
+      "bytes": 57832
+    },
+    "rar": {
+      "url": "https://www.rfc-editor.org/rfc/rfc9396.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc9396.txt",
+      "retrievedAt": "2026-10-02T01:45:33.443979+00:00",
+      "sha256": "d6a8f032d8a585daae1c33a8c7b6e539d199f886ec8cc1c7898436f7f2eed29c",
+      "bytes": 65926
+    },
+    "schema-actions": {
+      "url": "https://schema.org/Action",
+      "finalUrl": "https://schema.org/Action",
+      "retrievedAt": "2026-10-02T01:45:34.696839+00:00",
+      "sha256": "b8f2fff26bdaf07d890c13ba95e010beff6f04eff47c00062a472dfe095a5657",
+      "bytes": 57115
+    },
+    "sml": {
+      "url": "https://www.ietf.org/archive/id/draft-ietf-sml-structured-email-06.txt",
+      "finalUrl": "https://www.ietf.org/archive/id/draft-ietf-sml-structured-email-06.txt",
+      "retrievedAt": "2026-10-02T01:45:32.164724+00:00",
+      "sha256": "ec0f7e386240f730165fdd225d59f0c5d2201b2618b89c9779be79c89bda31a8",
+      "bytes": 39101
+    },
+    "smtp": {
+      "url": "https://www.rfc-editor.org/rfc/rfc5321.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc5321.txt",
+      "retrievedAt": "2026-10-02T01:45:32.686456+00:00",
+      "sha256": "7d560eddff1b213c17d4e1e5f95005728b2f05bc2b3947f0fcc91717c6707634",
+      "bytes": 225929
+    },
+    "soap": {
+      "url": "https://www.w3.org/TR/soap12-part1/",
+      "finalUrl": "https://www.w3.org/TR/soap12-part1/",
+      "retrievedAt": "2026-10-02T01:45:28.281661+00:00",
+      "sha256": "1dd0df06385c7c18fc186feb6d7c434a7f1eb6cfc5afe1cbb41ecc0a6599d95a",
+      "bytes": 166947
+    },
+    "sse": {
+      "url": "https://html.spec.whatwg.org/multipage/server-sent-events.html",
+      "finalUrl": "https://html.spec.whatwg.org/multipage/server-sent-events.html",
+      "retrievedAt": "2026-10-02T01:45:33.001444+00:00",
+      "sha256": "470e106ce64c6fd75671ac0cb22105f440dd5a6eda4c1138be12c51f696bbc8b",
+      "bytes": 76653
+    },
+    "unsubscribe": {
+      "url": "https://www.rfc-editor.org/rfc/rfc8058.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc8058.txt",
+      "retrievedAt": "2026-10-02T01:45:32.793337+00:00",
+      "sha256": "94f4529f3545fd0d6e7faac0f57d59ab7933b8fdf6e700017114c783b526c68f",
+      "bytes": 18219
+    },
+    "webhooks": {
+      "url": "https://raw.githubusercontent.com/standard-webhooks/standard-webhooks/main/spec/standard-webhooks.md",
+      "finalUrl": "https://raw.githubusercontent.com/standard-webhooks/standard-webhooks/main/spec/standard-webhooks.md",
+      "retrievedAt": "2026-10-02T01:46:33.071717+00:00",
+      "sha256": "47cf696ee08a583f6cddf2d02b13e544e1bd28435b8e418870e8b557b1ed4082",
+      "bytes": 28403
+    },
+    "webrtc": {
+      "url": "https://www.rfc-editor.org/rfc/rfc8831.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc8831.txt",
+      "retrievedAt": "2026-10-02T01:50:49.276473+00:00",
+      "sha256": "86bec13ce9ebb28dfea37ad2ea2ccd771ab7adb9a95668ed8736eee2b028ea5c",
+      "bytes": 35623
+    },
+    "websocket": {
+      "url": "https://www.rfc-editor.org/rfc/rfc6455.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc6455.txt",
+      "retrievedAt": "2026-10-02T01:45:31.246945+00:00",
+      "sha256": "765775326aee0ecca9b04bde3fd1f52932d498e33e34e428bd61b8a24da0fa3b",
+      "bytes": 162067
+    },
+    "websub": {
+      "url": "https://www.w3.org/TR/websub/",
+      "finalUrl": "https://www.w3.org/TR/websub/",
+      "retrievedAt": "2026-10-02T01:50:49.470258+00:00",
+      "sha256": "75ccd70af4323efa197503c4d923b7d553b949e42992531ca7ca476820dedaef",
+      "bytes": 130140
+    },
+    "webtransport": {
+      "url": "https://www.w3.org/TR/webtransport/",
+      "finalUrl": "https://www.w3.org/TR/webtransport/",
+      "retrievedAt": "2026-10-02T01:50:49.378976+00:00",
+      "sha256": "a056d6c2eddf29885875a31bfd9c3cbb9cc5f3abd4c658b23f83bee8aa2dc32a",
+      "bytes": 1000919
+    },
+    "wot": {
+      "url": "https://www.w3.org/TR/wot-thing-description11/",
+      "finalUrl": "https://www.w3.org/TR/wot-thing-description11/",
+      "retrievedAt": "2026-10-02T01:45:29.159531+00:00",
+      "sha256": "db4517d82699840edfcd331ab064b17de569e4f9568c18c3d27a40cb411cf856",
+      "bytes": 919076
+    },
+    "wsdl": {
+      "url": "https://www.w3.org/TR/wsdl20/",
+      "finalUrl": "https://www.w3.org/TR/wsdl20/",
+      "retrievedAt": "2026-10-02T01:46:33.935005+00:00",
+      "sha256": "f6379b0a686acc25e4665fa7509fd232fbbc1fc042b99a7d8f4ef6ce822d5390",
+      "bytes": 432287
+    },
+    "xmpp": {
+      "url": "https://www.rfc-editor.org/rfc/rfc6120.txt",
+      "finalUrl": "https://www.rfc-editor.org/rfc/rfc6120.txt",
+      "retrievedAt": "2026-10-02T01:45:31.871232+00:00",
+      "sha256": "a64e922cba1b4b69bfc96192e59692efdb296c828800870ffb35c1fb7aad2ee8",
+      "bytes": 451942
+    }
+  },
+  "entries": [
+    {
+      "id": "http",
+      "name": "HTTP APIs",
+      "group": "Service APIs",
+      "status": "RFC 9110",
+      "provides": "HTTP supplies methods, status codes, conditional requests and authentication conventions.",
+      "mapping": "Use the existing read and decision endpoints. OpenAPI can identify their schemas and operation IDs.",
+      "gap": "If-Match must govern the actual approved representation; 202 is acceptance, and a lost response is indeterminate.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "http",
+        "openapi"
+      ]
+    },
+    {
+      "id": "graphql",
+      "name": "GraphQL",
+      "group": "Service APIs",
+      "status": "September 2025 specification",
+      "provides": "Queries, mutations and subscriptions operate on a typed schema. Results can include both data and errors.",
+      "mapping": "Read the proposal with an installed query; call the service’s mutation with its expected-version argument.",
+      "gap": "Serial root mutation execution is not an atomic business transaction. Interpret domain state and partial errors.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "graphql"
+      ]
+    },
+    {
+      "id": "grpc",
+      "name": "gRPC",
+      "group": "Service APIs",
+      "status": "gRPC documentation",
+      "provides": "RPCs return status codes; a deadline can expire even after a state-changing operation succeeds.",
+      "mapping": "Select installed service and method descriptors. Map native request fields and result messages to the contract.",
+      "gap": "The service must enforce expected revision and principal authority. A deadline does not establish failure before execution.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "grpc"
+      ]
+    },
+    {
+      "id": "jsonrpc",
+      "name": "JSON-RPC",
+      "group": "Service APIs",
+      "status": "2.0 specification",
+      "provides": "Transport-independent calls carry a method, parameters and correlation ID. Notifications receive no response.",
+      "mapping": "Use a service read call and decision call over the already authorized connection; retain native result/error objects.",
+      "gap": "A request ID is correlation, not an idempotency guarantee. Notifications alone cannot prove a consequential decision.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "jsonrpc",
+        "openrpc"
+      ]
+    },
+    {
+      "id": "soap",
+      "name": "SOAP / WSDL",
+      "group": "Service APIs",
+      "status": "SOAP 1.2; WSDL 2.0",
+      "provides": "SOAP has a protocol-binding framework and faults; WSDL describes interfaces, operations and bindings.",
+      "mapping": "Use the installed WSDL operation and existing service security. Map the proposal revision into its native message.",
+      "gap": "SOAP success and reliable delivery do not establish contract effects. Service-specific version checks and fault meanings remain necessary.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "soap",
+        "wsdl"
+      ]
+    },
+    {
+      "id": "odata",
+      "name": "OData",
+      "group": "Service APIs",
+      "status": "4.01 OASIS Standard",
+      "provides": "OData defines actions and conditional action requests, including native ETag checks and concurrency failures.",
+      "mapping": "Bind the contract to a documented resource-bound action and the resource state it actually covers.",
+      "gap": "OData permits weak ETag comparison in its own conditional semantics. Do not mislabel that as RFC 9110 strong comparison.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "odata"
+      ]
+    },
+    {
+      "id": "coap",
+      "name": "CoAP",
+      "group": "Service APIs",
+      "status": "RFC 7252",
+      "provides": "CoAP provides constrained resource operations, ETags, If-Match and request/response exchanges.",
+      "mapping": "An installed constrained-service binding can map the decision to the native resource and its precondition.",
+      "gap": "CoAP tokens, acknowledgements and retransmission rules are not business-decision deduplication. Account authorization and secure transport need an explicit profile.",
+      "disposition": "Specialist candidate",
+      "sources": [
+        "coap"
+      ]
+    },
+    {
+      "id": "local",
+      "name": "SDKs and local tools",
+      "group": "Service APIs",
+      "status": "Host-specific interfaces; POSIX execution model",
+      "provides": "A host can invoke an installed library or executable. This is an implementation choice, not a common network protocol.",
+      "mapping": "Map contract operations through a reviewed host adapter, fixed executable identity and structured arguments.",
+      "gap": "Do not execute email-supplied commands. The adapter still needs authoritative service state and atomic enforcement; an exit code alone is insufficient.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "posix-exec"
+      ]
+    },
+    {
+      "id": "mcp",
+      "name": "Model Context Protocol",
+      "group": "Agent protocols",
+      "status": "2026-07-28; Tasks extension separately versioned",
+      "provides": "MCP describes tools, calls and structured results over standard or custom bindings; Tasks is a separate extension.",
+      "mapping": "Use installed tool mappings and the server’s existing authorization. Reuse native task support when negotiated.",
+      "gap": "Tool annotations are hints. Successful calls and completed protocol tasks require interpretation against the contract’s actual effect.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "mcp-current",
+        "mcp-transport",
+        "mcp-tasks"
+      ]
+    },
+    {
+      "id": "a2a",
+      "name": "Agent2Agent",
+      "group": "Agent protocols",
+      "status": "Current project specification",
+      "provides": "A2A defines agent cards, structured messages, tasks, extensions and multiple protocol bindings.",
+      "mapping": "Map a typed decision through an explicitly supported service extension; preserve native task and result handling.",
+      "gap": "SendMessage idempotency is optional. Agent discovery, task completion and downstream delegation do not automatically prove exact-terms execution.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "a2a"
+      ]
+    },
+    {
+      "id": "amqp",
+      "name": "AMQP",
+      "group": "Messaging",
+      "status": "1.0 OASIS Standard",
+      "provides": "AMQP supplies message transfer, delivery states, settlement and message properties.",
+      "mapping": "Use a trusted request/reply route and service decision record, retaining native correlation and delivery semantics.",
+      "gap": "Identify which receiver accepted the message. A broker’s accepted disposition is not proof that an application committed the effect.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "amqp"
+      ]
+    },
+    {
+      "id": "mqtt",
+      "name": "MQTT",
+      "group": "Messaging",
+      "status": "5.0 OASIS Standard",
+      "provides": "MQTT defines publish/subscribe delivery, QoS, Response Topic and Correlation Data for request/reply patterns.",
+      "mapping": "Use installed command and response topics, with authorization for each topic and a service-side decision check.",
+      "gap": "QoS describes message delivery, not an atomic application effect. Prevent retained or replayed commands from causing new decisions.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "mqtt"
+      ]
+    },
+    {
+      "id": "nats",
+      "name": "Core NATS",
+      "group": "Messaging",
+      "status": "Project documentation",
+      "provides": "Core NATS supplies ephemeral at-most-once messaging and request/reply using reply subjects.",
+      "mapping": "Map read and decision requests to authorized subjects; authenticate the service response and retain native correlation.",
+      "gap": "A timeout can mean no response, not no effect. Subject access alone must not substitute for the acting principal’s permission.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "nats"
+      ]
+    },
+    {
+      "id": "jetstream",
+      "name": "NATS JetStream",
+      "group": "Messaging",
+      "status": "Project documentation",
+      "provides": "JetStream adds persisted streams and per-consumer delivery tracking with acknowledgements.",
+      "mapping": "Use durable command delivery where needed and a separate correlated application result.",
+      "gap": "Acknowledging consumption does not prove the business transaction. Couple decision deduplication to the service’s actual commit.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "jetstream"
+      ]
+    },
+    {
+      "id": "kafka",
+      "name": "Apache Kafka",
+      "group": "Messaging",
+      "status": "4.1 design documentation",
+      "provides": "Kafka provides durable logs and transaction mechanisms; coordinating effects in external systems remains a separate concern.",
+      "mapping": "Use installed command/result topics and a service decision ledger or equivalent atomic storage mechanism.",
+      "gap": "Broker transactions do not automatically cover publishing an article or sending mail. Preserve account authority through consumers and retries.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "kafka"
+      ]
+    },
+    {
+      "id": "webhooks",
+      "name": "Webhooks",
+      "group": "Messaging",
+      "status": "Standard Webhooks project specification",
+      "provides": "Standard Webhooks defines signed payload and delivery metadata, including an identifier and attempt timestamp.",
+      "mapping": "Reuse an existing authenticated webhook for decisions or results when its API defines that role.",
+      "gap": "A callback must be installed and authorized independently of email. Signature freshness does not prove current terms or grant permission.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "webhooks"
+      ]
+    },
+    {
+      "id": "websub",
+      "name": "WebSub",
+      "group": "Messaging",
+      "status": "W3C Recommendation",
+      "provides": "WebSub defines publisher, hub and subscriber relationships for delivering updates.",
+      "mapping": "Reuse it for authenticated update notification followed by the service’s trusted state read.",
+      "gap": "Subscription verification and notification delivery do not define a command, exact-terms decision or completed effect.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "websub"
+      ]
+    },
+    {
+      "id": "websocket",
+      "name": "WebSocket",
+      "group": "Streams and federation",
+      "status": "RFC 6455",
+      "provides": "WebSocket provides a bidirectional message channel and subprotocol negotiation.",
+      "mapping": "Carry an existing RPC or command protocol over the authorized connection.",
+      "gap": "A WebSocket connection has no built-in MAP read, decision or outcome meaning. The application subprotocol must supply those.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "websocket"
+      ]
+    },
+    {
+      "id": "sse",
+      "name": "Server-sent events",
+      "group": "Streams and federation",
+      "status": "WHATWG HTML standard",
+      "provides": "SSE delivers server-to-client event streams and supports reconnection with event identifiers.",
+      "mapping": "Use an installed service stream for progress or authenticated result updates.",
+      "gap": "It is not the client’s decision-submission path. Replayed event IDs and disconnected streams must not manufacture completion.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "sse"
+      ]
+    },
+    {
+      "id": "webrtc",
+      "name": "WebRTC data channels",
+      "group": "Streams and federation",
+      "status": "RFC 8831",
+      "provides": "WebRTC data channels carry application data over SCTP with channel-specific ordering and reliability choices.",
+      "mapping": "A peer-service integration could carry an existing command protocol over an authenticated channel.",
+      "gap": "Signaling, peer identity, recipient authority, correlation and recovery must be specified. Channel delivery does not mean the action committed.",
+      "disposition": "Specialist candidate",
+      "sources": [
+        "webrtc"
+      ]
+    },
+    {
+      "id": "webtransport",
+      "name": "WebTransport",
+      "group": "Streams and federation",
+      "status": "W3C Candidate Recommendation Snapshot, July 2026",
+      "provides": "WebTransport exposes streams and datagrams for application communication.",
+      "mapping": "Reuse a deployment’s application protocol over its established session rather than defining a MAP stream format.",
+      "gap": "Streams and datagrams do not supply contract semantics, principal delegation or an atomic expected-version check.",
+      "disposition": "Specialist candidate",
+      "sources": [
+        "webtransport"
+      ]
+    },
+    {
+      "id": "http3",
+      "name": "HTTP/2, HTTP/3 and QUIC",
+      "group": "Streams and federation",
+      "status": "HTTP/3 RFC 9114; underlying protocol family",
+      "provides": "HTTP/3 carries HTTP semantics over QUIC. Transport evolution is separate from the API’s application semantics.",
+      "mapping": "Keep the HTTP service binding independent of the HTTP wire version.",
+      "gap": "A different connection or multiplexing mechanism is not another action contract or evidence of safe retry.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "http3",
+        "http"
+      ]
+    },
+    {
+      "id": "xmpp",
+      "name": "XMPP",
+      "group": "Streams and federation",
+      "status": "RFC 6120",
+      "provides": "XMPP includes authenticated XML streams and an IQ request/response mechanism.",
+      "mapping": "An installed service namespace could carry reads and decisions with correlated IQ responses.",
+      "gap": "Map JIDs and delegated identities to the service principal. An IQ result still needs domain-specific exact-terms and outcome semantics.",
+      "disposition": "Specialist candidate",
+      "sources": [
+        "xmpp"
+      ]
+    },
+    {
+      "id": "activitypub",
+      "name": "ActivityPub",
+      "group": "Streams and federation",
+      "status": "W3C Recommendation",
+      "provides": "ActivityPub defines actor inboxes, outboxes and activity delivery for social applications.",
+      "mapping": "Reuse existing social activity semantics where they match the desired operation.",
+      "gap": "Delivery or acceptance of an activity is not generic business approval. A bespoke publishing workflow still needs a documented service binding.",
+      "disposition": "Specialist candidate",
+      "sources": [
+        "activitypub"
+      ]
+    },
+    {
+      "id": "openapi",
+      "name": "OpenAPI",
+      "group": "Descriptions and discovery",
+      "status": "3.1.2 examined",
+      "provides": "OpenAPI describes HTTP operations, security requirements, schemas and links to related operations.",
+      "mapping": "Reuse operation identifiers and native API definitions as binding inputs.",
+      "gap": "Links do not guarantee permission. OpenAPI alone does not define MAP effects or prove a service’s atomic version check.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "openapi"
+      ]
+    },
+    {
+      "id": "openrpc",
+      "name": "OpenRPC",
+      "group": "Descriptions and discovery",
+      "status": "Project specification",
+      "provides": "OpenRPC describes JSON-RPC methods and supplies an optional rpc.discover discovery method.",
+      "mapping": "Reference trusted method descriptions and their parameters rather than defining another RPC descriptor.",
+      "gap": "Discovery does not install a binding or authorize execution. Outcome and exact-terms semantics remain service-specific.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "openrpc"
+      ]
+    },
+    {
+      "id": "asyncapi",
+      "name": "AsyncAPI",
+      "group": "Descriptions and discovery",
+      "status": "3.0.0",
+      "provides": "AsyncAPI describes servers, channels, operations, security, messages and request/reply relationships with protocol bindings.",
+      "mapping": "Reuse its native channel and message descriptions for queue and event-driven service integrations.",
+      "gap": "A reply relationship does not prove business acceptance. Pin trusted configuration and define the service’s decision/result semantics.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "asyncapi"
+      ]
+    },
+    {
+      "id": "arazzo",
+      "name": "Arazzo",
+      "group": "Descriptions and discovery",
+      "status": "1.1.0",
+      "provides": "Arazzo describes API workflows with operation references, runtime values, payload replacements and success criteria.",
+      "mapping": "Evaluate its existing mappings before standardizing the custom x-map selector language.",
+      "gap": "A workflow runner must stop for host policy and confirmation before the decision. Success criteria cannot prove unimplemented atomic enforcement.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "arazzo"
+      ]
+    },
+    {
+      "id": "wot",
+      "name": "WoT Thing Description",
+      "group": "Descriptions and discovery",
+      "status": "1.1 W3C Recommendation",
+      "provides": "Thing Descriptions provide action affordances, forms, input/output descriptions and security metadata across protocol bindings.",
+      "mapping": "Compare a MAP semantic profile over existing affordances with a new binding-description format.",
+      "gap": "Do not equate invokeaction with informed approval. Recipient relationship, exact terms and business effects still need explicit service guarantees.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "wot"
+      ]
+    },
+    {
+      "id": "cloudevents",
+      "name": "CloudEvents",
+      "group": "Descriptions and discovery",
+      "status": "1.0.2",
+      "provides": "CloudEvents standardizes event context and its representation across formats and protocol bindings.",
+      "mapping": "Use it around existing service notifications or result events when the service already does so.",
+      "gap": "An event envelope does not define a command contract, authority, atomic commit or exactly-once application behaviour.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "cloudevents"
+      ]
+    },
+    {
+      "id": "schema-actions",
+      "name": "Schema.org Actions",
+      "group": "Descriptions and discovery",
+      "status": "Schema.org vocabulary",
+      "provides": "Schema.org describes actions, their participants, results and potential actions.",
+      "mapping": "Reuse suitable vocabulary or documented mappings where its meaning agrees with a MAP type.",
+      "gap": "A potentialAction or target URL is descriptive metadata, not a permission grant or executable request template.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "schema-actions"
+      ]
+    },
+    {
+      "id": "smtp",
+      "name": "SMTP and MIME",
+      "group": "Email and human interfaces",
+      "status": "RFC 5321; Structured Email container",
+      "provides": "SMTP delivers mail; MIME carries readable and structured message parts.",
+      "mapping": "Keep email delivery as MAP’s proposal channel, independent of the service execution interface.",
+      "gap": "Mail acceptance and a delivered reply do not prove execution. A generic reply-command binding would need its own trust and result rules.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "smtp",
+        "sml"
+      ]
+    },
+    {
+      "id": "imap",
+      "name": "IMAP",
+      "group": "Email and human interfaces",
+      "status": "RFC 9051",
+      "provides": "IMAP accesses and manages mailbox messages; it does not specify mail submission.",
+      "mapping": "Use an existing mail client or provider integration to obtain the message and trusted delivery context.",
+      "gap": "Mailbox access does not establish permission to act in the external service.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "imap"
+      ]
+    },
+    {
+      "id": "jmap",
+      "name": "JMAP",
+      "group": "Email and human interfaces",
+      "status": "RFC 8620",
+      "provides": "JMAP defines account-scoped method calls, capabilities and state preconditions such as ifInState.",
+      "mapping": "Reuse JMAP mailbox access or a separately defined domain capability when its actual semantics fit.",
+      "gap": "Mailbox state is not the version of an external publication or campaign. Core JMAP is not a universal action API.",
+      "disposition": "Binding candidate",
+      "sources": [
+        "jmap"
+      ]
+    },
+    {
+      "id": "sml",
+      "name": "Structured Email",
+      "group": "Email and human interfaces",
+      "status": "IETF working-group draft -06",
+      "provides": "Structured Email specifies structured MIME content and defers details of structured replies to future work.",
+      "mapping": "Reuse its container for the proposal and coordinate MAP’s specific action requirements with SML.",
+      "gap": "A shared MIME container neither standardizes execution nor reserves the entire action problem for MAP.",
+      "disposition": "Reuse before inventing",
+      "sources": [
+        "sml"
+      ]
+    },
+    {
+      "id": "itip",
+      "name": "iTIP / iMIP",
+      "group": "Email and human interfaces",
+      "status": "RFC 5546 and RFC 6047",
+      "provides": "iTIP defines calendaring scheduling exchanges; iMIP binds them to MIME email.",
+      "mapping": "Use calendar-native requests and replies for attendance and scheduling semantics they already define.",
+      "gap": "Do not recreate an RSVP protocol as a generic MAP type. A broader workflow must preserve organizer, attendee and revision semantics.",
+      "disposition": "Reuse existing workflow",
+      "sources": [
+        "itip",
+        "imip"
+      ]
+    },
+    {
+      "id": "unsubscribe",
+      "name": "One-click unsubscribe",
+      "group": "Email and human interfaces",
+      "status": "RFC 8058",
+      "provides": "RFC 8058 defines an authenticated email signal and a fixed one-click unsubscribe POST.",
+      "mapping": "Use it directly for list unsubscribe. Keep MAP’s experimental capability actions explicitly separate.",
+      "gap": "It is not a general bearer approval protocol and does not authorize consequential actions.",
+      "disposition": "Reuse existing workflow",
+      "sources": [
+        "unsubscribe"
+      ]
+    },
+    {
+      "id": "oauth",
+      "name": "OAuth",
+      "group": "Identity and authorization",
+      "status": "RFC 9700 security BCP",
+      "provides": "OAuth deployments have established authorization flows and security requirements for clients, tokens and resources.",
+      "mapping": "Use the service’s existing scoped connection and resource protections.",
+      "gap": "Possession of a token is not confirmation of a particular proposal. Keep credentials outside email and model-generated arguments.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "oauth"
+      ]
+    },
+    {
+      "id": "oauth-metadata",
+      "name": "OAuth resource metadata",
+      "group": "Identity and authorization",
+      "status": "RFC 9728",
+      "provides": "Protected Resource Metadata advertises authorization configuration for an OAuth resource.",
+      "mapping": "Use it during explicit setup for a service independently selected by the host.",
+      "gap": "Metadata is not proof of MAP support, publisher trust, recipient authority or consent to the waiting action.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "oauth-metadata"
+      ]
+    },
+    {
+      "id": "oidc",
+      "name": "OpenID Connect",
+      "group": "Identity and authorization",
+      "status": "Core 1.0, errata set 2",
+      "provides": "OIDC supplies authentication and identity claims on top of OAuth 2.0.",
+      "mapping": "Accept an already trusted provider’s identity through the service’s existing sign-in flow.",
+      "gap": "Authentication identifies a subject; it does not authorize every action that subject’s email describes.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "oidc"
+      ]
+    },
+    {
+      "id": "rar",
+      "name": "OAuth Rich Authorization Requests",
+      "group": "Identity and authorization",
+      "status": "RFC 9396",
+      "provides": "RAR carries structured authorization_details, with reusable fields for API-defined authorization types.",
+      "mapping": "Reuse it when a service needs fine-grained authorization requests rather than inventing a MAP permission language.",
+      "gap": "An authorization_details object needs agreed semantics and enforcement. It does not itself bind an approval to current service terms.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "rar"
+      ]
+    },
+    {
+      "id": "gnap",
+      "name": "GNAP",
+      "group": "Identity and authorization",
+      "status": "RFC 9635",
+      "provides": "GNAP specifies grant negotiation, access tokens and interaction with a resource owner.",
+      "mapping": "Allow a service’s established GNAP authorization through its trusted binding.",
+      "gap": "Grant negotiation must remain separate from the email’s proposal. MAP need not require migration from OAuth or introduce its own grant system.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "gnap"
+      ]
+    },
+    {
+      "id": "http-signatures",
+      "name": "HTTP Message Signatures",
+      "group": "Identity and authorization",
+      "status": "RFC 9421",
+      "provides": "HTTP signatures cover selected message components and can carry creation time, expiry and nonce metadata.",
+      "mapping": "Reuse them for request or callback authentication where the native service already defines the signature profile.",
+      "gap": "A valid signature proves neither authorization nor a completed effect. Coverage, freshness, key trust and replay handling require a profile.",
+      "disposition": "Reuse supporting layer",
+      "sources": [
+        "http-signatures"
+      ]
+    }
+  ],
+  "openQuestions": [
+    "Whether a small semantic annotation over OpenAPI/Arazzo, AsyncAPI, OpenRPC or WoT is sufficient for reusable MAP bindings; no universal format is selected.",
+    "Which real services can demonstrate atomic principal, permission, expiry and terms enforcement across the different interface families.",
+    "How a delegated or brokered integration proves the original acting principal at the service decision, rather than only a worker or broker identity.",
+    "How a non-HTTP service identity is explicitly associated with Core’s current HTTPS-origin identifier; this survey does not change Core’s identity syntax.",
+    "Which provider action renderers can preserve the contract and recipient checks end to end; their presence is not a MAP compatibility claim."
+  ],
+  "conclusions": [
+    {
+      "title": "Keep the common boundary small",
+      "assessment": "MAP owns the email proposal, shared decision semantics and conditions for exercising authority. Service APIs, agent protocols and messaging systems keep their native calls, tasks and result formats. Extending Core for each transport would create unnecessary coupling.",
+      "sources": [
+        "http",
+        "a2a",
+        "asyncapi"
+      ]
+    },
+    {
+      "title": "Reuse descriptions before defining annotations",
+      "assessment": "Use the description a service already maintains. OpenAPI/OpenRPC/AsyncAPI, Arazzo and WoT cover enough of the structural problem that a universal x-map language is premature. A later semantic profile should add only a demonstrated gap, with evidence from more than one implementation.",
+      "sources": [
+        "openapi",
+        "openrpc",
+        "asyncapi",
+        "arazzo",
+        "wot"
+      ]
+    },
+    {
+      "title": "Treat asynchronous execution as a first-class case",
+      "assessment": "Readback may arrive as a correlated reply. Decisions can queue or delegate work. The service still needs the original principal, exact approved snapshot, atomic decision and authenticated result. Preserve delivery, acceptance and completion as distinct facts.",
+      "sources": [
+        "amqp",
+        "mqtt",
+        "grpc",
+        "a2a"
+      ]
+    },
+    {
+      "title": "Reuse identity without choosing an identity vendor",
+      "assessment": "Existing OAuth, OIDC or GNAP connections can establish account access. Neither sign-in nor discovery authorizes the email’s particular request, and MAP needs no new global identity provider or DNS record.",
+      "sources": [
+        "oauth",
+        "oidc",
+        "gnap"
+      ]
+    },
+    {
+      "title": "Do not duplicate complete domain workflows",
+      "assessment": "Calendar scheduling and one-click unsubscribe already have protocols. Use their native semantics when they fit; add a MAP type only where a useful email interaction remains and an implementer can establish the required guarantees.",
+      "sources": [
+        "itip",
+        "imip",
+        "unsubscribe"
+      ]
+    }
+  ],
+  "reuseComparison": [
+    {
+      "name": "OpenAPI / OpenRPC / native schemas",
+      "existing": "Operation identities, inputs, outputs and protocol-specific descriptions.",
+      "remaining": "Associate an exact MAP contract with native operations and document authorization, revision and outcome semantics.",
+      "decision": "Use as the service-description source; do not duplicate its schema.",
+      "sources": [
+        "openapi",
+        "openrpc"
+      ]
+    },
+    {
+      "name": "AsyncAPI",
+      "existing": "Channels, messages, security, protocol bindings and request/reply.",
+      "remaining": "Define which application result establishes the decision, its principal and the atomic commit.",
+      "decision": "Use for messaging integrations; no MAP queue envelope.",
+      "sources": [
+        "asyncapi"
+      ]
+    },
+    {
+      "name": "Arazzo",
+      "existing": "API workflow steps, operation references, runtime values and success criteria.",
+      "remaining": "Keep host policy and confirmation outside automatic step advancement; establish the service’s actual enforcement.",
+      "decision": "Reuse for suitable API workflows. Do not make a workflow engine a Core requirement.",
+      "sources": [
+        "arazzo"
+      ]
+    },
+    {
+      "name": "WoT Thing Description",
+      "existing": "Cross-protocol action affordances, forms, input/output and security descriptions.",
+      "remaining": "A MAP profile would still need recipient, principal, exact-contract and exact-terms semantics.",
+      "decision": "Strong cross-protocol prior art; evaluate a profile when a real integration needs this shape.",
+      "sources": [
+        "wot"
+      ]
+    },
+    {
+      "name": "A2A tasks / MCP Tasks",
+      "existing": "Native representations for longer-running work and its state.",
+      "remaining": "Establish how task results prove the contract’s effect; preserve approval and authority across delegation.",
+      "decision": "Reuse when the service supports them; no generic MAP job API.",
+      "sources": [
+        "a2a",
+        "mcp-tasks"
+      ]
+    }
+  ]
+}

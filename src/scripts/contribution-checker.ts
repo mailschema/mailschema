@@ -1,8 +1,17 @@
-import { assertContribution, referenceErrors, type CatalogView } from '../registry/validation';
-import type { Contribution } from '../registry/model';
+import { parseContractText, type Contract } from '../specification/contracts';
+import {
+  parseImplementationText,
+  type ImplementationRecord,
+} from '../specification/implementations';
+import { decodeMapUtf8 } from '../specification/strict-json.ts';
+import { specification } from '../data/specification';
 
 const form = document.querySelector<HTMLFormElement>('#contribution-form')!;
 const editor = document.querySelector<HTMLTextAreaElement>('#contribution-json')!;
+const kind = document.querySelector<HTMLSelectElement>('#contribution-kind')!;
+const target = document.querySelector<HTMLSelectElement>('#contribution-target')!;
+const targetField = document.querySelector<HTMLElement>('[data-service-target]')!;
+const editorLabel = document.querySelector<HTMLElement>('[data-editor-label]')!;
 const fileInput = document.querySelector<HTMLInputElement>('#contribution-file')!;
 const download = document.querySelector<HTMLButtonElement>('[data-download]')!;
 const submit = document.querySelector<HTMLAnchorElement>('[data-submit]')!;
@@ -11,7 +20,7 @@ const submitNote = document.querySelector<HTMLElement>('[data-submit-note]')!;
 const status = form.querySelector<HTMLElement>('[data-check-status]')!;
 const errors = form.querySelector<HTMLElement>('.contribution-errors')!;
 const preview = document.querySelector<HTMLElement>('[data-preview]')!;
-let checked: Contribution | undefined;
+let checked: Contract | ImplementationRecord | undefined;
 let generation = 0;
 const maxBytes = 256 * 1024;
 function reset() {
@@ -24,23 +33,6 @@ function reset() {
   preview.hidden = errors.hidden = true;
   status.textContent = '';
 }
-
-function githubSubmission(input: Contribution) {
-  const filename = `${input.id}.json`;
-  const value = JSON.stringify(input, null, 2) + '\n';
-  const prefilledUrl = `https://github.com/mailschema/mailschema/new/main/registry/contributions?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(value)}`;
-  return prefilledUrl.length <= 7000
-    ? {
-        url: prefilledUrl,
-        label: 'Continue in GitHub',
-        note: 'The checked JSON will be prefilled in GitHub.',
-      }
-    : {
-        url: 'https://github.com/mailschema/mailschema/upload/main/registry/contributions',
-        label: 'Upload in GitHub',
-        note: 'This contribution is too large to prefill. Download the checked JSON, then upload it in GitHub.',
-      };
-}
 function showErrors(messages: string[]) {
   errors.querySelector('ul')!.replaceChildren(
     ...messages.slice(0, 12).map((message) => {
@@ -52,6 +44,17 @@ function showErrors(messages: string[]) {
   errors.hidden = false;
   status.textContent = 'The file needs changes.';
 }
+function filename(value: Contract | ImplementationRecord) {
+  // Filenames help review; the identifiers and exact contract digest remain authoritative.
+  if ('service' in value) {
+    const host = new URL(value.service).hostname.replace(/[^a-zA-Z0-9-]/g, '-');
+    const slug = new URL(value.type.id).pathname.split('/').filter(Boolean).pop() || 'type';
+    const binding = new URL(value.binding).pathname.split('/').filter(Boolean).pop() || 'binding';
+    return `${host}-${slug}-${value.type.version}-${binding.replace(/[^a-zA-Z0-9-]/g, '-')}.json`;
+  }
+  const slug = new URL(value.id).pathname.split('/').filter(Boolean).pop() || 'new-type';
+  return `${slug.replace(/[^a-zA-Z0-9-]/g, '-').slice(0, 80)}-${value.version}.json`;
+}
 function fact(label: string, value: string) {
   const row = document.createElement('div');
   const term = document.createElement('dt');
@@ -62,109 +65,148 @@ function fact(label: string, value: string) {
   return row;
 }
 editor.addEventListener('input', reset);
+kind.addEventListener('change', () => {
+  reset();
+  editor.value = '';
+  targetField.hidden = kind.value !== 'implementation';
+  editorLabel.textContent =
+    kind.value === 'implementation' ? 'Service record JSON' : 'Contract JSON';
+});
+document
+  .querySelector<HTMLButtonElement>('[data-service-starter]')!
+  .addEventListener('click', () => {
+    reset();
+    const selected = target.selectedOptions[0];
+    editor.value =
+      JSON.stringify(
+        {
+          service: 'https://example.org',
+          maintainer: { name: 'Service operator', url: 'https://example.org' },
+          type: {
+            id: selected.dataset.id,
+            version: selected.dataset.version,
+            contractDigest: selected.dataset.digest,
+          },
+          operations: (selected.dataset.operations || '').split(','),
+          binding: 'https://example.org/docs/map-binding',
+          status: 'Draft',
+          documentation: 'https://example.org/docs/map',
+          evidence: [
+            {
+              kind: 'declaration',
+              url: 'https://example.org/docs/map',
+              summary: 'Replace with the actual scope and source of this support claim.',
+            },
+          ],
+        },
+        null,
+        2,
+      ) + '\n';
+    editor.focus();
+  });
 fileInput.addEventListener('change', async () => {
   reset();
   const ticket = generation;
   const file = fileInput.files?.[0];
   if (!file) return;
   if (file.size > maxBytes) return showErrors(['Choose a JSON file smaller than 256 KiB.']);
-  const text = await file.text();
-  if (generation === ticket) {
-    editor.value = text;
-    editor.focus();
+  try {
+    const text = decodeMapUtf8(new Uint8Array(await file.arrayBuffer()));
+    if (ticket === generation) {
+      editor.value = text;
+      editor.focus();
+    }
+  } catch (error) {
+    if (ticket === generation) showErrors([String(error)]);
   }
 });
 document.querySelectorAll<HTMLAnchorElement>('[data-example]').forEach((link) => {
   link.addEventListener('click', async (event) => {
     event.preventDefault();
+    kind.value = 'contract';
+    targetField.hidden = true;
+    editorLabel.textContent = 'Contract JSON';
     reset();
     const ticket = generation;
     try {
       const response = await fetch(link.href);
-      if (!response.ok) throw new Error('Example unavailable. Try downloading the file again.');
+      if (!response.ok)
+        throw new Error('Could not load the contract. Try the download link again.');
       const text = await response.text();
-      if (generation === ticket) {
+      if (ticket === generation) {
         editor.value = text;
         editor.focus();
       }
     } catch (error) {
-      if (generation === ticket) showErrors([String(error)]);
+      if (ticket === generation) showErrors([String(error)]);
     }
   });
 });
-form.addEventListener('submit', async (event) => {
+form.addEventListener('submit', (event) => {
   event.preventDefault();
   reset();
-  const ticket = generation;
   try {
     if (new TextEncoder().encode(editor.value).length > maxBytes)
-      throw new Error('Use a contribution smaller than 256 KiB.');
-    let input: unknown;
-    try {
-      input = JSON.parse(editor.value);
-    } catch {
-      throw new Error('The file is not valid JSON. Check its quotes, commas and brackets.');
+      throw new Error('Use a file smaller than 256 KiB.');
+    const input =
+      kind.value === 'implementation'
+        ? parseImplementationText(editor.value)
+        : parseContractText(editor.value);
+    if ('service' in input) {
+      const match = [...target.options].some(
+        (option) =>
+          option.dataset.id === input.type.id &&
+          option.dataset.version === input.type.version &&
+          option.dataset.digest === input.type.contractDigest &&
+          input.operations.every((operation) =>
+            (option.dataset.operations || '').split(',').includes(operation),
+          ),
+      );
+      if (!match) throw new Error('Select an exact Registry contract and its listed operations.');
     }
-    assertContribution(input);
-    status.textContent = 'Checking Registry references…';
-    const response = await fetch('/registry/catalog.json');
-    if (!response.ok)
-      throw new Error('Could not load the Registry. Try again before submitting this file.');
-    const catalog = (await response.json()) as CatalogView & { contributions: { id: string }[] };
-    if (generation !== ticket) return;
-    const problems = referenceErrors(input, catalog);
-    if (catalog.contributions.some((item) => item.id === input.id))
-      problems.push('This contribution identifier is already in the Registry.');
-    if (problems.length) return showErrors(problems);
     checked = input;
     preview.querySelector('[data-preview-title]')!.textContent =
-      input.kind === 'implementation' ? input.product.name : input.record.name;
+      'service' in input ? input.maintainer.name : input.name;
     preview.querySelector('[data-preview-summary]')!.textContent =
-      input.kind === 'implementation' ? input.summary : input.record.summary;
-    const facts = [
-      fact(
-        'Contribution',
-        input.kind === 'new-type'
-          ? 'New type'
-          : input.kind === 'amendment'
-            ? 'Amendment'
-            : 'Implementation declaration',
-      ),
-      fact('Contributed by', input.contributor.name),
-    ];
-    if (input.kind === 'implementation')
-      facts.push(
-        fact('Type and version', `${input.type} · ${input.typeVersion}`),
-        fact('Execution profile', input.profile),
-        fact(
-          'Evidence',
-          input.evidence.kind === 'declaration' ? 'Support declaration' : 'Submitted test report',
-        ),
-        fact('Operations', input.operations.join(', ')),
+      'service' in input ? input.evidence.map((item) => item.summary).join(' ') : input.summary;
+    preview
+      .querySelector('[data-preview-facts]')!
+      .replaceChildren(
+        ...('service' in input
+          ? [
+              fact('Service', input.service),
+              fact('Contract', `${input.type.id} · ${input.type.version}`),
+              fact('Operations', input.operations.join(', ')),
+              fact('Evidence', input.evidence.map((item) => item.kind).join(', ')),
+            ]
+          : [
+              fact('Identifier', input.id),
+              fact('Version', input.version),
+              fact('Operations', input.operations.map((operation) => operation.name).join(', ')),
+              fact(
+                'Effects',
+                [...new Set(input.operations.flatMap((operation) => operation.effects))]
+                  .map((effect) => effect.split('/').pop())
+                  .join(', '),
+              ),
+            ]),
       );
-    else
-      facts.push(
-        fact('Maintained by', input.record.maintainers.map((party) => party.name).join(', ')),
-        fact(
-          'Proposed status',
-          `${input.record.status}${input.record.version ? ` · ${input.record.version}` : ''}`,
-        ),
-        fact('Operations', input.record.operations.map((operation) => operation.name).join(', ')),
-        fact('Example', input.record.example.title),
-      );
-    preview.querySelector('[data-preview-facts]')!.replaceChildren(...facts);
-    preview.hidden = false;
-    download.disabled = false;
-    const submission = githubSubmission(input);
-    submit.href = submission.url;
-    submitLabel.textContent = submission.label;
-    submitNote.textContent = submission.note;
+    const base = 'https://github.com/mailschema/mailschema';
+    const path = `${specification.source}/${'service' in input ? 'implementations' : 'contracts'}`;
+    const url = `${base}/new/main/${path}?filename=${encodeURIComponent(filename(input))}&value=${encodeURIComponent(JSON.stringify(input, null, 2) + '\n')}`;
+    const prefill = url.length <= 7000;
+    submit.href = prefill ? url : `${base}/upload/main/${path}`;
+    submitLabel.textContent = prefill ? 'Continue in GitHub' : 'Upload in GitHub';
+    submitNote.textContent = prefill
+      ? 'GitHub will open with the checked JSON. Add companion files in the same pull request.'
+      : 'Download the checked JSON, then upload it to your branch in GitHub.';
     submit.removeAttribute('aria-disabled');
     submit.tabIndex = 0;
-    status.textContent = 'File checks passed.';
+    download.disabled = false;
+    preview.hidden = false;
+    status.textContent = 'Structure checks passed. Ready for review.';
   } catch (error) {
-    if (generation === ticket)
-      showErrors((error instanceof Error ? error.message : String(error)).split('\n'));
+    showErrors(String(error).split('\n'));
   }
 });
 download.addEventListener('click', () => {
@@ -174,7 +216,7 @@ download.addEventListener('click', () => {
   );
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${checked.id}.json`;
+  link.download = filename(checked);
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });

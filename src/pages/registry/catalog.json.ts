@@ -1,8 +1,10 @@
-import { registry, typeContracts, typeHref } from '../../data/types';
+import { registry, typeContracts, typeHref } from '../../data/legacy-types';
 import { recordDigest } from '../../registry/catalog';
 export function GET() {
   return Response.json({
     format: 'mailschema-registry/2',
+    status: 'superseded',
+    successor: '/registry/map-0.3.json',
     types: registry.types.map((record) => ({
       record,
       digest: recordDigest(record),

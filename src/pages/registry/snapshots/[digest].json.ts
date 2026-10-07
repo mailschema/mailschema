@@ -1,4 +1,4 @@
-import { registry } from '../../../data/types';
+import { registry } from '../../../data/legacy-types';
 import type { APIContext } from 'astro';
 // Every record digest the Registry has published.
 export function getStaticPaths() {

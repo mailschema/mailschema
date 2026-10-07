@@ -27,6 +27,10 @@ export default {
       canonical.hostname = canonicalHost;
     }
     canonical.pathname = canonical.pathname.replace(/(?<=.)\/+$/, '');
+    if (canonical.pathname === '/types' || canonical.pathname.startsWith('/types/'))
+      canonical.pathname = `/registry${canonical.pathname.slice('/types'.length)}`;
+    // A profile identifier resolves to its published record.
+    if (/^\/profiles\/map\/\d+\.\d+$/.test(canonical.pathname)) canonical.pathname += '.json';
     if (canonical.href !== url.href) return Response.redirect(canonical, 308);
 
     const response = await env.ASSETS.fetch(request);
