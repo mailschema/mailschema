@@ -24,6 +24,7 @@ The public catalogue is a view of the canonical contracts, Registry metadata and
 
 ## Change log
 
+- 7 October 2026, npm 0.3.1: `mailschema description` prints the description's digest on a second line, as `contract` does for a contract. The other packages remain at 0.3.0.
 - 7 October 2026, packages 0.3.0: npm and RubyGems process MAP 0.3; PyPI, crates.io and Go carry its profile record, context and schemas. No package carries MAP 0.2.
 - 7 October 2026, MAP 0.3 working draft: an email describes the action, and a trusted service binding maps each decision to the service's existing operations. There is no MAP execution endpoint or request and result envelope. The profile record binds the context, core schema and contract format by SHA-256. Four Draft contracts are published through the Registry; MAP 0.2 and its artifacts remain available.
 - 2 October 2026, historical availability: the 1 October deletion ruling is replaced. Published MAP 0.1 artifacts and their conformance fixtures remain available as immutable, unlisted resources with MAP 0.2 identified as the successor. The retired MAP 0.1 runtime and package code remain removed.
