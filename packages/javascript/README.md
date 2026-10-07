@@ -3,7 +3,7 @@
 [Mail Action Protocol](https://mailschema.org) 0.3 for JavaScript. It parses and checks MAP descriptions, type contracts and Registry implementation records, and computes the RFC 8785 digests that identify contracts. The same code runs the MailSchema specification's own checks. It has no Node.js-only dependencies, so it also runs in browsers and workers.
 
 ```sh
-npm install mailschema@0.3.0
+npm install mailschema@0.3.1
 ```
 
 ## Check a description against its contract
@@ -34,10 +34,12 @@ The profile record, context and schemas are exported byte for byte: `mailschema/
 ## Command line
 
 ```sh
-npx mailschema@0.3.0 contract campaign-send-approval-0.1.json
-npx mailschema@0.3.0 description description.json --contract campaign-send-approval-0.1.json
-npx mailschema@0.3.0 implementation record.json
+npx mailschema@0.3.1 contract campaign-send-approval-0.1.json
+npx mailschema@0.3.1 description description.json --contract campaign-send-approval-0.1.json
+npx mailschema@0.3.1 implementation record.json
 ```
+
+Each command first prints a line naming what it checked. `contract` prints `Valid type contract <id> <version>` and, on the second line, the contract's digest. `description` prints `Valid MAP 0.3 description <@id>` and, on the second line, the description's digest; with `--contract`, it first checks that the description uses that contract as it allows. `implementation` prints `Valid implementation record for <service>`. A digest is `sha-256:` and the SHA-256 of the document's RFC 8785 canonical JSON, the value `digest()` returns; the description's digest is not the contract digest it names. An invalid file prints every reason on standard error and exits with status 1. Nothing is uploaded or changed.
 
 Checking does not authenticate a message, establish a service's authority or perform an action. Those belong to the implementation, under the [specification](https://mailschema.org/specification/core).
 

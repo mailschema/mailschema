@@ -4,6 +4,7 @@ import { parseArgs } from 'node:util';
 import {
   Contract,
   CONTRACT_MAX_BYTES,
+  digest,
   InvalidDocument,
   parseDescription,
   parseImplementation,
@@ -16,9 +17,10 @@ const help = `Mail Action Protocol 0.3 checks
   mailschema implementation <record.json>
 
 contract checks a type contract and prints its digest. description checks a
-description and, with --contract, that it uses that contract as it allows.
-implementation checks a Registry implementation record. Nothing is uploaded
-or changed.`;
+description and, with --contract, that it uses that contract as it allows,
+then prints the description's digest. implementation checks a Registry
+implementation record. A digest is the SHA-256 of the document's RFC 8785
+canonical JSON. Nothing is uploaded or changed.`;
 
 async function read(path) {
   const info = await stat(path);
@@ -48,7 +50,7 @@ try {
     const description = parseDescription(await read(path));
     if (values.contract)
       report(Contract.parse(await read(values.contract)).descriptionErrors(description));
-    console.log(`Valid MAP 0.3 description ${description['@id']}`);
+    console.log(`Valid MAP 0.3 description ${description['@id']}\n${digest(description)}`);
   } else if (command === 'implementation') {
     const record = parseImplementation(await read(path));
     console.log(`Valid implementation record for ${record.service}`);

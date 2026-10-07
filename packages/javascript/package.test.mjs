@@ -74,21 +74,33 @@ test('identifies each contract by the digest its example names', async () => {
   }
 });
 
-test('checks files from the command line', () => {
+test('checks files from the command line and prints their digests', async () => {
   const cli = fileURLToPath(new URL('../bin/mailschema.js', import.meta.url));
-  const contract = fileURLToPath(fixture('contracts/publication-approval-0.1.json'));
-  const description = fileURLToPath(fixture('examples/publication-approval.json'));
-  assert.match(
-    execFileSync(process.execPath, [cli, 'contract', contract], { encoding: 'utf8' }),
-    /^Valid type contract .*\nsha-256:[0-9a-f]{64}\n$/,
-  );
-  assert.match(
-    execFileSync(process.execPath, [cli, 'description', description, '--contract', contract], {
-      encoding: 'utf8',
-    }),
-    /^Valid MAP 0\.3 description /,
-  );
+  const run = (...args) =>
+    execFileSync(process.execPath, [cli, ...args], { encoding: 'utf8', stdio: 'pipe' });
+  const path = (name) => fileURLToPath(fixture(name));
+  const descriptionDigests = {
+    'campaign-send-approval':
+      'sha-256:850cebcbd01af512c9a360adfdc5f672d08f5bc54ae68539508b5eb98cc44be1',
+    'publication-approval':
+      'sha-256:270b6c781f876aa56ecdc7b9ab45ed5dc0e8465bc8df56f1805e05a8f3a6db44',
+  };
+  for (const [slug, descriptionDigest] of Object.entries(descriptionDigests)) {
+    const { id, version, digest: contractDigest } = contracts.get(slug);
+    const contract = path(`contracts/${slug}-${version}.json`);
+    const description = path(`examples/${slug}.json`);
+    assert.equal(
+      run('contract', contract),
+      `Valid type contract ${id} ${version}\n${contractDigest}\n`,
+    );
+    const { '@id': descriptionId } = await load(`examples/${slug}.json`);
+    const output = `Valid MAP 0.3 description ${descriptionId}\n${descriptionDigest}\n`;
+    assert.equal(run('description', description), output, slug);
+    assert.equal(run('description', description, '--contract', contract), output, slug);
+  }
+  const campaign = path('examples/campaign-send-approval.json');
+  assert.throws(() => run('contract', campaign));
   assert.throws(() =>
-    execFileSync(process.execPath, [cli, 'contract', description], { stdio: 'pipe' }),
+    run('description', campaign, '--contract', path('contracts/publication-approval-0.1.json')),
   );
 });
