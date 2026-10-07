@@ -1,64 +1,42 @@
 // Draft artifacts only. This does not select a runtime profile or prepare packages.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
-import canonicalize from 'canonicalize';
 import jsonld from 'jsonld';
 import { walkthroughArtifacts } from './map-walkthrough.mjs';
 import { interfaceResearch, interfaceLandscape } from './interface-research.mjs';
-import { parseContractText } from '../src/specification/contracts.ts';
-import { parseMapJson } from '../src/specification/strict-json.ts';
+import {
+  CONTEXT,
+  CONTRACT_MAX_BYTES,
+  Contract,
+  DESCRIPTION_MAX_BYTES,
+  PROFILE,
+  descriptionErrors,
+  parse,
+  sha256,
+} from '../src/map/core/index.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const directory = 'specifications/map-0.3';
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const json = (path) => parseMapJson(readFileSync(resolve(root, path)), 262144);
+const json = (path) => parse(readFileSync(resolve(root, path)), CONTRACT_MAX_BYTES);
 const encode = (value) => JSON.stringify(value, null, 2) + '\n';
-const sha = (value) => createHash('sha256').update(value).digest('hex');
-const contractDigest = (value) => `sha-256:${sha(canonicalize(value))}`;
-const profile = 'https://mailschema.org/profiles/map/0.3';
-const contextId = 'https://mailschema.org/contexts/map-0.3.jsonld';
-// Conditional requirements refer to properties declared in the containing schema.
-const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
-addFormats(ajv);
-const core = ajv.compile(json(`${directory}/schemas/core.schema.json`));
-const assertValid = (validate, value, label) =>
-  assert(validate(value), `${label}: ${JSON.stringify(validate.errors)}`);
-
-function checkSchema(schema) {
-  const walk = (value) => {
-    if (!value || typeof value !== 'object') return;
-    for (const [key, child] of Object.entries(value)) {
-      if (['$ref', '$dynamicRef'].includes(key))
-        assert(typeof child === 'string' && child.startsWith('#'), 'External schema reference');
-      walk(child);
-    }
-  };
-  walk(schema);
-  return ajv.compile(schema);
-}
+const profile = PROFILE;
+const contextId = CONTEXT;
+const assertValid = (errors, label) => assert.deepEqual(errors, [], label);
 
 export const contracts = readdirSync(resolve(root, directory, 'contracts'))
   .filter((name) => name.endsWith('.json'))
   .sort()
   .map((name) => {
     const path = `${directory}/contracts/${name}`;
-    const contract = parseContractText(readFileSync(resolve(root, path)));
-    const suffix = `-${contract.version}.json`;
+    const loaded = Contract.parse(readFileSync(resolve(root, path)));
+    const suffix = `-${loaded.version}.json`;
     assert(name.endsWith(suffix), `${name}: filename must end with its contract version`);
     const slug = name.slice(0, -suffix.length);
     assert(/^[a-z][a-z0-9-]*$/.test(slug), `${name}: invalid page slug`);
-    return {
-      slug,
-      path,
-      contract,
-      digest: contractDigest(contract),
-      validateDetails: checkSchema(contract.detailsSchema),
-    };
+    return { slug, path, loaded, contract: loaded.document, digest: loaded.digest };
   });
 const registryMetadata = json(`${directory}/registry.json`);
 assert.equal(
@@ -183,7 +161,7 @@ export async function draftArtifacts(check) {
     assert.equal(record.artifacts[name].url, url, `The profile record binds another ${name}`);
     assert.equal(
       record.artifacts[name].sha256,
-      sha(read(`${directory}/${file}`)),
+      sha256(read(`${directory}/${file}`)),
       `${directory}/${file} differs from the bytes the published 0.3 profile record binds`,
     );
   }
@@ -207,7 +185,7 @@ export async function draftArtifacts(check) {
   ]) {
     const content = read(`${directory}/examples/${filename}.md`);
     source[slug].details.content.title = content.split('\n')[0].replace(/^# /, '');
-    source[slug].details.content.digest = `sha-256:${sha(content)}`;
+    source[slug].details.content.digest = `sha-256:${sha256(content)}`;
   }
   const examples = new Map();
   for (const item of currentContracts) {
@@ -218,24 +196,9 @@ export async function draftArtifacts(check) {
       type: { id: item.contract.id, version: item.contract.version, contractDigest: item.digest },
       ...source[item.slug],
     };
-    parseMapJson(encode(example), 65536);
-    assertValid(core, example, item.slug);
-    assertValid(item.validateDetails, example.details, item.slug);
-    assert(Date.parse(example.expiresAt) > Date.parse(example.issuedAt));
-    assert.equal(example.type.contractDigest, item.digest);
-    assert.equal(new Set(example.operations.map((op) => op.id)).size, example.operations.length);
-    for (const offered of example.operations) {
-      const operation = item.contract.operations.find((op) => op.id === offered.id);
-      assert(operation, `Unknown operation ${offered.id}`);
-      if (offered.capability) {
-        assert(operation.capability, 'Capability not permitted');
-        assert.equal(new URL(offered.capability.url).origin, example.service.id);
-        assert(
-          Date.parse(example.expiresAt) - Date.parse(example.issuedAt) <=
-            operation.capability.maxLifetimeSeconds * 1000,
-        );
-      }
-    }
+    parse(encode(example), DESCRIPTION_MAX_BYTES);
+    assertValid(descriptionErrors(example), item.slug);
+    assertValid(item.loaded.descriptionErrors(example), item.slug);
     // Exercise JSON-LD offline: no identifier in an example may cause retrieval.
     const expanded = await Promise.resolve(
       jsonld.expand(example, {
@@ -301,7 +264,7 @@ export async function draftArtifacts(check) {
       }
     }
     const item = currentContracts.find((c) => c.slug === vector.example);
-    const valid = Boolean(core(value) && item.validateDetails(value.details));
+    const valid = !descriptionErrors(value).length && !item.loaded.detailsErrors(value.details).length;
     assert.equal(valid, vector.valid, vector.id);
   }
 
@@ -349,7 +312,7 @@ export async function draftArtifacts(check) {
     'examples/publication-exchange.json',
     'examples/campaign.md',
     'context.jsonld',
-  ].map((name) => ({ path: `${directory}/${name}`, sha256: sha(read(`${directory}/${name}`)) }));
+  ].map((name) => ({ path: `${directory}/${name}`, sha256: sha256(read(`${directory}/${name}`)) }));
   write(
     `${directory}/catalogue.json`,
     encode({

@@ -1,19 +1,49 @@
 const canonicalHost = 'mailschema.org';
-const map01Deprecation = '@1790812800';
-const map01Successors = new Map([
-  ['/profiles/map/0.1.json', '/profiles/map/0.2.json'],
-  ['/contexts/map-0.1.jsonld', '/contexts/map-0.2.jsonld'],
-  ['/schemas/map-0.1.schema.json', '/schemas/map-0.2.schema.json'],
-  ['/schemas/type-contract-0.1.schema.json', '/schemas/type-contract-0.2.schema.json'],
-  ['/contracts/content-review-0.1.json', '/contracts/content-review-0.2.json'],
-  ['/schemas/content-review-0.1.schema.json', '/schemas/content-review-0.2.schema.json'],
-  ['/contracts/content-review-0.2.json', '/contracts/content-review-0.3.json'],
-  ['/schemas/content-review-0.2.schema.json', '/schemas/content-review-0.3.schema.json'],
-]);
 
-const map01Successor = (pathname) =>
-  map01Successors.get(pathname) ??
-  (pathname.startsWith('/fixtures/map-0.1/') ? '/profiles/map/0.2.json' : undefined);
+// Superseded published artifacts keep their bytes and say so: a Deprecation date for the
+// profile that superseded them and, where one exists, the artifact that replaced each.
+const map01 = {
+  deprecation: '@1790812800',
+  successors: new Map([
+    ['/profiles/map/0.1.json', '/profiles/map/0.2.json'],
+    ['/contexts/map-0.1.jsonld', '/contexts/map-0.2.jsonld'],
+    ['/schemas/map-0.1.schema.json', '/schemas/map-0.2.schema.json'],
+    ['/schemas/type-contract-0.1.schema.json', '/schemas/type-contract-0.2.schema.json'],
+    ['/contracts/content-review-0.1.json', '/contracts/content-review-0.2.json'],
+    ['/schemas/content-review-0.1.schema.json', '/schemas/content-review-0.2.schema.json'],
+    ['/contracts/content-review-0.2.json', '/contracts/content-review-0.3.json'],
+    ['/schemas/content-review-0.2.schema.json', '/schemas/content-review-0.3.schema.json'],
+  ]),
+  superseded: (pathname) => pathname.startsWith('/fixtures/map-0.1/'),
+  successor: '/profiles/map/0.2.json',
+};
+const map02 = {
+  deprecation: '@1791331200',
+  successors: new Map([
+    ['/profiles/map/0.2.json', '/profiles/map/0.3.json'],
+    ['/contexts/map-0.2.jsonld', '/contexts/map-0.3.jsonld'],
+    ['/schemas/map-0.2.schema.json', '/artifacts/map-0.3/schemas/core.schema.json'],
+    ['/schemas/type-contract-0.2.schema.json', '/artifacts/map-0.3/schemas/contract.schema.json'],
+    ['/registry/catalog.json', '/registry/map-0.3.json'],
+  ]),
+  // MAP 0.3 publishes under /artifacts/map-0.3/, so these paths hold only earlier material,
+  // most of it without a single replacement.
+  superseded: (pathname) =>
+    /^\/(?:schemas|contracts|contribution-examples)\//.test(pathname) ||
+    pathname.startsWith('/fixtures/map-0.2/') ||
+    /^\/registry\/(?:records|contributions|snapshots)\//.test(pathname),
+  successor: undefined,
+};
+
+/** The superseded artifact's Deprecation date and successor, if the path names one. */
+function superseded(pathname) {
+  for (const generation of [map01, map02]) {
+    const successor = generation.successors.get(pathname);
+    if (successor) return { deprecation: generation.deprecation, successor };
+    if (generation.superseded(pathname))
+      return { deprecation: generation.deprecation, successor: generation.successor };
+  }
+}
 
 export default {
   async fetch(request, env) {
@@ -40,10 +70,14 @@ export default {
     headers.set('X-Frame-Options', 'DENY');
     headers.set('Permissions-Policy', 'camera=(), geolocation=(), microphone=()');
     headers.set('Strict-Transport-Security', 'max-age=31536000');
-    const successor = response.ok ? map01Successor(url.pathname) : undefined;
-    if (successor) {
-      headers.set('Deprecation', map01Deprecation);
-      headers.append('Link', `<https://${canonicalHost}${successor}>; rel="successor-version"`);
+    const archived = response.ok ? superseded(url.pathname) : undefined;
+    if (archived) {
+      headers.set('Deprecation', archived.deprecation);
+      if (archived.successor)
+        headers.append(
+          'Link',
+          `<https://${canonicalHost}${archived.successor}>; rel="successor-version"`,
+        );
       headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     } else if (url.pathname.startsWith('/og/'))
       headers.set('Cache-Control', 'public, max-age=31536000, immutable');

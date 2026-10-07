@@ -81,13 +81,13 @@ jobs:
             echo "The selected package version is already promoted."
             exit 0
           fi
-          git commit -m "Promote ${REGISTRY} ${VERSION}"
+          git commit -m "chore(packages): promote ${REGISTRY} ${VERSION}"
           git push --force-with-lease origin "HEAD:refs/heads/${branch}"
           existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
           if [ -z "$existing" ]; then
             gh pr create \
               --base "${GITHUB_REF_NAME}" \
               --head "$branch" \
-              --title "Promote ${REGISTRY} ${VERSION}" \
-              --body "Public registry metadata and the published artifact were independently read back. Every contract distributed by the package matches the canonical MailSchema bytes, and the complete site verification passed. Merging this pull request promotes the exact version on the Tools page."
+              --title "chore(packages): promote ${REGISTRY} ${VERSION}" \
+              --body "Public registry metadata and the published artifact were independently read back. Every MAP 0.3 artifact the package carries matches the canonical MailSchema bytes, and the complete site verification passed. Merging this pull request promotes the exact version on the Tools page."
           fi

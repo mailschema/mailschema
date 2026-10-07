@@ -1,32 +1,16 @@
-# MailSchema for Rust
+# mailschema
 
-[![crates.io](https://img.shields.io/crates/v/mailschema)](https://crates.io/crates/mailschema)
-[![CI](https://github.com/mailschema/rust/actions/workflows/test.yml/badge.svg)](https://github.com/mailschema/rust/actions/workflows/test.yml)
-
-The Mail Action Protocol 0.2 core artifacts and the MailSchema Registry schemas, embedded without runtime dependencies, filesystem access or network calls.
-
-[Specification](https://mailschema.org/specification) · [Registry](https://mailschema.org/registry) · [Tools](https://mailschema.org/tools) · [Source](https://github.com/mailschema/rust)
-
-## Install
+The [Mail Action Protocol](https://mailschema.org) 0.3 artifacts for Rust, embedded byte for byte as mailschema.org publishes them: the profile record, the JSON-LD context, and the core, type contract and implementation record schemas. The profile record binds the context and the first two schemas by SHA-256. No runtime dependencies, filesystem access or network calls.
 
 ```toml
 [dependencies]
-mailschema = "0.2"
+mailschema = "0.3"
 ```
-
-Rust 1.70 or newer is required.
-
-## Use an artifact
 
 ```rust
-use mailschema::{Schema, MAP_CONTEXT, MAP_PROFILE, MAP_SCHEMA};
-
-assert_eq!(Schema::Map.as_str(), MAP_SCHEMA);
-assert!(MAP_CONTEXT.contains("MailAction"));
+let schema: serde_json::Value = serde_json::from_str(mailschema::CORE_SCHEMA)?;
 ```
 
-`MAP_SCHEMA`, `MAP_CONTEXT`, `CONTRACT_FORMAT_SCHEMA` and `FORMS_SCHEMA` are byte-identical to the files the [profile record](https://mailschema.org/profiles/map/0.2.json) binds by SHA-256. `CONTRIBUTION_SCHEMA` and `RECORD_SCHEMA` describe Registry files. Parse them with your JSON library and pass the schemas to a Draft 2020-12 validator; the crate does not choose a validation engine. Type contracts are not bundled: a client obtains them from the [Registry catalogue](https://mailschema.org/registry/catalog.json) by digest.
+The constants are `PROFILE_RECORD`, `CONTEXT_DOCUMENT`, `CORE_SCHEMA`, `CONTRACT_SCHEMA` and `IMPLEMENTATION_SCHEMA`, with `PROFILE` and `CONTEXT` naming the profile and context. Schema validation alone does not establish a valid description; see the [specification](https://mailschema.org/specification/core).
 
-## Trust boundary
-
-A valid document is structured input. Schema validation does not authenticate a service, grant authority or establish product conformance. Package versions and MAP profile versions advance independently. MIT licensed.
+Source: [mailschema/rust](https://github.com/mailschema/rust). License: MIT.

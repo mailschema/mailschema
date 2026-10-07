@@ -1,12 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
-import canonicalize from 'canonicalize';
-import { parseContractText } from '../specification/contracts';
-import {
-  parseImplementationText,
-  type ImplementationRecord,
-} from '../specification/implementations';
+import { Contract, parseImplementation, type ImplementationRecord } from '../map/core';
 import metadata from '../../specifications/map-0.3/registry.json';
 import { specification } from './specification';
 
@@ -14,8 +8,6 @@ export { specification };
 export const typeHref = (slug: string) => `/registry/${slug}`;
 const source = resolve(specification.source);
 const read = (path: string) => readFileSync(resolve(source, path), 'utf8');
-const digest = (value: unknown) =>
-  `sha-256:${createHash('sha256').update(canonicalize(value)!).digest('hex')}`;
 export interface Example {
   '@context': string;
   '@id': string;
@@ -40,7 +32,8 @@ const contractFiles = readdirSync(resolve(source, 'contracts'))
   .filter((name) => name.endsWith('.json'))
   .sort();
 const contractVersions = contractFiles.map((filename) => {
-  const contract = parseContractText(read(`contracts/${filename}`));
+  const loaded = Contract.parse(read(`contracts/${filename}`));
+  const contract = loaded.document;
   const suffix = `-${contract.version}.json`;
   if (!filename.endsWith(suffix))
     throw new Error(`${filename}: contract filename must end with its version.`);
@@ -61,7 +54,7 @@ const contractVersions = contractFiles.map((filename) => {
   return {
     ...contract,
     slug,
-    digest: digest(contract),
+    digest: loaded.digest,
     category: record.category,
     maintainers: record.maintainers,
     status: version.status as Status,
@@ -91,7 +84,7 @@ const implementationsDirectory = resolve(source, 'implementations');
 export const implementations: ImplementationRecord[] = readdirSync(implementationsDirectory)
   .filter((name) => name.endsWith('.json'))
   .sort()
-  .map((name) => parseImplementationText(read(`implementations/${name}`)));
+  .map((name) => parseImplementation(read(`implementations/${name}`)));
 const seenServices = new Set<string>();
 for (const implementation of implementations) {
   const target = contractVersions.find(

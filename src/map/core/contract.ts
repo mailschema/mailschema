@@ -1,150 +1,227 @@
-// Type contracts an implementation vendors, verified by digest and compiled once.
-import type { ErrorObject, ValidateFunction } from 'ajv/dist/2020.js';
+// A type contract: the digest-bound definition of an interaction's details, operations,
+// effects and permitted bindings.
+import type { ValidateFunction } from 'ajv/dist/2020.js';
 import {
-  BUNDLED,
-  CORE_SCHEMA,
-  JSON_SCHEMA_2020_12,
-  MAP_PROFILE,
-  contractFormatErrors,
+  CONTRACT_MAX_BYTES,
+  contractSchema,
   createValidator,
-  descriptionErrors,
-  errorList,
-  reached,
-  requestErrors,
-  resultErrors,
+  EFFECTS,
+  FORMATS,
+  schemaErrors,
 } from './artifacts.ts';
-import { capabilityProblems } from './binding.ts';
-import { digest } from './document.ts';
-import type { ProblemCode } from './documents.ts';
-import { inputError } from './limits.ts';
-import { escape, member } from './pointer.ts';
-import { fieldValuesSchema, formProblems, referenceProblem, values } from './schemas.ts';
-import type {
-  InputError,
-  JsonObject,
-  MapDescription,
-  MapRequest,
-  MapResult,
-  TypeContract,
-  TypeReference,
-} from './types.ts';
+import { descriptionErrors, type Description } from './description.ts';
+import { digest, InvalidDocument, parse } from './json.ts';
+import { unportablePattern } from './patterns.ts';
 
-/** A type contract that fails its own checks or its pinned digest. */
-export class InvalidContract extends Error {}
-
-/** Reasons the core assigns to the approval lifecycle. */
-export const APPROVAL_REASONS = ['declined', 'stale-target', 'expired', 'superseded'] as const;
-
-/** A MAP problem a request earns before the service's own state is consulted. */
-export type RequestProblem = { code: ProblemCode; title: string; detail: string };
-
-const FIELD_VALIDATORS = 128;
-
-function frozen<T>(value: T): T {
-  const copy = structuredClone(value);
-  const freeze = (item: unknown) => {
-    if (item && typeof item === 'object') {
-      Object.values(item).forEach(freeze);
-      Object.freeze(item);
-    }
-  };
-  freeze(copy);
-  return copy;
+export interface Operation {
+  id: string;
+  name: string;
+  semantics: string;
+  effects: string[];
+  bindings: ('credential' | 'capability')[];
+  actors: ('human' | 'agent')[];
+  exactTerms: boolean;
+  inputSchema: Record<string, unknown> | null;
+  outcomes: Record<string, string>;
+  capability?: { kind: CapabilityKind; maxLifetimeSeconds: number };
 }
 
-/** Each operation's branch of a request schema, with its input schema. */
-function branches(requestSchema: JsonObject) {
-  const last = ((requestSchema.allOf as JsonObject[] | undefined) ?? []).at(-1) ?? {};
-  return ((last.oneOf as JsonObject[] | undefined) ?? [last]).map((branch) => {
-    const properties = (branch.properties ?? {}) as Record<string, JsonObject | undefined>;
-    return {
-      operation: properties.operation?.const as string | undefined,
-      input: properties.input ?? {},
-    };
-  });
+export interface ContractDocument {
+  id: string;
+  version: string;
+  profile: string;
+  name: string;
+  summary: string;
+  requirements: string[];
+  detailsSchema: Record<string, unknown>;
+  operations: Operation[];
 }
 
-/** A JSON Pointer to the failing member, naming a missing or extra member itself. */
-function pointerOf(error: ErrorObject) {
-  const name = error.params.missingProperty ?? error.params.additionalProperty;
-  return name === undefined ? error.instancePath : `${error.instancePath}/${escape(String(name))}`;
+export type CapabilityKind = keyof typeof CAPABILITY_KINDS;
+
+/** The capability binding's kinds: the exact effects each declares and its longest lifetime. */
+export const CAPABILITY_KINDS = {
+  refusal: { effects: ['refusal', 'state'], maxLifetimeSeconds: 604800 },
+  'protective-report': { effects: ['protection', 'state'], maxLifetimeSeconds: 259200 },
+  'address-confirmation': { effects: ['assertion', 'state'], maxLifetimeSeconds: 86400 },
+} as const;
+
+// The JSON Schema 2020-12 keywords a contract's schemas may use. Every implementation
+// enforces all of them alike; scope-resolved references and content annotations are absent.
+const KEYWORDS = new Set([
+  '$schema', '$ref', '$defs', '$comment',
+  'allOf', 'anyOf', 'oneOf', 'not', 'if', 'then', 'else', 'dependentSchemas',
+  'prefixItems', 'items', 'contains', 'properties', 'patternProperties',
+  'additionalProperties', 'propertyNames', 'unevaluatedItems', 'unevaluatedProperties',
+  'type', 'enum', 'const', 'multipleOf', 'maximum', 'exclusiveMaximum', 'minimum',
+  'exclusiveMinimum', 'maxLength', 'minLength', 'pattern', 'maxItems', 'minItems',
+  'uniqueItems', 'maxContains', 'minContains', 'maxProperties', 'minProperties', 'required',
+  'dependentRequired', 'format',
+  'title', 'description', 'default', 'deprecated', 'readOnly', 'writeOnly', 'examples',
+]); // prettier-ignore
+const SCHEMA = ['additionalProperties', 'propertyNames', 'items', 'contains', 'not', 'if', 'then', 'else', 'unevaluatedItems', 'unevaluatedProperties']; // prettier-ignore
+const SCHEMA_LISTS = ['allOf', 'anyOf', 'oneOf', 'prefixItems'];
+const SCHEMA_MAPS = ['properties', 'patternProperties', '$defs', 'dependentSchemas'];
+const DIALECT = 'https://json-schema.org/draft/2020-12/schema';
+// The keywords that apply their subschemas to the value itself, not to a member or item.
+const IN_PLACE = new Set(['not', 'if', 'then', 'else', 'allOf', 'anyOf', 'oneOf', 'dependentSchemas']);
+
+const escape = (name: string) => name.replaceAll('~', '~0').replaceAll('/', '~1');
+
+/** The values a schema object holds where schemas belong, as [keyword, pointer, value]. */
+function children(node: Record<string, unknown>, pointer: string): [string, string, unknown][] {
+  const found: [string, string, unknown][] = [];
+  for (const keyword of SCHEMA)
+    if (Object.hasOwn(node, keyword)) found.push([keyword, `${pointer}/${keyword}`, node[keyword]]);
+  for (const keyword of SCHEMA_LISTS)
+    if (Array.isArray(node[keyword]))
+      for (const [index, item] of node[keyword].entries())
+        found.push([keyword, `${pointer}/${keyword}/${index}`, item]);
+  for (const keyword of SCHEMA_MAPS) {
+    const map = node[keyword];
+    if (map && typeof map === 'object' && !Array.isArray(map))
+      for (const [name, item] of Object.entries(map))
+        found.push([keyword, `${pointer}/${keyword}/${escape(name)}`, item]);
+  }
+  return found;
 }
 
-/** Input errors as a detail and a pointer, each within the core limits, the first 100 kept. */
-function inputErrors(errors: ErrorObject[] | null | undefined, prefix = ''): InputError[] {
-  const seen = new Set<string>();
-  return (errors ?? [])
-    .filter((error) => error.keyword !== 'if')
-    .map((error) => inputError(error.message ?? 'invalid', `${prefix}${pointerOf(error)}`))
-    .filter(({ detail, pointer }) => {
-      const key = JSON.stringify([pointer, detail]);
-      return !seen.has(key) && Boolean(seen.add(key));
-    })
-    .slice(0, 100);
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * Every schema within a schema, object or boolean, with its JSON Pointer from the root, the
+ * schema itself first.
+ */
+function* schemas(schema: unknown, pointer: string): Generator<[string, unknown]> {
+  if (typeof schema === 'boolean') yield [pointer, schema];
+  if (!isObject(schema)) return;
+  yield [pointer, schema];
+  for (const [, at, item] of children(schema, pointer)) yield* schemas(item, at);
 }
 
 /**
- * A type contract an implementation vendors, verified against the digest it was pinned by
- * and compiled once. It checks the descriptions, requests, inputs and results of that exact
- * type. The Registry has already applied the contract rules, such as portable patterns, to
- * the contract that digest names; loading refuses anything that would otherwise fail when a
- * request arrives.
+ * Whether applying the schema can never finish: from its root, a chain of $ref and in-place
+ * keywords returns to a schema without moving into a member or item.
  */
-export class Contract {
-  readonly document: TypeContract;
-  readonly digest: string;
-  readonly requestSchema: JsonObject;
-  readonly #ajv = createValidator();
-  readonly #details?: ValidateFunction;
-  readonly #request: ValidateFunction;
-  readonly #inputs = new Map<string, ValidateFunction>();
-  readonly #outputs = new Map<string, ValidateFunction>();
-  readonly #fields = new Map<string, { schema: JsonObject; validate: ValidateFunction }>();
+function endless(schema: Record<string, unknown>): boolean {
+  // Where each schema object sends its value, and whether it is the same value.
+  const links = new Map<string, [string, boolean][]>();
+  for (const [at, node] of schemas(schema, '')) {
+    if (!isObject(node)) continue;
+    const applied = children(node, at)
+      .filter(([keyword]) => keyword !== '$defs')
+      .map(([keyword, to]): [string, boolean] => [to, IN_PLACE.has(keyword)]);
+    if (typeof node.$ref === 'string') applied.push([node.$ref.slice(1), true]);
+    links.set(at, applied);
+  }
+  const reachable = [''];
+  for (const at of reachable)
+    for (const [to] of links.get(at) ?? []) if (!reachable.includes(to)) reachable.push(to);
+  const state = new Map<string, 'open' | 'done'>();
+  const loops = (at: string): boolean => {
+    if (state.has(at)) return state.get(at) === 'open';
+    state.set(at, 'open');
+    const looped = (links.get(at) ?? []).some(([to, inPlace]) => inPlace && loops(to));
+    state.set(at, 'done');
+    return looped;
+  };
+  return reachable.some(loops);
+}
 
-  /**
-   * `digest` is the contract digest the implementation pinned; `dependencies` supplies, by
-   * URL, any pinned schema the package does not bundle.
-   */
-  constructor(
-    contract: unknown,
-    requestSchema: unknown,
-    {
-      digest: pinned,
-      dependencies = {},
-    }: { digest: string; dependencies?: Record<string, unknown> },
-  ) {
-    const errors = contractFormatErrors(contract);
-    if (errors.length) throw new InvalidContract(`invalid type contract: ${errors.join('; ')}`);
-    this.document = frozen(contract as TypeContract);
-    if (this.document.profile !== MAP_PROFILE)
-      throw new InvalidContract('the contract is for another MAP profile');
-    this.digest = digest(this.document);
-    if (this.digest !== pinned)
-      throw new InvalidContract(`the contract digest is ${this.digest}, not the pinned ${pinned}`);
-    this.requestSchema = frozen(requestSchema as JsonObject);
-    const references = this.#pin(dependencies);
-    const supplied = [...references]
-      .filter(([url]) => !BUNDLED.has(url))
-      .map(([, schema]) => schema);
-    this.#verify(references, supplied);
-    try {
-      // Every schema compiles now, so a pattern or reference fails the contract, not a request.
-      for (const schema of [...supplied, this.requestSchema]) this.#ajv.addSchema(schema);
-      for (const schema of supplied) this.#ajv.getSchema(String(schema.$id));
-      this.#request = this.#ajv.getSchema(String(this.requestSchema.$id))!;
-      if (this.document.detailsSchema)
-        this.#details = this.#ajv.compile(this.document.detailsSchema);
-      for (const branch of branches(this.requestSchema))
-        this.#inputs.set(branch.operation!, this.#ajv.compile(branch.input));
-      for (const operation of this.document.operations)
-        for (const result of operation.results)
-          this.#outputs.set(
-            `${operation.id}/${result.state}`,
-            this.#ajv.compile(result.outputSchema),
-          );
-    } catch (error) {
-      throw new InvalidContract(`a schema does not compile: ${(error as Error).message}`);
+/** Why a schema a contract supplies cannot be enforced alike everywhere, if it cannot. */
+function schemaProblems(schema: Record<string, unknown>, pointer: string): string[] {
+  const problems: string[] = [];
+  const positions = new Set([...schemas(schema, '')].map(([at]) => at));
+  for (const [at, value] of schemas(schema, pointer)) {
+    if (typeof value === 'boolean') continue;
+    const node = value as Record<string, unknown>;
+    for (const keyword of Object.keys(node))
+      if (!KEYWORDS.has(keyword)) problems.push(`${at}: ${keyword} is not a MAP schema keyword`);
+    if ('$schema' in node && (at !== pointer || node.$schema !== DIALECT))
+      problems.push(`${at}: $schema names JSON Schema 2020-12, at the schema's root only`);
+    const ref = node.$ref;
+    if (
+      ref !== undefined &&
+      (typeof ref !== 'string' || !ref.startsWith('#') || !positions.has(ref.slice(1)))
+    )
+      problems.push(`${at}: $ref is a JSON Pointer to a schema within this schema`);
+    if ('format' in node && !(FORMATS as readonly unknown[]).includes(node.format))
+      problems.push(`${at}: format is one of ${FORMATS.join(', ')}`);
+    if (typeof node.multipleOf === 'number' && !Number.isInteger(node.multipleOf))
+      problems.push(`${at}: multipleOf is an integer`);
+    const patterns = [
+      ...(typeof node.pattern === 'string' ? [node.pattern] : []),
+      ...Object.keys((node.patternProperties as object | undefined) ?? {}),
+    ];
+    for (const pattern of patterns) {
+      const problem = unportablePattern(pattern);
+      if (problem) problems.push(`${at}: pattern ${JSON.stringify(pattern)} uses ${problem}`);
     }
+  }
+  if (problems.length) return problems;
+  if (endless(schema)) return [`${pointer}: $ref leads back without moving into the value`];
+  try {
+    createValidator().compile(schema);
+  } catch (error) {
+    problems.push(`${pointer}: ${(error as Error).message}`);
+  }
+  return problems;
+}
+
+const validateContract = createValidator().compile<ContractDocument>(contractSchema);
+
+/** An HTTPS URL's host and port as an origin compares them: lowercase, without :443. */
+const authority = (url: string) =>
+  /^https:\/\/([^/?#]*)/i.exec(url)?.[1].toLowerCase().replace(/:443$/, '');
+
+/** Why the value is not a MAP 0.3 type contract, or no reasons. */
+export function contractErrors(value: unknown): string[] {
+  if (!validateContract(value)) return schemaErrors(validateContract.errors);
+  const errors: string[] = [];
+  if (new TextEncoder().encode(JSON.stringify(value)).length > CONTRACT_MAX_BYTES)
+    errors.push(`/: exceeds ${CONTRACT_MAX_BYTES} bytes`);
+  const ids = value.operations.map((operation) => operation.id);
+  if (new Set(ids).size !== ids.length) errors.push('/operations: identifiers must be unique');
+  errors.push(...schemaProblems(value.detailsSchema, '/detailsSchema'));
+  for (const [index, operation] of value.operations.entries()) {
+    const at = `/operations/${index}`;
+    if (operation.inputSchema)
+      errors.push(...schemaProblems(operation.inputSchema, `${at}/inputSchema`));
+    if (!operation.capability) continue;
+    const kind = CAPABILITY_KINDS[operation.capability.kind];
+    const expected = kind.effects.map((effect) => `${EFFECTS}${effect}`).sort();
+    if (operation.effects.toSorted().join('\n') !== expected.join('\n'))
+      errors.push(`${at}/effects: a ${operation.capability.kind} capability declares exactly ${expected.join(' and ')}`);
+    if (operation.capability.maxLifetimeSeconds > kind.maxLifetimeSeconds)
+      errors.push(`${at}/capability/maxLifetimeSeconds: at most ${kind.maxLifetimeSeconds}`);
+  }
+  return errors;
+}
+
+/** A valid contract with its digest and compiled schemas. */
+export class Contract {
+  readonly document: ContractDocument;
+  /** `sha-256:` and the SHA-256 of the contract's RFC 8785 form. */
+  readonly digest: string;
+  readonly #details: ValidateFunction;
+  readonly #inputs = new Map<string, ValidateFunction>();
+
+  /** The contract, or InvalidDocument with every reason the value is not one. */
+  constructor(value: unknown) {
+    const errors = contractErrors(value);
+    if (errors.length) throw new InvalidDocument('The value is not a MAP 0.3 type contract.', errors);
+    this.document = structuredClone(value as ContractDocument);
+    this.digest = digest(this.document);
+    const ajv = createValidator();
+    this.#details = ajv.compile(this.document.detailsSchema);
+    for (const operation of this.document.operations)
+      if (operation.inputSchema) this.#inputs.set(operation.id, ajv.compile(operation.inputSchema));
+  }
+
+  /** The contract in the bytes or text, read as MAP JSON within the contract limit. */
+  static parse(input: string | Uint8Array): Contract {
+    return new Contract(parse(input, CONTRACT_MAX_BYTES));
   }
 
   get id() {
@@ -155,233 +232,57 @@ export class Contract {
     return this.document.version;
   }
 
-  /** The type reference a description and a request of this contract name exactly. */
-  get typeReference(): TypeReference {
-    return { id: this.id, version: this.version, contractDigest: this.digest };
-  }
-
-  operation(id: string) {
+  operation(id: string): Operation | undefined {
     return this.document.operations.find((operation) => operation.id === id);
   }
 
-  /** Whether completing the operation decides the interaction. */
-  isDecision(id: string) {
-    const found = this.operation(id);
-    if (!found) throw new TypeError(`${id} is not an operation of this type.`);
-    return !found.repeatable;
+  /** Why the details do not satisfy the contract's details schema, or no reasons. */
+  detailsErrors(details: unknown): string[] {
+    return this.#details(details) ? [] : schemaErrors(this.#details.errors, '/details');
+  }
+
+  /** Why the input is not acceptable for the operation, or no reasons. */
+  inputErrors(operationId: string, input: unknown): string[] {
+    const operation = this.operation(operationId);
+    if (!operation) return [`/operation: ${operationId} is not an operation of this contract`];
+    const validate = this.#inputs.get(operationId);
+    if (!validate) return input === undefined ? [] : ['/input: this operation accepts no input'];
+    return validate(input) ? [] : schemaErrors(validate.errors, '/input');
   }
 
   /**
-   * Every rule a description must satisfy beyond the core schema, for the service that issues
-   * it and the client that receives it.
+   * Why a valid description does not use this contract as it allows, or no reasons: it names
+   * this contract by identifier, version and digest; it offers only declared operations; a
+   * capability appears only where the contract permits one, at the service's origin and
+   * within the kind's lifetime; and its details satisfy the details schema.
    */
-  descriptionErrors(description: unknown): string[] {
-    const errors = descriptionErrors(description);
-    if (errors.length) return errors;
-    const issued = description as MapDescription;
-    if (!this.#names(issued.type)) return ['The description names another type contract.'];
-    const problems = [...this.#detailsProblems(issued), ...this.#operationProblems(issued)];
-    if (!(Date.parse(issued.describedAt) < Date.parse(issued.expiresAt)))
-      problems.push('The interaction expires before it was described.');
-    if (issued.service.authority === 'possession') problems.push(...capabilityProblems(issued));
-    return problems;
-  }
-
-  /**
-   * The checks a service makes on a request once it has resolved the description it issued,
-   * compared the description digest and established the caller: the exact type, an offered
-   * operation the authority permits, and expiry. Undefined when they pass. The service then
-   * applies its own state (a decided interaction, a stale target) and `inputErrors`, in that
-   * order, before any effect.
-   */
-  requestProblem(
-    description: MapDescription,
-    request: MapRequest,
-    { now }: { now: Date },
-  ): RequestProblem | undefined {
-    if (!this.#names(request.type) || !this.#names(description.type))
-      return {
-        code: 'unsupported-type',
-        title: 'Unsupported interaction type',
-        detail: 'The service does not implement this exact interaction type contract.',
-      };
-    if (!this.#offered(description, request.operation))
-      return {
-        code: 'unsupported-operation',
-        title: 'Unsupported operation',
-        detail: 'The operation was not offered in this interaction.',
-      };
-    if (reached(now, description.expiresAt))
-      return {
-        code: 'expired-interaction',
-        title: 'Interaction expired',
-        detail: 'The interaction expired before the request was processed.',
-      };
-  }
-
-  /**
-   * Input problems for one request, each with a detail and a JSON Pointer into its input: the
-   * operation's input schema, then its field bindings against the description's details. Type
-   * rules a contract cannot express are the caller's.
-   */
-  inputErrors(description: MapDescription, request: MapRequest): InputError[] {
-    const found = this.operation(request.operation);
-    const validate = this.#inputs.get(request.operation);
-    if (!found || !validate) return [inputError('The operation is not part of this type.', '')];
-    if (!validate(request.input)) return inputErrors(validate.errors);
-    return (found.fieldBindings ?? [])
-      .flatMap((binding) => {
-        const fields = member(description.details, binding.fields) as JsonObject | undefined;
-        const supplied = member(request.input, binding.input);
-        if (!fields)
-          return supplied === undefined
-            ? []
-            : [inputError('This interaction defines no fields for these values.', binding.input)];
-        if (supplied === undefined)
-          return ((fields.required ?? []) as string[]).length
-            ? [inputError('Values for the required fields are missing.', binding.input)]
-            : [];
-        const schema = this.#fieldValues(fields);
-        return schema(supplied) ? [] : inputErrors(schema.errors, binding.input);
-      })
-      .slice(0, 100);
-  }
-
-  /** A request against the core request definition and this contract's request schema. */
-  requestErrors(request: unknown): string[] {
-    return [
-      ...requestErrors(request),
-      ...(this.#request(request) ? [] : errorList(this.#request.errors)),
-    ];
-  }
-
-  /** The core result definition, then the output schema and reason the operation declares. */
-  resultErrors(result: unknown): string[] {
-    const errors = resultErrors(result);
-    if (errors.length) return errors;
-    const recorded = result as MapResult;
-    if (!this.#names(recorded.type)) return ['The result names another type contract.'];
-    const found = this.operation(recorded.operation);
-    if (!found) return [`${recorded.operation} is not an operation of this type.`];
-    const declared = found.results.find((entry) => entry.state === recorded.state);
-    if (!declared) return [`${found.id} does not declare the state ${recorded.state}.`];
-    const validate = this.#outputs.get(`${found.id}/${declared.state}`)!;
-    const problems = validate(recorded.output) ? [] : errorList(validate.errors, '/output');
-    if (recorded.state === 'failed' && !declared.reasons?.includes(recorded.reason!))
-      problems.push(`${found.id} does not declare the reason ${recorded.reason}.`);
-    return problems;
-  }
-
-  #names(type: TypeReference) {
-    return (
-      type.id === this.id && type.version === this.version && type.contractDigest === this.digest
-    );
-  }
-
-  #offered(description: MapDescription, id: string) {
-    return (
-      description.operations.some((offered) => offered.id === id) &&
-      Boolean(this.operation(id)?.authority.includes(description.service.authority))
-    );
-  }
-
-  #operationProblems(description: MapDescription) {
-    const ids = description.operations.map((offered) => offered.id);
-    const authority = description.service.authority;
-    return [
-      ...(new Set(ids).size === ids.length ? [] : ['An operation is offered twice.']),
-      ...ids
-        .filter((id) => !this.operation(id)?.authority.includes(authority))
-        .map((id) => `${id} is not a ${authority} operation of this type.`),
-    ];
-  }
-
-  #detailsProblems(description: MapDescription) {
-    const present = Object.hasOwn(description, 'details');
-    const valid = this.#details ? present && this.#details(description.details) : !present;
-    if (!valid) return ['The details do not satisfy the type contract.'];
-    const blocks = new Set(
-      this.document.operations.flatMap((operation) =>
-        (operation.fieldBindings ?? []).map((binding) => binding.fields),
-      ),
-    );
-    return [...blocks].flatMap((pointer) => {
-      const fields = member(description.details, pointer) as JsonObject | undefined;
-      return fields ? formProblems(fields).map((problem) => `${pointer}: ${problem}`) : [];
-    });
-  }
-
-  /**
-   * The compiled schema of a fields block's values. Least recently used blocks leave first,
-   * with their compiled copies, so a long-running service stays bounded.
-   */
-  #fieldValues(fields: JsonObject) {
-    const key = digest(fields);
-    let entry = this.#fields.get(key);
-    if (entry) this.#fields.delete(key);
-    else {
-      const schema = fieldValuesSchema(fields);
-      entry = { schema, validate: this.#ajv.compile(schema) };
+  descriptionErrors(description: Description): string[] {
+    const invalid = descriptionErrors(description);
+    if (invalid.length) return invalid;
+    const errors: string[] = [];
+    const { type } = description;
+    if (type.id !== this.id || type.version !== this.version)
+      errors.push(`/type: names ${type.id} ${type.version}, not this contract`);
+    if (type.contractDigest !== this.digest) errors.push('/type/contractDigest: does not match');
+    if (description.profile !== this.document.profile)
+      errors.push('/profile: differs from the contract profile');
+    const lifetime = (Date.parse(description.expiresAt) - Date.parse(description.issuedAt)) / 1000;
+    const origin = authority(description.service.id);
+    for (const [index, offered] of description.operations.entries()) {
+      const at = `/operations/${index}`;
+      const operation = this.operation(offered.id);
+      if (!operation) {
+        errors.push(`${at}/id: ${offered.id} is not an operation of this contract`);
+        continue;
+      }
+      if (!offered.capability) continue;
+      if (!operation.capability)
+        errors.push(`${at}/capability: the contract permits no capability for ${offered.id}`);
+      else if (lifetime > operation.capability.maxLifetimeSeconds)
+        errors.push(`/expiresAt: a ${offered.id} capability lasts at most ${operation.capability.maxLifetimeSeconds} seconds`);
+      if (authority(offered.capability.url) !== origin)
+        errors.push(`${at}/capability/url: must have the service's origin`);
     }
-    this.#fields.set(key, entry);
-    if (this.#fields.size > FIELD_VALIDATORS) {
-      const [oldest, evicted] = this.#fields.entries().next().value!;
-      this.#fields.delete(oldest);
-      this.#ajv.removeSchema(evicted.schema);
-    }
-    return entry.validate;
-  }
-
-  /** The pinned schemas by URL, bundled or supplied, each matching its pinned digest. */
-  #pin(dependencies: Record<string, unknown>) {
-    const references = new Map<string, JsonObject>();
-    for (const dependency of this.document.dependencies ?? []) {
-      const schema = (BUNDLED.get(dependency.url) ?? dependencies[dependency.url]) as
-        JsonObject | undefined;
-      if (!schema) throw new InvalidContract(`unknown dependency ${dependency.url}`);
-      if (digest(schema) !== dependency.canonicalDigest)
-        throw new InvalidContract(`the pinned digest of ${dependency.url} differs`);
-      if (schema.$id !== dependency.url)
-        throw new InvalidContract(`the schema pinned as ${dependency.url} has another $id`);
-      references.set(dependency.url, BUNDLED.has(dependency.url) ? schema : frozen(schema));
-    }
-    if (!references.has(CORE_SCHEMA)) throw new InvalidContract('the core schema must be pinned');
-    return references;
-  }
-
-  #verify(references: Map<string, JsonObject>, supplied: JsonObject[]) {
-    const inline = [
-      this.document.detailsSchema,
-      ...this.document.operations.flatMap((operation) =>
-        operation.results.map((result) => result.outputSchema),
-      ),
-    ].filter(Boolean);
-    // Every schema is valid JSON Schema 2020-12, so no malformed keyword fails at request time.
-    for (const schema of [...inline, this.requestSchema, ...supplied])
-      if (!this.#ajv.validateSchema(schema as JsonObject))
-        throw new InvalidContract(
-          `a schema is not valid JSON Schema 2020-12: ${this.#ajv.errorsText(this.#ajv.errors)}`,
-        );
-    const reference = this.document.requestSchema;
-    if (this.requestSchema.$schema !== JSON_SCHEMA_2020_12)
-      throw new InvalidContract('the request schema must declare JSON Schema 2020-12');
-    if (this.requestSchema.$id !== reference.url)
-      throw new InvalidContract('the request schema $id differs from the contract');
-    if (digest(this.requestSchema) !== reference.canonicalDigest)
-      throw new InvalidContract('the request schema digest differs from the contract');
-    const constants = new Set(values(this.requestSchema, 'const'));
-    const ids = this.document.operations.map((operation) => operation.id);
-    for (const expected of [this.id, this.version, ...ids])
-      if (!constants.has(expected))
-        throw new InvalidContract(`the request schema does not bind ${expected}`);
-    if (new Set(ids).size !== ids.length)
-      throw new InvalidContract('duplicate operation identifiers');
-    for (const operation of this.document.operations) {
-      const states = operation.results.map((result) => result.state);
-      if (new Set(states).size !== states.length)
-        throw new InvalidContract(`duplicate ${operation.id} result states`);
-    }
-    const problem = referenceProblem(inline, this.requestSchema, references, supplied);
-    if (problem) throw new InvalidContract(problem);
+    return [...errors, ...this.detailsErrors(description.details)];
   }
 }

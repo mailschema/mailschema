@@ -1,31 +1,34 @@
-import { createHash } from 'node:crypto';
-import { packageArtifactNames, type PackageRegistry } from './package-artifacts';
-
-export interface PackageRelease {
-  format: 'mailschema-package-release/2';
-  version: string;
-  schemaSha256: string;
-  contracts: { name: string; sha256: string }[];
-  channels: PackageReleaseChannel[];
-}
-
-export type PackageContracts = Record<string, string> & { contribution: string };
+// Release evidence: a public registry readback showing a published package carries the exact
+// MAP 0.3 artifacts, and the selection of verified releases the website presents.
+import { sha256 } from '../map/core';
+import { packageArtifacts, packageRegistries, type PackageRegistry } from './package-artifacts';
 
 export interface PackageReleaseChannel {
-  registry: string;
+  registry: PackageRegistry;
   name: string;
   version: string;
   url: string;
-  status: string;
+  status: 'verified';
+}
+
+export interface PackageRelease {
+  format: 'mailschema-package-release/3';
+  version: string;
+  profileSha256: string;
+  artifacts: { name: string; sha256: string }[];
+  channels: PackageReleaseChannel[];
 }
 
 export interface PackageSetSelection {
-  schema: string;
-  schemaSha256: string;
-  channels: { registry: string; evidence: string; version: string }[];
+  schema: 'mailschema-package-set/2';
+  profileSha256: string;
+  channels: { registry: PackageRegistry; evidence: string; version: string }[];
 }
 
-const registryRequirements: Record<string, { host: string; name: string }> = {
+/** The artifacts' canonical bytes by name. */
+export type ArtifactBytes = Record<string, string>;
+
+const registryRequirements: Record<PackageRegistry, { host: string; name: string }> = {
   npm: { host: 'www.npmjs.com', name: 'mailschema' },
   PyPI: { host: 'pypi.org', name: 'mailschema' },
   'crates.io': { host: 'crates.io', name: 'mailschema' },
@@ -33,81 +36,57 @@ const registryRequirements: Record<string, { host: string; name: string }> = {
   RubyGems: { host: 'rubygems.org', name: 'mailschema' },
 };
 
-function schemaDigest(schema: string): string {
-  return createHash('sha256').update(schema).digest('hex');
-}
-
-/**
- * Refuse to advertise release evidence unless it binds the contribution schema and every
- * artifact its registry distributes to the canonical bytes.
- */
-export function assertPackageRelease(release: PackageRelease, contracts: PackageContracts): void {
-  if (release.format !== 'mailschema-package-release/2')
+/** Refuse release evidence unless it binds every artifact to its canonical bytes. */
+export function assertPackageRelease(release: PackageRelease, artifacts: ArtifactBytes): void {
+  if (release.format !== 'mailschema-package-release/3')
     throw new Error(`Unknown package release evidence format ${String(release.format)}.`);
   if (!/^\d+\.\d+\.\d+$/.test(release.version)) throw new Error('Invalid package release version.');
-  if (schemaDigest(contracts.contribution) !== release.schemaSha256)
-    throw new Error(
-      'The contribution schema differs from the advertised package release. Publish matching packages and update the selected release evidence before building the site.',
-    );
-  if (!release.channels.length) throw new Error('Package release evidence has no channels.');
-  const seen = new Set<string>();
-  for (const entry of release.channels) {
-    const requirement = registryRequirements[entry.registry];
-    if (!requirement) throw new Error(`Unknown package registry ${entry.registry}.`);
-    if (seen.has(entry.registry)) throw new Error(`Duplicate ${entry.registry} release evidence.`);
-    seen.add(entry.registry);
-    const url = new URL(entry.url);
-    if (
-      entry.status !== 'verified' ||
-      entry.name !== requirement.name ||
-      entry.version !== release.version ||
-      url.protocol !== 'https:' ||
-      url.hostname !== requirement.host
-    )
-      throw new Error(`Invalid ${entry.registry} package release evidence.`);
-  }
-  const expectedNames = packageArtifactNames(release.channels[0].registry as PackageRegistry);
-  const found = new Map(release.contracts.map((entry) => [entry.name, entry.sha256]));
-  assertExactMembers(found, expectedNames, 'release contract');
-  for (const name of expectedNames)
-    if (found.get(name) !== schemaDigest(contracts[name]))
-      throw new Error(`The ${name} contract differs from the advertised package release.`);
+  if (release.profileSha256 !== sha256(artifacts.profile))
+    throw new Error('The release evidence binds a different profile record.');
+  const found = new Map(release.artifacts.map((entry) => [entry.name, entry.sha256]));
+  if (
+    found.size !== packageArtifacts.length ||
+    packageArtifacts.some((artifact) => found.get(artifact.name) !== sha256(artifacts[artifact.name]))
+  )
+    throw new Error('The release evidence does not bind the canonical artifacts.');
+  if (release.channels.length !== 1) throw new Error('Release evidence names one channel.');
+  const [channel] = release.channels;
+  const requirement = registryRequirements[channel.registry];
+  const url = new URL(channel.url);
+  if (
+    !requirement ||
+    channel.status !== 'verified' ||
+    channel.name !== requirement.name ||
+    channel.version !== release.version ||
+    url.protocol !== 'https:' ||
+    url.hostname !== requirement.host
+  )
+    throw new Error(`Invalid ${channel.registry} package release evidence.`);
 }
 
-function assertExactMembers(found: Map<string, string>, expected: string[], label: string): void {
-  if (found.size !== expected.length || expected.some((name) => !found.has(name)))
-    throw new Error(`Invalid ${label} set.`);
-}
-
-/** Resolve the exact independently verified channel versions promoted to the website. */
+/** The verified channel versions the website presents, by registry. */
 export function assertPackageSet(
   selection: PackageSetSelection,
-  evidence: Map<string, PackageRelease>,
-  contracts: PackageContracts,
-): Map<string, PackageReleaseChannel> {
-  if (selection.schema !== 'mailschema-package-set/1')
+  evidence: ReadonlyMap<string, PackageRelease>,
+  artifacts: ArtifactBytes,
+): Map<PackageRegistry, PackageReleaseChannel> {
+  if (selection.schema !== 'mailschema-package-set/2')
     throw new Error('Invalid package-set selection format.');
-  if (schemaDigest(contracts.contribution) !== selection.schemaSha256)
-    throw new Error('The selected package set targets a different contribution schema.');
-  if (!selection.channels.length) throw new Error('The selected package set has no channels.');
-
-  const selected = new Map<string, PackageReleaseChannel>();
+  if (selection.profileSha256 !== sha256(artifacts.profile))
+    throw new Error('The package set targets a different profile record.');
+  const selected = new Map<PackageRegistry, PackageReleaseChannel>();
   for (const channel of selection.channels) {
-    if (!/^[a-zA-Z0-9._-]+$/.test(channel.evidence))
+    if (!packageRegistries.includes(channel.registry) || selected.has(channel.registry))
+      throw new Error(`Invalid or repeated selected registry ${channel.registry}.`);
+    if (!/^[a-z0-9.-]+$/.test(channel.evidence))
       throw new Error(`Invalid release evidence reference ${channel.evidence}.`);
-    if (selected.has(channel.registry))
-      throw new Error(`Duplicate selected ${channel.registry} package.`);
     const release = evidence.get(channel.evidence);
     if (!release) throw new Error(`Missing release evidence ${channel.evidence}.`);
-    assertPackageRelease(release, contracts);
-    if (release.schemaSha256 !== selection.schemaSha256)
-      throw new Error(`Release evidence ${channel.evidence} targets a different schema.`);
-    const matches = release.channels.filter(
-      (entry) => entry.registry === channel.registry && entry.version === channel.version,
-    );
-    if (matches.length !== 1)
+    assertPackageRelease(release, artifacts);
+    const [verified] = release.channels;
+    if (verified.registry !== channel.registry || verified.version !== channel.version)
       throw new Error(`Selected ${channel.registry} ${channel.version} is not verified.`);
-    selected.set(channel.registry, matches[0]);
+    selected.set(channel.registry, verified);
   }
   return selected;
 }

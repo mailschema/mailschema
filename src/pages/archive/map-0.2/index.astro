@@ -1,8 +1,23 @@
 ---
+import { readFileSync, readdirSync } from 'node:fs';
 import Base from '../../../layouts/Base.astro';
-import { typeContracts } from '../../../data/legacy-types';
 import '../../../styles/catalog.css';
 import '../../../styles/prose.css';
+
+// The published MAP 0.2 contracts, read from their unchanged files.
+const contracts = readdirSync('public/contracts')
+  .filter((name) => name.endsWith('.json'))
+  .sort()
+  .map((name) => ({ name, ...JSON.parse(readFileSync(`public/contracts/${name}`, 'utf8')) }))
+  .filter((contract) => contract.profile === 'https://mailschema.org/profiles/map/0.2');
+
+const packages = [
+  ['npm', 'mailschema 0.2.2', 'https://www.npmjs.com/package/mailschema/v/0.2.2'],
+  ['RubyGems', 'mailschema 0.2.0', 'https://rubygems.org/gems/mailschema/versions/0.2.0'],
+  ['PyPI', 'mailschema 0.2.1', 'https://pypi.org/project/mailschema/0.2.1/'],
+  ['crates.io', 'mailschema 0.2.1', 'https://crates.io/crates/mailschema/0.2.1'],
+  ['Go', 'github.com/mailschema/go v0.2.0', 'https://pkg.go.dev/github.com/mailschema/go@v0.2.0'],
+];
 ---
 
 <Base title="MAP 0.2 archive" theme="light">
@@ -11,19 +26,19 @@ import '../../../styles/prose.css';
       <span class="eyebrow eyebrow-line">Historical material</span>
       <h1>MAP 0.2 archive</h1>
       <p class="lead">
-        MAP 0.2 is superseded for new work. Its published artifacts remain available for
-        implementations that depend on them. See the{' '}
-        <a href="/specification">current specification</a> for new implementations.
+        MAP 0.2 is superseded by MAP 0.3. Its published artifacts remain available, unchanged, for
+        interpreting earlier messages. See the <a href="/specification">current specification</a> for
+        new implementations.
       </p>
     </header>
     <article class="prose">
-      <h2>Profile and packages</h2>
+      <h2>Profile</h2>
       <p>
         <a href="/profiles/map/0.2.json">Published profile record</a>
         {' · '}
         <a href="/schemas/map-0.2.schema.json">Core schema</a>
         {' · '}
-        <a href="/archive/map-0.2/tools">Package documentation</a>
+        <a href="/registry/catalog.json">Registry catalogue</a>
       </p>
       <p>
         <a href="https://github.com/mailschema/mailschema/blob/c1b64de71b5d3caf56bcbd4cc6f95d00f7e87efc/docs/specification/profile.md">
@@ -32,19 +47,24 @@ import '../../../styles/prose.css';
       </p>
       <h2 id="types">Type contracts</h2>
       <ul>
-        {typeContracts.map((entry) => (
+        {contracts.map((contract) => (
           <li>
-            <a href={entry.contract.url}>
-              {entry.type} · {entry.version}
+            <a href={`/contracts/${contract.name}`}>
+              {contract.id.split('/').at(-1)} · {contract.version}
             </a>
             {' · '}
-            <a href={entry.requestSchema.url}>Request schema</a>
+            <a href={contract.requestSchema.url}>Request schema</a>
           </li>
         ))}
       </ul>
-      <p>
-        <a href="/registry/catalog.json">Historical Registry catalogue</a>
-      </p>
+      <h2>Packages</h2>
+      <ul>
+        {packages.map(([registry, label, href]) => (
+          <li>
+            {registry}: <a href={href}>{label}</a>
+          </li>
+        ))}
+      </ul>
       <p>
         Earlier profile: <a href="/archive/map-0.1">MAP 0.1 archive</a>.
       </p>

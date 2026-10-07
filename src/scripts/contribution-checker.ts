@@ -1,9 +1,10 @@
-import { parseContractText, type Contract } from '../specification/contracts';
 import {
-  parseImplementationText,
+  Contract,
+  decodeUtf8,
+  parseImplementation,
+  type ContractDocument,
   type ImplementationRecord,
-} from '../specification/implementations';
-import { decodeMapUtf8 } from '../specification/strict-json.ts';
+} from '../map/core';
 import { specification } from '../data/specification';
 
 const form = document.querySelector<HTMLFormElement>('#contribution-form')!;
@@ -20,7 +21,7 @@ const submitNote = document.querySelector<HTMLElement>('[data-submit-note]')!;
 const status = form.querySelector<HTMLElement>('[data-check-status]')!;
 const errors = form.querySelector<HTMLElement>('.contribution-errors')!;
 const preview = document.querySelector<HTMLElement>('[data-preview]')!;
-let checked: Contract | ImplementationRecord | undefined;
+let checked: ContractDocument | ImplementationRecord | undefined;
 let generation = 0;
 const maxBytes = 256 * 1024;
 function reset() {
@@ -44,7 +45,7 @@ function showErrors(messages: string[]) {
   errors.hidden = false;
   status.textContent = 'The file needs changes.';
 }
-function filename(value: Contract | ImplementationRecord) {
+function filename(value: ContractDocument | ImplementationRecord) {
   // Filenames help review; the identifiers and exact contract digest remain authoritative.
   if ('service' in value) {
     const host = new URL(value.service).hostname.replace(/[^a-zA-Z0-9-]/g, '-');
@@ -111,7 +112,7 @@ fileInput.addEventListener('change', async () => {
   if (!file) return;
   if (file.size > maxBytes) return showErrors(['Choose a JSON file smaller than 256 KiB.']);
   try {
-    const text = decodeMapUtf8(new Uint8Array(await file.arrayBuffer()));
+    const text = decodeUtf8(new Uint8Array(await file.arrayBuffer()));
     if (ticket === generation) {
       editor.value = text;
       editor.focus();
@@ -150,8 +151,8 @@ form.addEventListener('submit', (event) => {
       throw new Error('Use a file smaller than 256 KiB.');
     const input =
       kind.value === 'implementation'
-        ? parseImplementationText(editor.value)
-        : parseContractText(editor.value);
+        ? parseImplementation(editor.value)
+        : Contract.parse(editor.value).document;
     if ('service' in input) {
       const match = [...target.options].some(
         (option) =>

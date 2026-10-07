@@ -27,6 +27,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run packages:prepare && npm run packages:test
+      # The npm package runs the shared vectors against its own build.
+      - run: npm install --no-audit --no-fund && npm test
+        working-directory: .release/packages/npm
       # The Ruby gem must agree with the reference on every shared vector and fixture.
       - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:

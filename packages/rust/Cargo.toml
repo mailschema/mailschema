@@ -1,17 +1,18 @@
 [package]
 name = "mailschema"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.70"
-description = "Embedded Mail Action Protocol 0.2 core artifacts and MailSchema Registry schemas"
+description = "Embedded Mail Action Protocol 0.3 artifacts: the profile record, context and schemas"
 homepage = "https://mailschema.org/tools"
 repository = "https://github.com/mailschema/rust"
 documentation = "https://docs.rs/mailschema"
 license = "MIT"
 readme = "README.md"
-keywords = ["email", "schema", "json-schema", "agents"]
+keywords = ["email", "mail-action-protocol", "json-schema", "agents"]
 categories = ["data-structures", "email"]
-include = ["src/**", "schemas/**", "contexts/**", "Cargo.toml", "README.md", "LICENSE"]
+include = ["src/**", "artifacts/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [dev-dependencies]
 serde_json = "1"
+sha2 = "0.10"

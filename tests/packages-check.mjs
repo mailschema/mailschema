@@ -1,229 +1,106 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
-import { createHash } from 'node:crypto';
-import { materializePackageArtifacts, packageArtifactNames } from '../src/lib/package-artifacts.ts';
+import { join } from 'node:path';
+import { sha256 } from '../src/map/core/index.ts';
 import {
-  getContributionSchema,
-  getRecordSchema,
-  contributionErrors,
-  assertContribution,
-  assertTypeRecord,
-  referenceErrors,
-  MAP_PROFILE,
-  getMapSchema,
-  getMapContext,
-  getContractFormatSchema,
-  getFormsSchema,
-} from '../.release/packages/npm/dist/index.js';
+  materializePackageArtifacts,
+  packageArtifactPath,
+} from '../src/lib/package-artifacts.ts';
 
-const fixture = JSON.parse(
-  readFileSync(new URL('../registry/examples/new-type.json', import.meta.url)),
-);
-const record = JSON.parse(
-  readFileSync(new URL('../registry/types/content-review.json', import.meta.url)),
-);
+const release = '.release/packages';
 const versions = JSON.parse(readFileSync('packages/versions.json', 'utf8'));
-const prepared = JSON.parse(readFileSync('.release/packages/prepared.json', 'utf8'));
-const canonicalArtifacts = materializePackageArtifacts();
+const prepared = JSON.parse(readFileSync(`${release}/prepared.json`, 'utf8'));
+const artifacts = materializePackageArtifacts();
+const roots = { npm: 'npm', PyPI: 'python/src', 'crates.io': 'rust', Go: 'go', RubyGems: 'ruby' };
 
-test('each distribution uses its independently declared package version', () => {
-  assert.equal(prepared.format, 'mailschema-package-build/2');
+/** Every file in a prepared package, as paths relative to its root. */
+const files = (directory) =>
+  readdirSync(join(release, directory), { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name).slice(release.length + directory.length + 2));
+
+test('each package declares the version packages/versions.json selects', () => {
+  assert.equal(prepared.format, 'mailschema-package-build/3');
   assert.deepEqual(prepared.versions, versions);
-  assert.equal(
-    JSON.parse(readFileSync('.release/packages/npm/package.json')).version,
-    versions.npm,
-  );
-  assert.match(
-    readFileSync('.release/packages/python/pyproject.toml', 'utf8'),
-    new RegExp(`^version = "${versions.PyPI.replaceAll('.', '\\.')}"$`, 'm'),
-  );
-  assert.match(
-    readFileSync('.release/packages/rust/Cargo.toml', 'utf8'),
-    new RegExp(`^version = "${versions['crates.io'].replaceAll('.', '\\.')}"$`, 'm'),
-  );
-  assert.match(
-    readFileSync('.release/packages/ruby/lib/mailschema/version.rb', 'utf8'),
-    new RegExp(`VERSION = "${versions.RubyGems.replaceAll('.', '\\.')}"$`, 'm'),
-  );
-});
-
-test('the preparation manifest binds each distributed contract', () => {
-  const expected = new Map(
-    canonicalArtifacts.map(({ name, bytes }) => [
-      name,
-      createHash('sha256').update(bytes).digest('hex'),
-    ]),
-  );
-  assert.deepEqual(new Map(prepared.contracts.map(({ name, sha256 }) => [name, sha256])), expected);
-  for (const channel of prepared.channels)
-    assert.deepEqual(channel.contracts, packageArtifactNames(channel.registry));
-});
-
-test('distribution metadata and READMEs point to maintained language repositories', () => {
-  const npmPackage = JSON.parse(readFileSync('.release/packages/npm/package.json'));
-  assert.equal(npmPackage.repository.url, 'git+https://github.com/mailschema/javascript.git');
-  assert.equal(npmPackage.bugs.url, 'https://github.com/mailschema/javascript/issues');
-  assert.equal(npmPackage.scripts.build, 'node build.mjs');
-  assert.equal(npmPackage.scripts.test, 'npm run build && node --test test/*.test.mjs');
-
-  const pythonProject = readFileSync('.release/packages/python/pyproject.toml', 'utf8');
-  assert.match(pythonProject, /Repository = "https:\/\/github\.com\/mailschema\/python"/);
-  assert.match(pythonProject, /Issues = "https:\/\/github\.com\/mailschema\/python\/issues"/);
-
-  const rustProject = readFileSync('.release/packages/rust/Cargo.toml', 'utf8');
-  assert.match(rustProject, /repository = "https:\/\/github\.com\/mailschema\/rust"/);
-
-  for (const [language, repository] of [
-    ['npm', 'javascript'],
-    ['python', 'python'],
-    ['rust', 'rust'],
-  ]) {
-    const readme = readFileSync(`.release/packages/${language}/README.md`, 'utf8');
-    assert.match(readme, /Mail Action Protocol/);
-    assert.match(readme, new RegExp(`https://github\\.com/mailschema/${repository}`));
-  }
-  // The crate's install line follows its declared version.
-  const minor = versions['crates.io'].split('.').slice(0, 2).join('.');
-  assert.match(
-    readFileSync('.release/packages/rust/README.md', 'utf8'),
-    new RegExp(`mailschema = "${minor.replace('.', '\\.')}"`),
-  );
-
-  const gemspec = readFileSync('.release/packages/ruby/mailschema.gemspec', 'utf8');
-  for (const [key, value] of [
-    ['allowed_push_host', 'https://rubygems.org'],
-    ['source_code_uri', 'https://github.com/mailschema/ruby'],
-    ['changelog_uri', 'https://github.com/mailschema/ruby/blob/main/CHANGELOG.md'],
-    ['bug_tracker_uri', 'https://github.com/mailschema/ruby/issues'],
-    ['rubygems_mfa_required', 'true'],
+  assert.equal(JSON.parse(readFileSync(`${release}/npm/package.json`)).version, versions.npm);
+  for (const [path, line] of [
+    ['python/pyproject.toml', `version = "${versions.PyPI}"`],
+    ['rust/Cargo.toml', `version = "${versions['crates.io']}"`],
+    ['ruby/lib/mailschema/version.rb', `VERSION = "${versions.RubyGems}"`],
   ])
-    assert.ok(gemspec.includes(`spec.metadata["${key}"] = "${value}"`), key);
-  const rubyReadme = readFileSync('.release/packages/ruby/README.md', 'utf8');
-  assert.match(rubyReadme, /Mail Action Protocol 0\.2/);
-  assert.match(rubyReadme, /https:\/\/github\.com\/mailschema\/ruby/);
+    assert.ok(readFileSync(`${release}/${path}`, 'utf8').includes(line), path);
 });
 
-test('package preparation removes artifacts from earlier builds', () => {
-  for (const path of [
-    '.release/packages/python/dist',
-    '.release/packages/python/tests/__pycache__',
-    '.release/packages/rust/target',
-    '.release/packages/ruby/.bundle',
-    '.release/packages/ruby/pkg',
-  ])
-    assert.equal(existsSync(path), false, `${path} must not survive package preparation`);
-  assert.equal(
-    readFileSync('.release/packages/ruby/Gemfile.lock', 'utf8'),
-    readFileSync('packages/ruby/Gemfile.lock', 'utf8'),
+test('every package carries each artifact byte for byte, bound by the profile record', () => {
+  assert.equal(prepared.profileSha256, sha256(artifacts.find((a) => a.name === 'profile').bytes));
+  assert.deepEqual(
+    prepared.artifacts,
+    artifacts.map(({ name, bytes }) => ({ name, sha256: sha256(bytes) })),
   );
+  for (const [registry, root] of Object.entries(roots))
+    for (const artifact of artifacts)
+      assert.equal(
+        readFileSync(`${release}/${root}/${packageArtifactPath(registry, artifact)}`, 'utf8'),
+        artifact.bytes,
+        `${registry} ${artifact.name}`,
+      );
 });
 
 test('the npm package carries the MAP core exactly as the repository runs it', () => {
   const core = readdirSync('src/map/core').sort();
-  assert.deepEqual(readdirSync('.release/packages/npm/src/core').sort(), core);
+  assert.deepEqual(readdirSync(`${release}/npm/src/core`).sort(), core);
   for (const file of core) {
     const source = readFileSync(`src/map/core/${file}`, 'utf8');
     assert.equal(
-      readFileSync(`.release/packages/npm/src/core/${file}`, 'utf8'),
-      // Only the bundled artifacts' imports point at the package's own copies.
-      file === 'bundled.ts' ? source.replaceAll("'../../../public/schemas/", "'../") : source,
+      readFileSync(`${release}/npm/src/core/${file}`, 'utf8'),
+      // Only the schema imports point at the package's own copies.
+      file === 'bundled.ts'
+        ? source.replaceAll("'../../../specifications/map-0.3/schemas/", "'../")
+        : source,
       file,
     );
   }
 });
 
-test('prepared distributions contain exactly the artifacts selected by the manifest', () => {
-  const roots = {
-    npm: 'npm',
-    PyPI: 'python/src/mailschema',
-    'crates.io': 'rust',
-    RubyGems: 'ruby',
-  };
-  for (const artifact of canonicalArtifacts)
-    for (const [registry, root] of Object.entries(roots)) {
-      const path = artifact.paths[registry];
-      if (!path) continue;
-      assert.equal(readFileSync(`.release/packages/${root}/${path}`, 'utf8'), artifact.bytes);
-    }
-  const canonical = canonicalArtifacts.find(({ name }) => name === 'contribution').bytes;
-  assert.deepEqual(getContributionSchema(), JSON.parse(canonical));
-  assert.equal(getRecordSchema().$ref, '#/$defs/record');
-  const edited = getContributionSchema();
-  edited.title = 'mutated';
-  assert.notEqual(getContributionSchema().title, 'mutated');
-  // The MAP 0.2 core artifacts, exactly as published; no type contract is bundled.
-  assert.equal(MAP_PROFILE, 'https://mailschema.org/profiles/map/0.2');
-  for (const [document, path] of [
-    [getMapSchema(), 'public/schemas/map-0.2.schema.json'],
-    [getMapContext(), 'public/contexts/map-0.2.jsonld'],
-    [getContractFormatSchema(), 'public/schemas/type-contract-0.2.schema.json'],
-    [getFormsSchema(), 'public/schemas/forms-0.1.schema.json'],
+test('packages point to their language repositories and carry no earlier profile', () => {
+  const npm = JSON.parse(readFileSync(`${release}/npm/package.json`));
+  assert.equal(npm.repository.url, 'git+https://github.com/mailschema/javascript.git');
+  assert.match(readFileSync(`${release}/python/pyproject.toml`, 'utf8'), /github\.com\/mailschema\/python"/);
+  assert.match(readFileSync(`${release}/rust/Cargo.toml`, 'utf8'), /github\.com\/mailschema\/rust"/);
+  assert.match(readFileSync(`${release}/go/go.mod`, 'utf8'), /^module github\.com\/mailschema\/go$/m);
+  const gemspec = readFileSync(`${release}/ruby/mailschema.gemspec`, 'utf8');
+  for (const [key, value] of [
+    ['allowed_push_host', 'https://rubygems.org'],
+    ['source_code_uri', 'https://github.com/mailschema/ruby'],
+    ['rubygems_mfa_required', 'true'],
   ])
-    assert.deepEqual(document, JSON.parse(readFileSync(path, 'utf8')));
-  for (const root of ['npm/dist', 'python/src/mailschema', 'rust/contracts', 'rust/schemas'])
-    if (existsSync(`.release/packages/${root}`))
-      for (const file of readdirSync(`.release/packages/${root}`))
-        assert.doesNotMatch(file, /content-review|map-0\.1/, `${root}/${file}`);
+    assert.ok(gemspec.includes(`spec.metadata["${key}"] = "${value}"`), key);
+  for (const [directory, repository] of [
+    ['npm', 'javascript'],
+    ['python', 'python'],
+    ['rust', 'rust'],
+    ['go', 'go'],
+    ['ruby', 'ruby'],
+  ]) {
+    assert.match(
+      readFileSync(`${release}/${directory}/README.md`, 'utf8'),
+      new RegExp(`Mail Action Protocol[\\s\\S]*github\\.com/mailschema/${repository}`),
+    );
+    // Test fixtures are verbatim copies of the published 0.3 conformance files, one of which
+    // checks that an earlier profile's URI is refused.
+    for (const file of files(directory).filter(
+      (path) => !/(?:^|\/)(?:node_modules|dist|fixtures|Gemfile\.lock|package-lock\.json)(?:\/|$)/.test(path),
+    ))
+      assert.doesNotMatch(
+        readFileSync(`${release}/${directory}/${file}`, 'utf8'),
+        /map\/0\.[12]\b|map-0\.[12]\b|MAP 0\.[12]\b/,
+        `${directory}/${file}`,
+      );
+  }
 });
 
-test('compiled API validates contributions and records and rejects unsupported claims', () => {
-  assertContribution(fixture);
-  assertTypeRecord(record);
-  const badUrl = structuredClone(fixture);
-  badUrl.contributor.url = 'javascript:alert(1)';
-  assert.ok(contributionErrors(badUrl).length);
-  assert.throws(() => assertContribution({ ...fixture, verified: true }));
-  assert.throws(() => assertTypeRecord({ ...record, version: null }));
-  for (const invalid of [null, [], 1, { kind: [] }, { kind: 'unknown' }])
-    assert.ok(contributionErrors(invalid).length);
-});
-
-test('compiled reference validator rejects stale amendments and unrelated operations', () => {
-  const digest = 'a'.repeat(64);
-  const catalog = { types: [{ record, digest }], snapshots: [{ record, digest }] };
-  const implementation = {
-    format: 'mailschema-contribution/1',
-    id: 'example-reviewer',
-    kind: 'implementation',
-    contributor: { name: 'Example Service' },
-    summary: 'Test support declaration.',
-    type: record.slug,
-    typeVersion: record.version,
-    typeDigest: digest,
-    profile: record.profile,
-    product: { name: 'Example Reviewer', url: 'https://example.com' },
-    operations: [record.operations[0].id],
-    evidence: { kind: 'declaration' },
-  };
-  assertContribution(implementation);
-  assert.deepEqual(referenceErrors(implementation, catalog), []);
-  assert.ok(
-    referenceErrors({ ...implementation, operations: ['Delete everything'] }, catalog).length,
-  );
-  assert.ok(referenceErrors({ ...implementation, typeDigest: 'b'.repeat(64) }, catalog).length);
-});
-
-test('packaged CLI validates files, emits standalone schema and fails invalid input', () => {
-  const cli = resolve('.release/packages/npm/bin/mailschema.js');
-  const check = execFileSync(process.execPath, [cli, 'check', 'registry/examples/new-type.json'], {
-    encoding: 'utf8',
-  });
-  assert.match(check, /Valid MailSchema contribution/);
-  const schema = JSON.parse(
-    execFileSync(process.execPath, [cli, 'schema', '--record'], { encoding: 'utf8' }),
-  );
-  assert.equal(schema.$ref, '#/$defs/record');
-  const context = JSON.parse(
-    execFileSync(process.execPath, [cli, 'schema', '--context'], { encoding: 'utf8' }),
-  );
-  assert.equal(context['@context'].MailAction, 'map:MailAction');
-  const bad = spawnSync(process.execPath, [cli, 'check', 'package.json'], { encoding: 'utf8' });
-  assert.equal(bad.status, 1);
-  const missing = spawnSync(process.execPath, [cli, 'check', '/nonexistent-metadata-file.json'], {
-    encoding: 'utf8',
-  });
-  assert.equal(missing.status, 1);
+test('package preparation leaves no earlier build output', () => {
+  for (const path of ['python/dist', 'rust/target', 'ruby/.bundle', 'ruby/pkg'])
+    assert.equal(existsSync(`${release}/${path}`), false, path);
 });
