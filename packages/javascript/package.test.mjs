@@ -1,170 +1,94 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
-  Contract,
-  InvalidContract,
-  InvalidDocument,
-  MAP_PROFILE,
-  assertContribution,
   canonicalize,
+  Contract,
+  coreSchema,
+  DESCRIPTION_MAX_BYTES,
+  descriptionErrors,
   digest,
-  getContractFormatSchema,
-  getContributionSchema,
-  getFormsSchema,
-  getMapContext,
-  getMapSchema,
-  isJsonRequest,
-  mapErrors,
   parse,
-  problem,
-  problemErrors,
-  result,
-  resultStatus,
-  resultUrl,
-  settle,
-  transition,
+  parseDescription,
+  PROFILE,
 } from '../dist/index.js';
-// Internal: the core definitions the shared lexical vectors name.
-import { definition } from '../dist/core/artifacts.js';
 
-const load = async (name) => JSON.parse(await readFile(new URL(name, import.meta.url), 'utf8'));
-
-test('exposes the MAP 0.2 core artifacts', () => {
-  assert.equal(MAP_PROFILE, 'https://mailschema.org/profiles/map/0.2');
-  assert.equal(getMapSchema().$id, 'https://mailschema.org/schemas/map-0.2.schema.json');
-  assert.equal(getMapContext()['@context'].MailAction, 'map:MailAction');
-  assert.equal(
-    getContractFormatSchema().$id,
-    'https://mailschema.org/schemas/type-contract-0.2.schema.json',
+const fixture = (name) => new URL(`fixtures/${name}`, import.meta.url);
+const load = async (name) => JSON.parse(await readFile(fixture(name), 'utf8'));
+const contracts = new Map();
+for (const name of await readdir(fixture('contracts')))
+  contracts.set(
+    name.replace(/-[0-9.]+\.json$/, ''),
+    Contract.parse(await readFile(fixture(`contracts/${name}`))),
   );
-  assert.equal(getFormsSchema().$id, 'https://mailschema.org/schemas/forms-0.1.schema.json');
-  assert.equal(getContributionSchema().$schema, 'https://json-schema.org/draft/2020-12/schema');
+
+test('carries the MAP 0.3 artifacts byte for byte', async () => {
+  assert.equal(PROFILE, 'https://mailschema.org/profiles/map/0.3');
+  assert.equal(coreSchema.$id, 'https://mailschema.org/artifacts/map-0.3/schemas/core.schema.json');
+  for (const name of JSON.parse(await readFile(new URL('../artifacts.json', import.meta.url))))
+    assert.deepEqual(
+      await readFile(new URL(`../dist/${name}`, import.meta.url)),
+      await readFile(new URL(`../src/${name}`, import.meta.url)),
+    );
 });
 
-test('validates a Registry contribution', async () => {
-  assertContribution(await load('new-type.json'));
-});
-
-test('preserves canonical artifact bytes during the build', async () => {
-  const artifacts = JSON.parse(
-    await readFile(new URL('../artifacts.json', import.meta.url), 'utf8'),
-  );
-  for (const name of artifacts) {
-    const source = await readFile(new URL(`../src/${name}`, import.meta.url));
-    const built = await readFile(new URL(`../dist/${name}`, import.meta.url));
-    assert.deepEqual(built, source);
+test('parses and canonicalizes every JSON vector as MAP requires', async () => {
+  for (const vector of await load('json-vectors.json')) {
+    if (!vector.valid) assert.throws(() => parse(vector.json, DESCRIPTION_MAX_BYTES), vector.name);
+    else
+      assert.equal(canonicalize(parse(vector.json, DESCRIPTION_MAX_BYTES)), vector.canonical, vector.name);
   }
-});
-
-// The MAP core, against the vectors and fixtures every MailSchema implementation shares.
-const fixture = (path) => load(`fixtures/${path}`);
-const fixtureNames = async (directory) =>
-  (await readdir(new URL(`fixtures/${directory}`, import.meta.url))).filter((name) =>
-    name.endsWith('.json'),
-  );
-
-test('reproduces the shared RFC 8785, I-JSON, lexical and media type vectors', async () => {
-  for (const vector of await fixture('map-0.2/jcs-vectors.json')) {
+  for (const vector of await load('jcs-vectors.json')) {
     assert.equal(canonicalize(JSON.parse(vector.json)), vector.canonical, vector.name);
     assert.equal(digest(JSON.parse(vector.json)), vector.digest, vector.name);
   }
-  for (const vector of await fixture('map-0.2/ijson-vectors.json')) {
-    const bytes = vector.base64
-      ? Buffer.from(vector.base64, 'base64')
-      : Buffer.from(vector.json, 'utf8');
-    if (vector.valid) assert.equal(canonicalize(parse(bytes)), vector.canonical, vector.name);
-    else assert.throws(() => parse(bytes), InvalidDocument, vector.name);
-  }
-  for (const vector of await fixture('map-0.2/lexical-vectors.json'))
-    assert.equal(
-      definition(vector.schema, vector.definition)(vector.value),
-      vector.valid,
-      `${vector.definition} ${JSON.stringify(vector.value)}`,
-    );
-  for (const vector of await fixture('map-0.2/media-type-vectors.json'))
-    assert.equal(isJsonRequest(vector.contentType), vector.accepted, vector.contentType);
 });
 
-test('verifies every contract by its pinned digest and accepts its published documents', async () => {
-  const requestSchema = (contract) =>
-    fixture(`schemas/${contract.requestSchema.url.split('/').at(-1)}`);
-  for (const file of await fixtureNames('contracts')) {
-    const contract = await fixture(`contracts/${file}`);
-    const schema = await requestSchema(contract);
-    const pinned = digest(contract);
-    assert.throws(() => new Contract(contract, schema, { digest: `${pinned}0` }), InvalidContract);
-    assert.equal(new Contract(contract, schema, { digest: pinned }).digest, pinned, file);
-  }
-  const types = (
-    await readdir(new URL('fixtures/map-0.2', import.meta.url), { withFileTypes: true })
-  )
-    .filter((entry) => entry.isDirectory() && entry.name !== 'emails')
-    .map((entry) => entry.name);
-  for (const slug of types) {
-    const description = await fixture(`map-0.2/${slug}/description.json`);
-    const contract = await fixture(`contracts/${slug}-${description.type.version}.json`);
-    const loaded = new Contract(contract, await requestSchema(contract), {
-      digest: description.type.contractDigest,
-    });
-    assert.deepEqual(loaded.descriptionErrors(description), [], slug);
-    for (const name of await fixtureNames(`map-0.2/${slug}`)) {
-      const document = await fixture(`map-0.2/${slug}/${name}`);
-      assert.deepEqual(mapErrors(document), [], name);
-      if (document.kind === 'MapRequest')
-        assert.deepEqual(loaded.requestErrors(document), [], name);
-      if (document.kind === 'MapResult') assert.deepEqual(loaded.resultErrors(document), [], name);
+test('agrees with every shape vector', async () => {
+  for (const vector of await load('shape-vectors.json')) {
+    const value = await load(`examples/${vector.example}.json`);
+    for (const edit of vector.edits) {
+      const segments = edit.path
+        .split('/')
+        .slice(1)
+        .map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
+      const key = segments.pop();
+      const target = segments.reduce((node, segment) => node[segment], value);
+      if (edit.op === 'remove') delete target[key];
+      else target[key] = edit.value;
     }
+    const contract = contracts.get(vector.example);
+    const valid = !descriptionErrors(value).length && !contract.detailsErrors(value.details).length;
+    assert.equal(valid, vector.valid, vector.id);
   }
 });
 
-test('builds only results and problems the core accepts', async () => {
-  const description = await fixture('map-0.2/content-review/description.json');
-  const request = await fixture('map-0.2/content-review/approve.request.json');
-  const at = new Date('2026-09-25T09:00:00Z');
-  const members = {
-    target: description.target,
-    resultUrl: resultUrl(description, request.requestId),
-    recordedAt: at,
-  };
-  const proposed = result(request, {
-    ...members,
-    state: 'approval-required',
-    approvalUrl: 'https://reviews.example/approvals/1',
-    actor: 'agent-1',
-  });
-  assert.equal(resultStatus(proposed), 202);
-  assert.throws(() => result(request, { ...members, state: 'failed' }), TypeError);
-  const superseded = transition(proposed, {
-    state: 'failed',
-    reason: 'superseded',
-    recordedAt: at,
-  });
-  assert.deepEqual(
-    [superseded.reason, superseded.actor, superseded.approvalUrl],
-    ['superseded', 'agent-1', undefined],
+test('identifies each contract by the digest its example names', async () => {
+  for (const [slug, contract] of contracts) {
+    const description = parseDescription(await readFile(fixture(`examples/${slug}.json`)));
+    assert.equal(description.type.contractDigest, contract.digest);
+    assert.deepEqual(contract.descriptionErrors(description), []);
+  }
+});
+
+test('checks files from the command line', () => {
+  const cli = fileURLToPath(new URL('../bin/mailschema.js', import.meta.url));
+  const contract = fileURLToPath(fixture('contracts/publication-approval-0.1.json'));
+  const description = fileURLToPath(fixture('examples/publication-approval.json'));
+  assert.match(
+    execFileSync(process.execPath, [cli, 'contract', contract], { encoding: 'utf8' }),
+    /^Valid type contract .*\nsha-256:[0-9a-f]{64}\n$/,
   );
-  const expired = settle(proposed, description, new Date(Date.parse(description.expiresAt) + 1));
-  assert.deepEqual([expired.state, expired.reason], ['failed', 'expired']);
-  const stale = problem('stale-target', {
-    title: 'The target revision is stale',
-    detail: 'No effect was applied.',
-    requestId: request.requestId,
-    interactionId: request.interactionId,
-    resultUrl: members.resultUrl,
-    target: description.target,
-  });
-  assert.deepEqual([stale.status, stale.code, problemErrors(stale)], [409, 'stale-target', []]);
-  assert.throws(
-    () =>
-      problem('stale-target', {
-        title: 'Stale',
-        detail: 'Stale.',
-        requestId: request.requestId,
-        interactionId: request.interactionId,
-        resultUrl: members.resultUrl,
-      }),
-    TypeError,
+  assert.match(
+    execFileSync(process.execPath, [cli, 'description', description, '--contract', contract], {
+      encoding: 'utf8',
+    }),
+    /^Valid MAP 0\.3 description /,
+  );
+  assert.throws(() =>
+    execFileSync(process.execPath, [cli, 'contract', description], { stdio: 'pipe' }),
   );
 });

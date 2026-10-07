@@ -1,6 +1,6 @@
-// Generate the active MAP 0.3 submission candidate and preserve the MAP 0.2 projection.
-// Normative prose and type contracts have one source; templates hold RFC front matter,
-// implementation status, and references. --check verifies both generated documents.
+// Generate the MAP 0.3 submission candidate from the specification sources. Normative prose
+// and type contracts have one source; the template holds RFC front matter, implementation
+// status and references. --check verifies the generated document.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,10 +8,7 @@ import { contractText, contracts } from './map-0.3.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const TEMPLATE = 'ietf/archive/map-0.2.template.xml';
-const DRAFT = 'ietf/archive/map-0.2.xml';
 const SITE = 'https://mailschema.org';
-const MARKER = '    <!-- profile -->';
 
 // The draft is ASCII, as RFC 7997 expects of body text; these are the only other characters the
 // specification uses, and anything else stops the build.
@@ -40,7 +37,6 @@ const slug = (text) =>
     .replace(/^-|-$/g, '');
 
 const cited = new Set();
-let currentProfile = false;
 
 /** A link as the draft cites it: an RFC or draft reference, a section of this draft, or a URL. */
 function link(text, href) {
@@ -65,7 +61,7 @@ function link(text, href) {
     cited.add('JSON-SCHEMA');
     return `${text} <xref target="JSON-SCHEMA"/>`;
   }
-  const section = /^(?:\/specification\/(?:profile|type-contracts))?#([a-z0-9-]+)$/.exec(href);
+  const section = /^#([a-z0-9-]+)$/.exec(href);
   if (section) return `${text} (<xref target="${section[1]}"/>)`;
   const url = href.startsWith('/') ? `${SITE}${href}` : href;
   return `<eref target="${escape(url)}">${text}</eref>`;
@@ -83,9 +79,7 @@ function inline(source) {
   text = escape(text)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(
-      currentProfile
-        ? /\b(NOT RECOMMENDED|MUST NOT|SHALL NOT|SHOULD NOT|RECOMMENDED|REQUIRED|OPTIONAL|MUST|SHALL|SHOULD|MAY)\b/g
-        : /\b(MUST NOT|SHOULD NOT|MUST|SHOULD|MAY)\b/g,
+      /\b(NOT RECOMMENDED|MUST NOT|SHALL NOT|SHOULD NOT|RECOMMENDED|REQUIRED|OPTIONAL|MUST|SHALL|SHOULD|MAY)\b/g,
       '<bcp14>$1</bcp14>',
     )
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) =>
@@ -198,38 +192,6 @@ function list(items, indent) {
 }
 
 const body = (path) => read(path).replace(/^---\n[\s\S]*?\n---\n/, '');
-const sectionsFrom = (markdown, first) => markdown.slice(markdown.indexOf(`## ${first}`));
-
-// The profile from its first section, with the bound artifacts' digests after their table.
-const record = JSON.parse(read('public/profiles/map/0.2.json'));
-const digests = ['schema', 'context', 'contractFormat']
-  .map((name) => `\`${record.artifacts[name].url}\`, SHA-256 \`${record.artifacts[name].sha256}\``)
-  .join('; ');
-const profile = sectionsFrom(body('docs/specification/profile.md'), 'Published artifacts').replace(
-  '\n## Email representation',
-  `\nThe profile record binds these artifacts by the SHA-256 digest of their exact bytes: ${digests}.\n\n## Email representation`,
-);
-// The contract rules, as one section of the draft.
-const rules = sectionsFrom(body('docs/specification/type-contracts.md'), 'Contract rules').replace(
-  /^## /gm,
-  '### ',
-);
-const generated = [...blocks(profile, 2), ...blocks(`## Type contract rules\n\n${rules}`, 2)].join(
-  '\n',
-);
-
-const template = read(TEMPLATE);
-if (template.split(MARKER).length !== 2)
-  throw new Error(`${TEMPLATE} must contain one ${MARKER.trim()}`);
-const draft = template.replace(MARKER, generated);
-
-// Every reference the generated text cites must be in the template's reference lists.
-for (const target of cited)
-  if (
-    !draft.includes(`reference.${target.replace(/^RFC/, 'RFC.')}.xml`) &&
-    !draft.includes(`anchor="${target}"`)
-  )
-    throw new Error(`${target} is cited but not listed in ${TEMPLATE}`);
 
 function output(path, value) {
   if (process.argv.includes('--check')) {
@@ -240,10 +202,6 @@ function output(path, value) {
     console.log(`Wrote ${path} from its source.`);
   }
 }
-output(DRAFT, draft);
-
-cited.clear();
-currentProfile = true;
 const base = 'specifications/map-0.3';
 const section = (name) => body(`${base}/${name}.md`).replace(/^\s*# [^\n]+\n/, '');
 const core03 = section('core');

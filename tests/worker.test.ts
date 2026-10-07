@@ -58,3 +58,23 @@ test('serves immutable MAP 0.1 artifacts with deprecation and successor metadata
     expect(response.headers.get('cache-control'), path).toBe('public, max-age=31536000, immutable');
   }
 });
+
+test('serves immutable MAP 0.2 artifacts as superseded by MAP 0.3', async () => {
+  for (const [path, successor] of [
+    ['/profiles/map/0.2.json', '/profiles/map/0.3.json'],
+    ['/schemas/map-0.2.schema.json', '/artifacts/map-0.3/schemas/core.schema.json'],
+    ['/registry/catalog.json', '/registry/map-0.3.json'],
+    ['/contracts/content-review-0.4.json', undefined],
+    ['/registry/records/content-review.json', undefined],
+    ['/fixtures/map-0.2/jcs-vectors.json', undefined],
+  ]) {
+    const response = await serve(`https://mailschema.org${path}`);
+    expect(response.headers.get('deprecation'), path).toBe('@1791331200');
+    expect(response.headers.get('link'), path).toBe(
+      successor ? `<https://mailschema.org${successor}>; rel="successor-version"` : null,
+    );
+    expect(response.headers.get('cache-control'), path).toBe('public, max-age=31536000, immutable');
+  }
+  for (const path of ['/profiles/map/0.3.json', '/artifacts/map-0.3/schemas/core.schema.json'])
+    expect((await serve(`https://mailschema.org${path}`)).headers.get('deprecation')).toBeNull();
+});

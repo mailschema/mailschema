@@ -1,79 +1,29 @@
 {
-  "format": "mailschema-package-artifacts/1",
+  "format": "mailschema-package-artifacts/2",
   "artifacts": [
+    { "name": "profile", "source": "public/profiles/map/0.3.json", "file": "profile.json" },
+    { "name": "context", "source": "specifications/map-0.3/context.jsonld", "file": "context.jsonld" },
     {
-      "name": "contribution",
-      "role": "core",
-      "kind": "schema",
-      "source": "public/schemas/contribution.schema.json",
-      "paths": {
-        "npm": "dist/contribution.schema.json",
-        "PyPI": "contribution.schema.json",
-        "crates.io": "schemas/contribution.schema.json",
-        "Go": "schemas/contribution.schema.json",
-        "RubyGems": "schemas/contribution.schema.json"
-      }
+      "name": "core-schema",
+      "source": "specifications/map-0.3/schemas/core.schema.json",
+      "file": "core.schema.json"
     },
     {
-      "name": "record",
-      "role": "core",
-      "kind": "schema",
-      "source": "derived:contribution#/$defs/record",
-      "paths": {
-        "crates.io": "schemas/record.schema.json"
-      }
+      "name": "contract-schema",
+      "source": "specifications/map-0.3/schemas/contract.schema.json",
+      "file": "contract.schema.json"
     },
     {
-      "name": "map-0.2",
-      "role": "core",
-      "kind": "schema",
-      "source": "public/schemas/map-0.2.schema.json",
-      "paths": {
-        "npm": "dist/map-0.2.schema.json",
-        "PyPI": "map-0.2.schema.json",
-        "crates.io": "schemas/map-0.2.schema.json",
-        "Go": "schemas/map-0.2.schema.json",
-        "RubyGems": "schemas/map-0.2.schema.json"
-      }
-    },
-    {
-      "name": "map-0.2-context",
-      "role": "core",
-      "kind": "context",
-      "source": "public/contexts/map-0.2.jsonld",
-      "paths": {
-        "npm": "dist/map-0.2.jsonld",
-        "PyPI": "map-0.2.jsonld",
-        "crates.io": "contexts/map-0.2.jsonld",
-        "Go": "contexts/map-0.2.jsonld",
-        "RubyGems": "contexts/map-0.2.jsonld"
-      }
-    },
-    {
-      "name": "type-contract-0.2",
-      "role": "core",
-      "kind": "schema",
-      "source": "public/schemas/type-contract-0.2.schema.json",
-      "paths": {
-        "npm": "dist/type-contract-0.2.schema.json",
-        "PyPI": "type-contract-0.2.schema.json",
-        "crates.io": "schemas/type-contract-0.2.schema.json",
-        "Go": "schemas/type-contract-0.2.schema.json",
-        "RubyGems": "schemas/type-contract-0.2.schema.json"
-      }
-    },
-    {
-      "name": "forms-0.1",
-      "role": "core",
-      "kind": "schema",
-      "source": "public/schemas/forms-0.1.schema.json",
-      "paths": {
-        "npm": "dist/forms-0.1.schema.json",
-        "PyPI": "forms-0.1.schema.json",
-        "crates.io": "schemas/forms-0.1.schema.json",
-        "Go": "schemas/forms-0.1.schema.json",
-        "RubyGems": "schemas/forms-0.1.schema.json"
-      }
+      "name": "implementation-schema",
+      "source": "specifications/map-0.3/schemas/implementation.schema.json",
+      "file": "implementation.schema.json"
     }
-  ]
+  ],
+  "directories": {
+    "npm": "dist",
+    "PyPI": "mailschema",
+    "crates.io": "artifacts",
+    "Go": "artifacts",
+    "RubyGems": "artifacts"
+  }
 }

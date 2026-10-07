@@ -1,54 +1,31 @@
-// Mail Action Protocol 0.2 processing. It parses, canonicalizes, digests and validates MAP
-// documents, checks the type contracts an implementation vendors, and builds results and
-// problems. It does not establish endpoint trust, verify email authentication, grant
-// authority or send email.
+// Mail Action Protocol 0.3 processing: one implementation, run unchanged by the repository's
+// site and checks and shipped as the npm package.
 export {
-  MAP_PROFILE,
-  CORE_SCHEMA,
-  FORMS_SCHEMA,
-  CONTRACT_FORMAT,
+  PROFILE,
   CONTEXT,
-  mapErrors,
-  descriptionErrors,
-  requestErrors,
-  resultErrors,
-  problemErrors,
-  isRequestId,
-  reached,
-} from './artifacts.ts';
-export { InvalidDocument, parse, canonicalize, digest } from './document.ts';
-export { APPROVAL_REASONS, Contract, InvalidContract, type RequestProblem } from './contract.ts';
-export {
-  PROBLEM_STATUS,
-  type ProblemCode,
-  result,
-  transition,
-  problem,
-  resultStatus,
-  retainUntil,
-  settle,
-} from './documents.ts';
-export {
   DESCRIPTION_MEDIA_TYPE,
-  isDescriptionPart,
-  capability,
-  writtenPath,
-  isJsonRequest,
-  resultUrl,
-} from './binding.ts';
-export type {
-  Authority,
-  Consequence,
-  ContractOperation,
-  InputError,
-  JsonObject,
-  MapDescription,
-  MapProblem,
-  MapRequest,
-  MapResult,
-  ResultState,
-  SchemaReference,
-  Target,
-  TypeContract,
-  TypeReference,
-} from './types.ts';
+  DESCRIPTION_MAX_BYTES,
+  CONTRACT_MAX_BYTES,
+  EFFECTS,
+  FORMATS,
+  coreSchema,
+  contractSchema,
+  implementationSchema,
+} from './artifacts.ts';
+export { InvalidDocument, MAX_DEPTH, decodeUtf8, parse, canonicalize, digest } from './json.ts';
+export { sha256 } from './sha256.ts';
+export { descriptionErrors, parseDescription, type Description } from './description.ts';
+export {
+  CAPABILITY_KINDS,
+  Contract,
+  contractErrors,
+  type CapabilityKind,
+  type ContractDocument,
+  type Operation,
+} from './contract.ts';
+export {
+  implementationErrors,
+  parseImplementation,
+  type ImplementationRecord,
+} from './implementation.ts';
+export { unportablePattern } from './patterns.ts';

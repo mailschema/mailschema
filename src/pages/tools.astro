@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import CodeBlock from '../components/CodeBlock.astro';
 import { typeRecords, specification } from '../data/types';
+import { packages } from '../data/packages';
 import vectors from '../../conformance/map-0.3/shape-vectors.json';
 import scenarios from '../../conformance/map-0.3/scenarios.json';
 import '../styles/catalog.css';
@@ -146,18 +147,29 @@ const artifacts = [
         </p>
       </div>
     </section>
-    <section class="catalog-note">
-      <h2>Language packages</h2>
-      <div>
-        <p>
-          The packages linked below belong to the earlier profile and remain available for those
-          integrations. Use the schemas and contracts above for the current draft.
-        </p>
-        <a class="text-link" href="/archive/map-0.2/tools">
-          Historical package releases <Icon size={15} />
-        </a>
-      </div>
-    </section>
+    {packages.length > 0 && (
+      <section class="catalog-note" id="packages">
+        <h2>Language packages</h2>
+        <div>
+          <p>
+            Each release carries the profile record, context and schemas byte for byte, verified by
+            public registry readback.
+          </p>
+          <ul class="artifact-list">
+            {packages.map((item) => (
+              <li>
+                <a href={item.url}>
+                  {item.language} · {item.registry} {item.version}
+                  <Icon size={15} />
+                </a>
+                <p>{item.summary}</p>
+                <CodeBlock label={item.language} code={item.install} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
   </main>
 </Base>
 <style>

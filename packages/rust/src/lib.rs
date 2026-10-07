@@ -1,78 +1,47 @@
-//! The Mail Action Protocol 0.2 core artifacts and the MailSchema Registry schemas.
-//!
-//! The MAP 0.2 core schema, JSON-LD context, type contract format and form fields
-//! block are embedded exactly as the profile record binds them by SHA-256. Type
-//! contracts are not bundled: clients obtain them from the Registry catalogue by
-//! digest. The Registry schemas describe contribution files and expanded type
-//! records; pass them to a JSON Schema validator with format checking enabled.
+//! The Mail Action Protocol 0.3 artifacts, byte for byte as mailschema.org publishes them: the
+//! profile record, the JSON-LD context, and the core, type contract and implementation record
+//! schemas. The profile record binds the context and the first two schemas by SHA-256.
 //! Nothing here needs filesystem or network access.
 
-/// The MAP profile whose core artifacts this crate carries.
-pub const MAP_PROFILE: &str = "https://mailschema.org/profiles/map/0.2";
+/// The MAP profile these artifacts define.
+pub const PROFILE: &str = "https://mailschema.org/profiles/map/0.3";
 
-/// The MAP 0.2 core schema: descriptions, requests, results and problems.
-pub const MAP_SCHEMA: &str = include_str!("../schemas/map-0.2.schema.json");
+/// The JSON-LD context every MAP 0.3 description names.
+pub const CONTEXT: &str = "https://mailschema.org/contexts/map-0.3.jsonld";
 
-/// The MAP 0.2 JSON-LD context.
-pub const MAP_CONTEXT: &str = include_str!("../contexts/map-0.2.jsonld");
+/// The profile record.
+pub const PROFILE_RECORD: &str = include_str!("../artifacts/profile.json");
 
-/// The type contract format every MAP 0.2 contract follows.
-pub const CONTRACT_FORMAT_SCHEMA: &str = include_str!("../schemas/type-contract-0.2.schema.json");
+/// The JSON-LD context document.
+pub const CONTEXT_DOCUMENT: &str = include_str!("../artifacts/context.jsonld");
 
-/// The form fields block contracts pin.
-pub const FORMS_SCHEMA: &str = include_str!("../schemas/forms-0.1.schema.json");
+/// The schema of a MAP 0.3 description.
+pub const CORE_SCHEMA: &str = include_str!("../artifacts/core.schema.json");
 
-/// Schema for new types, amendments and implementation declarations.
-pub const CONTRIBUTION_SCHEMA: &str = include_str!("../schemas/contribution.schema.json");
+/// The schema every type contract follows.
+pub const CONTRACT_SCHEMA: &str = include_str!("../artifacts/contract.schema.json");
 
-/// Schema for expanded Registry records, including attribution and history.
-pub const RECORD_SCHEMA: &str = include_str!("../schemas/record.schema.json");
-
-/// The embedded JSON Schema documents.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Schema {
-    Map,
-    ContractFormat,
-    Forms,
-    Contribution,
-    Record,
-}
-
-impl Schema {
-    /// Return the embedded JSON text for this schema.
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Map => MAP_SCHEMA,
-            Self::ContractFormat => CONTRACT_FORMAT_SCHEMA,
-            Self::Forms => FORMS_SCHEMA,
-            Self::Contribution => CONTRIBUTION_SCHEMA,
-            Self::Record => RECORD_SCHEMA,
-        }
-    }
-}
+/// The schema of a Registry implementation record.
+pub const IMPLEMENTATION_SCHEMA: &str = include_str!("../artifacts/implementation.schema.json");
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sha2::{Digest, Sha256};
 
     #[test]
-    fn embeds_standalone_draft_2020_12_documents() {
-        for schema in [
-            Schema::Map,
-            Schema::ContractFormat,
-            Schema::Forms,
-            Schema::Contribution,
-            Schema::Record,
+    fn profile_record_binds_the_bundled_bytes() {
+        let record: serde_json::Value = serde_json::from_str(PROFILE_RECORD).unwrap();
+        assert_eq!(record["id"], PROFILE);
+        assert_eq!(record["context"], CONTEXT);
+        for (key, bytes) in [
+            ("context", CONTEXT_DOCUMENT),
+            ("schema", CORE_SCHEMA),
+            ("contractFormat", CONTRACT_SCHEMA),
         ] {
-            let value: serde_json::Value = serde_json::from_str(schema.as_str()).unwrap();
-            assert_eq!(value["$schema"], "https://json-schema.org/draft/2020-12/schema");
+            let digest = format!("{:x}", Sha256::digest(bytes.as_bytes()));
+            assert_eq!(record["artifacts"][key]["sha256"], digest, "{key}");
         }
-        let map: serde_json::Value = serde_json::from_str(MAP_SCHEMA).unwrap();
-        assert_eq!(map["$id"], "https://mailschema.org/schemas/map-0.2.schema.json");
-        let context: serde_json::Value = serde_json::from_str(MAP_CONTEXT).unwrap();
-        assert_eq!(context["@context"]["MailAction"], "map:MailAction");
-        let record: serde_json::Value = serde_json::from_str(RECORD_SCHEMA).unwrap();
-        assert_eq!(record["$ref"], "#/$defs/record");
-        assert_eq!(MAP_PROFILE, "https://mailschema.org/profiles/map/0.2");
+        serde_json::from_str::<serde_json::Value>(IMPLEMENTATION_SCHEMA).unwrap();
     }
 }

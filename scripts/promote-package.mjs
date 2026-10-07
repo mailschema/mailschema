@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { materializePackageArtifacts } from '../src/lib/package-artifacts.ts';
+import { materializePackageArtifacts, packageArtifactPath } from '../src/lib/package-artifacts.ts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const packageName = 'mailschema';
@@ -26,7 +26,7 @@ function parseArguments(argv) {
 }
 
 function usage() {
-  return `Verify a published MailSchema package against the canonical schema.
+  return `Verify a published MailSchema package against the canonical MAP 0.3 artifacts.
 
 Usage:
   node scripts/promote-package.mjs --registry <npm|PyPI|crates.io|Go|RubyGems> --version <x.y.z>
@@ -180,12 +180,11 @@ function gemEntry(archive, path) {
 }
 
 async function verify(registry, version) {
-  const contracts = materializePackageArtifacts(root, registry).map((artifact) => ({
+  const artifacts = materializePackageArtifacts(root).map((artifact) => ({
     ...artifact,
+    path: packageArtifactPath(registry, artifact),
     bytes: Buffer.from(artifact.bytes),
   }));
-  const schema = contracts.find((artifact) => artifact.name === 'contribution').bytes;
-  const schemaSha256 = sha256(schema);
   const artifact = await registryArtifact(registry, version);
   const bytes = await download(artifact.downloadUrl);
   const artifactSha256 = sha256(bytes);
@@ -197,31 +196,28 @@ async function verify(registry, version) {
   const archive = resolve(temporary, artifact.name);
   try {
     await writeFile(archive, bytes);
-    for (const contract of contracts) {
-      const suffix = `/${contract.paths[registry]}`;
+    for (const expected of artifacts) {
       const packaged =
         artifact.archive === 'gem'
-          ? gemEntry(archive, contract.paths[registry])
+          ? gemEntry(archive, expected.path)
           : artifact.archive === 'zip'
-            ? zipEntry(archive, suffix)
-            : tarEntry(archive, suffix);
-      if (!packaged.equals(contract.bytes))
-        throw new Error(
-          `${registry} ${version} does not contain the canonical ${contract.name} contract bytes.`,
-        );
+            ? zipEntry(archive, `/${expected.path}`)
+            : tarEntry(archive, `/${expected.path}`);
+      if (!packaged.equals(expected.bytes))
+        throw new Error(`${registry} ${version} does not contain the canonical ${expected.name} bytes.`);
     }
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
 
   return {
-    format: 'mailschema-package-release/2',
+    format: 'mailschema-package-release/3',
     checkedAt: new Date().toISOString(),
     version,
-    schemaSha256,
-    contracts: contracts.map(({ name, bytes }) => ({ name, sha256: sha256(bytes) })),
+    profileSha256: sha256(artifacts.find((entry) => entry.name === 'profile').bytes),
+    artifacts: artifacts.map(({ name, bytes }) => ({ name, sha256: sha256(bytes) })),
     verification:
-      'Public registry metadata, artifact integrity where published, and an independent download matched every canonical contract distributed by this package.',
+      'Public registry metadata, artifact integrity where published, and an independent download matched every MAP 0.3 artifact this package carries.',
     channels: [
       {
         registry,
@@ -242,7 +238,7 @@ async function verify(registry, version) {
 }
 
 async function writePromotion(registry, version, evidence) {
-  const reference = `${slugs[registry]}-${version}-contracts`;
+  const reference = `${slugs[registry]}-${version}`;
   const evidencePath = resolve(root, 'docs/releases', `${reference}.json`);
   const selectionPath = resolve(root, 'docs/releases/current.json');
   const existingEvidence = await readFile(evidencePath, 'utf8').catch((error) => {
@@ -261,10 +257,10 @@ async function writePromotion(registry, version, evidence) {
   const encodedEvidence = `${JSON.stringify(evidence, null, 2)}\n`;
 
   const selection = JSON.parse(await readFile(selectionPath, 'utf8'));
-  if (selection.schema !== 'mailschema-package-set/1')
+  if (selection.schema !== 'mailschema-package-set/2')
     throw new Error('Unknown package-set selection format.');
-  if (selection.schemaSha256 !== evidence.schemaSha256)
-    throw new Error('The package-set manifest targets different schema bytes.');
+  if (selection.profileSha256 !== evidence.profileSha256)
+    throw new Error('The package set targets a different profile record.');
   const next = selection.channels.filter((entry) => entry.registry !== registry);
   next.push({ registry, evidence: reference, version });
   next.sort((left, right) => order.indexOf(left.registry) - order.indexOf(right.registry));
@@ -294,6 +290,6 @@ if (args.promote) {
   );
 } else {
   console.log(
-    `Verified ${args.registry} ${args.version} against schema ${evidence.schemaSha256}. No files changed.`,
+    `Verified ${args.registry} ${args.version} against profile record ${evidence.profileSha256}. No files changed.`,
   );
 }
