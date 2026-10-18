@@ -8,6 +8,8 @@ Selected Direction 03, the yellow-and-blue board. A developer opens the project 
 
 Full palette with explicit roles: charcoal foundation, acid yellow-green for the next action, blue-violet for structured information, cool mist for reading. All implementation tokens use OKLCH. No gradient text, decorative glass or accent side borders.
 
+The specification reader has light and dark modes. Dark reading uses a charcoal surface, light text, brighter violet links and restrained violet navigation highlights. The masthead and acid yellow-green status accent retain their colours in both modes. Sourcey owns the toggle and saved preference; MailSchema supplies its brand accents.
+
 ## Typography
 
 Preserve the selected board's Plus Jakarta Sans identity, self-hosted. Heavy tightly tracked wordmark and display type, comfortable medium-weight body text, ordinary sentence case. Monospace is limited to examples and identifiers. Body measure about 68ch.

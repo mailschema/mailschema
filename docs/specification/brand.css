@@ -5,3 +5,8 @@
   --blue-ink: oklch(47% 0.21 285);
   --lime: oklch(94% 0.176 120);
 }
+
+:root.dark {
+  --blue: oklch(76% 0.125 286);
+  --blue-ink: oklch(80% 0.102 286);
+}
