@@ -9,11 +9,15 @@ const source: SourceAdapter = {
   async resolve(context) {
     return {
       kind: 'markdown',
+      slugs: 'normalized',
       groups: sections.map((label) => ({
+        kind: 'group',
         label,
-        pages: specNavigation
+        id: `Specification/${label}`,
+        items: specNavigation
           .filter((page) => page.section === label)
           .map((page) => ({
+            kind: 'page',
             slug: page.slug,
             label: page.label,
             file: context.resolvePath(page.file),
