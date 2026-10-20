@@ -5,6 +5,7 @@ import {
   Contract,
   CONTRACT_MAX_BYTES,
   digest,
+  extractMessage,
   InvalidDocument,
   parseDescription,
   parseImplementation,
@@ -15,17 +16,23 @@ const help = `Mail Action Protocol 0.3 checks
   mailschema contract <contract.json>
   mailschema description <description.json> [--contract <contract.json>]
   mailschema implementation <record.json>
+  mailschema message <message.eml>
 
 contract checks a type contract and prints its digest. description checks a
 description and, with --contract, that it uses that contract as it allows,
 then prints the description's digest. implementation checks a Registry
-implementation record. A digest is the SHA-256 of the document's RFC 8785
-canonical JSON. Nothing is uploaded or changed.`;
+implementation record. message finds a received email's one MAP part, writes
+its description to standard output exactly as the part carries it, and prints
+the description's digest on standard error. A digest is the SHA-256 of the
+document's RFC 8785 canonical JSON. Nothing is uploaded or changed.`;
 
-async function read(path) {
+// A whole email, attachments included, is far larger than any MAP document.
+const MESSAGE_MAX_BYTES = 26214400;
+
+async function read(path, maxBytes = CONTRACT_MAX_BYTES, kind = 'a JSON file') {
   const info = await stat(path);
-  if (!info.isFile() || info.size > CONTRACT_MAX_BYTES)
-    throw new Error(`Expected a JSON file of at most ${CONTRACT_MAX_BYTES} bytes.`);
+  if (!info.isFile() || info.size > maxBytes)
+    throw new Error(`Expected ${kind} of at most ${maxBytes} bytes.`);
   return new Uint8Array(await readFile(path));
 }
 
@@ -51,6 +58,12 @@ try {
     if (values.contract)
       report(Contract.parse(await read(values.contract)).descriptionErrors(description));
     console.log(`Valid MAP 0.3 description ${description['@id']}\n${digest(description)}`);
+  } else if (command === 'message') {
+    const result = extractMessage(await read(path, MESSAGE_MAX_BYTES, 'an email file'));
+    if (result.status === 'none') throw new Error('The message has no MAP 0.3 part.');
+    if (result.status === 'invalid') throw new Error(`The message's MAP part cannot be used: ${result.reason}.`);
+    process.stdout.write(result.bytes);
+    console.error(`Valid MAP 0.3 description ${result.description['@id']}\n${digest(result.description)}`);
   } else if (command === 'implementation') {
     const record = parseImplementation(await read(path));
     console.log(`Valid implementation record for ${record.service}`);

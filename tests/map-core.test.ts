@@ -106,6 +106,16 @@ describe('descriptions', () => {
     ]);
   });
 
+  it('names the allowed values when a field is not one of them', () => {
+    const contract = contracts.get('publication-approval')!;
+    const description = example('publication-approval');
+    const broken = structuredClone(description);
+    (broken.details as { destinations: Array<{ visibility: string }> }).destinations[0].visibility = 'private';
+    expect(contract.descriptionErrors(broken)).toEqual([
+      '/details/destinations/0/visibility: must be one of "public", "restricted"',
+    ]);
+  });
+
   it('checks a description against the contract it names', () => {
     const contract = contracts.get('email-address-confirmation')!;
     const description = example('email-address-confirmation');

@@ -42,6 +42,7 @@ async function putFixtures(directory) {
     const slug = name.replace(/-[0-9.]+\.json$/, '');
     await put(`${directory}/examples/${slug}.json`, await read(`${specification}/examples/${slug}.json`));
   }
+  await put(`${directory}/examples/publication.eml`, await read(`${specification}/examples/publication.eml`));
   for (const name of ['json-vectors.json', 'jcs-vectors.json', 'shape-vectors.json'])
     await put(`${directory}/${name}`, await read(`conformance/map-0.3/${name}`));
 }

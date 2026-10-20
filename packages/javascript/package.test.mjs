@@ -98,7 +98,10 @@ test('checks files from the command line and prints their digests', async () => 
     assert.equal(run('description', description), output, slug);
     assert.equal(run('description', description, '--contract', contract), output, slug);
   }
+  const extracted = execFileSync(process.execPath, [cli, 'message', path('examples/publication.eml')], { stdio: 'pipe' });
+  assert.deepEqual(parseDescription(extracted), await load('examples/publication-approval.json'));
   const campaign = path('examples/campaign-send-approval.json');
+  assert.throws(() => run('message', campaign));
   assert.throws(() => run('contract', campaign));
   assert.throws(() =>
     run('description', campaign, '--contract', path('contracts/publication-approval-0.1.json')),

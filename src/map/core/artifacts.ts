@@ -29,6 +29,17 @@ export function createValidator() {
   return ajv;
 }
 
-/** Each validation error as its JSON Pointer and message. @internal */
+/**
+ * Each validation error as its JSON Pointer and message. An enum or const error names the
+ * values it allows, so the fix is in the message. @internal
+ */
 export const schemaErrors = (errors: ErrorObject[] | null | undefined, prefix = '') =>
-  (errors ?? []).map((error) => `${prefix + error.instancePath || '/'}: ${error.message}`);
+  (errors ?? []).map((error) => `${prefix + error.instancePath || '/'}: ${schemaMessage(error)}`);
+
+function schemaMessage(error: ErrorObject): string | undefined {
+  if (error.keyword === 'enum')
+    return `must be one of ${(error.params as { allowedValues: unknown[] }).allowedValues.map((value) => JSON.stringify(value)).join(', ')}`;
+  if (error.keyword === 'const')
+    return `must be ${JSON.stringify((error.params as { allowedValue: unknown }).allowedValue)}`;
+  return error.message;
+}

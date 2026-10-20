@@ -28,4 +28,5 @@ export {
   parseImplementation,
   type ImplementationRecord,
 } from './implementation.ts';
+export { extractMessage, type MessageProblem, type MessageResult } from './message.ts';
 export { unportablePattern } from './patterns.ts';
