@@ -29,7 +29,7 @@
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "astro": "7.3.5",
-    "sourcey": "3.8.2"
+    "sourcey": "3.8.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
