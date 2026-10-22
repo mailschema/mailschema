@@ -37,7 +37,7 @@ The branch updates the site to MAP 0.3 in development and production builds. Bro
 | JavaScript | `mailschema` `0.3.2` on npm processes MAP 0.3 with the core the site and specification checks run, and reads a received email's MAP part |
 | Python, Rust, Go | PyPI, crates.io and Go `0.3.0` carry the MAP 0.3 profile record, context and schemas |
 | Nitrosend                 | Content Review 0.3 on MAP 0.2 deployed in production, on the Ruby gem; the MAP 0.2 evidence run is pending                                                                            |
-| Sourcey                   | `3.6.10` renders the specification                                                                                                                                                    |
+| Sourcey                   | `3.8.3` renders the specification                                                                                                                                                     |
 | Internet-Draft            | The 0.3 `-00`, generated from the new specification and contracts, is posted to Datatracker as an individual draft. The prior 0.2 candidate is archived in `ietf/archive/`. No adoption is claimed. |
 
 ## Repositories

@@ -14,7 +14,7 @@ The MailSchema Registry contains type definitions. Sourcey's earlier candidate p
 
 ## Package handoff
 
-`package.json` and `package-lock.json` pin the exact public `sourcey@3.6.10` release. The npm tarball has SHA-256 `f6a91124a06a25efb9be989dc022a61a6bed4e9c22a132f4b08b7392b3dee486` and npm shasum `3faee44b60f812f149b41eb691afe4feacea6e38`; both match the public registry artifact. A clean consumer install imported Sourcey and contained the packaged reader theme before MailSchema adopted it.
+`package.json` and `package-lock.json` pin the exact public `sourcey@3.8.3` release. The npm tarball has SHA-256 `94cfdc5af1e71f91d90ab56f9b35c922cc108d7a3f7359cee1b168ab02db8d23` and npm shasum `d0da312fe2f46e161c14db175fc7dd232b6a92fc`; both match the public registry artifact. A clean consumer install imported Sourcey and contained the packaged reader theme before MailSchema adopted it.
 
 Sourcey is maintained in [`sourcey/sourcey`](https://github.com/sourcey/sourcey). Updating MailSchema requires an intentional exact-version change, public registry readback, a clean install and the complete build, browser and visual checks. MailSchema does not track a mutable npm tag or a local Sourcey checkout.
 

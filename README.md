@@ -78,7 +78,7 @@ Earlier profiles' published artifacts, including the MAP 0.2 Registry catalogue,
 
 The strategy history is maintained separately from this standalone project. No portfolio application was modified to host the site.
 
-The specification reader uses the exact public `sourcey@3.6.10` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
+The specification reader uses the exact public `sourcey@3.8.3` release. See `docs/SOURCEY.md` for ownership, release evidence, update steps and validation details.
 
 ## Published packages
 
