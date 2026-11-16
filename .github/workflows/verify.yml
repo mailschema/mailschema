@@ -26,6 +26,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Check the local Poppy consumer example
+        run: npm ci --prefix examples/poppy-consumer --ignore-scripts && npm test --prefix examples/poppy-consumer
       - run: npm run packages:prepare && npm run packages:test
       # The npm package runs the shared vectors against its own build.
       - run: npm install --no-audit --no-fund && npm test
