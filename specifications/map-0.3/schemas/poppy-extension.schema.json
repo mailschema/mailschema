@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mailschema.org/artifacts/map-0.3/schemas/poppy-extension.schema.json",
+  "title": "Poppy mailschema.org/map extension entry, version 1",
+  "description": "One entry of the mailschema.org/map extension in a Personal Agent Protocol poppy.json document, as defined by https://mailschema.org/specification/poppy. Consumers ignore entries whose version they do not support and members they do not recognize, so this schema validates producers. Membership rules the schema cannot express (the mcp URL is listed in apis, each contract appears once, each operation is defined by its contract) are checked by consumers.",
+  "type": "object",
+  "required": ["version", "profile", "binding", "mcp", "contracts"],
+  "properties": {
+    "version": {
+      "const": "1"
+    },
+    "profile": {
+      "const": "https://mailschema.org/profiles/map/0.3"
+    },
+    "binding": {
+      "const": "https://mailschema.org/specification/poppy"
+    },
+    "mcp": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?([/?][^\\s#]*)?$",
+      "description": "An HTTPS URL without user information or fragment: the url of an apis entry of type mcp in the same poppy.json document."
+    },
+    "human": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "HTTPS origins where map.human.url may lead.",
+      "items": {
+        "type": "string",
+        "pattern": "^https://[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*(:[0-9]{1,5})?$"
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    }
+  },
+  "$defs": {
+    "contract": {
+      "type": "object",
+      "required": ["id", "version", "contractDigest", "tool", "operations"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contractDigest": {
+          "type": "string",
+          "pattern": "^sha-256:[0-9a-f]{64}$"
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[\\x21\\x23-\\x5B\\x5D-\\x7E]+$"
+          },
+          "uniqueItems": true
+        },
+        "operations": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "not": {
+              "const": "read"
+            },
+            "maxLength": 64
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/operation"
+          }
+        }
+      }
+    },
+    "operation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["submission", "approvers"],
+          "properties": {
+            "submission": {
+              "const": "operations"
+            },
+            "approvers": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": ["user", "agent"]
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["submission"],
+          "properties": {
+            "submission": {
+              "const": "direct"
+            },
+            "approvers": false
+          }
+        }
+      ]
+    }
+  }
+}
