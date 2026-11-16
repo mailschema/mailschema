@@ -157,7 +157,8 @@ async function action(name) {
 
 const server = createServer(async (request, response) => {
   response.setHeader('Cache-Control', 'no-store');
-  response.setHeader('Referrer-Policy', 'no-referrer');
+  // Preserve Origin on local form POSTs without leaking referrers off this origin.
+  response.setHeader('Referrer-Policy', 'same-origin');
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('X-Frame-Options', 'DENY');
   try {

@@ -59,10 +59,13 @@ test('public metadata cannot reach controls, callbacks, mailbox data or private 
     assert.ok(!JSON.stringify(metadata).includes('owner@example.net'));
     const jwks = await fetch(`${metadataBase}/jwks.json`).then((response) => response.json());
     assert.ok(jwks.keys[0].x && jwks.keys[0].y && !jwks.keys[0].d);
-    const local = await fetch(`${base}/`).then((response) => response.text());
+    const page = await fetch(`${base}/`);
+    assert.equal(page.headers.get('referrer-policy'), 'same-origin');
+    const local = await page.text();
     const nonce = /name="nonce" value="([^"]+)"/.exec(local)[1];
     for (const [origin, value] of [
       ['https://attacker.example', nonce],
+      ['null', nonce],
       [base, 'wrong'],
     ]) {
       const refused = await fetch(`${base}/enable`, {
@@ -73,6 +76,16 @@ test('public metadata cannot reach controls, callbacks, mailbox data or private 
       });
       assert.equal(refused.status, 400);
     }
+    // A valid local form reaches the action boundary, which safely reports that
+    // there is no connected mailbox yet; it must not be refused as cross-origin.
+    const accepted = await fetch(`${base}/read`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: { Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ nonce }),
+    });
+    assert.equal(accepted.status, 303);
+    assert.equal(accepted.headers.get('location'), '/');
     assert.equal((await fetch(`${base}/callback?code=not-authorized`)).status, 400);
   } finally {
     child.kill('SIGTERM');
