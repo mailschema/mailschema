@@ -36,6 +36,12 @@ export const specNavigation = [
     file: `${currentSource}/capability.md`,
   },
   {
+    slug: 'poppy',
+    label: 'Poppy binding',
+    section: 'Specification',
+    file: `${currentSource}/poppy.md`,
+  },
+  {
     slug: 'contracts',
     label: 'Type contracts',
     section: 'Types',
